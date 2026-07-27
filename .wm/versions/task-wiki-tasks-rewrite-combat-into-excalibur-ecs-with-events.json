@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:tasks:rewrite-combat-into-excalibur-ecs-with-events",
-  "current_version": 1,
+  "current_version": 3,
   "versions": [
     {
       "id": "v1",
@@ -17,6 +17,34 @@
           "field": "implementation_notes",
           "old_value": null,
           "new_value": "Wikis extracted. Task itself still pending (ECS rewrite not started)."
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-07-27T13:55:22.218Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-review"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-07-27T13:55:26.717Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "implementation_notes",
+          "old_value": "Wikis extracted. Task itself still pending (ECS rewrite not started).",
+          "new_value": "Wikis extracted. Task itself still pending (ECS rewrite not started).\nECS rewire complete. 3 wiki docs updated (architecture, decision, failure), 2 new pattern pages created, 2 memories saved, 1 promotion to critical-patterns. 92 tests passing."
         }
       ],
       "compacted": false

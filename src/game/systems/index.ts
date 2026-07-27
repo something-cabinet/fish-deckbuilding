@@ -1,25 +1,10 @@
-// ECS System stubs
+/**
+ * Game systems index.
+ *
+ * For this turn-based game, the primary orchestration is handled by
+ * CombatOrchestrator (event-driven, called by UI/bridge).
+ * Excalibur Systems (per-frame) can be added later for visual effects,
+ * animations, or continuous behaviors.
+ */
 
-import type { Engine, Actor } from 'excalibur';
-
-export interface System {
-  update(engine: Engine, delta: number): void;
-}
-
-export class CombatSystem implements System {
-  update(_engine: Engine, _delta: number) {
-    // Stub: combat resolution logic
-  }
-}
-
-export class GridSystem implements System {
-  update(_engine: Engine, _delta: number) {
-    // Stub: grid placement and movement logic
-  }
-}
-
-export class TurnSystem implements System {
-  update(_engine: Engine, _delta: number) {
-    // Stub: turn phase management
-  }
-}
+export { CombatOrchestrator } from './CombatOrchestrator';

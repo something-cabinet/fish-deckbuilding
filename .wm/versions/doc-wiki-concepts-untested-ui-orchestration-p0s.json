@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:concepts:untested-ui-orchestration-p0s",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-27T13:54:49.313Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\n{}\nrelates_to:\n  - {type: references, target: wiki:tasks:rewrite-combat-into-excalibur-ecs-with-events}\n---\n\n---\ntitle: Failure: Untested UI Orchestration Layer Caused All P0 Bugs\ntype: concept\nid: wiki:concepts:untested-ui-orchestration-p0s\ntags: [failure, testing, ui, orchestration]\n---\n\n## What went wrong\nAcross 3 Oracle reviews, ALL 7 P0 bugs lived in BattleHUD.svelte — the untested UI orchestration layer. The pure function layer (CombatController, CoinSystem, GridCombat, TurnFlow) had 0 bugs.\n\n## Root cause\nBattleHUD.svelte handled: card play, targeting, end-turn flow, defense phase, victory/death checks, deck management — all with direct $state mutation and no tests. The pure function layer had 79 tests and was architecturally sound, but the wiring code that connected pure functions to UI had zero coverage.\n\nSpecific bugs that could have been caught by testing:\n1. Deck corruption — drawing from run.deck instead of a battle copy\n2. Defense broken — hand dumped before defense prompt\n3. Victory unreachable — no check after play card damage\n4. Attacks hitting empty slots — no occupied-only filter\n5. Duplicate card ID removal — filter removed all copies not one\n\n## Prevention\n- Test the orchestration layer, not just the pure functions\n- Consider extracting orchestration into a testable controller (CombatController pattern)\n- Integration tests that script a full battle cycle (play → defend → victory/death)\n- UI components should be thin — call tested controllers, don't implement game logic\n\n## Time lost\n~40-60 hours of debugging, Oracle reviews, and remediation passes that could have been avoided with integration tests for the orchestration layer.\n\n## Related\n- @task-tasks:rewrite-combat-into-excalibur-ecs-with-events",
+          "new_value": "---\ntitle: Failure: Untested UI Orchestration Layer Caused All P0 Bugs\ntype: concept\ntags: [failure, testing, ui, orchestration]\n---\n\n## What went wrong\nAcross 3 Oracle reviews, ALL 7 P0 bugs lived in BattleHUD.svelte — the untested UI orchestration layer. The pure function layer (CombatController, CoinSystem, TurnFlow) had 0 bugs.\n\n## Root cause\nBattleHUD.svelte handled: card play, targeting, end-turn flow, defense phase, victory/death checks, deck management — all with direct $state mutation and no tests. The pure function layer had 79 tests and was architecturally sound, but the wiring code that connected pure functions to UI had zero coverage.\n\nSpecific bugs that could have been caught by testing:\n1. Deck corruption — drawing from run.deck instead of a battle copy\n2. Defense broken — hand dumped before defense prompt\n3. Victory unreachable — no check after play card damage\n4. Attacks hitting empty slots — no occupied-only filter\n5. Duplicate card ID removal — filter removed all copies not one\n\n## Resolution\nOrchestration extracted from BattleHUD.svelte into a testable CombatOrchestrator with its own ECS entities. 13 integration tests cover the full combat cycle. BattleHUD is a thin subscriber. Snapshot-based state sync prevents per-field desyncs.\n\n## Prevention\n- Test the orchestration layer, not just the pure functions\n- Extract orchestration into a testable controller (CombatOrchestrator pattern)\n- Integration tests that script a full battle cycle (play → defend → victory/death)\n- UI components should be thin — call tested controllers, don't implement game logic\n- Use snapshot-based state sync to prevent per-field desyncs\n\n## Time lost\n~40-60 hours of debugging, Oracle reviews, and remediation passes.\n\n## Related\n- @task-tasks:rewrite-combat-into-excalibur-ecs-with-events\n- @wiki/patterns/snapshot-state-sync\n- @wiki/patterns/turn-based-ecs-orchestrator\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

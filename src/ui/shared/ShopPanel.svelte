@@ -2,6 +2,7 @@
   import { gameState, setScreen, spendGold, addToDeck, removeFromDeck, addRelic } from '../../lib/state';
   import { CARD_DATA } from '../../game/cards/cardData';
   import { RELIC_DATA } from '../../game/relics/relicData';
+  import { eventBus } from '../../game/events';
 
   // Mock shop inventory — sell cards NOT in the starter deck
   const shopCards = [
@@ -25,6 +26,7 @@
       spendGold(cardCost);
       addToDeck(cardId);
       alert(`Bought ${CARD_DATA[cardId]?.name}!`);
+      eventBus.emit('shop:cardBought', { cardId, cost: cardCost });
     } else {
       alert('Not enough gold!');
     }
@@ -35,6 +37,7 @@
       spendGold(relicCost);
       addRelic(relicId);
       alert(`Acquired ${RELIC_DATA[relicId]?.name}!`);
+      eventBus.emit('shop:relicBought', { relicId, cost: relicCost });
     } else {
       alert('Not enough gold!');
     }
@@ -46,6 +49,7 @@
       const toRemove = gameState.run.deck[0];
       removeFromDeck(toRemove);
       alert(`Removed ${CARD_DATA[toRemove]?.name || 'a card'} from deck.`);
+      eventBus.emit('shop:cardRemoved', { cardId: toRemove, cost: removeCost });
     } else {
       alert('Not enough gold or deck is empty!');
     }

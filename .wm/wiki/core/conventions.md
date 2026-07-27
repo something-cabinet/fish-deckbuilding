@@ -1,7 +1,12 @@
 ---
 title: Fish Roguelite Deckbuilding — Conventions
 type: core
-id: wiki:core:conventions
+tags: [core, conventions]
+---
+
+---
+title: Fish Roguelite Deckbuilding — Conventions
+type: core
 tags: [core, conventions]
 ---
 
@@ -22,16 +27,22 @@ wm-spec
 ### TDD — Red-Green-Refactor
 All implementation starts with a failing test. Pure functions are always test-first. UI components are excluded.
 ```bash
-npm test          # run all tests
+npm test          # run all tests (92 tests, ~1s)
 npm run test:watch  # watch mode
 ```
 @wiki/rules/tdd
 
 ## Code Conventions
 
-**Game logic**: Pure TypeScript functions in `src/game/combat/`. No side effects, no DOM access. All state in → new state out.
+**Game logic (pure functions)**: TypeScript functions in `src/game/combat/`. No side effects, no DOM access. All state in → new state out. 79 tests. These are deterministic computations — always test-first.
 
-**UI components**: Svelte 5 with `$state` runes. Components call tested controllers — they don't implement game logic. No tests required.
+**ECS orchestration**: Turn-based game actions are coordinated by `CombatOrchestrator` (`src/game/systems/`). It owns Excalibur entities with typed Components (HealthComponent, CoinComponent, TurnComponent, DeckStateComponent, etc.) and emits events after every action. 13 integration tests.
+
+**Event bus**: Typed Excalibur EventEmitter in `src/game/events.ts`. Primary sync via `state:changed` snapshot event. Granular events only for transient UI effects.
+
+**Bridge**: `src/game/bridge.ts` subscribes to events and syncs to Svelte `$state` reactively. UI never accesses Excalibur APIs directly — always goes through bridge or orchestrator.
+
+**UI components**: Svelte 5 with `$state` runes. Components call the orchestrator via bridge or read from synced $state. No game logic, no orchestration, no tests required.
 
 **State**: Run/combat split. `RunState` persists across battles, `CombatState` is per-battle. The run deck is COPIED into the battle deck — never mutated during combat.
 @wiki/patterns/run-combat-state-split
@@ -40,7 +51,7 @@ npm run test:watch  # watch mode
 
 **Enemies**: Flat `EnemyInstance[]` array with HP, attack, defense, intent, strategy. No grid positions.
 
-**Testing**: Vitest, ~500ms for 79 tests. New test files go in `src/game/combat/__tests__/`.
+**Testing**: Vitest, ~1s for 92 tests (7 test files on pure functions + 1 on orchestrator). New test files go in `src/game/systems/__tests__/` for orchestration tests, `src/game/combat/__tests__/` for pure function tests.
 
 ## Styling
 
@@ -69,7 +80,9 @@ All pages use YAML frontmatter with `type` matching the directory. Pages are lin
 
 1. **Spec first** — never write code without a spec
 2. **Test first** — never implement without a failing test
-3. **Pure functions** — game logic has no side effects
+3. **Pure functions** — domain logic is pure, no side effects
 4. **State split** — run state and combat state are separate
 5. **Battle deck is a copy** — never mutate the run deck during combat
-6. **CSS variables** — colors only in `app.css`, components use `var(--name)`
+6. **Snapshot sync** — emit full state snapshots, not per-field events
+7. **Thin UI** — Svelte reads from $state, never implements game logic
+8. **CSS variables** — colors only in `app.css`, components use `var(--name)`
