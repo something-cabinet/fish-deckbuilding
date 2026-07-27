@@ -26,8 +26,10 @@ type: reference
 ## memorys
 
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
+- [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
+- [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 
@@ -39,13 +41,20 @@ type: reference
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
+- [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *draft*
 
 ## tasks
 
-- [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-progress*
+- [Dynamic hand overlap for variable card count](wiki/tasks/dynamic-hand-overlap-for-variable-card-count.md) — *todo*
+- [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
+- [Deck/discard pile visualization](wiki/tasks/deckdiscard-pile-visualization.md) — *todo*
+- [Card visual states and hover interactions](wiki/tasks/card-visual-states-and-hover-interactions.md) — *todo*
+- [CSS theming system with custom properties](wiki/tasks/css-theming-system-with-custom-properties.md) — *todo*
+- [Combat feedback animations](wiki/tasks/combat-feedback-animations.md) — *todo*
+- [Zone-based UI decomposition for battle screen](wiki/tasks/zone-based-ui-decomposition-for-battle-screen.md) — *todo*
 
 ## Graph Stats
 
-- **Nodes:** 19
-- **Edges:** 42
+- **Nodes:** 28
+- **Edges:** 54
 

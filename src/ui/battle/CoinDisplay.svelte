@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState } from '../../lib/state';
+  import { gameState } from '../../lib/state.svelte';
   import { calculateInterest } from '../../game/combat';
 
   let coins = $derived(gameState.combat.coins);

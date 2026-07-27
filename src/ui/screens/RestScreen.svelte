@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, setScreen, healHero, markNodeCleared } from '../../lib/state';
+  import { gameState, setScreen, healHero, markNodeCleared } from '../../lib/state.svelte';
   import { getCard, CARD_DATA } from '../../game/cards/cardData';
   import { eventBus } from '../../game/events';
 

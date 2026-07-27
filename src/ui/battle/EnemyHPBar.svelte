@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState } from '../../lib/state';
+  import { gameState } from '../../lib/state.svelte';
 
   // Show the boss enemy or the first alive enemy's HP
   let bossEnemy = $derived(

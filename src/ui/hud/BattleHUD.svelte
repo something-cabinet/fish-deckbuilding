@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, setScreen, markNodeCleared, incrementBattleIndex, endCombat, addToDeck } from '../../lib/state';
+  import { gameState, setScreen, markNodeCleared, incrementBattleIndex, endCombat, addToDeck } from '../../lib/state.svelte';
   import { canPlayCard } from '../../game/combat';
   import { getCurrentOrchestrator, syncCombatResultToRun } from '../../game/bridge';
   import { getCard } from '../../game/cards/cardData';

@@ -10,7 +10,7 @@
 
 import { eventBus } from './events';
 import type { CombatState, RunState, Screen, EnemyInstance } from './combat/CardTypes';
-import type { GameState } from '../lib/state';
+import type { GameState } from '../lib/state.svelte';
 import { CombatOrchestrator } from './systems/CombatOrchestrator';
 
 let gameStateRef: GameState | null = null;
