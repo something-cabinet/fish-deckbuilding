@@ -10,6 +10,7 @@ type: reference
 ## concepts
 
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
+- [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
@@ -41,7 +42,7 @@ type: reference
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
-- [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *draft*
+- [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
 
 ## tasks
 
@@ -51,10 +52,10 @@ type: reference
 - [Card visual states and hover interactions](wiki/tasks/card-visual-states-and-hover-interactions.md) — *todo*
 - [CSS theming system with custom properties](wiki/tasks/css-theming-system-with-custom-properties.md) — *todo*
 - [Combat feedback animations](wiki/tasks/combat-feedback-animations.md) — *todo*
-- [Zone-based UI decomposition for battle screen](wiki/tasks/zone-based-ui-decomposition-for-battle-screen.md) — *todo*
+- [Zone-based UI decomposition for battle screen](wiki/tasks/zone-based-ui-decomposition-for-battle-screen.md) — *done*
 
 ## Graph Stats
 
-- **Nodes:** 28
-- **Edges:** 54
+- **Nodes:** 29
+- **Edges:** 56
 

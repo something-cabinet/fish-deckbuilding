@@ -20,7 +20,7 @@ tags: [core, architecture]
 | Game orchestration | **CombatOrchestrator** | Turn-based flow coordinator, owns ECS entities, calls pure functions |
 | Event layer | **EventBus (typed)** | Excalibur EventEmitter with typed CombatEvents interface |
 | Bridge | **Bridge** | Syncs Excalibur events → Svelte $state reactively |
-| UI overlay | **Svelte 5** | Thin subscriber, reads from $state, dispatches via bridge |
+| UI overlay | **Svelte 5** | Zone architecture, reads from $state, dispatches via bridge |
 | Language | **TypeScript** | Strict typing throughout |
 | Bundler | **Vite** | Dev server + production builds |
 | Testing | **Vitest** | 92 tests, ~1s |
@@ -29,10 +29,12 @@ tags: [core, architecture]
 
 ```
 ┌──────────────────────────────────────────┐
-│  Svelte 5 (UI) — thin subscriber         │
+│  Svelte 5 (UI) — zone architecture       │
+│  - BattleHUD: CSS Grid layout coordinator│
+│  - 9 zone components (self-contained)    │
+│  - ModalHost for overlays                │
 │  - Reads from $state (synced via bridge) │
 │  - Dispatches actions via bridge         │
-│  - Defense modal opens reactively        │
 ├──────────────────────────────────────────┤
 │  Bridge Layer (event → $state sync)      │
 │  - Subscribes to eventBus                │
@@ -118,14 +120,30 @@ src/
 ├── game/enemies/encounterData.ts # 6 encounters
 ├── game/relics/relicData.ts # 5 relics
 ├── game/map/mapGenerator.ts # Seeded map generation
-├── ui/                      # ★ Svelte 5 components
+├── ui/                      # ★ Svelte 5 components (zone architecture)
 │   ├── screens/             # MainMenu, RestScreen, DeathScreen, VictoryScreen
-│   ├── hud/                 # BattleHUD, MapOverlay, CoinDisplay
-│   ├── battle/              # EnemyRow, HandViewer, SellOrderPrompt, DefensePrompt
-│   ├── shop/                # ShopPanel
+│   ├── hud/
+│   │   ├── BattleHUD.svelte  # CSS Grid layout coordinator (190 lines)
+│   │   ├── MapOverlay.svelte # Map screen
+│   │   └── ModalHost.svelte  # Modal overlay renderer
+│   ├── battle/
+│   │   ├── zones/            # ★ Self-contained zone components
+│   │   │   ├── hero-hp/HeroHPZone.svelte
+│   │   │   ├── turn-info/TurnInfoZone.svelte
+│   │   │   ├── enemy-hp-bar/EnemyHPBarZone.svelte
+│   │   │   ├── coin/CoinZone.svelte
+│   │   │   ├── enemy-row/EnemyRowZone.svelte
+│   │   │   ├── deck/DeckZone.svelte
+│   │   │   ├── hand/HandZone.svelte
+│   │   │   ├── action-bar/ActionBarZone.svelte
+│   │   │   └── interest-flash/InterestFlashZone.svelte
+│   │   ├── EnemyRow.svelte, HandViewer.svelte, etc. (shared components)
+│   │   ├── DefensePrompt.svelte, SellOrderPrompt.svelte (overlay modals)
+│   │   └── CardReward.svelte, CardTooltip.svelte, DeckViewer.svelte
+│   ├── shop/                # ShopPanel.svelte
 │   └── shared/              # Common components
 ├── lib/
-│   ├── state.ts             # Svelte $state runes (synced via bridge)
+│   ├── state.svelte.ts      # Svelte $state runes (synced via bridge)
 │   └── db.ts                # IndexedDB stub
 ├── App.svelte               # Screen router + bridge init + Excalibur mount
 └── app.css                  # Ocean debt city palette
@@ -159,6 +177,7 @@ ENEMY TURN:
 | Pure functions + ECS orchestration (dual layer) | Completed | @wiki/decisions/pure-function-ecs-pivot |
 | Snapshot-based state sync | Completed | @wiki/patterns/snapshot-state-sync |
 | CombatOrchestrator for turn-based ECS | Completed | @wiki/patterns/turn-based-ecs-orchestrator |
+| Zone-based UI decomposition | Completed | @wiki/patterns/zone-based-ui-decomposition |
 | FaB coin system with sell ordering | Current | @wiki/decisions/fab-coin-system |
 | Grid → StS direct targeting | Completed | (in spec) |
 | Run/combat state split | Completed | @wiki/patterns/run-combat-state-split |

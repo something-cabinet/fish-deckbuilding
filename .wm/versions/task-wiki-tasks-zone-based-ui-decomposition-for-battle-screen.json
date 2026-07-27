@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:tasks:zone-based-ui-decomposition-for-battle-screen",
-  "current_version": 2,
+  "current_version": 3,
   "versions": [
     {
       "id": "v1",
@@ -26,6 +26,20 @@
           "field": "implementation_notes",
           "old_value": null,
           "new_value": "Plan: Decompose BattleHUD.svelte into ~9 zone components. Each zone gets its own folder under src/ui/battle/zones/{zone-name}/ with a .svelte component and scoped styles. BattleHUD becomes a CSS Grid layout coordinator (<200 lines). Modals stay as separate overlay system.\n\nZone extraction order (all independent, parallel-safe):\n1. Create directories and BattleHUD layout grid\n2. Extract HeroHPZone (top-left: hero name, HP bar, relics)\n3. Extract TurnInfoZone (center: turn counter, phase badge, gold)\n4. Extract EnemyHPBarZone (top-right: enemy HP summary — currently empty in BattleHUD)\n5. Extract CoinZone (left sidebar: coins, credit limit)\n6. Extract EnemyRowZone (center: enemies, targeting hint)\n7. Extract DeckZone (right sidebar: deck count, view deck button)\n8. Extract HandZone (bottom: card hand with sell/play/block buttons)\n9. Extract ActionBarZone (END TURN, CANCEL buttons)\n10. Extract InterestFlashZone (interest damage banner)\n11. Create ModalHost overlay component\n12. Integration test and responsive layout fixup"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-07-27T15:09:29.896Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
         }
       ],
       "compacted": false
