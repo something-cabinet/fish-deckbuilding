@@ -1,0 +1,25 @@
+{
+  "entity_id": "wiki:tasks:rewrite-combat-into-excalibur-ecs-with-events",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-27T11:17:40.728Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        },
+        {
+          "field": "implementation_notes",
+          "old_value": null,
+          "new_value": "Wikis extracted. Task itself still pending (ECS rewrite not started)."
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}
