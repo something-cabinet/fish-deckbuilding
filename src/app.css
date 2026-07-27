@@ -1,0 +1,110 @@
+:root {
+  /* === OCEAN DEBT CITY PALETTE === */
+  /* Deep ocean backgrounds */
+  --abyss: #0a1628;
+  --deep: #0f2236;
+  --midnight: #162a40;
+  --shallow: #1e3a5f;
+
+  /* Coral & life accents */
+  --coral: #e85d4e;
+  --coral-light: #ff7a6b;
+  --coral-dark: #b33a2e;
+
+  /* Gold / coin / debt */
+  --gold: #f4c430;
+  --gold-dim: #c9a020;
+  --gold-dark: #8a6d0b;
+
+  /* Ink / ledgers / text */
+  --ink: #0d1117;
+  --ink-light: #1a2332;
+  --parchment: #e8dcc5;
+  --parchment-dim: #c4b89a;
+
+  /* Card type colors */
+  --unit-blue: #3b82f6;
+  --unit-blue-dark: #1d4ed8;
+  --spell-green: #22c55e;
+  --spell-green-dark: #15803d;
+  --power-purple: #a855f7;
+  --power-purple-dark: #7e22ce;
+
+  /* Grid & targeting */
+  --grid-empty: rgba(255, 255, 255, 0.06);
+  --grid-hover: rgba(255, 255, 255, 0.15);
+  --grid-valid: rgba(59, 130, 246, 0.25);
+  --grid-target: rgba(232, 93, 78, 0.35);
+  --grid-enemy: rgba(244, 196, 48, 0.08);
+
+  /* UI chrome */
+  --panel-bg: rgba(15, 34, 54, 0.92);
+  --panel-border: rgba(232, 220, 197, 0.15);
+  --button-bg: var(--shallow);
+  --button-hover: var(--coral);
+  --button-text: var(--parchment);
+  --hp-bar: #ef4444;
+  --hp-bar-bg: rgba(239, 68, 68, 0.2);
+  --energy-fill: #fbbf24;
+
+  /* Typography */
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--parchment);
+  background-color: var(--abyss);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--abyss);
+}
+
+#app {
+  position: relative;
+}
+
+/* Utility classes */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.rounded { border-radius: 0.5rem; }
+.rounded-lg { border-radius: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.font-bold { font-weight: 700; }
+.font-mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', monospace; }
+.uppercase { text-transform: uppercase; }
+.tracking-wide { letter-spacing: 0.05em; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--shallow);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--coral);
+}
