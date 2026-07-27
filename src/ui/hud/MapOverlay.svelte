@@ -5,8 +5,8 @@
     setCurrentNode,
     setMapNodes,
     markNodeCleared,
-  } from '../../lib/state';
-  import type { MapNode, NodeType } from '../../lib/state';
+  } from '../../lib/state.svelte';
+  import type { MapNode, NodeType } from '../../lib/state.svelte';
   import { generateMap } from '../../game/map/mapGenerator';
   import { getRandomEncounter } from '../../game/enemies/encounterData';
   import { createAndRegisterOrchestrator } from '../../game/bridge';

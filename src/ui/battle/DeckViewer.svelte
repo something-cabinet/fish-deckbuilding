@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState } from '../../lib/state';
+  import { gameState } from '../../lib/state.svelte';
   import { getCard, CARD_DATA } from '../../game/cards/cardData';
   import type { CardDef } from '../../game/combat/CardTypes';
 

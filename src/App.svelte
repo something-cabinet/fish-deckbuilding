@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { gameState } from './lib/state';
+  import { gameState } from './lib/state.svelte';
   import { createEngine, startEngine } from './game/engine';
   import { MenuScene } from './game/scenes/MenuScene';
   import { MapScene } from './game/scenes/MapScene';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setScreen, resetGame } from '../../lib/state';
+  import { setScreen, resetGame } from '../../lib/state.svelte';
 
   function startGame() {
     resetGame();

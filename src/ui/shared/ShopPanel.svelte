@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, setScreen, spendGold, addToDeck, removeFromDeck, addRelic } from '../../lib/state';
+  import { gameState, setScreen, spendGold, addToDeck, removeFromDeck, addRelic } from '../../lib/state.svelte';
   import { CARD_DATA } from '../../game/cards/cardData';
   import { RELIC_DATA } from '../../game/relics/relicData';
   import { eventBus } from '../../game/events';

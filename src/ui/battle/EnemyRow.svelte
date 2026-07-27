@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { gameState, getEnemyAction } from '../../lib/state';
-  import { getLivingEnemies } from '../../lib/state';
+  import { gameState, getEnemyAction } from '../../lib/state.svelte';
+  import { getLivingEnemies } from '../../lib/state.svelte';
   import { getCard } from '../../game/cards/cardData';
   import type { EnemyInstance, EnemyAction } from '../../game/combat';
 

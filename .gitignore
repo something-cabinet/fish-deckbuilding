@@ -25,3 +25,7 @@ dist-ssr
 
 # Deepwork state files (git-local, readable by OpenCode)
 .slim/deepwork/
+
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/clonedeps/repos/
+# END oh-my-opencode-slim clonedeps
