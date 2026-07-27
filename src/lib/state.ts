@@ -54,6 +54,7 @@ function createInitialCombatState(): CombatState {
     rewardGold: 0,
     rewardCards: [],
     interestDue: 0,
+    incomingDamage: 0,
     enemyActions: [],
     aiStrategy: 'balanced',
   };

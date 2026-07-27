@@ -5,6 +5,7 @@
   import { MenuScene } from './game/scenes/MenuScene';
   import { MapScene } from './game/scenes/MapScene';
   import { BattleScene } from './game/scenes/BattleScene';
+  import { registerBridge } from './game/bridge';
 
   import MainMenu from './ui/screens/MainMenu.svelte';
   import BattleHUD from './ui/hud/BattleHUD.svelte';
@@ -22,6 +23,9 @@
       console.warn('Game canvas not found');
       return;
     }
+
+    // Register the bridge so ECS events sync to Svelte $state
+    registerBridge(gameState);
 
     const engine = createEngine(canvas);
 

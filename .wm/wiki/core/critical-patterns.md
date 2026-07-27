@@ -1,7 +1,12 @@
 ---
 title: Critical Patterns
 type: core
-id: wiki:core:critical-patterns
+tags: [critical]
+---
+
+---
+title: Critical Patterns
+type: core
 tags: [critical]
 ---
 
@@ -36,3 +41,17 @@ RunState persists across battles (deck, HP, gold, relics). CombatState is per-ba
 **What to do differently:** Enforce this split from day 1. The initial flat GameState caused deck corruption. The split fixed it.
 
 **Full entry:** @wiki/patterns/run-combat-state-split
+
+---
+
+## 2026-07-27 — Snapshot-Based State Sync Prevents ECS Desyncs
+
+**Category:** pattern
+**Source:** @task-tasks:rewrite-combat-into-excalibur-ecs-with-events
+**Tags:** [ecs, state, sync, event-driven]
+
+In event-driven ECS architectures, per-field granular events (card:played → sync coins, enemy:hurt → sync HP) inevitably produce desyncs — 5 P0 bugs in this project were caused by this pattern. Switching to a single `state:changed` snapshot event after every action eliminated all of them.
+
+**What to do differently:** Emit a full state snapshot after every action, not per-field events. The bridge/subscriber does a bulk sync from the snapshot. Keep granular events only for transient UI effects (flashes, animations).
+
+**Full entry:** @wiki/patterns/snapshot-state-sync

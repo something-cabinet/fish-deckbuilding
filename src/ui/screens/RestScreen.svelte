@@ -1,12 +1,14 @@
 <script lang="ts">
   import { gameState, setScreen, healHero, markNodeCleared } from '../../lib/state';
   import { getCard, CARD_DATA } from '../../game/cards/cardData';
+  import { eventBus } from '../../game/events';
 
   let showUpgrade = $state(false);
   const healAmount = Math.floor(gameState.run.heroMaxHp * 0.3);
 
   function handleHeal() {
     healHero(healAmount);
+    eventBus.emit('rest:healed', { amount: healAmount, heroHp: gameState.run.heroHp });
     markNodeCleared(gameState.run.currentNodeId);
     setScreen('map');
   }
@@ -17,6 +19,7 @@
 
   function upgradeCard(cardId: string) {
     alert(`Upgraded ${getCard(cardId)?.name || 'card'}! (visual only)`);
+    eventBus.emit('rest:upgraded', { cardId });
     markNodeCleared(gameState.run.currentNodeId);
     setScreen('map');
   }

@@ -1,10 +1,7 @@
 <script lang="ts">
   import { gameState, setScreen, markNodeCleared, incrementBattleIndex, endCombat, addToDeck } from '../../lib/state';
-  import {
-    canPlayCard,
-    CombatController,
-    startPlayerTurn,
-  } from '../../game/combat';
+  import { canPlayCard } from '../../game/combat';
+  import { getCurrentOrchestrator, syncCombatResultToRun } from '../../game/bridge';
   import { getCard } from '../../game/cards/cardData';
   import { getRelic } from '../../game/relics/relicData';
   import type { CombatState } from '../../game/combat';
@@ -36,8 +33,33 @@
   // Interest display
   let interestFlash = $state(0);
 
-  // Track whether onCombatStart relic has fired
-  let combatStartRelicsFired = $state(false);
+  // React to interest due (set by bridge via interest:due event)
+  $effect(() => {
+    const interest = gameState.combat.interestDue;
+    if (interest > 0) {
+      interestFlash = interest;
+      setTimeout(() => { interestFlash = 0; }, 2000);
+    }
+  });
+
+  // Detect defense phase from state sync — open defense prompt automatically
+  $effect(() => {
+    if (gameState.combat.turnPhase === 'defense' && gameState.combat.incomingDamage != null) {
+      pendingEnemyDamage = gameState.combat.incomingDamage;
+      pendingEnemyAttacks = gameState.combat.enemyActions.map(a => ({
+        enemyId: gameState.combat.enemies[a.enemyIndex]?.id ?? '',
+        damage: a.damage ?? 0,
+      }));
+      showDefensePrompt = true;
+    }
+  });
+
+  // Reset defense prompt when leaving defense phase
+  $effect(() => {
+    if (gameState.combat.turnPhase !== 'defense') {
+      showDefensePrompt = false;
+    }
+  });
 
   // Derived state
   let currentPhase = $derived(gameState.combat.turnPhase);
@@ -69,7 +91,7 @@
    * Returns true if battle ended.
    */
   function checkAndHandleBattleEnd(): boolean {
-    const end = CombatController.checkBattleEnd(gameState.combat);
+    const end = getCurrentOrchestrator()?.checkBattleEnd() ?? null;
     if (end === 'victory') {
       handleVictory();
       return true;
@@ -82,8 +104,7 @@
 
   /** Sell a card from hand for coins */
   function handleSellCard(cardIndex: number) {
-    const newState = CombatController.sellCard(gameState.combat, cardIndex);
-    applyState(newState);
+    getCurrentOrchestrator()?.sellCard(cardIndex);
 
     // If we just sold the selected card, clear selection
     if (selectedCardIndex === cardIndex) {
@@ -130,153 +151,64 @@
     const enemy = gameState.combat.enemies[enemyIndex];
     if (!enemy || enemy.hp <= 0) return;
 
-    // Play the attack card (with effects/keywords resolved inside CombatController)
-    const newState = CombatController.playAttack(
-      gameState.combat,
-      selectedCardIndex,
-      enemyIndex
-    );
-    applyState(newState);
+    // Play the attack card (relic triggers handled inside orchestrator)
+    getCurrentOrchestrator()?.playCard(selectedCardIndex, enemyIndex);
 
-    // Trigger onCardPlayed relic effects (e.g., Pearl Necklace 10% draw)
-    const relicRoll = Math.floor(Math.random() * 100) + 1;
-    const relicState = CombatController.applyRelicTrigger(
-      gameState.combat,
-      gameState.run.relics,
-      'onCardPlayed',
-      relicRoll
-    );
-    if (relicState !== gameState.combat) {
-      applyState(relicState);
-    }
-
-    // Check for enemy killed relic trigger
-    const prevEnemy = gameState.combat.enemies[enemyIndex];
-    const newEnemy = newState.enemies[enemyIndex];
-    if (prevEnemy && newEnemy && prevEnemy.hp > 0 && newEnemy.hp <= 0) {
-      const killState = CombatController.applyRelicTrigger(
-        gameState.combat,
-        gameState.run.relics,
-        'onEnemyKilled'
-      );
-      if (killState !== gameState.combat) {
-        applyState(killState);
-      }
+    // Check for battle end after playing card
+    const battleResult = getCurrentOrchestrator()?.checkBattleEnd();
+    if (battleResult === 'victory') {
+      cancelTargeting();
+      handleVictory();
+      return;
+    } else if (battleResult === 'defeat') {
+      cancelTargeting();
+      handleDefeat();
+      return;
     }
 
     // Clear targeting
     cancelTargeting();
-
-    // Check for battle end
-    checkAndHandleBattleEnd();
   }
 
   function doStartPlayerTurn() {
-    const newState = startPlayerTurn(gameState.combat);
-    applyState(newState);
-
-    // Apply onTurnStart relic effects (e.g., Old Coin)
-    const relicState = CombatController.applyRelicTrigger(
-      gameState.combat,
-      gameState.run.relics,
-      'onTurnStart'
-    );
-    if (relicState !== gameState.combat) {
-      applyState(relicState);
-    }
-
-    if (newState.interestDue > 0) {
-      interestFlash = newState.interestDue;
-      setTimeout(() => { interestFlash = 0; }, 2000);
-    }
-    // Check if hero died from interest
-    checkAndHandleBattleEnd();
+    getCurrentOrchestrator()?.startPlayerTurn();
   }
 
   /** End player turn */
   function handleEndTurn() {
-    const result = CombatController.endPlayerTurn(gameState.combat);
-
-    if (result.combatState.turnPhase === 'sellOrder') {
-      // Sell order phase — show SellOrderPrompt
-      applyState(result.combatState);
-    } else if (result.requiresDefense) {
-      // Apply damage reduction from relics (Golden Scales)
-      const { reducedDamage } = CombatController.applyDamageReduction(
-        result.combatState,
-        gameState.run.relics,
-        result.incomingDamage
-      );
-
-      // Show defense prompt with reduced damage
-      applyState(result.combatState);
-      pendingEnemyDamage = result.incomingDamage - reducedDamage;
-      pendingEnemyAttacks = result.enemyAttacks;
-      showDefensePrompt = true;
-    } else {
-      // Battle may have ended or no enemies — resolve was already called
-      applyState(result.combatState);
-
-      // Check battle end
-      checkAndHandleBattleEnd();
-    }
+    getCurrentOrchestrator()?.endPlayerTurn();
   }
 
   /** Confirm sell order after player rearranges sold cards */
   function handleConfirmSellOrder(orderedCards: string[]) {
-    const result = CombatController.confirmSellOrder(gameState.combat, orderedCards);
-
-    if (result.requiresDefense) {
-      // Apply damage reduction from relics
-      const { reducedDamage } = CombatController.applyDamageReduction(
-        result.combatState,
-        gameState.run.relics,
-        result.incomingDamage
-      );
-
-      applyState(result.combatState);
-      pendingEnemyDamage = result.incomingDamage - reducedDamage;
-      pendingEnemyAttacks = result.enemyAttacks;
-      showDefensePrompt = true;
-    } else {
-      applyState(result.combatState);
-      checkAndHandleBattleEnd();
-    }
+    getCurrentOrchestrator()?.confirmSellOrder(orderedCards);
   }
 
   /** Confirm block in defense prompt */
   function handleConfirmBlock(blockedIndices: number[]) {
-    let state = CombatController.defend(gameState.combat, blockedIndices);
-    applyState(state);
+    getCurrentOrchestrator()?.defend(blockedIndices, pendingEnemyDamage);
 
     showDefensePrompt = false;
     pendingEnemyDamage = 0;
 
-    // Check battle end after damage
-    if (!checkAndHandleBattleEnd()) {
-      // Move remaining hand to deck and resolve turn
-      state = CombatController.resolveTurn(gameState.combat);
-      applyState(state);
-    }
+    // Advance to next turn
+    getCurrentOrchestrator()?.startPlayerTurn();
   }
 
   /** Take damage without blocking */
   function handleTakeDamage() {
-    let state = CombatController.defend(gameState.combat, []);
-    applyState(state);
+    getCurrentOrchestrator()?.defend([], pendingEnemyDamage);
 
     showDefensePrompt = false;
     pendingEnemyDamage = 0;
 
-    // Check battle end after damage
-    if (!checkAndHandleBattleEnd()) {
-      state = CombatController.resolveTurn(gameState.combat);
-      applyState(state);
-    }
+    // Advance to next turn
+    getCurrentOrchestrator()?.startPlayerTurn();
   }
 
   /** Handle victory — show card reward */
   function handleVictory() {
+    syncCombatResultToRun();
     rewardCards = [...gameState.combat.rewardCards];
     showCardReward = true;
   }
@@ -324,7 +256,7 @@
   /** Handle defeat */
   function handleDefeat() {
     endCombat();
-    setScreen('death');
+    // Screen transition to 'death' is handled by the bridge via combat:defeat event
   }
 
   /** End combat and return to map (for testing/debug) */
@@ -342,28 +274,6 @@
     hoveredCardId = null;
   }
 
-  // Auto-start player turn when phase transitions to 'draw'
-  $effect(() => {
-    if (
-      gameState.screen === 'battle' &&
-      gameState.combat.turnPhase === 'draw'
-    ) {
-      // Fire onCombatStart relic effects once per battle
-      if (!combatStartRelicsFired) {
-        combatStartRelicsFired = true;
-        const relicState = CombatController.applyRelicTrigger(
-          gameState.combat,
-          gameState.run.relics,
-          'onCombatStart'
-        );
-        if (relicState !== gameState.combat) {
-          Object.assign(gameState.combat, relicState);
-        }
-      }
-
-      doStartPlayerTurn();
-    }
-  });
 </script>
 
 <div class="battle-hud">

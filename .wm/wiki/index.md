@@ -10,6 +10,8 @@ type: reference
 ## concepts
 
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
+- [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
+- [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
@@ -44,6 +46,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 17
-- **Edges:** 32
+- **Nodes:** 19
+- **Edges:** 42
 

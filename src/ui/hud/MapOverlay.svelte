@@ -9,8 +9,7 @@
   import type { MapNode, NodeType } from '../../lib/state';
   import { generateMap } from '../../game/map/mapGenerator';
   import { getRandomEncounter } from '../../game/enemies/encounterData';
-  import { startBattle } from '../../game/combat';
-  import { incrementBattleIndex } from '../../lib/state';
+  import { createAndRegisterOrchestrator } from '../../game/bridge';
 
   // Generate map if none exists
   if (gameState.run.mapNodes.length === 0) {
@@ -71,20 +70,16 @@
           return;
         }
 
-        const newCombatState = startBattle(
+        // Kick off the battle scene orchestrator (creates ECS entities, starts turn 1)
+        createAndRegisterOrchestrator(
           gameState.run,
           encounter.enemies,
           encounter.id,
           encounter.rewardGold,
-          encounter.rewardCards || []
+          encounter.rewardCards || [],
         );
 
-        // Assign the new combat state
-        Object.assign(gameState.combat, newCombatState);
-
-        // Increment battle index for next battle seed diversity
-        incrementBattleIndex();
-
+        // Navigate to battle screen
         setScreen('battle');
         break;
       }

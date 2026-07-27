@@ -87,6 +87,7 @@ export interface CombatState {
   rewardGold: number;
   rewardCards: string[];
   interestDue: number;      // Damage taken at end of turn if in debt
+  incomingDamage?: number;   // Total incoming damage from enemy attacks (defense phase, optional for tests)
   enemyActions: EnemyAction[];  // Computed AI actions for the current enemy turn
   aiStrategy: AIStrategy;       // AI strategy for this encounter
 }

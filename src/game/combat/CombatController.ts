@@ -1,3 +1,9 @@
+/**
+ * @deprecated Replaced by CombatOrchestrator (src/game/systems/CombatOrchestrator.ts).
+ * Kept only so existing tests (CombatController.test.ts) continue passing.
+ * Do not import in production code.
+ */
+
 import { getCard } from '../cards/cardData';
 import type { EncounterDef } from '../enemies/encounterData';
 import { sellCard, spendCoins, canPlayCard, calculateInterest } from './CoinSystem';

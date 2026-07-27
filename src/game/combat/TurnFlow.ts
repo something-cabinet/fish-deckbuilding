@@ -83,6 +83,7 @@ export function startBattle(
     rewardGold,
     rewardCards: rewardCards || [],
     interestDue: 0,
+    incomingDamage: 0,
     enemyActions: [],
     aiStrategy,
   };
