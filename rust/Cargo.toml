@@ -4,7 +4,10 @@ description = "Godot 4 tactical RPG battle prototype using gdext Rust bindings"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/nhkhanh/fish-roguelite-deckbuilding"
+repository = "https://github.com/something-cabinet/fish-deckbuilding"
+readme = "README.md"
+keywords = ["godot", "gdext", "tactical-rpg", "game"]
+categories = ["game-engines", "wasm"]
 
 [lib]
 crate-type = ["cdylib"]
