@@ -2,6 +2,16 @@
 
 Guppy the Debtor fights through an underwater city in this tactical RPG. Built with Godot 4 and godot-rust (gdext).
 
+## Quick Start
+
+```bash
+cd rust
+cargo build                    # compile Rust extension
+cargo test                     # 52 tests, no Godot needed
+```
+
+Open `godot/project.godot` in Godot 4 editor — hit F5 to run.
+
 ## Prerequisites
 
 - Rust (nightly): `rustup toolchain install nightly`
@@ -34,9 +44,21 @@ cd rust
 
 Produces `.wasm` and `.threads.wasm` in `rust/target/wasm32-unknown-emscripten/debug/`.
 
-### Godot Editor
+### In Godot Editor
 
-Open `godot/` as a Godot 4 project. The editor loads the compiled extension automatically. Export via `Project > Export...` with Extensions Support enabled.
+Open `godot/` as a Godot 4 project. The Rust extension loads automatically via `godot/battle.gdextension`. Hit F5 to start the battle scene from the editor.
+
+The extension recompiles automatically on code change (hot-reload). Rebuild with `cd rust && cargo build` while the editor is open.
+
+### Web Export
+
+```bash
+source ./emsdk/emsdk_env.sh
+cd rust
+./build-web.sh
+```
+
+Then in Godot editor: `Project > Export...` → enable Extensions Support → export to `godot/web/`. Deploy the output with `vercel.json` (COOP/COEP headers for threaded WASM).
 
 ## Tests
 
