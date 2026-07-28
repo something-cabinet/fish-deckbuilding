@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 wm-cli
+wm-cli.exe
 
 # Deepwork state files (git-local, readable by OpenCode)
 .slim/deepwork/

@@ -2,7 +2,7 @@
 
 ## Wiki Conventions
 
-### 7 Page Types
+### 10 Page Types
 | Type | Directory | Purpose |
 |------|-----------|---------|
 | task | `wiki/tasks/` | Actionable units of work with acceptance criteria |
@@ -12,14 +12,17 @@
 | decision | `wiki/decisions/` | ADRs: context, options, rationale, outcome |
 | howto | `wiki/howto/` | Step-by-step guides, tutorials |
 | reference | `wiki/reference/` | API docs, error codes, configuration tables |
+| core | `wiki/core/` | Meta-project docs defining how the project works |
+| rule | `wiki/rules/` | Enforceable project rules and invariants |
+| memory | `wiki/memory/` | Durable knowledge entries (short summaries with links to full docs) |
 
 ### Frontmatter Schema
 Every wiki page starts with YAML frontmatter:
 ```yaml
 ---
 title: Page Title
-type: task|spec|concept|pattern|decision|howto|reference
-status: todo|in-progress|done|draft|reviewed|approved
+type: task|spec|concept|pattern|decision|howto|reference|core|rule
+status: todo|in-progress|done|draft|reviewed|approved|active
 tags: [tag1, tag2]
 priority: low|medium|high|urgent
 assignee: name
@@ -59,7 +62,7 @@ Always follow this sequence for every request:
 ### 3. wm-plan — Task Planning
 - Trigger: Task assigned
 - Steps: Search wiki for related specs → Plan with ACs → Validate → Wait for approval
-- Supports `--from @doc/<spec>` for spec-wide task generation
+- Supports `--from @wiki/specs/<name>` for spec-wide task generation
 
 ### 4. wm-implement — Code & Documentation
 - Trigger: Plan approved
