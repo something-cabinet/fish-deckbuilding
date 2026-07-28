@@ -1,7 +1,7 @@
 <script lang="ts">
   import { gameState } from '../../lib/state.svelte';
   import { getCard } from '../../game/cards/cardData';
-  import { canPlayCard } from '../../game/combat';
+  import { CardType } from '../../game/combat/CardTypes';
 
   interface Props {
     onHover: (cardId: string, event: MouseEvent) => void;
@@ -49,7 +49,6 @@
   function getCardMargin(index: number): string {
     if (index === 0) return '0';
     if (hoveredIndex === null) return `${overlap}px`;
-    // When hovering, spread cards slightly and reset hovered card margin
     const spreadOverlap = Math.min(overlap * 0.5, -4);
     if (hoveredIndex === index) return '4px';
     return `${spreadOverlap}px`;
@@ -82,13 +81,20 @@
     };
   });
 
-  function handleCardClick(cardId: string, index: number) {
+  function getTypeColor(type: CardType): string {
+    switch (type) {
+      case CardType.Attack: return 'var(--coral)';
+      case CardType.Armor: return 'var(--unit-blue)';
+      case CardType.Skill: return 'var(--stat-heal)';
+      case CardType.Summon: return 'var(--spell-green)';
+      case CardType.Passive: return 'var(--power-purple)';
+      default: return 'var(--parchment-dim)';
+    }
+  }
+
+  function handleCardClick(_cardId: string, index: number) {
     if (phase === 'play') {
-      // If card has attack, select it for targeting
-      const card = getCard(cardId);
-      if (card && card.attack > 0 && canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)) {
-        onSelectCard?.(index);
-      }
+      onSelectCard?.(index);
     } else if (phase === 'defense') {
       onBlockCard?.(index);
     }
@@ -106,20 +112,19 @@
   </div>
 
   <div class="hand-cards" bind:this={cardsContainer}>
-    {#each gameState.combat.hand as cardId, i}
-      {@const card = getCard(cardId)}
-      {#if card}
-        {@const playable = canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)}
+    {#each gameState.combat.hand as cardInstanceId, i}
+      {@const card = getCard(cardInstanceId.split('_')[0] + (cardInstanceId.includes('_') && isNaN(Number(cardInstanceId.split('_').at(-1))) ? '' : ''))}
+      {#if true}
+        {@const resolvedCard = cardInstanceId.includes('_') ? getCard(cardInstanceId.split('_').slice(0, -1).join('_')) || getCard(cardInstanceId) : getCard(cardInstanceId)}
         <div
           class="hand-card"
           class:selected={selectedIndex === i}
-          class:is-selectable={phase === 'play' && card.attack > 0 && playable}
-          class:unplayable={phase === 'play' && card.attack > 0 && !playable}
+          class:is-selectable={phase === 'play' && !!resolvedCard}
           class:hovered={hoveredIndex === i}
-          style="border-color: {selectedIndex === i ? 'var(--gold)' : card.color}; margin-left: {getCardMargin(i)}"
+          style="border-color: {resolvedCard ? getTypeColor(resolvedCard.type) : 'var(--parchment-dim)'}"
           onmouseenter={(e) => {
             hoveredIndex = i;
-            onHover(cardId, e);
+            onHover(cardInstanceId, e);
           }}
           onmouseleave={() => {
             hoveredIndex = null;
@@ -127,62 +132,58 @@
           }}
           role="button"
           tabindex="0"
-          onclick={() => handleCardClick(cardId, i)}
+          onclick={() => handleCardClick(cardInstanceId, i)}
         >
-          <div class="card-cost">{card.cost}</div>
-          <div class="card-name">{card.name}</div>
-          <div class="card-stats-row">
-            <span class="card-stat atk-stat" title="Attack">{card.attack}</span>
-            <span class="card-stat def-stat" title="Defense">{card.defense}</span>
-            <span class="card-stat coin-stat" title="Coin Value">{card.coinValue}</span>
-          </div>
-          {#if selectedIndex === i}
-            <div class="selected-badge">SELECTED</div>
-          {/if}
-
-          <!-- Action buttons -->
-          {#if phase === 'play'}
-            <div class="card-actions">
-              <button
-                class="card-btn sell-btn"
-                title="Sell for {card.coinValue} coin{card.coinValue > 1 ? 's' : ''}"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  onSellCard?.(i);
-                }}
-              >
-                SELL {card.coinValue}
-              </button>
-              {#if card.attack > 0}
-                <button
-                  class="card-btn play-btn"
-                  class:cant-afford={!playable}
-                  disabled={!playable}
-                  title="Play as attack ({card.cost} coin{card.cost !== 1 ? 's' : ''})"
-                  onclick={(e) => {
-                    e.stopPropagation();
-                    if (playable) {
-                      onPlayCard?.(i);
-                    }
-                  }}
-                >
-                  ATK {card.attack}
-                </button>
+          {#if resolvedCard}
+            <div class="card-cost">{resolvedCard.manaCost}</div>
+            <div class="card-name">{resolvedCard.name}</div>
+            <div class="card-type-badge">{resolvedCard.type.toUpperCase()}</div>
+            <div class="card-stats-row">
+              {#if resolvedCard.damage}
+                <span class="card-stat atk-stat" title="Damage">{resolvedCard.damage}</span>
+              {/if}
+              {#if resolvedCard.armorAmount}
+                <span class="card-stat def-stat" title="Armor">{resolvedCard.armorAmount}</span>
+              {/if}
+              {#if resolvedCard.healAmount}
+                <span class="card-stat heal-stat" title="Heal">{resolvedCard.healAmount}</span>
               {/if}
             </div>
-          {:else if phase === 'defense'}
-            <div class="card-actions">
-              <button
-                class="card-btn block-btn"
-                title="Block {card.defense} damage"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  onBlockCard?.(i);
-                }}
-              >
-                BLOCK {card.defense}
-              </button>
-            </div>
+            {#if selectedIndex === i}
+              <div class="selected-badge">SELECTED</div>
+            {/if}
+
+            {#if phase === 'play'}
+              <div class="card-actions">
+                {#if resolvedCard.manaCost <= (gameState.combat.mana || 0)}
+                  <button
+                    class="card-btn play-btn"
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      onPlayCard?.(i);
+                    }}
+                  >
+                    PLAY
+                  </button>
+                {:else}
+                  <span class="card-btn cost-too-high">{resolvedCard.manaCost}⚡</span>
+                {/if}
+              </div>
+            {:else if phase === 'defense'}
+              <div class="card-actions">
+                <button
+                  class="card-btn block-btn"
+                  onclick={(e) => {
+                    e.stopPropagation();
+                    onBlockCard?.(i);
+                  }}
+                >
+                  BLOCK
+                </button>
+              </div>
+            {/if}
+          {:else}
+            <div class="card-name">Unknown</div>
           {/if}
         </div>
       {/if}
@@ -275,16 +276,6 @@
     cursor: pointer;
   }
 
-  .hand-card.unplayable {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .hand-card.unplayable:hover {
-    transform: translateY(-6px) scale(1.02);
-    opacity: 0.6;
-  }
-
   .selected-badge {
     font-size: 0.5rem;
     font-weight: 900;
@@ -303,8 +294,8 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--gold-dark);
-    color: var(--gold);
+    background: var(--unit-blue);
+    color: white;
     font-size: 0.7rem;
     font-weight: 700;
     display: flex;
@@ -319,6 +310,16 @@
     text-align: center;
     line-height: 1.2;
     margin-top: 0.35rem;
+  }
+
+  .card-type-badge {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.08);
+    color: var(--parchment-dim);
   }
 
   .card-stats-row {
@@ -347,9 +348,9 @@
     color: var(--stat-def);
   }
 
-  .card-stat.coin-stat {
-    background: rgba(244, 196, 48, 0.15);
-    color: var(--gold);
+  .card-stat.heal-stat {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--stat-heal);
   }
 
   .card-actions {
@@ -369,6 +370,7 @@
     transition: all 0.15s ease;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-align: center;
   }
 
   .card-btn:hover {
@@ -381,15 +383,6 @@
     transform: none;
   }
 
-  .sell-btn {
-    background: rgba(168, 85, 247, 0.3);
-    color: var(--stat-purple);
-  }
-
-  .sell-btn:hover:not(:disabled) {
-    background: rgba(168, 85, 247, 0.5);
-  }
-
   .play-btn {
     background: rgba(232, 93, 78, 0.3);
     color: var(--coral-light);
@@ -399,8 +392,10 @@
     background: rgba(232, 93, 78, 0.5);
   }
 
-  .play-btn.cant-afford {
-    opacity: 0.4;
+  .cost-too-high {
+    background: rgba(255,255,255,0.05);
+    color: var(--parchment-dim);
+    opacity: 0.6;
   }
 
   .block-btn {

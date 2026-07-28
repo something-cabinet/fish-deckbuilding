@@ -1,48 +1,61 @@
-export { sellCard, canPlayCard, spendCoins, calculateInterest, canAffordWithCredit } from './CoinSystem';
+/**
+ * Combat system index — exports the new pure-function CombatEngine API.
+ *
+ * The old combat system (TurnFlow, CoinSystem, CombatController, etc.) has been removed.
+ * Use CombatEngine functions for all combat logic.
+ */
 export {
-  drawToMaxHand,
-  startBattle,
+  initBattle,
   startPlayerTurn,
-  resolveTurn,
-  isHeroDead,
-  areAllEnemiesDead,
+  playCard,
+  baseAttack,
+  moveUnit,
+  endPlayerTurn,
+  replaceCard,
   checkBattleEnd,
-} from './TurnFlow';
-export { CombatController } from './CombatController';
-export type { CombatController as CombatControllerInterface, EnemyTurnResult } from './CombatController';
+  getPlayableCards,
+  getValidTargets,
+  resetCardInstanceCounter,
+} from './CombatEngine';
 export {
-  type EnemyInstance,
-  type TurnPhase,
-  type RunState,
-  type CombatState,
-  type MapNode,
-  type NodeType,
-  type Screen,
-  type AIStrategy,
-  type EnemyAction,
-  type CardDef,
-  type Keyword,
-  type EffectType,
-  type CardEffect,
-  DEFAULT_CREDIT_LIMIT,
-  HERO_STARTING_HP,
-  HERO_MAX_HAND,
+  getManaForTurn,
+  canPlayCard,
+  spendMana,
+} from './ManaSystem';
+export {
+  shuffleDeck,
+  drawCards,
+  replaceCardFromHand,
+  canReplace,
+} from './DrawSystem';
+export {
+  resolveAttackCard,
+  resolveArmorCard,
+  resolveSkillCard,
+  resolveSummonCard,
+  resolvePassiveCard,
+} from './CardEffects';
+export { heroBaseAttack } from './BaseAttack';
+export { executeEnemyTurn, getEnemyMoveTarget, getEnemyAttackTarget } from './EnemyAI';
+export { applyArmor, tickArmor, damageWithArmor } from './ArmorSystem';
+export type {
+  CombatState,
+  CombatHero,
+  CombatEnemy,
+  CombatCard,
+  CombatSummon,
+  PassiveEffect,
+  CardDefinition,
+  UIBattleState,
+  EnemyInstance,
+  RunState,
+  Screen,
+  AIStrategy,
+  EnemyAction,
 } from './CardTypes';
-export { computeEnemyActions } from './EnemyAI';
 export {
-  resolveKeywords,
-  type KeywordContext,
-  type KeywordResult,
-} from './Keywords';
-export {
-  resolveEffects,
-  type EffectContext,
-  type EffectResult,
-} from './Effects';
-export {
-  resolveRelicTrigger,
-  resolveDamageReduction,
-  type RelicTrigger,
-  type RelicEffectDef,
-  type RelicDef,
-} from './RelicSystem';
+  CardType,
+  TurnPhase,
+  MoveType,
+  HERO_STARTING_HP,
+} from './CardTypes';

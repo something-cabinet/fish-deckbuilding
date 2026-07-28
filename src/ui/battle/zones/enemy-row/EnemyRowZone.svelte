@@ -12,8 +12,19 @@
 
   let { selectedCardIndex, selectedCardId, onEnemyClick, onCancelTargeting }: Props = $props();
 
+  // M5: resolve card definition from instanceId for display
+  function resolveCardId(instanceId: string): string | undefined {
+    if (!instanceId) return undefined;
+    // instanceId format: "cardId_N"
+    const parts = instanceId.split('_');
+    if (parts.length >= 2 && !isNaN(Number(parts[parts.length - 1]))) {
+      return parts.slice(0, -1).join('_');
+    }
+    return instanceId;
+  }
+
   let currentPhase = $derived(gameState.combat.turnPhase);
-  let targetingMode = $derived(selectedCardIndex !== null && currentPhase === 'play');
+  let targetingMode = $derived(selectedCardIndex !== null && currentPhase === 'playerAction');
 </script>
 
 <div class="enemy-row-zone">
@@ -24,7 +35,7 @@
   />
   {#if targetingMode}
     <div class="targeting-hint">
-      Click an enemy to target with {getCard(selectedCardId ?? '')?.name ?? 'attack'}
+      Click an enemy to target with {getCard(resolveCardId(selectedCardId ?? '') ?? '')?.name ?? 'attack'}
       <button class="cancel-btn" onclick={onCancelTargeting}>CANCEL</button>
     </div>
   {/if}

@@ -41,7 +41,7 @@ const jellyDrifter: EncounterDef = {
   ],
   aiStrategy: 'aggressive',
   rewardGold: 15,
-  rewardCards: ['fin_slash', 'bubble_shield', 'ink_cloud'],
+  rewardCards: ['fin_slash', 'bubble_shield', 'healing_rain'],
 };
 
 const pufferPatrol: EncounterDef = {

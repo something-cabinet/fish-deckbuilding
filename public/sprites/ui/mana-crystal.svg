@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <style>
+      .abyss { fill: #0a1628; }
+      .deep { fill: #0f2236; }
+      .coral { fill: #e85d4e; }
+      .gold { fill: #f4c430; }
+      .parchment { fill: #e8dcc5; }
+      .shallow { fill: #1a3a5c; }
+      .coral-light { fill: #ff6b5e; }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+      .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Mana crystal base -->
+  <rect x="8" y="2" width="16" height="4" class="gold"/>
+  <rect x="6" y="6" width="20" height="4" class="gold"/>
+  <rect x="4" y="10" width="24" height="12" class="gold"/>
+  <rect x="6" y="22" width="20" height="4" class="gold"/>
+  <rect x="8" y="26" width="16" height="4" class="gold"/>
+  
+  <!-- Crystal inner glow -->
+  <rect x="10" y="8" width="12" height="4" class="parchment" opacity="0.6" class="animate-pulse"/>
+  <rect x="8" y="12" width="16" height="8" class="parchment" opacity="0.5" class="animate-pulse"/>
+  <rect x="10" y="20" width="12" height="4" class="parchment" opacity="0.6" class="animate-pulse"/>
+  
+  <!-- Crystal center -->
+  <rect x="12" y="12" width="8" height="8" class="parchment" opacity="0.8" class="animate-pulse"/>
+  <rect x="14" y="14" width="4" height="4" class="gold"/>
+  
+  <!-- Crystal facets -->
+  <rect x="6" y="8" width="2" height="4" class="gold" opacity="0.8"/>
+  <rect x="24" y="8" width="2" height="4" class="gold" opacity="0.8"/>
+  <rect x="6" y="18" width="2" height="4" class="gold" opacity="0.8"/>
+  <rect x="24" y="18" width="2" height="4" class="gold" opacity="0.8"/>
+  
+  <!-- Top highlight -->
+  <rect x="10" y="4" width="4" height="2" class="parchment" opacity="0.8"/>
+  <rect x="18" y="4" width="4" height="2" class="parchment" opacity="0.6"/>
+  
+  <!-- Bottom shadow -->
+  <rect x="10" y="28" width="12" height="2" class="abyss" opacity="0.3"/>
+</svg>

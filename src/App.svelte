@@ -1,19 +1,24 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { gameState } from './lib/state.svelte';
-  import { createEngine, startEngine } from './game/engine';
+  import { createEngine, startEngine, getEngine } from './game/engine';
   import { MenuScene } from './game/scenes/MenuScene';
-  import { MapScene } from './game/scenes/MapScene';
+  import { IslandScene } from './game/scenes/IslandScene';
   import { BattleScene } from './game/scenes/BattleScene';
-  import { registerBridge } from './game/bridge';
+  import { registerBridge, registerIslandScene } from './game/bridge';
 
   import MainMenu from './ui/screens/MainMenu.svelte';
   import BattleHUD from './ui/hud/BattleHUD.svelte';
   import MapOverlay from './ui/hud/MapOverlay.svelte';
-  import ShopPanel from './ui/shared/ShopPanel.svelte';
+  import ShopScreen from './ui/screens/ShopScreen.svelte';
+  import RewardScreen from './ui/screens/RewardScreen.svelte';
+  import DeckScreen from './ui/screens/DeckScreen.svelte';
+  import SaveScreen from './ui/screens/SaveScreen.svelte';
+  import SettingsScreen from './ui/screens/SettingsScreen.svelte';
   import RestScreen from './ui/screens/RestScreen.svelte';
   import DeathScreen from './ui/screens/DeathScreen.svelte';
   import VictoryScreen from './ui/screens/VictoryScreen.svelte';
+  import DialogueBox from './ui/shared/DialogueBox.svelte';
 
   let engineInitialized = $state(false);
 
@@ -31,7 +36,12 @@
 
     // Register scenes
     engine.add('menu', new MenuScene());
-    engine.add('map', new MapScene());
+
+    // Island overworld map (replaces the old STS-style MapScene)
+    const islandScene = new IslandScene();
+    registerIslandScene(islandScene);
+    engine.add('map', islandScene);
+
     engine.add('battle', new BattleScene());
 
     // Start with menu scene
@@ -44,6 +54,30 @@
     return () => {
       engine.stop();
     };
+  });
+
+  // C2: Reactively switch Excalibur scenes when gameState.screen changes
+  $effect(() => {
+    if (!engineInitialized) return;
+    const screen = gameState.screen;
+    const engine = getEngine();
+    if (!engine) return;
+
+    switch (screen) {
+      case 'menu':
+        engine.goToScene('menu');
+        break;
+      case 'map':
+        engine.goToScene('map');
+        break;
+      case 'battle':
+        engine.goToScene('battle');
+        break;
+      default:
+        // Other screens (shop, cardReward, deck, save, settings, rest, death, victory)
+        // These are pure Svelte overlays — keep the current Excalibur scene active
+        break;
+    }
   });
 </script>
 
@@ -62,13 +96,23 @@
     {:else if gameState.screen === 'battle'}
       <BattleHUD />
     {:else if gameState.screen === 'shop'}
-      <ShopPanel />
+      <ShopScreen />
+    {:else if gameState.screen === 'cardReward'}
+      <RewardScreen />
+    {:else if gameState.screen === 'deck'}
+      <DeckScreen />
+    {:else if gameState.screen === 'save'}
+      <SaveScreen />
+    {:else if gameState.screen === 'settings'}
+      <SettingsScreen />
     {:else if gameState.screen === 'rest'}
       <RestScreen />
     {:else if gameState.screen === 'death'}
       <DeathScreen />
     {:else if gameState.screen === 'victory'}
       <VictoryScreen />
+    {:else if gameState.screen === 'dialogue'}
+      <DialogueBox />
     {/if}
   </div>
 </div>

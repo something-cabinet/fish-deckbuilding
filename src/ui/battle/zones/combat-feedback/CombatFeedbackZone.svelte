@@ -1,14 +1,13 @@
 <script lang="ts">
   import { gameState } from '../../../../lib/state.svelte';
   import { eventBus } from '../../../../game/events';
-  import { getCard } from '../../../../game/cards/cardData';
 
   interface FloatingText {
     id: number;
     text: string;
     x: number;
     y: number;
-    type: 'damage' | 'coins' | 'heal' | 'defeated';
+    type: 'damage' | 'heal' | 'defeated';
   }
 
   let floaters = $state<FloatingText[]>([]);
@@ -26,13 +25,6 @@
     };
   }
 
-  function getCoinPosition(): { x: number; y: number } {
-    return {
-      x: 120,
-      y: window.innerHeight * 0.45,
-    };
-  }
-
   function addFloater(text: string, x: number, y: number, type: FloatingText['type']) {
     const id = nextId++;
     const floater: FloatingText = { id, text, x, y, type };
@@ -43,30 +35,14 @@
   }
 
   $effect(() => {
-    const onCardPlayed = (e: { targetEnemyIndex: number; damage: number }) => {
-      const pos = getEnemyPosition(e.targetEnemyIndex);
-      addFloater(`${e.damage}`, pos.x, pos.y, 'damage');
-    };
-
-    const onCardSold = (e: { cardId: string }) => {
-      const card = getCard(e.cardId);
-      const value = card?.coinValue ?? 0;
-      const pos = getCoinPosition();
-      addFloater(`+${value}`, pos.x, pos.y, 'coins');
-    };
-
     const onEnemyKilled = (e: { enemyIndex: number }) => {
       const pos = getEnemyPosition(e.enemyIndex);
       addFloater('DEFEATED', pos.x, pos.y, 'defeated');
     };
 
-    eventBus.on('card:played', onCardPlayed);
-    eventBus.on('card:sold', onCardSold);
     eventBus.on('enemy:killed', onEnemyKilled);
 
     return () => {
-      eventBus.off('card:played', onCardPlayed);
-      eventBus.off('card:sold', onCardSold);
       eventBus.off('enemy:killed', onEnemyKilled);
     };
   });
@@ -94,7 +70,6 @@
   }
 
   .damage { color: var(--hp-bar); }
-  .coins { color: var(--gold); }
   .heal { color: var(--stat-def-light); }
   .defeated {
     color: var(--coral-light);

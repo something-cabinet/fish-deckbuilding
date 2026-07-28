@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCard } from '../../game/cards/cardData';
-  import type { Keyword, CardEffect } from '../../game/combat/CardTypes';
+  import { CardType } from '../../game/combat/CardTypes';
 
   interface Props {
     cardId: string;
@@ -10,64 +10,69 @@
 
   const card = $derived(getCard(cardId));
 
-  const keywordLabels: Record<Keyword, string> = {
-    rush: 'Rush — Can be played the same turn it\'s drawn',
-    taunt: 'Taunt — Must be targeted first',
-    pierce: 'Pierce — Ignores enemy defense',
-    lifesteal: 'Lifesteal — Heal for half damage dealt',
-    double_strike: 'Double Strike — Deals 2x damage',
-    overdraft: 'Overdraft — Extends credit limit',
-  };
-
-  function effectLabel(e: CardEffect): string {
-    switch (e.type) {
-      case 'damage': return `Deal ${e.value} damage`;
-      case 'heal': return `Heal ${e.value} HP`;
-      case 'draw': return `Draw ${e.value} card${e.value !== 1 ? 's' : ''}`;
-      case 'gainCoins': return `Gain ${e.value} coin${e.value !== 1 ? 's' : ''}`;
-      case 'applyBuff': return `Apply buff +${e.value}`;
-      case 'applyDebuff': return `Apply debuff -${e.value}`;
-      default: return '';
+  function getTypeColor(type: CardType): string {
+    switch (type) {
+      case CardType.Attack: return 'var(--coral)';
+      case CardType.Armor: return 'var(--unit-blue)';
+      case CardType.Skill: return 'var(--stat-heal)';
+      case CardType.Summon: return 'var(--spell-green)';
+      case CardType.Passive: return 'var(--power-purple)';
+      default: return 'var(--parchment-dim)';
     }
   }
 </script>
 
 {#if card}
-  <div class="card-tooltip" style="border-color: {card.color}">
+  <div class="card-tooltip" style="border-color: {getTypeColor(card.type)}">
     <div class="tooltip-header">
-      <span class="tooltip-name">{card.name}</span>
-      <span class="tooltip-cost">{card.cost}C</span>
-    </div>
-    <div class="tooltip-stats-grid">
-      <div class="tooltip-stat-row">
-        <span class="tooltip-stat-label">ATK</span>
-        <span class="tooltip-stat-value atk">{card.attack}</span>
-      </div>
-      <div class="tooltip-stat-row">
-        <span class="tooltip-stat-label">DEF</span>
-        <span class="tooltip-stat-value def">{card.defense}</span>
-      </div>
-      <div class="tooltip-stat-row">
-        <span class="tooltip-stat-label">COIN</span>
-        <span class="tooltip-stat-value coin">{card.coinValue}</span>
-      </div>
+      <span class="tooltip-name" style="color: {getTypeColor(card.type)}">{card.name}</span>
+      <span class="tooltip-cost">{card.manaCost}⚡</span>
     </div>
 
-    {#if card.keywords && card.keywords.length > 0}
-      <div class="tooltip-keywords">
-        {#each card.keywords as kw}
-          <span class="keyword-badge" style="background: {card.color}33; border-color: {card.color}">
-            {kw.replace('_', ' ')}
-          </span>
-        {/each}
+    <div class="tooltip-type-badge">{card.type.toUpperCase()}</div>
+
+    <div class="tooltip-stats-grid">
+      {#if card.damage}
+        <div class="tooltip-stat-row">
+          <span class="tooltip-stat-label">DMG</span>
+          <span class="tooltip-stat-value atk">{card.damage}</span>
+        </div>
+      {/if}
+      {#if card.armorAmount}
+        <div class="tooltip-stat-row">
+          <span class="tooltip-stat-label">ARMOR</span>
+          <span class="tooltip-stat-value def">{card.armorAmount}</span>
+        </div>
+      {/if}
+      {#if card.healAmount}
+        <div class="tooltip-stat-row">
+          <span class="tooltip-stat-label">HEAL</span>
+          <span class="tooltip-stat-value def">{card.healAmount}</span>
+        </div>
+      {/if}
+      {#if card.buffAttack}
+        <div class="tooltip-stat-row">
+          <span class="tooltip-stat-label">ATK+</span>
+          <span class="tooltip-stat-value atk">{card.buffAttack}</span>
+        </div>
+      {/if}
+      {#if card.isAoE}
+        <div class="tooltip-stat-row">
+          <span class="tooltip-stat-label">AOE</span>
+          <span class="tooltip-stat-value">R{card.aoeRadius ?? 1}</span>
+        </div>
+      {/if}
+    </div>
+
+    {#if card.summonUnit}
+      <div class="tooltip-summon">
+        <span class="summon-label">Summon: ATK {card.summonUnit.attack} / HP {card.summonUnit.maxHp}</span>
       </div>
     {/if}
 
-    {#if card.effects && card.effects.length > 0}
-      <div class="tooltip-effects">
-        {#each card.effects as eff}
-          <span class="effect-text">{effectLabel(eff)}</span>
-        {/each}
+    {#if card.passiveEffect}
+      <div class="tooltip-passive">
+        <span class="passive-label">Passive: {card.passiveEffect}</span>
       </div>
     {/if}
 
@@ -109,18 +114,31 @@
   .tooltip-cost {
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--gold);
-    background: var(--gold-dark);
+    color: white;
+    background: var(--unit-blue);
     padding: 0.15rem 0.4rem;
     border-radius: 50%;
     min-width: 26px;
     text-align: center;
   }
 
+  .tooltip-type-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--parchment-dim);
+    text-transform: uppercase;
+    padding: 0.1rem 0.3rem;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    align-self: flex-start;
+  }
+
   .tooltip-stats-grid {
     display: flex;
     gap: 0.75rem;
     padding: 0.35rem 0;
+    flex-wrap: wrap;
   }
 
   .tooltip-stat-row {
@@ -145,33 +163,19 @@
 
   .tooltip-stat-value.atk { color: var(--stat-atk); }
   .tooltip-stat-value.def { color: var(--stat-def); }
-  .tooltip-stat-value.coin { color: var(--gold); }
 
-  .tooltip-keywords {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
+  .tooltip-summon,
+  .tooltip-passive {
+    padding: 0.25rem 0.5rem;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 4px;
   }
 
-  .keyword-badge {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    border: 1px solid;
-  }
-
-  .tooltip-effects {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .effect-text {
-    font-size: 0.75rem;
-    color: var(--gold);
+  .summon-label,
+  .passive-label {
+    font-size: 0.7rem;
+    color: var(--stat-purple);
     font-weight: 600;
   }
 

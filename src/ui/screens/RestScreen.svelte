@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, setScreen, healHero, markNodeCleared } from '../../lib/state.svelte';
+  import { gameState, setScreen, healHero, completeZone } from '../../lib/state.svelte';
   import { getCard, CARD_DATA } from '../../game/cards/cardData';
   import { eventBus } from '../../game/events';
 
@@ -9,7 +9,7 @@
   function handleHeal() {
     healHero(healAmount);
     eventBus.emit('rest:healed', { amount: healAmount, heroHp: gameState.run.heroHp });
-    markNodeCleared(gameState.run.currentNodeId);
+    completeZone(gameState.map.currentZone);
     setScreen('map');
   }
 
@@ -20,7 +20,7 @@
   function upgradeCard(cardId: string) {
     alert(`Upgraded ${getCard(cardId)?.name || 'card'}! (visual only)`);
     eventBus.emit('rest:upgraded', { cardId });
-    markNodeCleared(gameState.run.currentNodeId);
+    completeZone(gameState.map.currentZone);
     setScreen('map');
   }
 </script>
@@ -42,7 +42,7 @@
       </button>
     </div>
 
-    <button class="leave-btn" onclick={() => { markNodeCleared(gameState.run.currentNodeId); setScreen('map'); }}>CONTINUE</button>
+    <button class="leave-btn" onclick={() => { completeZone(gameState.map.currentZone); setScreen('map'); }}>CONTINUE</button>
   </div>
 
   {#if showUpgrade}

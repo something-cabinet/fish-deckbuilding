@@ -7,18 +7,21 @@ export interface EnemyAttackEvent {
 }
 
 export interface CombatEvents {
-  // Turn flow
-  'turn:started': { turnNumber: number; hand: string[]; coins: number; heroHp: number };
-  'turn:resolved': { turnNumber: number };
-  'interest:due': { amount: number; heroHp: number };
+  // ── Animation events (Phase 5) ──
+  /** Floating damage number above a target */
+  'anim:damage': { targetId: string; amount: number; isCrit?: boolean; position?: { x: number; y: number } };
+  /** Floating heal number above hero */
+  'anim:heal': { targetId: string; amount: number; position?: { x: number; y: number } };
+  /** Floating gold/coin number */
+  'anim:gold': { amount: number; position?: { x: number; y: number } };
+  /** Card played from hand — triggers card fly-out animation */
+  'anim:cardPlayed': { cardName: string; originRect?: { x: number; y: number; width: number; height: number } };
+  /** Armor gained shimmer */
+  'anim:armorGained': { targetId: string; amount: number };
+  /** Screen shake on heavy damage */
+  'anim:screenShake': { intensity: number };
 
-  // Player actions
-  'card:played': { cardId: string; cardIndex: number; targetEnemyIndex: number; damage: number; coins: number };
-  'card:sold': { cardId: string; cardIndex: number; coins: number; sellPile: string[] };
-  'card:blocked': { blockedCardIds: string[]; blockedEnemyDamage: number; heroHp: number };
-
-  // Enemy actions
-  'enemy:action': { enemyAttacks: EnemyAttackEvent[]; incomingDamage: number };
+  // Enemy events
   'enemy:killed': { enemyIndex: number; enemyId: string };
   'enemy:hurt': { enemyIndex: number; damage: number; remainingHp: number };
 
@@ -26,15 +29,15 @@ export interface CombatEvents {
   'combat:started': { encounterId: string; hand: string[]; enemies: number };
   'combat:victory': { rewardGold: number; rewardCards: string[] };
   'combat:defeat': {};
-  'combat:defensePhase': { incomingDamage: number; enemyAttacks: EnemyAttackEvent[] };
 
   // Game lifecycle
   'screen:changed': { screen: string };
   'scene:initialized': { scene: string };
 
-  // Map
-  'map:generated': { seed: number; nodeCount: number };
-  'map:nodeEntered': { nodeId: string; nodeType: string };
+  // Island map
+  'map:zoneClicked': { zoneId: string; zoneType: string };
+  'map:zoneEntered': { zoneId: string; zoneType: string };
+  'map:zoneCompleted': { zoneId: string; zoneType: string };
 
   // Shop
   'shop:cardBought': { cardId: string; cost: number };
