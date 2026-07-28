@@ -1,7 +1,7 @@
 
 use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::{
-    Button, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D, Panel,
+    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D, Panel,
     ProgressBar, StyleBox, StyleBoxFlat,
 };
 use godot::global::MouseButton;
@@ -158,7 +158,7 @@ impl BattleScene {
     }
 
     fn build_ui(&self) {
-        let mut ui = self.base().get_node_as::<Node2D>("UI");
+        let mut ui = self.base().get_node_as::<CanvasLayer>("UI");
 
         let mut crystals = Node2D::new_alloc();
         crystals.set_name("ManaCrystals");
@@ -227,6 +227,10 @@ impl BattleScene {
             if !unit.alive { continue; }
             let mut unit_root = self.build_unit_root(pos, unit, state);
             units_node.add_child(&unit_root);
+            let can_pulse = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && !unit.has_moved;
+            if can_pulse {
+                Self::attach_pulse_tween(&mut unit_root.get_node_as::<Panel>("GlowRing"));
+            }
             unit_root.set_scale(Vector2::new(0.0, 0.0));
             let mut tween = unit_root.create_tween();
             tween.tween_property(&unit_root, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.25);
@@ -250,7 +254,7 @@ impl BattleScene {
         glow.set_position(Vector2::new(-34.0, -34.0));
         glow.set_pivot_offset(Vector2::new(34.0, 34.0));
         glow.set_name("GlowRing");
-        if can_act { Self::attach_pulse_tween(&mut glow); } else { glow.set_modulate(rgba(0xff, 0xff, 0xff, 0.0)); }
+        if !can_act { glow.set_modulate(rgba(0xff, 0xff, 0xff, 0.0)); }
         root.add_child(&glow);
 
         let body_color = match unit.faction { Faction::Hero => rgb(0x4f, 0xd1, 0xc5), Faction::Enemy => rgb(0xc9, 0x4c, 0x4c) };
@@ -434,8 +438,9 @@ impl BattleScene {
         self.selected = Some(pos);
         if let Some(s) = self.state.as_ref() {
             self.valid_moves = grid_movement::get_movement_range(&s.grid, pos, constants::MOVE_BUDGET);
+            let has_moved = s.grid.unit_at(pos).is_some_and(|u| u.has_moved);
+            if !has_moved { self.show_move_overlay(&self.valid_moves); }
         }
-        self.show_move_overlay(&self.valid_moves);
         self.show_attack_highlight(pos);
         true
     }
