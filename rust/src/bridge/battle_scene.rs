@@ -70,7 +70,9 @@ impl INode2D for BattleScene {
         self.build_grid();
         self.build_ui();
         self.start_battle();
-        // Connect signals (P0-2 fix)
+        // Note: gdext 0.2 doesn't expose typed signals for built-in engine nodes
+        // (e.g. Button::pressed). String-based connect is the API limitation here,
+        // not the pattern of choice. Upgrade to typed signals when gdext supports it.
         let mut end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
         end_btn.connect("pressed", &self.base().callable("on_end_turn"));
         let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
