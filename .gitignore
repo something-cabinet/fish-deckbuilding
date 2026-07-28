@@ -1,37 +1,22 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Rust build artifacts
+rust/target/
 
-node_modules
-dist
-dist-ssr
-*.local
+# Web build artifacts
+dist/
+node_modules/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Godot editor artifacts
+godot/.godot/
+
+# Environment files
+.env
+
+# OS files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+
+# Generated files
+*.slim
 wm-cli
-wm-cli.exe
 
-# Prisma SQLite database
-prisma/dev.db
-prisma/dev.db-journal
-
-# Deepwork state files (git-local, readable by OpenCode)
-.slim/deepwork/
-
-# BEGIN oh-my-opencode-slim clonedeps
-.slim/clonedeps/repos/
-# END oh-my-opencode-slim clonedeps
+# Playtest screenshots
+playtest-*.png

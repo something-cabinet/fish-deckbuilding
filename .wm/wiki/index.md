@@ -9,16 +9,28 @@ type: reference
 
 ## concepts
 
+- [godot battle 04 movement system  selection overlay](wiki/tasks/godot-battle-04-movement-system--selection-overlay.md) — *draft*
+- [godot battle 05 combat system  attack counter battle end](wiki/tasks/godot-battle-05-combat-system--attack-counter-battle-end.md) — *draft*
+- [godot battle 03 unit system  placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *draft*
+- [godot battle 06 turn cycle  enemy ai  hud](wiki/tasks/godot-battle-06-turn-cycle--enemy-ai--hud.md) — *draft*
+- [godot battle 02 godot project scaffold  grid rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *draft*
+- [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
+- [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
+- [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
+- [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
+- [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
 - [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
 - [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
 - [svelte css grid battle ui](wiki/decisions/svelte-css-grid-battle-ui.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
+- [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
+- [gdext bridge pattern](wiki/concepts/gdext-bridge-pattern.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
 - [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
 
@@ -31,28 +43,37 @@ type: reference
 
 ## memorys
 
+- [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *active*
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
+- [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
 - [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
 - [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
+- [Vite HMR Incompatible with Excalibur Scenes](wiki/memory/vite-hmr-incompatible-with-excalibur-scenes.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
+- [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 
 ## rules
 
+- [No Comments in Project Code](wiki/rules/no-comments-in-code.md) — *active*
+- [Rust Anti-Patterns](wiki/rules/rust-anti-patterns.md) — *active*
 - [Spec-Driven Development](wiki/rules/spec-driven-development.md) — *draft*
 - [TDD — Test-First for Everything](wiki/rules/tdd.md) — *draft*
+- [No Magic Values — Use Enums and Constants](wiki/rules/no-magic-values.md) — *active*
+- [No else — Prefer Early Return](wiki/rules/no-else-prefer-early-return.md) — *active*
 
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
+- [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
 
@@ -76,6 +97,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 49
-- **Edges:** 72
+- **Nodes:** 70
+- **Edges:** 86
 
