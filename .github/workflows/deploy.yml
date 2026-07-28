@@ -60,7 +60,7 @@ jobs:
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
           unzip -q /tmp/templates.tpz -d /tmp/templates
           mkdir -p ~/.local/share/godot/export_templates
-          mv /tmp/templates/templates "~/.local/share/godot/export_templates/${GODOT_VERSION/-/.}"
+          mv /tmp/templates/templates ~/.local/share/godot/export_templates/"${GODOT_VERSION/-/.}"
 
       - name: Build Rust extension + export Godot web player
         env:
