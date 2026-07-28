@@ -33,10 +33,11 @@
 
   function confirmBattle() {
     if (!pendingAction || pendingAction.type !== 'battle') return;
+    const action = pendingAction;
     clearPendingAction();
 
     // Find enemies for this zone
-    const zone = getZoneById(pendingAction.zoneId);
+    const zone = getZoneById(action.zoneId);
     if (!zone) return;
 
     // Use zone-specific enemyPool for encounter selection
@@ -217,7 +218,10 @@
     width: 100%;
     height: 100%;
     position: relative;
-    pointer-events: none; /* allow clicks to pass through to Excalibur canvas */
+    /* !important needed: App.svelte's ".ui-overlay > *" rule ties this selector's
+       specificity and wins the cascade order tiebreak, forcing auto otherwise —
+       which would make this full-screen wrapper swallow every canvas click. */
+    pointer-events: none !important;
   }
 
   .map-overlay > * {
