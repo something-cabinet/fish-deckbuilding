@@ -5,7 +5,7 @@
   import { MenuScene } from './game/scenes/MenuScene';
   import { IslandScene } from './game/scenes/IslandScene';
   import { BattleScene } from './game/scenes/BattleScene';
-  import { registerBridge, registerIslandScene } from './game/bridge';
+  import { registerBridge, registerIslandScene, syncIslandScene } from './game/bridge';
 
   import MainMenu from './ui/screens/MainMenu.svelte';
   import BattleHUD from './ui/hud/BattleHUD.svelte';
@@ -68,7 +68,7 @@
         engine.goToScene('menu');
         break;
       case 'map':
-        engine.goToScene('map');
+        engine.goToScene('map').then(syncIslandScene);
         break;
       case 'battle':
         engine.goToScene('battle');

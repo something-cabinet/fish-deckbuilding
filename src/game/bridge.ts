@@ -78,6 +78,13 @@ export function registerIslandScene(scene: IslandScene): void {
   // syncFromState is called on map screen activation and on map state changes.
 }
 
+/** Push the current Svelte map state into the IslandScene. Call whenever the map screen becomes active. */
+export function syncIslandScene(): void {
+  if (islandSceneRef && gameStateRef) {
+    islandSceneRef.syncFromState(gameStateRef.map);
+  }
+}
+
 function subscribeAll(): void {
   eventBus.on('state:changed', () => {
     if (!gameStateRef || !currentOrchestrator) return;
