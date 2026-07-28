@@ -83,3 +83,17 @@ A `.tscn` node using a Rust GodotClass must declare `type="<CustomClass>"` direc
 **What to do differently:** When a GDExtension class provides all the node's behavior via `#[godot_api] impl INode2D` (or similar), give it its own `.tscn` node with `type="<CustomClassName>"` and skip the GDScript wrapper entirely. If this error appears, check the `.tscn` node's `type=` before suspecting the extension build, dll path, or editor cache.
 
 **Full entry:** @wiki/concepts/gdext-scene-node-type-mismatch
+
+---
+
+## 2026-07-29 — GDExtension Click Input: Use `_input()` Not `_unhandled_input()` with CanvasLayer UI
+
+**Category:** failure
+**Source:** @wiki/concepts:gdext-bridge-pattern
+**Tags:** [godot, gdext, input, architecture]
+
+Mouse clicks on a GDExtension bridge scene with CanvasLayer UI never reach `_unhandled_input()` because Control nodes in the CanvasLayer process input in `_gui_input` AFTER `_input` fires but BEFORE `_unhandled_input`. Debugging this cost 30+ minutes of instrumentation (adding input counters, mouse_filter on every visual node, switching between `_input` and `_unhandled_input`). The root cause was using the wrong virtual method.
+
+**What to do differently:** For grid/tactical game scenes that need to catch clicks before UI consumes them, override `_input()` (maps to Godot's `_input`) instead of `_unhandled_input()`. `_input()` fires before `_gui_input` on Control nodes, so CanvasLayer UI cannot consume the event first. Do NOT try to fix this by setting `mouse_filter = IGNORE` on every visual node — you'll miss one.
+
+**Full entry:** @wiki/concepts:gdext-bridge-pattern#input-handling-use-_input-over-_unhandled_input-for-gdextension-bridge-scenes-with-canvaslayer-ui
