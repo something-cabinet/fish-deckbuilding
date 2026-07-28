@@ -1,0 +1,7 @@
+[toolchain]
+# Pinned to a nightly that still supports `-Z emscripten-wasm-eh` (removed from
+# later nightlies, see godot-rust/gdext#438). Our rust/.cargo/config.toml relies
+# on that flag to disable wasm exception handling for Godot compatibility.
+channel = "nightly-2026-04-01"
+targets = ["wasm32-unknown-emscripten"]
+components = ["rust-src"]
