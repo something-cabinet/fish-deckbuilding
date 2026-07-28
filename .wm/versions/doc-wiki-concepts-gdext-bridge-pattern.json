@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:concepts:gdext-bridge-pattern",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-28T11:22:01.055Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\ntitle: Concept: gdext Bridge Pattern — Thin Scene Layer\ntype: concept\nid: wiki:concepts:gdext-bridge-pattern\ntags: [concept, godot, rust, architecture, bridge]\n---\n\n## Problem\nHow to organize Rust code that needs to call Godot APIs while keeping game logic pure and testable.\n\n## Solution\nSeparate into three layers:\n\n```text\ncore/           # Pure Rust — no godot dependency, tested with cargo test\n  grid/         #   Grid domain: types, state, BFS\n  combat/       #   Combat domain: attack resolution\n  battle/       #   Battle domain: turn engine, AI, state machine\n\nbridge/         # gdext classes — thin Godot integration\n  battle_scene.rs  # Inherits Node2D, handles input/sync, calls core\n```\n\nThe bridge layer:\n- Inherits Godot node types via `#[derive(GodotClass)]`\n- Handles all Godot API calls (creating nodes, signals, tweens)\n- NEVER contains game logic — delegates to core\n- Syncs via read-compute-apply cycle (read state, compute via core, apply to scene tree)\n\n## gdext Key Patterns\n- `ColorRect::new_alloc()` creates new nodes\n- `StyleBoxFlat::new_gd()` creates resource objects (not `new_alloc()`)\n- `create_tween()` returns `Option<Gd<Tween>>` — unwrap carefully\n- `get_node_as::<T>(path)` returns `Gd<T>` directly (panics if not found)\n- `try_cast::<T>()` returns `Result<Gd<T>, Gd<InputEvent>>` (not Option)\n- `tween_property(&node, \"scale\", &Variant, duration)` takes `&Gd<Node2D>`\n- `#[derive(GodotClass)] #[class(base=Node2D)]` + `#[godot_api] impl INode2D` is the standard class pattern\n- `#[func]` on methods makes them callable from Godot signals\n\n## Related\n- @wiki/specs:godot-battle-scaffold\n- @wiki/decisions:godot-rust-gdext-pivot",
+          "new_value": "## Problem\nHow to organize Rust code that needs to call Godot APIs while keeping game logic pure and testable.\n\n## Solution\nSeparate into three layers:\n\n```text\ncore/           Pure Rust — tested with cargo test\n  grid/         Grid domain: types, state, BFS\n  combat/       Combat domain: attack resolution\n  battle/       Battle domain: turn engine, AI, state machine\n\nbridge/         gdext classes — thin Godot integration\n  battle_scene.rs  Inherits Node2D, handles input/sync, calls core\n```\n\nThe bridge layer:\n- Inherits Godot node types via `#[derive(GodotClass)]`\n- Handles all Godot API calls (creating nodes, signals, tweens)\n- NEVER contains game logic — delegates to core\n\n## gdext Key Patterns\n\n### Object creation\n- `ColorRect::new_alloc()` creates new visual nodes\n- `StyleBoxFlat::new_gd()` creates resource objects (not `new_alloc()`)\n\n### Scene tree access\n- `get_node_as::<T>(path)` returns `Gd<T>` directly (panics on type mismatch — use correct type: `CanvasLayer` not `Node2D`)\n- `try_cast::<T>()` returns `Result<Gd<T>, Gd<InputEvent>>`\n\n### Tweens (godot 0.5.4)\n- `create_tween()` returns `Gd<Tween>` directly (not `Option<Gd<Tween>>` as in 0.2)\n- Create tween AFTER node is added to scene tree, or it returns null\n- `tween_property(&node, \"scale\", &variant, duration)` takes `&Gd<Node2D>`\n\n### Signals (godot 0.5.4)\n- Built-in nodes expose typed signals via `Gd<T>::signals()`\n- `connect_other(&target_gd, Target::handler)` for handler on different object\n- String-based `.connect(\"signal\", &callable)` is the old pattern — use typed signals when available\n\n### Class registration\n- `#[derive(GodotClass)] #[class(base=Node2D)]` + `#[godot_api] impl INode2D`\n- `#[func]` exposes methods to Godot signals\n- `#[signal]` declares custom signals\n- `unsafe impl ExtensionLibrary` required for entry point\n\n## Related\n- @wiki/specs:godot-battle-scaffold\n- @wiki/decisions:godot-rust-gdext-pivot\n- @wiki/patterns:comment-to-function-extraction\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}
