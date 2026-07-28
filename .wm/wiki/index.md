@@ -76,6 +76,7 @@ type: reference
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
+- [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
@@ -103,6 +104,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 76
+- **Nodes:** 77
 - **Edges:** 90
 
