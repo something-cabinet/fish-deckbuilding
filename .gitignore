@@ -18,5 +18,8 @@ godot/.godot/
 *.slim
 wm-cli
 
+# Build tools
+emsdk/
+
 # Playtest screenshots
 playtest-*.png
