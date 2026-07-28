@@ -19,6 +19,7 @@ type: reference
 - [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
 - [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
+- [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
@@ -32,6 +33,7 @@ type: reference
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
 - [gdext bridge pattern](wiki/concepts/gdext-bridge-pattern.md) — *draft*
+- [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
 - [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
 
@@ -79,6 +81,7 @@ type: reference
 - [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
+- [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
 - [CI Warning Cleanup](wiki/specs/ci-warning-cleanup.md) — *approved*
@@ -104,6 +107,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 77
+- **Nodes:** 80
 - **Edges:** 90
 
