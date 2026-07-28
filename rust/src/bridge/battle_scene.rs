@@ -10,7 +10,7 @@ use godot::prelude::*;
 use crate::core::{
     battle::{self as battle_engine, BattleResult, BattleState, Phase},
     constants, grid::movement as grid_movement,
-    grid::Faction,
+    grid::{Faction, GridUnit},
 };
 
 fn chebyshev_adjacent(a: (i32, i32), b: (i32, i32)) -> bool {
@@ -175,6 +175,14 @@ impl BattleScene {
         ui.add_child(&crystals);
     }
 
+    fn sync_mana_crystals(&self, state: &BattleState) {
+        for i in 0..constants::MAX_MANA {
+            let mut crystal = self.base().get_node_as::<Panel>(&format!("UI/ManaCrystals/Crystal_{}", i));
+            let style = Self::mana_crystal_style(i < state.mana);
+            crystal.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
+        }
+    }
+
     fn mana_crystal_style(filled: bool) -> Gd<StyleBoxFlat> {
         let mut style = StyleBoxFlat::new_gd();
         style.set_bg_color(if filled {
@@ -216,82 +224,56 @@ impl BattleScene {
         }
 
         for (&pos, unit) in &state.grid.units {
-            if !unit.alive {
-                continue;
-            }
-            let mut unit_root = Node2D::new_alloc();
-            let px = constants::GRID_ORIGIN_X + pos.0 * constants::TILE_SIZE + 40;
-            let py = constants::GRID_ORIGIN_Y + pos.1 * constants::TILE_SIZE + 40;
-            unit_root.set_position(Vector2::new(px as f32, py as f32));
-            unit_root.set_name(&format!("Unit_{}_{}", pos.0, pos.1));
-
-            let mut shadow = Self::rounded_panel(
-                rgba(0x0b, 0x1a, 0x24, 0.55),
-                Vector2::new(60.0, 60.0),
-                12,
-                0,
-                rgba(0, 0, 0, 0.0),
-            );
-            shadow.set_position(Vector2::new(-26.0, -24.0));
-            unit_root.add_child(&shadow);
-
-            let can_act = unit.faction == Faction::Hero
-                && state.phase == Phase::PlayerTurn
-                && !unit.has_moved;
-            let mut glow = Self::rounded_panel(
-                rgba(0, 0, 0, 0.0),
-                Vector2::new(68.0, 68.0),
-                34,
-                4,
-                match unit.faction {
-                    Faction::Hero => rgb(0x7f, 0xff, 0xe6),
-                    Faction::Enemy => rgb(0xff, 0x6b, 0x6b),
-                },
-            );
-            glow.set_position(Vector2::new(-34.0, -34.0));
-            glow.set_pivot_offset(Vector2::new(34.0, 34.0));
-            glow.set_name("GlowRing");
-            if can_act {
-                Self::attach_pulse_tween(&mut glow);
-            } else {
-                glow.set_modulate(rgba(0xff, 0xff, 0xff, 0.0));
-            }
-            unit_root.add_child(&glow);
-
-            let body_color = match unit.faction {
-                Faction::Hero => rgb(0x4f, 0xd1, 0xc5),
-                Faction::Enemy => rgb(0xc9, 0x4c, 0x4c),
-            };
-            let border_color = match unit.faction {
-                Faction::Hero => rgb(0x2a, 0x8a, 0x82),
-                Faction::Enemy => rgb(0x8b, 0x2e, 0x2e),
-            };
-            let mut body =
-                Self::rounded_panel(body_color, Vector2::new(56.0, 56.0), 12, 2, border_color);
-            body.set_position(Vector2::new(-28.0, -28.0));
-            body.set_name("Body");
-            if unit.has_moved || unit.has_attacked {
-                body.set_modulate(rgba(0xff, 0xff, 0xff, 0.75));
-            }
-            unit_root.add_child(&body);
-
-            let mut eye = ColorRect::new_alloc();
-            eye.set_size(Vector2::new(8.0, 8.0));
-            eye.set_color(rgb(0xff, 0xff, 0xff));
-            eye.set_position(Vector2::new(-16.0, -12.0));
-            eye.set_name("Eye");
-            unit_root.add_child(&eye);
-
-            let mut hp_bar = Self::hp_bar(unit.hp, unit.max_hp);
-            hp_bar.set_position(Vector2::new(-28.0, -42.0));
-            hp_bar.set_name("HpBar");
-            unit_root.add_child(&hp_bar);
-
+            if !unit.alive { continue; }
+            let mut unit_root = self.build_unit_root(pos, unit, state);
             units_node.add_child(&unit_root);
             unit_root.set_scale(Vector2::new(0.0, 0.0));
             let mut tween = unit_root.create_tween();
             tween.tween_property(&unit_root, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.25);
         }
+    }
+
+    fn build_unit_root(&self, pos: (i32, i32), unit: &GridUnit, state: &BattleState) -> Gd<Node2D> {
+        let mut root = Node2D::new_alloc();
+        let px = constants::GRID_ORIGIN_X + pos.0 * constants::TILE_SIZE + 40;
+        let py = constants::GRID_ORIGIN_Y + pos.1 * constants::TILE_SIZE + 40;
+        root.set_position(Vector2::new(px as f32, py as f32));
+        root.set_name(&format!("Unit_{}_{}", pos.0, pos.1));
+
+        let mut shadow = Self::rounded_panel(rgba(0x0b, 0x1a, 0x24, 0.55), Vector2::new(60.0, 60.0), 12, 0, rgba(0, 0, 0, 0.0));
+        shadow.set_position(Vector2::new(-26.0, -24.0));
+        root.add_child(&shadow);
+
+        let can_act = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && !unit.has_moved;
+        let glow_color = match unit.faction { Faction::Hero => rgb(0x7f, 0xff, 0xe6), Faction::Enemy => rgb(0xff, 0x6b, 0x6b) };
+        let mut glow = Self::rounded_panel(rgba(0, 0, 0, 0.0), Vector2::new(68.0, 68.0), 34, 4, glow_color);
+        glow.set_position(Vector2::new(-34.0, -34.0));
+        glow.set_pivot_offset(Vector2::new(34.0, 34.0));
+        glow.set_name("GlowRing");
+        if can_act { Self::attach_pulse_tween(&mut glow); } else { glow.set_modulate(rgba(0xff, 0xff, 0xff, 0.0)); }
+        root.add_child(&glow);
+
+        let body_color = match unit.faction { Faction::Hero => rgb(0x4f, 0xd1, 0xc5), Faction::Enemy => rgb(0xc9, 0x4c, 0x4c) };
+        let border_color = match unit.faction { Faction::Hero => rgb(0x2a, 0x8a, 0x82), Faction::Enemy => rgb(0x8b, 0x2e, 0x2e) };
+        let mut body = Self::rounded_panel(body_color, Vector2::new(56.0, 56.0), 12, 2, border_color);
+        body.set_position(Vector2::new(-28.0, -28.0));
+        body.set_name("Body");
+        if unit.has_moved || unit.has_attacked { body.set_modulate(rgba(0xff, 0xff, 0xff, 0.75)); }
+        root.add_child(&body);
+
+        let mut eye = ColorRect::new_alloc();
+        eye.set_size(Vector2::new(8.0, 8.0));
+        eye.set_color(rgb(0xff, 0xff, 0xff));
+        eye.set_position(Vector2::new(-16.0, -12.0));
+        eye.set_name("Eye");
+        root.add_child(&eye);
+
+        let mut hp_bar = Self::hp_bar(unit.hp, unit.max_hp);
+        hp_bar.set_position(Vector2::new(-28.0, -42.0));
+        hp_bar.set_name("HpBar");
+        root.add_child(&hp_bar);
+
+        root
     }
 
     fn show_attack_highlight(&self, selected_pos: (i32, i32)) {
@@ -333,13 +315,7 @@ impl BattleScene {
         ml.set_text(&format!("{} / {}", state.mana, state.max_mana));
         ml.set_modulate(rgb(0xd6, 0xe8, 0xef));
 
-        for i in 0..constants::MAX_MANA {
-            let crystal_name = format!("UI/ManaCrystals/Crystal_{}", i);
-            let mut crystal = self.base().get_node_as::<Panel>(&crystal_name);
-            let filled = i < state.mana;
-            let style = Self::mana_crystal_style(filled);
-            crystal.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
-        }
+        self.sync_mana_crystals(state);
 
         let mut tl = self.base().get_node_as::<Label>("UI/TurnLabel");
         tl.set_text(&match state.phase {
