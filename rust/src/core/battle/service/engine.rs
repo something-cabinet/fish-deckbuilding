@@ -71,10 +71,8 @@ pub fn execute_enemy_turn(state: &mut BattleState) {
 }
 
 fn resolve_ai_attack(state: &mut BattleState, enemy_pos: (i32, i32), hero_pos: (i32, i32)) -> bool {
-    let enemy = state.grid.unit_at(enemy_pos);
-    let hero = state.grid.unit_at(hero_pos);
-    if enemy.is_none() || hero.is_none() { return false; }
-    let enemy = enemy.unwrap(); let hero = hero.unwrap();
+    let Some(enemy) = state.grid.unit_at(enemy_pos) else { return false; };
+    let Some(hero) = state.grid.unit_at(hero_pos) else { return false; };
     if let Ok(result) = combat::base_attack(enemy, hero, enemy_pos, hero_pos) {
         if let Some(u) = state.grid.unit_at_mut(hero_pos) { u.take_damage(result.damage_dealt); }
         if result.counter_damage > 0 { if let Some(u) = state.grid.unit_at_mut(enemy_pos) { u.take_damage(result.counter_damage); } }
