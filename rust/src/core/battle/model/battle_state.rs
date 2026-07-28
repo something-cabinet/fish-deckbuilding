@@ -31,7 +31,7 @@ impl BattleState {
     pub fn reset_turn(&mut self) {
         self.turn_number += 1;
         self.mana = self.max_mana;
-        for (_, unit) in self.grid.units.iter_mut() {
+        for unit in self.grid.units.values_mut() {
             if unit.alive {
                 unit.reset_turn();
             }
@@ -91,12 +91,12 @@ mod tests {
     #[test]
     fn reset_turn_clears_unit_flags() {
         let mut s = BattleState::new();
-        for (_, unit) in s.grid.units.iter_mut() {
+        for unit in s.grid.units.values_mut() {
             unit.has_moved = true;
             unit.has_attacked = true;
         }
         s.reset_turn();
-        for (_, unit) in s.grid.units.iter_mut() {
+        for unit in s.grid.units.values_mut() {
             assert!(!unit.has_moved);
             assert!(!unit.has_attacked);
         }
