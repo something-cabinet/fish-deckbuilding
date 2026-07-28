@@ -1,47 +1,69 @@
-# Svelte + TS + Vite
+# Fish Tactical RPG — Godot + Rust
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Guppy the Debtor fights through an underwater city in this tactical RPG. Built with Godot 4 and godot-rust (gdext).
 
-## Recommended IDE Setup
+## Prerequisites
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- Rust (nightly): `rustup toolchain install nightly`
+- Godot 4.3+: [godotengine.org](https://godotengine.org/download/)
+- Web export requires Emscripten: `emsdk install 3.1.74` ([emsdk](https://github.com/emscripten-core/emsdk))
+- Web export requires wasm32 target:
+  ```bash
+  rustup component add rust-src --toolchain nightly
+  rustup target add wasm32-unknown-emscripten --toolchain nightly
+  ```
 
-## Need an official Svelte framework?
+## Build & Run
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### Native (macOS/Linux/Windows)
 
-## Technical considerations
-
-**Why use this over SvelteKit?**
-
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+cd rust
+cargo build
 ```
+
+Open `godot/project.godot` in Godot 4 editor. The extension compiles to `rust/target/debug/libgodot_battle_scaffold.dylib` (or `.so`/`.dll`).
+
+### Web (WASM)
+
+```bash
+source ./emsdk/emsdk_env.sh
+cd rust
+./build-web.sh
+```
+
+Produces `.wasm` and `.threads.wasm` in `rust/target/wasm32-unknown-emscripten/debug/`.
+
+### Godot Editor
+
+Open `godot/` as a Godot 4 project. The editor loads the compiled extension automatically. Export via `Project > Export...` with Extensions Support enabled.
+
+## Tests
+
+```bash
+cd rust
+cargo test
+```
+
+52 tests across 3 domains: grid (BFS movement), combat (attack resolution), battle (turn orchestration + enemy AI).
+
+## Project Structure
+
+```
+godot/           Godot project files (scenes, config)
+rust/
+  src/core/      Pure Rust game logic (no godot deps)
+    grid/        Grid domain — units, state, BFS
+    combat/      Combat domain — attack resolution
+    battle/      Battle domain — state machine, engine, AI
+  src/bridge/    gdext classes — thin Godot integration
+  Cargo.toml     Rust dependencies
+```
+
+## Architecture
+
+```
+core/ (pure Rust, cargo test) → bridge/ (gdext) → Godot scenes
+```
+
+Core is tested with `cargo test`. Bridge layer is thin — no game logic, only scene tree updates and input forwarding.
