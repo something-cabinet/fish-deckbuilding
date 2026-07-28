@@ -1,0 +1,36 @@
+[package]
+name = "godot-battle-scaffold"
+description = "Godot 4 tactical RPG battle prototype using gdext Rust bindings"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/something-cabinet/fish-deckbuilding"
+readme = "README.md"
+keywords = ["godot", "gdext", "tactical-rpg", "game"]
+categories = ["game-engines", "wasm"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = { version = "0.5", features = ["experimental-wasm", "lazy-function-tables"] }
+
+[features]
+nothreads = ["godot/experimental-wasm-nothreads"]
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 2
+
+[lints.clippy]
+style = "warn"
+correctness = "warn"
+suspicious = "warn"
+complexity = "warn"
+perf = "warn"
+cargo = "warn"
+pedantic = { level = "allow", priority = -1 }
+nursery = { level = "allow", priority = -1 }

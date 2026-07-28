@@ -1,10 +1,7 @@
 ---
 title: Critical Patterns
 type: core
-tags:
-- critical
-relates_to:
-  - {type: relates_to, target: wiki:patterns:svelte-derived-snapshot-before-clearing}
+tags: [critical]
 ---
 
 ---
@@ -75,42 +72,14 @@ Prisma + SQLite with better-sqlite3 imports Node native modules that cannot comp
 
 ---
 
-## 2026-07-28 — Overlay `pointer-events` Rules Can Tie in Specificity and Silently Swap Winners
+## 2026-07-28 — GDExtension Scene Node Type Must Match the Custom Class, Not a GDScript Wrapper
 
 **Category:** failure
-**Source:** @wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie
-**Tags:** [css, svelte, pointer-events]
+**Source:** @wiki/concepts:gdext-scene-node-type-mismatch
+**Tags:** [godot, gdext, scene-setup]
 
-`App.svelte`'s shared `.ui-overlay > :global(*) { pointer-events: auto; }` ties in CSS specificity `(0,2,0)` with a per-screen `.map-overlay { pointer-events: none; }` (both two classes, once the Svelte scope-hash class is counted on each side). Ties resolve by cascade order, and the shared rule happened to load later — silently winning and making the entire full-screen map overlay swallow every click meant for the Excalibur canvas beneath it. No error, no warning; `getComputedStyle` was the only way to see it.
+A `.tscn` node using a Rust GodotClass must declare `type="<CustomClass>"` directly. Declaring `type="Node2D"` with a GDScript stub (`extends <CustomClass>`) attached via `script=` fails in Godot 4.7 with "Script inherits from native type 'X', so it can't be assigned to an object of type: 'Y'" — a script can only add behavior on top of a node's actual type, it can't narrow a built-in node into a registered subclass. The symptom is misleading: zero errors in the Output panel, extension loads fine, no class-name collisions — it only shows in Debugger > Errors when the scene actually runs (F5).
 
-**What to do differently:** Any screen root that needs `pointer-events: none` to let clicks fall through to a canvas/game layer, while being a direct child of a shared overlay container that force-sets `auto` on `> *`, needs `!important` (or deliberately higher specificity) to guarantee it wins — don't assume "my rule looks more specific" without literally counting classes on both sides. When clicks silently no-op, verify with `getComputedStyle(el).pointerEvents` or `document.elementFromPoint(x, y)` in-browser rather than trusting the CSS as written.
+**What to do differently:** When a GDExtension class provides all the node's behavior via `#[godot_api] impl INode2D` (or similar), give it its own `.tscn` node with `type="<CustomClassName>"` and skip the GDScript wrapper entirely. If this error appears, check the `.tscn` node's `type=` before suspecting the extension build, dll path, or editor cache.
 
-**Full entry:** @wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie
-
----
-
-## 2026-07-28 — Sync Excalibur Scene State on Screen Activation, Not Just Domain Events
-
-**Category:** pattern
-**Source:** @wiki/patterns/excalibur-scene-state-sync-on-activation
-**Tags:** [excalibur, svelte, bridge]
-
-`IslandScene` keeps its own denormalized copy of map state (`unlockedZoneIds`, etc.) to avoid a circular import with the Svelte state layer, synced via `bridge.syncFromState()`. That sync was wired only to in-scene domain events (`map:zoneEntered`, `map:zoneCompleted`), never to the screen transition that first activates the scene — so the scene rendered its hardcoded constructor defaults until the player did the one thing they couldn't do yet (click a locked-looking node). A chicken-and-egg deadlock, not a crash, so it was easy to misdiagnose as "state wasn't unlocked" rather than "state wasn't synced."
-
-**What to do differently:** Any time an engine-side scene keeps a denormalized copy of app state and can be revisited after that state changed while inactive, push a fresh sync on every activation (`engine.goToScene(x).then(syncFn)`), not only on domain events fired from within the scene. `goToScene` is async — sync must be chained off its resolution, not called immediately after, or it fires before the scene's own `initialized` guard flips and gets silently dropped.
-
-**Full entry:** @wiki/patterns/excalibur-scene-state-sync-on-activation
-
----
-
-## 2026-07-28 — Snapshot a `$derived` Value Before Calling Anything That Mutates Its Dependency
-
-**Category:** failure
-**Source:** @wiki/patterns/svelte-derived-snapshot-before-clearing
-**Tags:** [svelte, runes]
-
-A Svelte 5 `$derived` rune re-evaluates synchronously the instant its dependency is mutated — even mid-function, before the next statement runs. `pendingAction.zoneId` read two lines after `clearPendingAction()` (which nulls the underlying state) crashed with `Cannot read properties of null`, because `pendingAction` had already recomputed to `null` by the time that line ran, despite the guard clause above it having passed.
-
-**What to do differently:** In any handler that reads a `$derived` value, calls something that mutates its dependency, and needs the value again afterward — snapshot it into a local `const` right after the guard, before the mutating call. This bug is invisible at compile time and looks identical to reading a normal local variable, so it only surfaces at runtime.
-
-**Full entry:** @wiki/patterns/svelte-derived-snapshot-before-clearing
+**Full entry:** @wiki/concepts/gdext-scene-node-type-mismatch

@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:rules:no-comments-in-code",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-28T08:22:24.591Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "## Rule: No Comments in Project Code\n\nComments rot, drift from code, and create false confidence. Named functions, descriptive variables, and self-documenting patterns are refactor-safe and always up to date.\n\n### Good\n- Named functions: `fn validate_transition() { ... }` instead of `// validate state transition`\n- Descriptive variables: `let remaining_budget = ...` instead of `let r = ... // remaining budget`\n- Type-driven design: use enums and Result types that document themselves\n\n### Avoid\n```rust\n// ❌ Comment explaining what code does\n// increment counter\ncounter += 1;\n\n// check if valid\nif x > 0 { ... }\n\n// ❌ Comment explaining why — extract to named function instead\n// retry with backoff\nfor i in 0..3 { ... }\n```\n\n### Allowed\n- Doc comments (`///`) on public API — these are documentation, not implementation comments\n- `#[allow(..., reason = \"...\")]` reasons — these are lint policy, not code comments\n- Test descriptions in `#[test]` functions\n- Module-level doc comments explaining architecture decisions\n- Comments that capture *why* a non-obvious decision was made, when the code alone can't express it\n\n### Enforcement\n- Code review must flag implementation comments\n- Extract to named functions rather than commenting",
+          "new_value": "## Rule: No Comments in Code — Zero. None.\n\nNo comments. Not implementation comments. Not doc comments (`///`). Not inline annotations. Zero.\n\nIf code needs a comment to be understood, it's badly named or too complex. Fix the naming or split the function.\n\n### What to do instead\n- **Choose descriptive names**: `remaining_move_budget` not `r // remaining budget`\n- **Extract named functions**: `fn validate_transition() { ... }` not `// validate state transition`\n- **Split large functions**: if a function needs a comment to explain a section, that section belongs in its own function with a descriptive name\n- **Use types that document themselves**: `Result<(), AttackError>` says more than `// returns error if attack fails`\n\n### Examples\n\n```rust\n// ❌ BAD — comment explaining what\n// increment counter\ncounter += 1;\n\n// ❌ BAD — comment explaining why, extract instead\n// retry with backoff\nfor i in 0..3 { ... }\n\n// ❌ BAD — doc comment that should be a function name\n/// Validate the state transition\nfn validate() { ... }\n\n// ✅ GOOD — name says it all\nfn validate_transition() -> Result<(), TransitionError> { ... }\n```\n\n### Enforcement\n- A comment in code = a code smell. Flag in review.\n- If you're tempted to write `/// Explanation`, extract a function instead.\n- Exception: Zero. No exceptions.\n\n### Rationale\nComments rot, drift from code, and create false confidence. A function with `validate_transition` as a name is always up to date, always correct, and never lies. A `/// Validates` doc comment can become wrong when the function changes and nobody updates the comment. Named functions also enable unit tests, search, and reuse.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

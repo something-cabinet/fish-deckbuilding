@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://cybafp41gg0xs"]
+
+[node name="BattleScene" type="BattleScene" unique_id=1079967444]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1052448833]
+anchor_mode = 0
+
+[node name="Background" type="ColorRect" parent="." unique_id=1155503957]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.043, 0.102, 0.141, 1)
+
+[node name="BattleGrid" type="Node2D" parent="." unique_id=2052213180]
+
+[node name="Tiles" type="Node2D" parent="BattleGrid" unique_id=2087784957]
+
+[node name="MovementOverlay" type="Node2D" parent="BattleGrid" unique_id=631699602]
+
+[node name="Units" type="Node2D" parent="." unique_id=400325636]
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1473622508]
+
+[node name="ManaLabel" type="Label" parent="UI" unique_id=1050416353]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 21.0
+offset_bottom = 43.0
+text = "Mana: 3/3"
+
+[node name="TurnLabel" type="Label" parent="UI" unique_id=1670566608]
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 21.0
+offset_bottom = 73.0
+text = "Turn 1"
+
+[node name="EndTurnButton" type="Button" parent="UI" unique_id=1008997496]
+offset_left = 1100.0
+offset_top = 20.0
+offset_right = 1260.0
+offset_bottom = 60.0
+text = "End Turn"
+
+[node name="ResultBanner" type="Panel" parent="UI" unique_id=1348621194]
+visible = false
+offset_left = 440.0
+offset_top = 260.0
+offset_right = 840.0
+offset_bottom = 460.0
+
+[node name="RestartButton" type="Button" parent="UI/ResultBanner" unique_id=1473823202]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 100.0
+offset_right = 280.0
+offset_bottom = 140.0
+text = "Restart"

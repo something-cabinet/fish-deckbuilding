@@ -1,0 +1,36 @@
+{
+  "entity_id": "wiki:rules:rust-anti-patterns",
+  "current_version": 2,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-28T09:10:23.243Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "## Rule: Rust Anti-Patterns — Beyond .clone()\n\nMinimize or eliminate the following patterns:\n\n### 1. No Bare `.unwrap()` and `.expect()` in Production\n- Use `?`, `.unwrap_or_else()`, `.ok_or_else()?` instead\n- Test code: acceptable where failure should panic\n- Config parsing at startup: `.expect(\"...\")` with descriptive message is acceptable\n\n### 2. Avoid `\"literal\".to_string()`\n- Use `&'static str` or `Cow<'static, str>` for static text\n- `.to_string()` is acceptable when building dynamic strings from parts\n\n### 3. Avoid Early `.collect::<Vec<_>>()` in Iterator Chains\n- Keep iterator chains lazy — `.collect()` only at final consumer site\n- Prefer `.fold()` over `.collect::<Vec<_>>().join()`\n\n### 4. Prefer `?` Over Panic-Prone Shortcuts\n- Every `.unwrap()` in production code should have a code review justification\n- The `?` operator is the default for `Result`/`Option` propagation\n\n### 5. No `unsafe` Unless Strictly Necessary\n- Our codebase target: ZERO `unsafe` blocks outside `unsafe impl ExtensionLibrary` (required by gdext macro)\n\n### Enforcement\n```bash\n# Find unwrap hotspots\nrg '\\.unwrap\\(\\)' rust/ -g '*.rs' -c\n# Find string literal to_string calls\nrg '\"[^\"]*\"\\.to_string\\(\\)' rust/ -g '*.rs'\n# Find unsafe blocks (should be zero outside gdext)\nrg 'unsafe\\s*(fn|impl|trait|static|\\{)' rust/ -g '*.rs'\n```",
+          "new_value": "## Rule: Rust Anti-Patterns — Beyond .clone()\n\nMinimize or eliminate the following patterns:\n\n### 1. No Bare `.unwrap()` and `.expect()` in Production\n- Use `?`, `.unwrap_or_else()`, `.ok_or_else()?` instead\n- Test code: acceptable where failure should panic\n- Config parsing at startup: `.expect(\"...\")` with descriptive message is acceptable\n- Use `?` over panic-prone shortcuts — the default for `Result`/`Option` propagation\n\n### 2. Avoid `\"literal\".to_string()` and `String::from(\"literal\")`\n- Use `&str` for static text\n- `.to_string()` is acceptable when building dynamic strings from parts\n\n### 3. Avoid Early `.collect::<Vec<_>>()` in Iterator Chains\n- Keep iterator chains lazy — `.collect()` only at final consumer site\n- Prefer `.fold()` over `.collect::<Vec<_>>().join()`\n\n### 4. Minimize Unnecessary Allocation (Box, Heap)\n- Use `enum` over `Box<dyn Trait>` for bounded variant sets\n- Avoid boxing or heap-allocating data that could live on the stack\n- No `unsafe` outside `unsafe impl ExtensionLibrary` (required by gdext macro)\n\n### Enforcement\n```bash\n# Find unwrap hotspots by file\nrg '\\.unwrap\\(\\)' rust/ -g '*.rs' -c\n# Find string literal to_string calls\nrg '\"[^\"]*\"\\.to_string\\(\\)' rust/ -g '*.rs'\n# Find unsafe blocks (should be zero outside gdext)\nrg 'unsafe\\s*(fn|impl|trait|static|\\{)' rust/ -g '*.rs'\n# Find early collects\nrg '\\.collect::<Vec' rust/ -g '*.rs'\n```\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-07-28T09:14:13.906Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "## Rule: Rust Anti-Patterns — Beyond .clone()\n\nMinimize or eliminate the following patterns:\n\n### 1. No Bare `.unwrap()` and `.expect()` in Production\n- Use `?`, `.unwrap_or_else()`, `.ok_or_else()?` instead\n- Test code: acceptable where failure should panic\n- Config parsing at startup: `.expect(\"...\")` with descriptive message is acceptable\n- Use `?` over panic-prone shortcuts — the default for `Result`/`Option` propagation\n\n### 2. Avoid `\"literal\".to_string()` and `String::from(\"literal\")`\n- Use `&str` for static text\n- `.to_string()` is acceptable when building dynamic strings from parts\n\n### 3. Avoid Early `.collect::<Vec<_>>()` in Iterator Chains\n- Keep iterator chains lazy — `.collect()` only at final consumer site\n- Prefer `.fold()` over `.collect::<Vec<_>>().join()`\n\n### 4. Minimize Unnecessary Allocation (Box, Heap)\n- Use `enum` over `Box<dyn Trait>` for bounded variant sets\n- Avoid boxing or heap-allocating data that could live on the stack\n- No `unsafe` outside `unsafe impl ExtensionLibrary` (required by gdext macro)\n\n### Enforcement\n```bash\n# Find unwrap hotspots by file\nrg '\\.unwrap\\(\\)' rust/ -g '*.rs' -c\n# Find string literal to_string calls\nrg '\"[^\"]*\"\\.to_string\\(\\)' rust/ -g '*.rs'\n# Find unsafe blocks (should be zero outside gdext)\nrg 'unsafe\\s*(fn|impl|trait|static|\\{)' rust/ -g '*.rs'\n# Find early collects\nrg '\\.collect::<Vec' rust/ -g '*.rs'\n```",
+          "new_value": "## Rule: Rust Anti-Patterns — Beyond .clone()\n\nMinimize or eliminate the following patterns:\n\n### 1. No Bare `.unwrap()` and `.expect()` in Production\n- Use `?`, `.unwrap_or_else()`, `.ok_or_else()?` instead\n- Test code: acceptable where failure should panic\n- Config parsing at startup: `.expect(\"...\")` with descriptive message is acceptable\n- Use `?` over panic-prone shortcuts — the default for `Result`/`Option` propagation\n\n### 2. No `.clone()` in Production Code\n- Clone indicates unnecessary allocation or ownership workaround\n- Prefer references (`&T`) over owned values where borrowing suffices\n- Test code: acceptable for test setup\n- Exception: `Gd<T>::clone()` for Godot node references (needed for signal wiring)\n\n### 3. Avoid `\"literal\".to_string()` and `String::from(\"literal\")`\n- Use `&str` for static text\n- `.to_string()` is acceptable when building dynamic strings from parts\n\n### 4. Avoid Early `.collect::<Vec<_>>()` in Iterator Chains\n- Keep iterator chains lazy — `.collect()` only at final consumer site\n- Prefer `.fold()` over `.collect::<Vec<_>>().join()`\n\n### 5. Minimize Unnecessary Allocation (Box, Heap)\n- Use `enum` over `Box<dyn Trait>` for bounded variant sets\n- Avoid boxing or heap-allocating data that could live on the stack\n\n### 6. No `unsafe` Unless Strictly Necessary\n- Our codebase target: ZERO `unsafe` blocks outside `unsafe impl ExtensionLibrary` (required by gdext macro)\n\n### Enforcement\n```bash\n# Find unwrap hotspots by file\nrg '\\.unwrap\\(\\)' rust/ -g '*.rs' -c\n# Find clone calls\nrg '\\.clone\\(\\)' rust/ -g '*.rs' -c\n# Find string literal to_string calls\nrg '\"[^\"]*\"\\.to_string\\(\\)' rust/ -g '*.rs'\n# Find unsafe blocks (should be zero outside gdext)\nrg 'unsafe\\s*(fn|impl|trait|static|\\{)' rust/ -g '*.rs'\n# Find early collects\nrg '\\.collect::<Vec' rust/ -g '*.rs'\n```\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

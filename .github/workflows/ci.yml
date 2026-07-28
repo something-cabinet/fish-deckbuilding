@@ -1,0 +1,16 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+          components: clippy
+      - run: cargo check --manifest-path rust/Cargo.toml
+      - run: cargo clippy --manifest-path rust/Cargo.toml -- -D warnings
+      - run: cargo test --manifest-path rust/Cargo.toml
