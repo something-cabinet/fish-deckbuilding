@@ -64,7 +64,7 @@
         class:selected={selectedIndex === i}
         class:top={i === 0}
         class:bottom={i === orderedCards.length - 1}
-        style="border-color: {card?.color ?? '#444'}"
+        style="border-color: {card?.color ?? 'var(--border-dim)'}"
         onclick={() => selectCard(i)}
       >
         <div class="order-position">
@@ -301,7 +301,7 @@
   }
 
   .confirm-btn:hover {
-    background: #f5c842;
+    background: var(--gold-light);
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(244, 196, 48, 0.3);
   }

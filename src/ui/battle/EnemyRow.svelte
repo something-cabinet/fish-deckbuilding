@@ -179,7 +179,7 @@
 
   .enemy-hp-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #e85d4e, #ff7a6b);
+    background: linear-gradient(90deg, var(--coral), var(--coral-light));
     border-radius: 3px;
     transition: width 0.2s ease;
   }
@@ -199,8 +199,8 @@
   }
 
   .stat.hp-stat {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
+    background: var(--hp-bar-bg);
+    color: var(--hp-bar);
   }
 
   .stat.max-hp-stat {
@@ -229,7 +229,7 @@
 
   .intent-badge.buff {
     background: rgba(168, 85, 247, 0.2);
-    color: #c084fc;
+    color: var(--stat-purple);
     border: 1px solid rgba(168, 85, 247, 0.3);
   }
 
@@ -241,7 +241,7 @@
 
   .intent-badge.defend {
     background: rgba(34, 197, 94, 0.2);
-    color: #4ade80;
+    color: var(--stat-def-light);
     border: 1px solid rgba(34, 197, 94, 0.3);
   }
 

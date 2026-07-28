@@ -14,8 +14,10 @@ type: reference
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
+- [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
+- [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
 
 ## cores
 
@@ -28,6 +30,8 @@ type: reference
 
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
+- [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
+- [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
@@ -42,12 +46,16 @@ type: reference
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
+- [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
+- [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 
 ## tasks
 
 - [Dynamic hand overlap for variable card count](wiki/tasks/dynamic-hand-overlap-for-variable-card-count.md) — *todo*
 - [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
+- [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
+- [Review and rename card types to thematic names](wiki/tasks/review-and-rename-card-types-to-thematic-names.md) — *todo*
 - [Deck/discard pile visualization](wiki/tasks/deckdiscard-pile-visualization.md) — *todo*
 - [Card visual states and hover interactions](wiki/tasks/card-visual-states-and-hover-interactions.md) — *todo*
 - [CSS theming system with custom properties](wiki/tasks/css-theming-system-with-custom-properties.md) — *todo*
@@ -56,6 +64,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 29
-- **Edges:** 56
+- **Nodes:** 37
+- **Edges:** 64
 

@@ -73,9 +73,6 @@
                 {/each}
               </div>
             {/if}
-            <div class="card-type" style="background: {card.color}">
-              {card.type}
-            </div>
             <div class="card-desc">{card.description}</div>
           </button>
         {/if}
@@ -222,12 +219,12 @@
 
   .stat.atk {
     background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
+    color: var(--stat-atk);
   }
 
   .stat.def {
     background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    color: var(--stat-def);
   }
 
   .stat.coin {
@@ -250,7 +247,7 @@
     padding: 0.1rem 0.3rem;
     border-radius: 2px;
     background: rgba(168, 85, 247, 0.2);
-    color: #c084fc;
+    color: var(--stat-purple);
     border: 1px solid rgba(168, 85, 247, 0.3);
   }
 
@@ -265,16 +262,6 @@
     font-size: 0.6rem;
     font-weight: 600;
     color: var(--gold);
-  }
-
-  .card-type {
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--parchment);
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
   }
 
   .card-desc {

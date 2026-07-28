@@ -1,7 +1,7 @@
 export interface CardDef {
   id: string;
   name: string;
-  type: 'attack' | 'defense' | 'equipment' | 'recruit';
+  type: 'action' | 'gear' | 'ally';
   cost: number;             // Coins needed to play
   coinValue: 1 | 2 | 3;    // Coins gained when selling
   attack: number;           // Damage when used offensively

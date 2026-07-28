@@ -13,7 +13,7 @@ const baseContext = {
 function makeCard(overrides: Partial<CardDef> & { id: string }): CardDef {
   return {
     name: 'Test Card',
-    type: 'attack' as const,
+    type: 'action' as const,
     cost: 1,
     coinValue: 1,
     attack: 3,

@@ -31,6 +31,57 @@
     gameState.combat.hand;
   });
 
+  // ─── Dynamic overlap ───
+  const CARD_WIDTH = 140;
+  let containerWidth = $state(800);
+  let hoveredIndex = $state<number | null>(null);
+  let cardsContainer = $state<HTMLDivElement | null>(null);
+
+  function calculateOverlap(cardCount: number): number {
+    if (cardCount <= 1) return 0;
+    const totalCardWidth = CARD_WIDTH * cardCount;
+    if (totalCardWidth <= containerWidth) return 0;
+    return Math.max(-80, (containerWidth - totalCardWidth) / (cardCount - 1));
+  }
+
+  let overlap = $derived(calculateOverlap(gameState.combat.hand.length));
+
+  function getCardMargin(index: number): string {
+    if (index === 0) return '0';
+    if (hoveredIndex === null) return `${overlap}px`;
+    // When hovering, spread cards slightly and reset hovered card margin
+    const spreadOverlap = Math.min(overlap * 0.5, -4);
+    if (hoveredIndex === index) return '4px';
+    return `${spreadOverlap}px`;
+  }
+
+  // Resize observer
+  $effect(() => {
+    if (!cardsContainer) return;
+    const updateWidth = () => {
+      if (cardsContainer) {
+        containerWidth = cardsContainer.clientWidth;
+      }
+    };
+    updateWidth();
+
+    let rafId: number;
+    const onResize = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateWidth);
+    };
+
+    const ro = new ResizeObserver(onResize);
+    ro.observe(cardsContainer);
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(rafId);
+    };
+  });
+
   function handleCardClick(cardId: string, index: number) {
     if (phase === 'play') {
       // If card has attack, select it for targeting
@@ -54,17 +105,26 @@
     {/if}
   </div>
 
-  <div class="hand-cards">
+  <div class="hand-cards" bind:this={cardsContainer}>
     {#each gameState.combat.hand as cardId, i}
       {@const card = getCard(cardId)}
       {#if card}
+        {@const playable = canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)}
         <div
           class="hand-card"
           class:selected={selectedIndex === i}
-          class:is-selectable={phase === 'play' && card.attack > 0 && canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)}
-          style="border-color: {selectedIndex === i ? 'var(--gold)' : card.color}"
-          onmouseenter={(e) => onHover(cardId, e)}
-          onmouseleave={onLeave}
+          class:is-selectable={phase === 'play' && card.attack > 0 && playable}
+          class:unplayable={phase === 'play' && card.attack > 0 && !playable}
+          class:hovered={hoveredIndex === i}
+          style="border-color: {selectedIndex === i ? 'var(--gold)' : card.color}; margin-left: {getCardMargin(i)}"
+          onmouseenter={(e) => {
+            hoveredIndex = i;
+            onHover(cardId, e);
+          }}
+          onmouseleave={() => {
+            hoveredIndex = null;
+            onLeave();
+          }}
           role="button"
           tabindex="0"
           onclick={() => handleCardClick(cardId, i)}
@@ -76,10 +136,6 @@
             <span class="card-stat def-stat" title="Defense">{card.defense}</span>
             <span class="card-stat coin-stat" title="Coin Value">{card.coinValue}</span>
           </div>
-          <div class="card-type-label" style="background: {card.color}">
-            {card.type}
-          </div>
-
           {#if selectedIndex === i}
             <div class="selected-badge">SELECTED</div>
           {/if}
@@ -100,12 +156,12 @@
               {#if card.attack > 0}
                 <button
                   class="card-btn play-btn"
-                  class:cant-afford={!canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)}
-                  disabled={!canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)}
+                  class:cant-afford={!playable}
+                  disabled={!playable}
                   title="Play as attack ({card.cost} coin{card.cost !== 1 ? 's' : ''})"
                   onclick={(e) => {
                     e.stopPropagation();
-                    if (canPlayCard(card, gameState.combat.coins, gameState.run.creditLimit)) {
+                    if (playable) {
                       onPlayCard?.(i);
                     }
                   }}
@@ -176,9 +232,11 @@
 
   .hand-cards {
     display: flex;
-    gap: 0.5rem;
+    gap: 0;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0.5rem 0;
   }
 
   .hand-card {
@@ -192,26 +250,39 @@
     align-items: center;
     gap: 0.3rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, margin-left 0.3s ease, filter 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     position: relative;
+    flex-shrink: 0;
   }
 
-  .hand-card:hover {
-    transform: translateY(-6px);
+  .hand-card:hover,
+  .hand-card.hovered {
+    transform: translateY(-24px) scale(1.05);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     filter: brightness(1.1);
+    z-index: 100;
   }
 
   .hand-card.selected {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 20px rgba(244, 196, 48, 0.3);
+    outline: 2px solid var(--gold);
+    box-shadow: 0 0 16px var(--gold);
+    transform: translateY(-12px);
     background: rgba(244, 196, 48, 0.06);
-    transform: translateY(-6px);
   }
 
   .hand-card.is-selectable {
     cursor: pointer;
+  }
+
+  .hand-card.unplayable {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .hand-card.unplayable:hover {
+    transform: translateY(-6px) scale(1.02);
+    opacity: 0.6;
   }
 
   .selected-badge {
@@ -268,27 +339,17 @@
 
   .card-stat.atk-stat {
     background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
+    color: var(--stat-atk);
   }
 
   .card-stat.def-stat {
     background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
+    color: var(--stat-def);
   }
 
   .card-stat.coin-stat {
     background: rgba(244, 196, 48, 0.15);
     color: var(--gold);
-  }
-
-  .card-type-label {
-    font-size: 0.5rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--parchment);
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
   }
 
   .card-actions {
@@ -322,7 +383,7 @@
 
   .sell-btn {
     background: rgba(168, 85, 247, 0.3);
-    color: #c084fc;
+    color: var(--stat-purple);
   }
 
   .sell-btn:hover:not(:disabled) {
@@ -331,7 +392,7 @@
 
   .play-btn {
     background: rgba(232, 93, 78, 0.3);
-    color: #ff7a6b;
+    color: var(--coral-light);
   }
 
   .play-btn:hover:not(:disabled) {
@@ -344,7 +405,7 @@
 
   .block-btn {
     background: rgba(34, 197, 94, 0.3);
-    color: #4ade80;
+    color: var(--stat-def-light);
   }
 
   .block-btn:hover:not(:disabled) {

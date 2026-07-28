@@ -32,17 +32,17 @@ describe('CoinSystem', () => {
 
   describe('canPlayCard', () => {
     it('should return true if coins are sufficient', () => {
-      const card = { cost: 1, id: 'test', name: 'test', type: 'attack' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
+      const card = { cost: 1, id: 'test', name: 'test', type: 'action' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
       expect(canPlayCard(card, 2, 5)).toBe(true);
     });
 
     it('should return true if credit covers the cost', () => {
-      const card = { cost: 2, id: 'test', name: 'test', type: 'attack' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
+      const card = { cost: 2, id: 'test', name: 'test', type: 'action' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
       expect(canPlayCard(card, 0, 5)).toBe(true); // goes to -2, within credit limit of 5
     });
 
     it('should return false if credit limit is exceeded', () => {
-      const card = { cost: 6, id: 'test', name: 'test', type: 'attack' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
+      const card = { cost: 6, id: 'test', name: 'test', type: 'action' as const, coinValue: 1 as const, attack: 3, defense: 1, description: '', color: '#fff' };
       expect(canPlayCard(card, 0, 5)).toBe(false); // goes to -6, below -5 limit
     });
 

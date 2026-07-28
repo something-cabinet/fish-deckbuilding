@@ -47,7 +47,8 @@ npm run test:watch  # watch mode
 **State**: Run/combat split. `RunState` persists across battles, `CombatState` is per-battle. The run deck is COPIED into the battle deck — never mutated during combat.
 @wiki/patterns/run-combat-state-split
 
-**Card system**: 3-purpose cards — `coinValue` (sell), `attack` (play), `defense` (block). Cards have `effects[]` and `keywords[]` that are resolved by the Effects/Keywords modules.
+**Card system**: FaB-style `action` type. All playable cards are `action` type. A card's combat role is determined by its numeric stats (attack, defense) and effects/keywords — not by a type label. Cards have 3 purposes: SELL for coins (`coinValue`), PLAY as attack (`attack`), BLOCK for defense (`defense`). Effects and keywords resolve via Effects/Keywords modules.
+@wiki/decisions/fab-style-action-card-type
 
 **Enemies**: Flat `EnemyInstance[]` array with HP, attack, defense, intent, strategy. No grid positions.
 
@@ -85,4 +86,5 @@ All pages use YAML frontmatter with `type` matching the directory. Pages are lin
 5. **Battle deck is a copy** — never mutate the run deck during combat
 6. **Snapshot sync** — emit full state snapshots, not per-field events
 7. **Thin UI** — Svelte reads from $state, never implements game logic
-8. **CSS variables** — colors only in `app.css`, components use `var(--name)`
+8. **FaB-style action type** — all playable cards are `action` type; combat role comes from stats, not type label
+9. **CSS variables** — colors only in `app.css`, components use `var(--name)`

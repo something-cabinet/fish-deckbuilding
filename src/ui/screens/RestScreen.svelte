@@ -55,7 +55,6 @@
             {#if card}
               <button class="upgrade-card" onclick={() => upgradeCard(cardId)}>
                 <span class="upgrade-name">{card.name}</span>
-                <span class="upgrade-type" style="background: {card.color}">{card.type}</span>
               </button>
             {/if}
           {/each}
@@ -144,12 +143,12 @@
   }
 
   .heal-btn:hover {
-    border-color: #22c55e;
+    border-color: var(--stat-def);
     background: rgba(34, 197, 94, 0.1);
   }
 
   .upgrade-btn:hover {
-    border-color: #f4c430;
+    border-color: var(--gold);
     background: rgba(244, 196, 48, 0.1);
   }
 
@@ -228,15 +227,6 @@
   .upgrade-name {
     font-weight: 700;
     font-size: 0.9rem;
-  }
-
-  .upgrade-type {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--parchment);
-    padding: 0.2rem 0.4rem;
-    border-radius: 3px;
   }
 
   .close-btn {
