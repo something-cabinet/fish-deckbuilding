@@ -47,7 +47,9 @@ jobs:
           ./build-web.sh
 
       - name: Export Godot web player
-        run: $GODOT4 --path godot/ --export-release "Web" --headless --verbose
+        run: |
+          mkdir -p godot/web
+          $GODOT4 --path godot/ --export-release "Web" --headless --verbose
 
       - name: Verify web export output
         run: test -f godot/web/index.html
