@@ -43,13 +43,23 @@ Open `godot/project.godot` in Godot 4 editor. The extension compiles to `rust/ta
 
 ### Web (WASM)
 
+Build the Rust extension:
+
 ```bash
 source ./emsdk/emsdk_env.sh
 cd rust
 ./build-web.sh
 ```
 
-Produces `.wasm` and `.threads.wasm` in `rust/target/wasm32-unknown-emscripten/debug/`.
+Then export the full web player from Godot editor: `Project > Export...` → Web → enable Extensions Support → export to folder.
+
+Test locally:
+
+```bash
+npx serve path/to/exported/folder --cors
+```
+
+Deploy with `vercel.json` (COOP/COEP headers for threaded WASM).
 
 ### In Godot Editor
 
