@@ -10,7 +10,7 @@ repository = "https://github.com/nhkhanh/fish-roguelite-deckbuilding"
 crate-type = ["cdylib"]
 
 [dependencies]
-godot = "0.2"
+godot = "0.5"
 
 [profile.dev]
 opt-level = 0
@@ -19,9 +19,6 @@ debug = true
 [profile.release]
 opt-level = 2
 
-# ── Curated clippy lints (per wiki-mem convention) ──────────────────────────
-# Restriction-group lints that produce false positives are deliberately excluded.
-# See https://github.com/0atman/noboilerplate for CDD philosophy.
 [lints.clippy]
 style = "warn"
 correctness = "warn"
@@ -29,10 +26,5 @@ suspicious = "warn"
 complexity = "warn"
 perf = "warn"
 cargo = "warn"
-# Restriction-group exclusions that cause more harm than good:
-# - as_conversions: one-line `x as f32` is clearer than 25 lines of bit-twiddling
-# - arithmetic_side_effects: too many false positives on counters
-# - unwrap_used: managed via clippy.toml allow-unwrap-in-tests
 pedantic = { level = "allow", priority = -1 }
-# Nursery lints — opt-in, not blanket
 nursery = { level = "allow", priority = -1 }
