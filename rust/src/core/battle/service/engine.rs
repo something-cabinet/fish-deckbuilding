@@ -1,4 +1,3 @@
-/// Battle engine — orchestrates the turn loop.
 use crate::core::battle::model::{BattleState, Phase};
 #[cfg(test)]
 use crate::core::battle::model::BattleResult;

@@ -1,4 +1,3 @@
-/// Combat resolution — pure function.
 use crate::core::grid::GridUnit;
 #[cfg(test)]
 use crate::core::grid::Faction;

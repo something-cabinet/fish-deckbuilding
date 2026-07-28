@@ -1,9 +1,7 @@
-/// Enemy AI — deterministic decision making.
 use crate::core::constants;
 use crate::core::grid::{GridState, movement};
 use crate::core::grid::Faction;
 
-/// What the enemy decides to do this turn.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Decision {
     Attack { target: (i32, i32) },
@@ -11,7 +9,6 @@ pub enum Decision {
     Wait,
 }
 
-/// Decide the enemy's action: adjacent → attack; else move toward hero (deterministic).
 pub fn decide(state: &GridState) -> Decision {
     let hero_positions = state.find_faction(Faction::Hero);
     let enemy_positions = state.find_faction(Faction::Enemy);

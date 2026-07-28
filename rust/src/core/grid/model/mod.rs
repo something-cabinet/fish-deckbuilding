@@ -1,4 +1,3 @@
-/// Grid domain — types and state.
 pub mod unit;
 pub mod state;
 

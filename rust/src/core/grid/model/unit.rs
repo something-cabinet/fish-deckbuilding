@@ -1,4 +1,3 @@
-/// Grid unit type — faction and combat stats.
 use crate::core::constants;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

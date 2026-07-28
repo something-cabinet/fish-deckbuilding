@@ -1,4 +1,3 @@
-/// Combat domain — attack result types.
 pub mod attack_result;
 pub mod attack_error;
 
