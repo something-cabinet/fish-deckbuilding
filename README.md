@@ -16,7 +16,14 @@ Open `godot/project.godot` in Godot 4 editor — hit F5 to run.
 
 - Rust (nightly): `rustup toolchain install nightly`
 - Godot 4.3+: [godotengine.org](https://godotengine.org/download/)
-- Web export requires Emscripten: `emsdk install 3.1.74` ([emsdk](https://github.com/emscripten-core/emsdk))
+- Web export requires Emscripten SDK:
+  ```bash
+  git clone https://github.com/emscripten-core/emsdk.git
+  cd emsdk
+  ./emsdk install 3.1.74
+  ./emsdk activate 3.1.74
+  ```
+  Then source it before any web build: `source ./emsdk/emsdk_env.sh`
 - Web export requires wasm32 target:
   ```bash
   rustup component add rust-src --toolchain nightly
