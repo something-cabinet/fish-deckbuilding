@@ -34,8 +34,8 @@ build-web.sh (Rust → .wasm)
 - [ ] AC-4: Vercel deploy serves the game with COOP/COEP headers
 - [ ] AC-5: CI badge shows green for the pipeline
 
-## Open Questions
+## Resolved Decisions
 
-- [ ] Q1: Where should the Godot web export output go? `godot/web/` or `dist/`?
-- [ ] Q2: Should vercel deploy be part of build-web.sh or a separate CI job?
-- [ ] Q3: Which branch triggers auto-deploy? `main` only or `investigate-godot` too?
+- Q1: Output goes to `godot/web/` (matches `export_presets.cfg`'s `export_path`).
+- Q2: Vercel deploy is a separate CI job (`.github/workflows/deploy.yml`), not part of `build-web.sh`. Vercel's build container lacks Rust/Godot/Emscripten, so GitHub Actions builds and pushes the prebuilt static output via the Vercel CLI (`vercel deploy --prebuilt`).
+- Q3: `main` only (plus manual `workflow_dispatch`).

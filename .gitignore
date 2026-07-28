@@ -3,6 +3,9 @@ rust/target/
 
 # Godot editor artifacts
 godot/.godot/
+godot/web/
+godot/*.pck
+godot/*.html
 
 # Environment files
 .env
