@@ -86,6 +86,7 @@ type: reference
 - [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
 - [Grid Battle UI — render 9×5 grid, wire targeting, base attack, move, replace, restore integration tests](wiki/tasks/grid-battle-ui--render-95-grid-wire-targeting-base-attack-move-replace-restore-integration-tests.md) — *todo*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
+- [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *todo*
 - [Review and rename card types to thematic names](wiki/tasks/review-and-rename-card-types-to-thematic-names.md) — *todo*
 - [Save/Load — replace Prisma with browser-localStorage, wire SaveScreen](wiki/tasks/saveload--replace-prisma-with-browser-localstorage-wire-savescreen.md) — *todo*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
@@ -100,6 +101,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 73
+- **Nodes:** 74
 - **Edges:** 90
 
