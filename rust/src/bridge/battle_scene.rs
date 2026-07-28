@@ -297,9 +297,8 @@ impl BattleScene {
             units_node.add_child(&unit_root);
             // D7: brief scale-in tween on placement
             unit_root.set_scale(Vector2::new(0.0, 0.0));
-            if let Some(mut tween) = unit_root.create_tween() {
-                tween.tween_property(&unit_root, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.25);
-            }
+            let mut tween = unit_root.create_tween();
+            tween.tween_property(&unit_root, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.25);
         }
     }
 
@@ -415,8 +414,8 @@ impl BattleScene {
     }
 
     fn attach_pulse_tween(node: &mut Gd<Panel>) {
-        if let Some(mut tween) = node.create_tween() {
-            tween.set_loops();
+        let mut tween = node.create_tween();
+        tween.set_loops();
             tween.set_trans(TransitionType::SINE);
             tween.set_ease(EaseType::IN_OUT);
             tween.tween_property(
@@ -426,7 +425,6 @@ impl BattleScene {
                 0.6,
             );
             tween.tween_property(&*node, "scale", &Variant::from(Vector2::new(1.0, 1.0)), 0.6);
-        }
     }
 
     fn handle_click(&mut self, pos: (i32, i32)) {
