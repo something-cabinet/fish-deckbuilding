@@ -55,14 +55,14 @@ wm-spec
 2. **GREEN** — Write the minimum code to make it pass
 3. **REFACTOR** — Clean up while tests stay green
 
-No implementation code is written without a test first. This includes combat logic, state transitions, card effects, enemy AI, and any other game code. UI components (Svelte) are excluded — they call tested pure functions.
+No implementation code is written without a test first. This includes combat logic, state transitions, card effects, enemy AI, and any other game code. The Godot bridge layer (gdext) is excluded — it calls tested pure Rust functions.
 
 ```bash
-npm test       # run all tests
-npm run test:watch  # watch mode
+cd rust
+cargo test       # run all tests
 ```
 
-Tests live in `src/game/combat/__tests__/` and run in ~400ms.
+Tests live in `rust/src/core/`.
 
 ## Quick Reference
 

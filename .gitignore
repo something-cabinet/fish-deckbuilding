@@ -1,10 +1,6 @@
 # Rust build artifacts
 rust/target/
 
-# Web build artifacts
-dist/
-node_modules/
-
 # Godot editor artifacts
 godot/.godot/
 
