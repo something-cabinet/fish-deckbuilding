@@ -1,8 +1,9 @@
 
 use godot::classes::tween::{EaseType, TransitionType};
+use godot::classes::notify::CanvasItemNotification;
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D, Panel,
-    ProgressBar, StyleBox, StyleBoxFlat,
+    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
+    Panel, ProgressBar, StyleBox, StyleBoxFlat,
 };
 use godot::global::MouseButton;
 use godot::prelude::*;
@@ -71,12 +72,21 @@ impl INode2D for BattleScene {
         self.build_grid();
         self.build_ui();
         self.start_battle();
-        let self_gd = self.to_gd();
-        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
-        end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
-        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
-        let restart_btn = banner.get_node_as::<Button>("RestartButton");
-        restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+        self.connect_signals();
+    }
+
+    /// Reconnect typed signals after hot-reload.
+    ///
+    /// Godot auto-disconnects typed signal closures before unloading the old
+    /// library, so they must be re-bound after the new library loads.  This
+    /// method is called from both `ready()` and `EXTENSION_RELOADED` to
+    /// keep signal bindings alive across reload cycles.
+    fn on_notification(&mut self, what: CanvasItemNotification) {
+        if what == CanvasItemNotification::EXTENSION_RELOADED {
+            godot_print!("[BattleScene] EXTENSION_RELOADED — reconnecting signals + refreshing UI");
+            self.connect_signals();
+            self.sync_all();
+        }
     }
 
     fn unhandled_input(&mut self, event: Gd<InputEvent>) {
@@ -130,9 +140,29 @@ impl BattleScene {
     fn on_restart(&mut self) {
         self.start_battle();
     }
+
+    fn connect_signals(&self) {
+        let self_gd = self.to_gd();
+        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
+        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
+        let restart_btn = banner.get_node_as::<Button>("RestartButton");
+        restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+    }
 }
 
 
+// ---------------------------------------------------------------------------
+// Visual & UI helpers
+//
+// The BattleScene struct stores no `#[export]` fields.  All game state is
+// ephemeral: `init()` creates a blank scene, and `ready()` / `start_battle()`
+// populate it fresh.  This means hot-reload always resets the battle — which
+// is fine for the prototype.  If mid-battle state preservation across reload
+// is desired later, add `#[export]` fields on the struct with `#[init(val =
+// ...)]` defaults.  Godot serialises export fields before unloading the old
+// library and restores them onto the fresh instance.
+// ---------------------------------------------------------------------------
 impl BattleScene {
     fn build_grid(&self) {
         let mut container = self.base().get_node_as::<Node2D>("BattleGrid/Tiles");

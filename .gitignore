@@ -17,6 +17,10 @@ godot/.godot/
 # Generated files
 *.slim
 wm-cli
+wm-cli.exe
+
+# Godot auto-generated UID files (regenerated on project open)
+*.gdextension.uid
 
 # Build tools
 emsdk/
