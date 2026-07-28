@@ -13,6 +13,12 @@ use crate::core::{
     grid::Faction,
 };
 
+fn chebyshev_adjacent(a: (i32, i32), b: (i32, i32)) -> bool {
+    (a.0 - b.0).abs().max((a.1 - b.1).abs()) == 1
+}
+
+enum Corner { TL, TR, BL, BR }
+
 fn hex(v: u8) -> f32 {
     v as f32 / 255.0
 }
@@ -431,8 +437,7 @@ impl BattleScene {
         if let Some(selected) = self.selected {
             let is_adjacent_enemy = self.state.as_ref().is_some_and(|s| {
                 s.grid.unit_at(pos).is_some_and(|u| {
-                    u.faction == Faction::Enemy
-                        && (pos.0 - selected.0).abs().max((pos.1 - selected.1).abs()) == 1
+                    u.faction == Faction::Enemy && chebyshev_adjacent(selected, pos)
                 })
             });
             if is_adjacent_enemy {
@@ -492,74 +497,29 @@ impl BattleScene {
             let right = tile_px - inset;
             let bottom = tile_px - inset;
 
-            Self::add_bracket(
-                &mut container,
-                root_pos,
-                inset,
-                inset + arm,
-                inset,
-                inset,
-                inset + arm,
-                inset,
-                width,
-                bracket_color,
-                &format!("BL_{x}_{y}_tl"),
-            );
-            Self::add_bracket(
-                &mut container,
-                root_pos,
-                right,
-                inset + arm,
-                right,
-                inset,
-                right - arm,
-                inset,
-                width,
-                bracket_color,
-                &format!("BL_{x}_{y}_tr"),
-            );
-            Self::add_bracket(
-                &mut container,
-                root_pos,
-                inset,
-                bottom - arm,
-                inset,
-                bottom,
-                inset + arm,
-                bottom,
-                width,
-                bracket_color,
-                &format!("BL_{x}_{y}_bl"),
-            );
-            Self::add_bracket(
-                &mut container,
-                root_pos,
-                right,
-                bottom - arm,
-                right,
-                bottom,
-                right - arm,
-                bottom,
-                width,
-                bracket_color,
-                &format!("BL_{x}_{y}_br"),
-            );
+            for (corner, suffix) in [(Corner::TL, "tl"), (Corner::TR, "tr"), (Corner::BL, "bl"), (Corner::BR, "br")] {
+                Self::add_bracket(&mut container, root_pos, tile_px, corner, inset, arm, width, bracket_color, &format!("BL_{x}_{y}_{suffix}"));
+            }
         }
     }
 
     fn add_bracket(
         container: &mut Gd<Node2D>,
         root: Vector2,
-        x1: f32,
-        y1: f32,
-        x2: f32,
-        y2: f32,
-        x3: f32,
-        y3: f32,
+        tile_px: f32,
+        corner: Corner,
+        inset: f32,
+        arm: f32,
         width: f32,
         color: Color,
         name: &str,
     ) {
+        let (x1, y1, x2, y2, x3, y3) = match corner {
+            Corner::TL => (inset, inset + arm, inset, inset, inset + arm, inset),
+            Corner::TR => (tile_px - inset, inset + arm, tile_px - inset, inset, tile_px - inset - arm, inset),
+            Corner::BL => (inset, tile_px - inset - arm, inset, tile_px - inset, inset + arm, tile_px - inset),
+            Corner::BR => (tile_px - inset, tile_px - inset - arm, tile_px - inset, tile_px - inset, tile_px - inset - arm, tile_px - inset),
+        };
         let mut line = Line2D::new_alloc();
         let mut points = PackedVector2Array::new();
         points.push(Vector2::new(x1, y1));
