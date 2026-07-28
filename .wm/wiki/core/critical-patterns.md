@@ -4,6 +4,12 @@ type: core
 tags: [critical]
 ---
 
+---
+title: Critical Patterns
+type: core
+tags: [critical]
+---
+
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -63,3 +69,17 @@ Prisma + SQLite with better-sqlite3 imports Node native modules that cannot comp
 **What to do differently:** Choose localStorage for client-side game persistence from the start. Reserve Prisma/SQLite for server-side tooling (admin panels, data analysis) where Node native modules are available.
 
 **Full entry:** @wiki/decisions/browser-localstorage-persistence
+
+---
+
+## 2026-07-28 — GDExtension Scene Node Type Must Match the Custom Class, Not a GDScript Wrapper
+
+**Category:** failure
+**Source:** @wiki/concepts:gdext-scene-node-type-mismatch
+**Tags:** [godot, gdext, scene-setup]
+
+A `.tscn` node using a Rust GodotClass must declare `type="<CustomClass>"` directly. Declaring `type="Node2D"` with a GDScript stub (`extends <CustomClass>`) attached via `script=` fails in Godot 4.7 with "Script inherits from native type 'X', so it can't be assigned to an object of type: 'Y'" — a script can only add behavior on top of a node's actual type, it can't narrow a built-in node into a registered subclass. The symptom is misleading: zero errors in the Output panel, extension loads fine, no class-name collisions — it only shows in Debugger > Errors when the scene actually runs (F5).
+
+**What to do differently:** When a GDExtension class provides all the node's behavior via `#[godot_api] impl INode2D` (or similar), give it its own `.tscn` node with `type="<CustomClassName>"` and skip the GDScript wrapper entirely. If this error appears, check the `.tscn` node's `type=` before suspecting the extension build, dll path, or editor cache.
+
+**Full entry:** @wiki/concepts/gdext-scene-node-type-mismatch
