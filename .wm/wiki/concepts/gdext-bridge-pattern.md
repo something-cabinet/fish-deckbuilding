@@ -5,6 +5,9 @@ tags: [godot, rust, gdext, architecture]
 status: active
 ---
 
+---
+---
+
 ## Problem
 How to organize Rust code that needs to call Godot APIs while keeping game logic pure and testable.
 
@@ -125,9 +128,17 @@ fn connect_signals(&self) {
 
 See `@wiki/docs/HOT_RELOAD.md` for the full workflow guide.
 
+### .tscn node type must be the custom class itself
+- The scene's `[node type="..."]` must be set to the **custom GodotClass name** (e.g. `type="BattleScene"`), not the built-in base (`type="Node2D"`) with a GDScript stub (`extends BattleScene`) attached via `script=`.
+- A script can only *add* behavior on top of the node's actual native type — it cannot narrow a plain `Node2D` node into a registered GDExtension subclass. Godot 4.7 enforces this strictly at scene-instantiation time.
+- Symptom if done wrong: `Script inherits from native type 'X', so it can't be assigned to an object of type: 'Y'` — appears only in Debugger > Errors on running the scene (F5), not in the Output panel, and not on project open. The extension loads fine and there's no class-name collision, which makes it look like a load failure when it isn't.
+- Fix: set the node's `type=` to the custom class name directly; drop the redundant GDScript wrapper (the `#[godot_api] impl INode2D` block already provides `ready`/`unhandled_input`/etc.).
+- Full writeup: @wiki/concepts:gdext-scene-node-type-mismatch
+
 ## Related
 - @wiki/tasks:godot-battle-07-hot-reload-fixes
 - @wiki/docs/HOT_RELOAD.md
 - @wiki/specs:godot-battle-scaffold
 - @wiki/decisions:godot-rust-gdext-pivot
 - @wiki/patterns:comment-to-function-extraction
+- @wiki/concepts:gdext-scene-node-type-mismatch
