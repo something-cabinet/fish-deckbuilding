@@ -46,6 +46,11 @@ jobs:
           cd rust
           ./build-web.sh
 
+      - name: Debug - list export templates
+        run: |
+          echo "GODOT4=$GODOT4"
+          find ~/.local/share/godot/export_templates -maxdepth 2 -exec ls -la {} \;
+
       - name: Export Godot web player
         run: $GODOT4 --path godot/ --export-release "Web" --headless --verbose
 
