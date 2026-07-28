@@ -49,7 +49,11 @@ jobs:
       - name: Export Godot web player
         run: |
           mkdir -p godot/web
-          $GODOT4 --path godot/ --export-release "Web" --headless --verbose
+          # Godot's editor can abort during GDExtension teardown after a
+          # successful headless export, so check for the output file rather
+          # than trusting the process exit code.
+          $GODOT4 --path godot/ --export-release "Web" --headless --verbose || true
+          test -f godot/web/index.html
 
       - name: Verify web export output
         run: test -f godot/web/index.html
