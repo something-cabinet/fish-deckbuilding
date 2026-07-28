@@ -64,9 +64,13 @@ function createInitialCombatState(): UIBattleState {
 
 function createInitialMapState(): MapStateUI {
   const start = getStartingZone();
+  const unlockedZones = ISLAND_ZONES.filter((z) => z.requiredChapter <= 1).map((z) => z.id);
+  if (!unlockedZones.includes(start.id)) {
+    unlockedZones.push(start.id);
+  }
   return {
     currentZone: start.id,
-    unlockedZones: [start.id],
+    unlockedZones,
     completedZones: [],
     heroPosition: { x: start.position.x, y: start.position.y },
     pendingAction: null,
