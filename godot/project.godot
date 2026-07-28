@@ -1,0 +1,15 @@
+[application]
+config/name = "Fish Tactical RPG"
+run/main_scene = "res://scenes/battle/battle.tscn"
+
+[display]
+window/size/viewport_width = 1280
+window/size/viewport_height = 720
+window/stretch/mode = "canvas_items"
+window/stretch/aspect = "keep"
+
+[rendering]
+renderer/rendering_method = "gl_compatibility"
+
+[environment]
+default_clear_color = Color(0.043, 0.102, 0.141, 1)
