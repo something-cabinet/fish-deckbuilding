@@ -2,6 +2,8 @@
 set -euo pipefail
 
 CRATE="godot_battle_scaffold"
+GODOT=${GODOT_BIN:-godot4}
+GODOT=${GODOT:-godot}
 
 RUSTFLAGS="-C link-args=-pthread \
 -C target-feature=+atomics \
@@ -16,3 +18,9 @@ mv "target/wasm32-unknown-emscripten/debug/${CRATE}.wasm" \
    "target/wasm32-unknown-emscripten/debug/${CRATE}.threads.wasm"
 
 cargo +nightly build --features nothreads -Zbuild-std --target wasm32-unknown-emscripten
+
+if command -v $GODOT &>/dev/null; then
+  $GODOT --path ../godot/ --export-release "Web" --headless
+else
+  echo "godot binary not found. Install Godot 4.3+ and set GODOT_BIN. Web export skipped."
+fi
