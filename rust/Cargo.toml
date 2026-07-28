@@ -10,7 +10,10 @@ repository = "https://github.com/nhkhanh/fish-roguelite-deckbuilding"
 crate-type = ["cdylib"]
 
 [dependencies]
-godot = "0.5"
+godot = { version = "0.5", features = ["experimental-wasm", "lazy-function-tables"] }
+
+[features]
+nothreads = ["godot/experimental-wasm-nothreads"]
 
 [profile.dev]
 opt-level = 0
