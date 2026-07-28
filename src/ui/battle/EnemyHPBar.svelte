@@ -56,7 +56,7 @@
 
   .ehp-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #e85d4e, #ff7a6b);
+    background: linear-gradient(90deg, var(--coral), var(--coral-light));
     border-radius: 6px;
     transition: width 0.3s ease;
   }

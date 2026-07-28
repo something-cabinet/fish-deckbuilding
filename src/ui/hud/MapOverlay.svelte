@@ -20,19 +20,19 @@
   function getNodeColor(type: NodeType): string {
     switch (type) {
       case 'combat':
-        return '#e85d4e';
+        return 'var(--coral)';
       case 'elite':
-        return '#a855f7';
+        return 'var(--hp-enemy)';
       case 'shop':
-        return '#f4c430';
+        return 'var(--gold)';
       case 'rest':
-        return '#22c55e';
+        return 'var(--stat-def)';
       case 'boss':
-        return '#ef4444';
+        return 'var(--hp-bar)';
       case 'start':
-        return '#3b82f6';
+        return 'var(--unit-blue)';
       default:
-        return '#888';
+        return 'var(--parchment-dim)';
     }
   }
 
@@ -158,19 +158,19 @@
 
     <div class="map-legend">
       <div class="legend-item">
-        <span class="legend-dot" style="background: #e85d4e"></span> Combat
+        <span class="legend-dot" style="background: var(--coral)"></span> Combat
       </div>
       <div class="legend-item">
-        <span class="legend-dot" style="background: #a855f7"></span> Elite
+        <span class="legend-dot" style="background: var(--hp-enemy)"></span> Elite
       </div>
       <div class="legend-item">
-        <span class="legend-dot" style="background: #f4c430"></span> Shop
+        <span class="legend-dot" style="background: var(--gold)"></span> Shop
       </div>
       <div class="legend-item">
-        <span class="legend-dot" style="background: #22c55e"></span> Rest
+        <span class="legend-dot" style="background: var(--stat-def)"></span> Rest
       </div>
       <div class="legend-item">
-        <span class="legend-dot" style="background: #ef4444"></span> Boss
+        <span class="legend-dot" style="background: var(--hp-bar)"></span> Boss
       </div>
     </div>
     <div class="map-info">

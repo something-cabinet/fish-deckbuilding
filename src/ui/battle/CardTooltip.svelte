@@ -38,7 +38,6 @@
       <span class="tooltip-name">{card.name}</span>
       <span class="tooltip-cost">{card.cost}C</span>
     </div>
-    <div class="tooltip-type" style="background: {card.color}">{card.type}</div>
     <div class="tooltip-stats-grid">
       <div class="tooltip-stat-row">
         <span class="tooltip-stat-label">ATK</span>
@@ -87,6 +86,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    animation: tooltip-enter 0.15s ease-out;
+  }
+
+  @keyframes tooltip-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .tooltip-header {
@@ -110,17 +115,6 @@
     border-radius: 50%;
     min-width: 26px;
     text-align: center;
-  }
-
-  .tooltip-type {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--parchment);
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    align-self: flex-start;
   }
 
   .tooltip-stats-grid {
@@ -149,8 +143,8 @@
     font-family: ui-monospace, monospace;
   }
 
-  .tooltip-stat-value.atk { color: #fbbf24; }
-  .tooltip-stat-value.def { color: #22c55e; }
+  .tooltip-stat-value.atk { color: var(--stat-atk); }
+  .tooltip-stat-value.def { color: var(--stat-def); }
   .tooltip-stat-value.coin { color: var(--gold); }
 
   .tooltip-keywords {

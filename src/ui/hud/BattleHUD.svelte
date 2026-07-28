@@ -13,6 +13,7 @@
   import ActionBarZone from '../battle/zones/action-bar/ActionBarZone.svelte';
   import ModalHost from '../battle/ModalHost.svelte';
   import CardTooltip from '../battle/CardTooltip.svelte';
+  import CombatFeedbackZone from '../battle/zones/combat-feedback/CombatFeedbackZone.svelte';
 
   let selectedCardIndex = $state<number | null>(null);
   let selectedCardId = $state<string | null>(null);
@@ -117,6 +118,7 @@
   </div>
 {/if}
 
+<CombatFeedbackZone />
 <ModalHost />
 
 <style>

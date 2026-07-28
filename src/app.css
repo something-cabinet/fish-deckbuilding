@@ -1,26 +1,23 @@
 :root {
   /* === OCEAN DEBT CITY PALETTE === */
-  /* Deep ocean backgrounds */
+  /* Ocean depths palette */
   --abyss: #0a1628;
   --deep: #0f2236;
-  --midnight: #162a40;
-  --shallow: #1e3a5f;
-
-  /* Coral & life accents */
+  --shallow: #1a3a5c;
   --coral: #e85d4e;
-  --coral-light: #ff7a6b;
-  --coral-dark: #b33a2e;
-
-  /* Gold / coin / debt */
+  --coral-light: #ff6b5e;
   --gold: #f4c430;
+  --parchment: #e8dcc5;
+  --parchment-dim: #a89880;
+
+  /* Derived / legacy aliases */
+  --midnight: #162a40;
+  --coral-dark: #b33a2e;
   --gold-dim: #c9a020;
   --gold-dark: #8a6d0b;
-
-  /* Ink / ledgers / text */
+  --gold-light: #f5c842;
   --ink: #0d1117;
   --ink-light: #1a2332;
-  --parchment: #e8dcc5;
-  --parchment-dim: #c4b89a;
 
   /* Card type colors */
   --unit-blue: #3b82f6;
@@ -30,6 +27,14 @@
   --power-purple: #a855f7;
   --power-purple-dark: #7e22ce;
 
+  /* Stat colors (previously hardcoded) */
+  --stat-atk: #fbbf24;
+  --stat-def: #22c55e;
+  --stat-def-light: #4ade80;
+  --stat-purple: #c084fc;
+  --stat-heal: #2dd4bf;
+  --border-dim: #444;
+
   /* Grid & targeting */
   --grid-empty: rgba(255, 255, 255, 0.06);
   --grid-hover: rgba(255, 255, 255, 0.15);
@@ -37,14 +42,30 @@
   --grid-target: rgba(232, 93, 78, 0.35);
   --grid-enemy: rgba(244, 196, 48, 0.08);
 
-  /* UI chrome */
-  --panel-bg: rgba(15, 34, 54, 0.92);
+  /* Semantic aliases */
+  --bg-primary: var(--abyss);
+  --bg-panel: rgba(15, 34, 54, 0.9);
+  --bg-zone: rgba(15, 34, 54, 0.6);
+  --border-panel: rgba(255, 255, 255, 0.08);
+  --border-zone: rgba(255, 255, 255, 0.12);
+
+  --coin-red: #e85d4e;
+  --coin-yellow: #f4c430;
+  --coin-blue: #3b82f6;
+  --hp-bar: #ef4444;
+  --hp-bar-bg: rgba(239, 68, 68, 0.2);
+  --hp-enemy: #a855f7;
+
+  --text-primary: var(--parchment);
+  --text-dim: var(--parchment-dim);
+  --text-accent: var(--gold);
+
+  /* UI chrome (legacy aliases mapped to semantic) */
+  --panel-bg: var(--bg-panel);
   --panel-border: rgba(232, 220, 197, 0.15);
   --button-bg: var(--shallow);
   --button-hover: var(--coral);
   --button-text: var(--parchment);
-  --hp-bar: #ef4444;
-  --hp-bar-bg: rgba(239, 68, 68, 0.2);
   --energy-fill: #fbbf24;
 
   /* Typography */

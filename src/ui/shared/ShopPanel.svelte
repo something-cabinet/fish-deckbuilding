@@ -69,7 +69,6 @@
             <span class="item-name">{card.name}</span>
             <span class="item-cost">{cardCost}G</span>
           </div>
-          <span class="item-type" style="background: {card.color}">{card.type}</span>
           <p class="item-desc">{card.description}</p>
           <button class="buy-btn" onclick={() => buyCard(card.id)}>BUY</button>
         </div>
@@ -190,7 +189,7 @@
     font-size: 0.85rem;
   }
 
-  .item-type, .item-rarity {
+  .item-rarity {
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;

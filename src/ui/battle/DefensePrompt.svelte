@@ -273,7 +273,7 @@
 
   .block-card.selected {
     background: rgba(34, 197, 94, 0.15);
-    border-color: #22c55e !important;
+    border-color: var(--stat-def) !important;
     box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
   }
 
@@ -320,7 +320,7 @@
   }
 
   .confirm-btn:hover:not(:disabled) {
-    background: #2dd4bf;
+    background: var(--stat-heal);
     transform: translateY(-2px);
   }
 
