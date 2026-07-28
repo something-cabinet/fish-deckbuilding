@@ -4,12 +4,6 @@ type: core
 tags: [critical]
 ---
 
----
-title: Critical Patterns
-type: core
-tags: [critical]
----
-
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -19,12 +13,12 @@ Promoted learnings from completed work. Read this at the start of every session 
 ## 2026-07-27 — Test the UI Orchestration Layer, Not Just Pure Functions
 
 **Category:** failure
-**Source:** @task-tasks:rewrite-combat-into-excalibur-ecs-with-events
+**Source:** @wiki/concepts:untested-ui-orchestration-p0s
 **Tags:** [testing, ui, orchestration]
 
-All 7 P0 bugs across 3 Oracle reviews lived in BattleHUD.svelte — the untested UI wiring layer. The pure function layer had 0 bugs across 79 tests. Root cause: no integration tests for the orchestration code that connects game logic to UI.
+All P0 bugs across BOTH architectures (roguelite and tactical RPG) lived in the untested UI wiring layer. The pure function layer had 0 bugs across 194 tests. Root cause: no integration tests for the orchestrator code that connects game logic to UI. The project's own NFR-2 was written to prevent this, but the orchestrator test suite was deleted during cleanup and not rebuilt — causing the same failure pattern to recur.
 
-**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. UI components should be thin — call tested controllers.
+**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. NEVER delete orchestrator tests without replacement. UI components should be thin — call tested controllers.
 
 **Full entry:** @wiki/concepts/untested-ui-orchestration-p0s
 
@@ -33,7 +27,7 @@ All 7 P0 bugs across 3 Oracle reviews lived in BattleHUD.svelte — the untested
 ## 2026-07-27 — Always Split Roguelite State into Run + Combat
 
 **Category:** pattern
-**Source:** @task-tasks:rewrite-combat-into-excalibur-ecs-with-events
+**Source:** @wiki/patterns:run-combat-state-split
 **Tags:** [state, architecture, roguelite]
 
 RunState persists across battles (deck, HP, gold, relics). CombatState is per-battle (hand, draw pile, turn phase). Copy the run deck into a battle deck at combat start — never modify the run deck during combat. Discard battle deck on exit.
@@ -47,7 +41,7 @@ RunState persists across battles (deck, HP, gold, relics). CombatState is per-ba
 ## 2026-07-27 — Snapshot-Based State Sync Prevents ECS Desyncs
 
 **Category:** pattern
-**Source:** @task-tasks:rewrite-combat-into-excalibur-ecs-with-events
+**Source:** @wiki/patterns:snapshot-state-sync
 **Tags:** [ecs, state, sync, event-driven]
 
 In event-driven ECS architectures, per-field granular events (card:played → sync coins, enemy:hurt → sync HP) inevitably produce desyncs — 5 P0 bugs in this project were caused by this pattern. Switching to a single `state:changed` snapshot event after every action eliminated all of them.
@@ -55,3 +49,17 @@ In event-driven ECS architectures, per-field granular events (card:played → sy
 **What to do differently:** Emit a full state snapshot after every action, not per-field events. The bridge/subscriber does a bulk sync from the snapshot. Keep granular events only for transient UI effects (flashes, animations).
 
 **Full entry:** @wiki/patterns/snapshot-state-sync
+
+---
+
+## 2026-07-28 — Browser Game Storage: localStorage, Not Prisma/SQLite
+
+**Category:** decision
+**Source:** @wiki/decisions/browser-localstorage-persistence
+**Tags:** [persistence, database, architecture]
+
+Prisma + SQLite with better-sqlite3 imports Node native modules that cannot compile or run in a Vite browser bundle. The build only passes because tree-shaking drops the unreferenced module. For single-player browser game state (<100KB), localStorage is the correct choice — synchronous, always available, no build tooling.
+
+**What to do differently:** Choose localStorage for client-side game persistence from the start. Reserve Prisma/SQLite for server-side tooling (admin panels, data analysis) where Node native modules are available.
+
+**Full entry:** @wiki/decisions/browser-localstorage-persistence
