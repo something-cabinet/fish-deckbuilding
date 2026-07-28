@@ -102,23 +102,28 @@ impl INode2D for BattleScene {
 impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
-        {
-            let s = match self.state.as_mut() {
-                Some(s) => s,
-                None => return,
-            };
-            if s.phase != Phase::PlayerTurn {
-                return;
-            }
-            battle_engine::end_player_turn(s);
-        }
+        if !self.end_player_turn_if_valid() { return; }
         self.sync_ui_ref();
+        self.run_enemy_turn();
+        self.sync_all();
+    }
+
+    fn end_player_turn_if_valid(&mut self) -> bool {
+        let s = match self.state.as_mut() {
+            Some(s) => s,
+            None => return false,
+        };
+        if s.phase != Phase::PlayerTurn { return false; }
+        battle_engine::end_player_turn(s);
+        true
+    }
+
+    fn run_enemy_turn(&mut self) {
         self.animating = true;
         if let Some(s) = self.state.as_mut() {
             battle_engine::execute_enemy_turn(s);
         }
         self.animating = false;
-        self.sync_all();
     }
 
     #[func]
