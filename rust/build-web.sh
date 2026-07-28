@@ -19,6 +19,11 @@ mv "target/wasm32-unknown-emscripten/release/${CRATE}.wasm" \
 
 cargo build --release --features nothreads -Zbuild-std --target wasm32-unknown-emscripten
 
+# The editor loads the GDExtension for the host (native) platform while scanning
+# the project, even when only exporting to Web — build a debug host lib so that
+# doesn't fail with "dynamic library not found".
+cargo build
+
 if command -v $GODOT &>/dev/null; then
   $GODOT --path ../godot/ --export-release "Web" --headless
 else
