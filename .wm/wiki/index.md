@@ -69,6 +69,7 @@ type: reference
 - [Spec-Driven Development](wiki/rules/spec-driven-development.md) — *draft*
 - [TDD — Test-First for Everything](wiki/rules/tdd.md) — *draft*
 - [No Magic Values — Use Enums and Constants](wiki/rules/no-magic-values.md) — *active*
+- [Spec Before Any Action](wiki/rules/spec-before-action.md) — *active*
 - [No else — Prefer Early Return](wiki/rules/no-else-prefer-early-return.md) — *active*
 
 ## specs
@@ -79,6 +80,7 @@ type: reference
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
+- [CI Warning Cleanup](wiki/specs/ci-warning-cleanup.md) — *approved*
 
 ## tasks
 
@@ -101,6 +103,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 74
+- **Nodes:** 76
 - **Edges:** 90
 

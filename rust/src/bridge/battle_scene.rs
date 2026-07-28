@@ -72,10 +72,10 @@ impl INode2D for BattleScene {
         self.build_ui();
         self.start_battle();
         let self_gd = self.to_gd();
-        let mut end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
         end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
         let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
-        let mut restart_btn = banner.get_node_as::<Button>("RestartButton");
+        let restart_btn = banner.get_node_as::<Button>("RestartButton");
         restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
     }
 
@@ -472,8 +472,6 @@ impl BattleScene {
             let inset = 4.0;
             let arm = 16.0;
             let width = 3.0;
-            let right = tile_px - inset;
-            let bottom = tile_px - inset;
 
             for (corner, suffix) in [(Corner::TL, "tl"), (Corner::TR, "tr"), (Corner::BL, "bl"), (Corner::BR, "br")] {
                 Self::add_bracket(&mut container, root_pos, tile_px, corner, inset, arm, width, bracket_color, &format!("BL_{x}_{y}_{suffix}"));
@@ -481,6 +479,7 @@ impl BattleScene {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn add_bracket(
         container: &mut Gd<Node2D>,
         root: Vector2,
