@@ -1,8 +1,3 @@
-//! Godot battle scene class — orchestrates the visual layer.
-//!
-//! Inherits `Node2D` — attach this to the root of `battle.tscn`.
-//!
-//! THIN layer — all game logic lives in `core/` (52 tests).
 
 use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::{
@@ -70,7 +65,6 @@ impl INode2D for BattleScene {
         self.build_grid();
         self.build_ui();
         self.start_battle();
-        // Typed signals (available in godot 0.5.4+ for built-in nodes)
         let self_gd = self.to_gd();
         let mut end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
         end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
@@ -102,7 +96,6 @@ impl INode2D for BattleScene {
 impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
-        // Phase 1: end player turn (mutable borrow, then dropped)
         {
             let s = match self.state.as_mut() {
                 Some(s) => s,
@@ -113,15 +106,12 @@ impl BattleScene {
             }
             battle_engine::end_player_turn(s);
         }
-        // Phase 2: sync (immutable borrow)
         self.sync_ui_ref();
-        // Phase 3: enemy turn (mutable borrow, then dropped)
         self.animating = true;
         if let Some(s) = self.state.as_mut() {
             battle_engine::execute_enemy_turn(s);
         }
         self.animating = false;
-        // Phase 4: sync all (immutable borrow)
         self.sync_all();
     }
 
@@ -131,7 +121,6 @@ impl BattleScene {
     }
 }
 
-// ─── Private helpers ────────────────────────────────────────────────────────
 
 impl BattleScene {
     fn build_grid(&self) {
@@ -160,7 +149,6 @@ impl BattleScene {
     fn build_ui(&self) {
         let mut ui = self.base().get_node_as::<Node2D>("UI");
 
-        // Mana crystal container positioned under the numeric label.
         let mut crystals = Node2D::new_alloc();
         crystals.set_name("ManaCrystals");
         crystals.set_position(Vector2::new(1080.0, 50.0));
@@ -226,7 +214,6 @@ impl BattleScene {
             unit_root.set_position(Vector2::new(px as f32, py as f32));
             unit_root.set_name(&format!("Unit_{}_{}", pos.0, pos.1));
 
-            // Drop shadow.
             let mut shadow = Self::rounded_panel(
                 rgba(0x0b, 0x1a, 0x24, 0.55),
                 Vector2::new(60.0, 60.0),
@@ -237,7 +224,6 @@ impl BattleScene {
             shadow.set_position(Vector2::new(-26.0, -24.0));
             unit_root.add_child(&shadow);
 
-            // Action-ready glow ring.
             let can_act = unit.faction == Faction::Hero
                 && state.phase == Phase::PlayerTurn
                 && !unit.has_moved;
@@ -261,7 +247,6 @@ impl BattleScene {
             }
             unit_root.add_child(&glow);
 
-            // Unit body.
             let body_color = match unit.faction {
                 Faction::Hero => rgb(0x4f, 0xd1, 0xc5),
                 Faction::Enemy => rgb(0xc9, 0x4c, 0x4c),
@@ -279,7 +264,6 @@ impl BattleScene {
             }
             unit_root.add_child(&body);
 
-            // Simple eye/detail to break up the flat rectangle.
             let mut eye = ColorRect::new_alloc();
             eye.set_size(Vector2::new(8.0, 8.0));
             eye.set_color(rgb(0xff, 0xff, 0xff));
@@ -287,21 +271,18 @@ impl BattleScene {
             eye.set_name("Eye");
             unit_root.add_child(&eye);
 
-            // HP bar.
             let mut hp_bar = Self::hp_bar(unit.hp, unit.max_hp);
             hp_bar.set_position(Vector2::new(-28.0, -42.0));
             hp_bar.set_name("HpBar");
             unit_root.add_child(&hp_bar);
 
             units_node.add_child(&unit_root);
-            // D7: brief scale-in tween on placement
             unit_root.set_scale(Vector2::new(0.0, 0.0));
             let mut tween = unit_root.create_tween();
             tween.tween_property(&unit_root, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.25);
         }
     }
 
-    /// Highlight adjacent enemies as attack targets (AC-6).
     fn show_attack_highlight(&self, selected_pos: (i32, i32)) {
         let state = match self.state.as_ref() {
             Some(s) => s,
@@ -341,7 +322,6 @@ impl BattleScene {
         ml.set_text(&format!("{} / {}", state.mana, state.max_mana));
         ml.set_modulate(rgb(0xd6, 0xe8, 0xef));
 
-        // Sync mana crystal visuals.
         for i in 0..constants::MAX_MANA {
             let crystal_name = format!("UI/ManaCrystals/Crystal_{}", i);
             let mut crystal = self.base().get_node_as::<Panel>(&crystal_name);
@@ -427,7 +407,6 @@ impl BattleScene {
     }
 
     fn handle_click(&mut self, pos: (i32, i32)) {
-        // Read-only check: is it a valid turn?
         if self
             .state
             .as_ref()
@@ -436,7 +415,6 @@ impl BattleScene {
             return;
         }
 
-        // Case 1: Selected unit + valid move target → move
         if let Some(selected) = self.selected {
             if self.valid_moves.contains(&pos) {
                 if let Some(s) = self.state.as_mut() {
@@ -450,7 +428,6 @@ impl BattleScene {
             }
         }
 
-        // Case 2: Selected unit + adjacent enemy → attack
         if let Some(selected) = self.selected {
             let is_adjacent_enemy = self.state.as_ref().is_some_and(|s| {
                 s.grid.unit_at(pos).is_some_and(|u| {
@@ -470,8 +447,6 @@ impl BattleScene {
             }
         }
 
-        // Case 3: Click on friendly unit that can still act → select and show overlay
-        // (P0-3 fix: allow selecting even after moving, as long as hasn't attacked)
         let is_selectable = self.state.as_ref().is_some_and(|s| {
             s.grid
                 .unit_at(pos)
@@ -484,12 +459,10 @@ impl BattleScene {
                     grid_movement::get_movement_range(&s.grid, pos, constants::MOVE_BUDGET);
             }
             self.show_move_overlay(&self.valid_moves);
-            // AC-6: highlight adjacent enemies as attack targets
             self.show_attack_highlight(pos);
             return;
         }
 
-        // Case 4: Click elsewhere → deselect
         self.selected = None;
         self.valid_moves.clear();
         self.clear_overlays_ref();
@@ -505,7 +478,6 @@ impl BattleScene {
             let py = constants::GRID_ORIGIN_Y + y * constants::TILE_SIZE;
             let root_pos = Vector2::new(px as f32, py as f32);
 
-            // Subtle base tint so the reachable region still reads as a region.
             let mut tint = ColorRect::new_alloc();
             tint.set_position(root_pos);
             tint.set_size(Vector2::new(tile_px, tile_px));
@@ -513,8 +485,6 @@ impl BattleScene {
             tint.set_name(&format!("Tint_{}_{}", x, y));
             container.add_child(&tint);
 
-            // Corner brackets at all four corners (prototype perimeter; can be
-            // optimized to an outer shell via 4-bit masks later).
             let bracket_color = rgb(0xe8, 0xdc, 0xc5);
             let inset = 4.0;
             let arm = 16.0;
@@ -522,7 +492,6 @@ impl BattleScene {
             let right = tile_px - inset;
             let bottom = tile_px - inset;
 
-            // Top-left
             Self::add_bracket(
                 &mut container,
                 root_pos,
@@ -536,7 +505,6 @@ impl BattleScene {
                 bracket_color,
                 &format!("BL_{x}_{y}_tl"),
             );
-            // Top-right
             Self::add_bracket(
                 &mut container,
                 root_pos,
@@ -550,7 +518,6 @@ impl BattleScene {
                 bracket_color,
                 &format!("BL_{x}_{y}_tr"),
             );
-            // Bottom-left
             Self::add_bracket(
                 &mut container,
                 root_pos,
@@ -564,7 +531,6 @@ impl BattleScene {
                 bracket_color,
                 &format!("BL_{x}_{y}_bl"),
             );
-            // Bottom-right
             Self::add_bracket(
                 &mut container,
                 root_pos,

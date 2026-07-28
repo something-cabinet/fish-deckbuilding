@@ -1,4 +1,3 @@
-/// BFS movement range computation — pure function.
 use std::collections::{HashMap, VecDeque};
 use crate::core::grid::model::GridState;
 #[cfg(test)]

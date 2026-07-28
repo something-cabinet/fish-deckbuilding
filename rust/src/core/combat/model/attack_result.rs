@@ -1,4 +1,3 @@
-/// Result of a single base-attack resolution.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AttackResult {
     pub damage_dealt: i32,

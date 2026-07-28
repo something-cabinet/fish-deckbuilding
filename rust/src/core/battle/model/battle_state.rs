@@ -1,4 +1,3 @@
-/// Battle state — the full mutable state of a battle.
 use crate::core::constants;
 use crate::core::grid::{Faction, GridState, GridUnit};
 use super::phase::Phase;

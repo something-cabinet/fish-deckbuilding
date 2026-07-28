@@ -1,4 +1,3 @@
-/// Grid state — owns unit placement on the board.
 use std::collections::HashMap;
 use crate::core::constants;
 use super::unit::{Faction, GridUnit};
