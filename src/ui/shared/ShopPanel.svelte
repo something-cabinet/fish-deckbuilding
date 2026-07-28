@@ -1,45 +1,53 @@
 <script lang="ts">
-  import { gameState, setScreen, spendGold, addToDeck, removeFromDeck, addRelic } from '../../lib/state.svelte';
-  import { CARD_DATA } from '../../game/cards/cardData';
-  import { RELIC_DATA } from '../../game/relics/relicData';
+  import { gameState, setScreen, spendGold, addToDeck, canAddToDeck, removeFromDeck } from '../../lib/state.svelte';
+  import { CARD_DATA, getCard } from '../../game/cards/cardData';
+  import { CardType } from '../../game/combat/CardTypes';
   import { eventBus } from '../../game/events';
 
-  // Mock shop inventory — sell cards NOT in the starter deck
-  const shopCards = [
-    CARD_DATA.fin_slash_2,    // Extra copy of a basic card
-    CARD_DATA.bubble_shield_2, // Extra defensive option
-    CARD_DATA.ink_cloud_2,     // Extra versatile card
-    CARD_DATA.desperate_strike, // Heavy hitter
-  ].filter(Boolean); // Guard against undefined entries
-
-  const shopRelics = [
-    RELIC_DATA.old_coin,
-    RELIC_DATA.coral_ring,
+  // Mock shop inventory — sell cards available in the card library
+  const shopCardIds = [
+    'fin_slash',
+    'bubble_shield',
+    'healing_rain',
+    'summon_minnow',
   ];
+  const shopCards: NonNullable<ReturnType<typeof getCard>>[] = shopCardIds.map(id => getCard(id)).filter((c): c is NonNullable<typeof c> => c != null);
 
   const removeCost = 25;
   const cardCost = 50;
-  const relicCost = 75;
 
-  function buyCard(cardId: string) {
-    if (gameState.run.gold >= cardCost) {
-      spendGold(cardCost);
-      addToDeck(cardId);
-      alert(`Bought ${CARD_DATA[cardId]?.name}!`);
-      eventBus.emit('shop:cardBought', { cardId, cost: cardCost });
-    } else {
-      alert('Not enough gold!');
+  let toastMessage = $state('');
+  let toastVisible = $state(false);
+
+  function showToast(msg: string) {
+    toastMessage = msg;
+    toastVisible = true;
+    setTimeout(() => { toastVisible = false; }, 2000);
+  }
+
+  function getTypeColor(type: CardType): string {
+    switch (type) {
+      case CardType.Attack: return 'var(--coral)';
+      case CardType.Armor: return 'var(--unit-blue)';
+      case CardType.Skill: return 'var(--stat-heal)';
+      case CardType.Summon: return 'var(--spell-green)';
+      case CardType.Passive: return 'var(--power-purple)';
+      default: return 'var(--parchment-dim)';
     }
   }
 
-  function buyRelic(relicId: string) {
-    if (gameState.run.gold >= relicCost) {
-      spendGold(relicCost);
-      addRelic(relicId);
-      alert(`Acquired ${RELIC_DATA[relicId]?.name}!`);
-      eventBus.emit('shop:relicBought', { relicId, cost: relicCost });
+  function buyCard(cardId: string) {
+    if (!canAddToDeck(cardId)) {
+      showToast('Deck full or max copies reached!');
+      return;
+    }
+    if (gameState.run.gold >= cardCost) {
+      spendGold(cardCost);
+      addToDeck(cardId);
+      showToast(`Bought ${getCard(cardId)?.name}!`);
+      eventBus.emit('shop:cardBought' as any, { cardId, cost: cardCost });
     } else {
-      alert('Not enough gold!');
+      showToast('Not enough gold!');
     }
   }
 
@@ -48,15 +56,19 @@
       spendGold(removeCost);
       const toRemove = gameState.run.deck[0];
       removeFromDeck(toRemove);
-      alert(`Removed ${CARD_DATA[toRemove]?.name || 'a card'} from deck.`);
-      eventBus.emit('shop:cardRemoved', { cardId: toRemove, cost: removeCost });
+      showToast(`Removed ${getCard(toRemove)?.name || 'a card'} from deck.`);
+      eventBus.emit('shop:cardRemoved' as any, { cardId: toRemove, cost: removeCost });
     } else {
-      alert('Not enough gold or deck is empty!');
+      showToast('Not enough gold or deck is empty!');
     }
   }
 </script>
 
 <div class="shop-panel">
+  {#if toastVisible}
+    <div class="shop-toast">{toastMessage}</div>
+  {/if}
+
   <h2 class="shop-title">MERCHANT OF THE DEEP</h2>
   <p class="shop-gold">Your Gold: <span class="gold-amount">{gameState.run.gold}</span></p>
 
@@ -64,30 +76,13 @@
     <h3 class="section-title">CARDS FOR SALE</h3>
     <div class="shop-grid">
       {#each shopCards as card}
-        <div class="shop-item card-item" style="border-color: {card.color}">
+        <div class="shop-item card-item" style="border-color: {getTypeColor(card.type)}">
           <div class="item-header">
             <span class="item-name">{card.name}</span>
             <span class="item-cost">{cardCost}G</span>
           </div>
           <p class="item-desc">{card.description}</p>
           <button class="buy-btn" onclick={() => buyCard(card.id)}>BUY</button>
-        </div>
-      {/each}
-    </div>
-  </div>
-
-  <div class="shop-section">
-    <h3 class="section-title">RELICS</h3>
-    <div class="shop-grid">
-      {#each shopRelics as relic}
-        <div class="shop-item relic-item" style="border-color: {relic.color}">
-          <div class="item-header">
-            <span class="item-name">{relic.name}</span>
-            <span class="item-cost">{relicCost}G</span>
-          </div>
-          <span class="item-rarity">{relic.rarity}</span>
-          <p class="item-desc">{relic.description}</p>
-          <button class="buy-btn" onclick={() => buyRelic(relic.id)}>BUY</button>
         </div>
       {/each}
     </div>
@@ -260,6 +255,28 @@
     font-size: 0.8rem;
     color: var(--parchment-dim);
     margin: 0;
+  }
+
+  .shop-toast {
+    position: fixed;
+    top: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--deep);
+    color: var(--gold);
+    padding: 0.6rem 1.5rem;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 50;
+    animation: toast-in 0.3s ease;
+    pointer-events: none;
+  }
+
+  @keyframes toast-in {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
 
   .leave-btn {

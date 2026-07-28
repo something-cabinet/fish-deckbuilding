@@ -1,7 +1,20 @@
 <script lang="ts">
   import { gameState } from '../../lib/state.svelte';
   import { getCard, CARD_DATA } from '../../game/cards/cardData';
+  import { CardType } from '../../game/combat/CardTypes';
+
   const allCards = Object.values(CARD_DATA);
+
+  function getTypeColor(type: CardType): string {
+    switch (type) {
+      case CardType.Attack: return 'var(--coral)';
+      case CardType.Armor: return 'var(--unit-blue)';
+      case CardType.Skill: return 'var(--stat-heal)';
+      case CardType.Summon: return 'var(--spell-green)';
+      case CardType.Passive: return 'var(--power-purple)';
+      default: return 'var(--parchment-dim)';
+    }
+  }
 </script>
 
 <div class="deck-viewer">
@@ -11,15 +24,16 @@
 
   <div class="card-list">
     {#each allCards as card}
-      <div class="deck-card" style="border-left-color: {card.color}">
+      <div class="deck-card" style="border-left-color: {getTypeColor(card.type)}">
         <div class="deck-card-header">
           <span class="deck-card-name">{card.name}</span>
-          <span class="deck-card-cost">{card.cost}C</span>
+          <span class="deck-card-cost">{card.manaCost}⚡</span>
         </div>
         <div class="deck-card-meta">
-          <span class="meta-stat">ATK {card.attack}</span>
-          <span class="meta-stat">DEF {card.defense}</span>
-          <span class="meta-stat">COIN {card.coinValue}</span>
+          {#if card.damage}<span class="meta-stat">DMG {card.damage}</span>{/if}
+          {#if card.armorAmount}<span class="meta-stat">ARMOR {card.armorAmount}</span>{/if}
+          {#if card.healAmount}<span class="meta-stat">HEAL {card.healAmount}</span>{/if}
+          <span class="meta-stat">{card.type.toUpperCase()}</span>
         </div>
         <p class="deck-card-desc">{card.description}</p>
       </div>
@@ -85,7 +99,12 @@
   .deck-card-cost {
     font-size: 0.8rem;
     font-weight: 700;
-    color: var(--gold);
+    color: white;
+    background: var(--unit-blue);
+    padding: 0.1rem 0.4rem;
+    border-radius: 50%;
+    min-width: 24px;
+    text-align: center;
   }
 
   .deck-card-meta {

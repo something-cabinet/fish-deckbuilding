@@ -1,6 +1,7 @@
 <script lang="ts">
   import { gameState } from '../../../../lib/state.svelte';
   import { getCard } from '../../../../game/cards/cardData';
+  import { CardType } from '../../../../game/combat/CardTypes';
   import DeckViewer from '../../../battle/DeckViewer.svelte';
 
   let showDeck = $state(false);
@@ -10,6 +11,17 @@
   let discardCount = $derived(gameState.combat.battleDiscard.length);
   let topDiscardId = $derived(gameState.combat.battleDiscard[discardCount - 1] ?? null);
   let topDiscardCard = $derived(topDiscardId ? getCard(topDiscardId) : null);
+
+  function getTypeColor(type: CardType): string {
+    switch (type) {
+      case CardType.Attack: return 'var(--coral)';
+      case CardType.Armor: return 'var(--unit-blue)';
+      case CardType.Skill: return 'var(--stat-heal)';
+      case CardType.Summon: return 'var(--spell-green)';
+      case CardType.Passive: return 'var(--power-purple)';
+      default: return 'var(--parchment-dim)';
+    }
+  }
 </script>
 
 <div class="deck-zone">
@@ -39,10 +51,10 @@
       {#if topDiscardCard}
         <div
           class="discard-top-card"
-          style="border-color: {topDiscardCard.color}"
+          style="border-color: {getTypeColor(topDiscardCard.type)}"
         >
           <div class="dtc-name">{topDiscardCard.name}</div>
-          <div class="dtc-cost">{topDiscardCard.cost}</div>
+          <div class="dtc-cost">{topDiscardCard.manaCost}</div>
         </div>
       {:else}
         <div class="card-back empty-discard"></div>
@@ -105,15 +117,15 @@
         {#each gameState.combat.battleDiscard as cardId, i}
           {@const card = getCard(cardId)}
           {#if card}
-            <div class="discard-card" style="border-left-color: {card.color}">
+            <div class="discard-card"           style="border-left-color: {getTypeColor(card.type)}">
               <div class="discard-card-header">
                 <span class="discard-card-name">{card.name}</span>
-                <span class="discard-card-cost">{card.cost}C</span>
+                <span class="discard-card-cost">{card.manaCost}⚡</span>
               </div>
               <div class="discard-card-meta">
-                <span class="meta-stat">ATK {card.attack}</span>
-                <span class="meta-stat">DEF {card.defense}</span>
-                <span class="meta-stat">COIN {card.coinValue}</span>
+                {#if card.damage}<span class="meta-stat">DMG {card.damage}</span>{/if}
+                {#if card.armorAmount}<span class="meta-stat">ARMOR {card.armorAmount}</span>{/if}
+                {#if card.healAmount}<span class="meta-stat">HEAL {card.healAmount}</span>{/if}
               </div>
             </div>
           {/if}

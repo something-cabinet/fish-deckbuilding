@@ -1,62 +1,75 @@
-import { STARTER_DECK } from '../game/cards/cardData';
+import { getStarterDeck } from '../game/cards/cardData';
 import type {
   EnemyInstance,
-  TurnPhase,
-  NodeType,
   Screen,
-  MapNode,
   RunState,
-  CombatState,
-  AIStrategy,
+  UIBattleState,
   EnemyAction,
 } from '../game/combat/CardTypes';
-export type { EnemyInstance, TurnPhase, NodeType, Screen, MapNode, RunState, CombatState, AIStrategy, EnemyAction };
+import { ISLAND_ZONES, getStartingZone } from '../game/map/islandData';
+import type { MapStateUI, PendingZoneAction } from '../game/map/IslandTypes';
+import { DIALOGUES } from '../game/story/dialogueData';
+import type { DialogueScene } from '../game/story/dialogueData';
+export type { EnemyInstance, Screen, RunState, UIBattleState, EnemyAction };
+export { DIALOGUES };
+export type { DialogueScene };
 
 // ───── Global Game State ─────
+export interface DialogueState {
+  sceneId: string;
+  lineIndex: number;
+  visible: boolean;
+}
+
 export interface GameState {
   screen: Screen;
   run: RunState;
-  combat: CombatState;
+  combat: UIBattleState;
+  map: MapStateUI;
+  activeDialogue: DialogueState | null;
 }
 
 function createInitialRunState(): RunState {
   return {
     heroHp: 30,
     heroMaxHp: 30,
-    heroMaxHand: 4,
-    creditLimit: 5,
     gold: 0,
-    deck: [...STARTER_DECK],
-    mapNodes: [],
-    currentNodeId: '',
+    deck: getStarterDeck().map(c => c.id),
     relics: [],
-    allies: [],
     seed: Date.now(),
     act: 1,
     battleIndex: 0,
   };
 }
 
-function createInitialCombatState(): CombatState {
+function createInitialCombatState(): UIBattleState {
   return {
     hand: [],
     battleDeck: [],
     battleDiscard: [],
-    sellPile: [],
-    coins: 0,
-    creditUsed: 0,
+    mana: 0,
     enemies: [],
     heroHp: 30,
     heroMaxHp: 30,
-    turnPhase: 'draw',
+    turnPhase: 'playerDraw',
     turnNumber: 1,
     encounterId: '',
     rewardGold: 0,
     rewardCards: [],
-    interestDue: 0,
     incomingDamage: 0,
     enemyActions: [],
-    aiStrategy: 'balanced',
+    lastAnimEvent: undefined,
+  };
+}
+
+function createInitialMapState(): MapStateUI {
+  const start = getStartingZone();
+  return {
+    currentZone: start.id,
+    unlockedZones: [start.id],
+    completedZones: [],
+    heroPosition: { x: start.position.x, y: start.position.y },
+    pendingAction: null,
   };
 }
 
@@ -65,6 +78,8 @@ function createInitialState(): GameState {
     screen: 'menu',
     run: createInitialRunState(),
     combat: createInitialCombatState(),
+    map: createInitialMapState(),
+    activeDialogue: null,
   };
 }
 
@@ -78,6 +93,45 @@ export function setScreen(screen: Screen) {
 export function resetGame() {
   const fresh = createInitialState();
   Object.assign(gameState, fresh);
+}
+
+// ───── Dialogue helpers ─────
+
+export function startDialogue(sceneId: string) {
+  if (DIALOGUES[sceneId]) {
+    gameState.activeDialogue = { sceneId, lineIndex: 0, visible: true };
+    gameState.screen = 'dialogue';
+  }
+}
+
+export function advanceDialogue() {
+  const ad = gameState.activeDialogue;
+  if (!ad) return;
+  const scene = DIALOGUES[ad.sceneId];
+  if (!scene) return;
+  if (ad.lineIndex < scene.lines.length - 1) {
+    gameState.activeDialogue = { ...ad, lineIndex: ad.lineIndex + 1 };
+  } else {
+    endDialogue();
+  }
+}
+
+export function endDialogue() {
+  const ad = gameState.activeDialogue;
+  if (!ad) return;
+  const scene = DIALOGUES[ad.sceneId];
+  if (!scene) return;
+
+  // Apply zone unlocks
+  if (scene.zoneUnlock) {
+    for (const zoneId of scene.zoneUnlock) {
+      unlockZone(zoneId);
+    }
+  }
+
+  // Navigate to next screen
+  gameState.screen = (scene.onEnd as Screen) || 'map';
+  gameState.activeDialogue = null;
 }
 
 // ───── Run state helpers ─────
@@ -96,7 +150,16 @@ export function spendGold(amount: number) {
   gameState.run.gold = Math.max(0, gameState.run.gold - amount);
 }
 
+const MAX_DECK_SIZE = 30;
+const MAX_COPIES = 2;
+
+export function countDeckCopies(cardId: string): number {
+  return gameState.run.deck.filter(id => id === cardId).length;
+}
+
 export function addToDeck(cardId: string) {
+  if (gameState.run.deck.length >= MAX_DECK_SIZE) return;
+  if (countDeckCopies(cardId) >= MAX_COPIES) return;
   gameState.run.deck.push(cardId);
 }
 
@@ -105,24 +168,52 @@ export function removeFromDeck(cardId: string) {
   if (idx !== -1) gameState.run.deck.splice(idx, 1);
 }
 
+export function canAddToDeck(cardId: string): boolean {
+  return gameState.run.deck.length < MAX_DECK_SIZE && countDeckCopies(cardId) < MAX_COPIES;
+}
+
 export function addRelic(relicId: string) {
   gameState.run.relics.push(relicId);
 }
 
-// ───── Map helpers ─────
-export function setMapNodes(nodes: MapNode[]) {
-  gameState.run.mapNodes = nodes;
+// ───── Island map helpers ─────
+
+export function setCurrentZone(zoneId: string) {
+  gameState.map.currentZone = zoneId;
+  const zone = ISLAND_ZONES.find((z) => z.id === zoneId);
+  if (zone) {
+    gameState.map.heroPosition = { x: zone.position.x, y: zone.position.y };
+  }
 }
 
-export function setCurrentNode(nodeId: string) {
-  gameState.run.currentNodeId = nodeId;
-  const node = gameState.run.mapNodes.find((n) => n.id === nodeId);
-  if (node) node.visited = true;
+export function unlockZone(zoneId: string) {
+  if (!gameState.map.unlockedZones.includes(zoneId)) {
+    gameState.map.unlockedZones.push(zoneId);
+  }
 }
 
-export function markNodeCleared(nodeId: string) {
-  const node = gameState.run.mapNodes.find((n) => n.id === nodeId);
-  if (node) node.cleared = true;
+export function completeZone(zoneId: string) {
+  if (!gameState.map.completedZones.includes(zoneId)) {
+    gameState.map.completedZones.push(zoneId);
+  }
+}
+
+export function setPendingAction(action: PendingZoneAction | null) {
+  gameState.map.pendingAction = action;
+}
+
+export function clearPendingAction() {
+  gameState.map.pendingAction = null;
+}
+
+/** Unlock any zones whose requiredChapter is ≤ current act. */
+export function refreshUnlockedZones() {
+  const chapter = gameState.run.act;
+  for (const zone of ISLAND_ZONES) {
+    if (zone.requiredChapter <= chapter && !gameState.map.unlockedZones.includes(zone.id)) {
+      gameState.map.unlockedZones.push(zone.id);
+    }
+  }
 }
 
 // ───── Combat helpers ─────
@@ -134,18 +225,32 @@ export function endCombat() {
   gameState.combat.hand = [];
   gameState.combat.battleDeck = [];
   gameState.combat.battleDiscard = [];
-  gameState.combat.sellPile = [];
-  gameState.combat.coins = 0;
-  gameState.combat.creditUsed = 0;
+  gameState.combat.mana = 0;
   gameState.combat.enemies = [];
-  gameState.combat.turnPhase = 'draw';
+  gameState.combat.turnPhase = 'playerDraw';
   gameState.combat.turnNumber = 1;
   gameState.combat.encounterId = '';
   gameState.combat.rewardGold = 0;
   gameState.combat.rewardCards = [];
-  gameState.combat.interestDue = 0;
   gameState.combat.enemyActions = [];
-  gameState.combat.aiStrategy = 'balanced';
+}
+
+/**
+ * Handle player defeat — preserves all run progress (gold, deck, collection, map).
+ * Restores a minimal HP so the player can continue or retry.
+ * Sets screen to 'death' for the defeat animation/UI.
+ */
+export function handleDefeat() {
+  // Preserve everything — gold, deck, collection, map progress
+  // Restore HP to at least 10, or 30% of max HP (whichever is higher), capped at max
+  gameState.run.heroHp = Math.min(
+    gameState.run.heroMaxHp,
+    Math.max(10, Math.floor(gameState.run.heroMaxHp * 0.3)),
+  );
+  // Clear combat state for the next battle
+  endCombat();
+  // Show death screen with options to return to map or retry
+  gameState.screen = 'death';
 }
 
 export function incrementBattleIndex() {
@@ -164,25 +269,21 @@ export function setCombatBattleDiscard(discard: string[]) {
   gameState.combat.battleDiscard = discard;
 }
 
-export function setCombatCoins(coins: number) {
-  gameState.combat.coins = coins;
+export function setCombatMana(mana: number) {
+  gameState.combat.mana = mana;
 }
 
-export function setCombatTurnPhase(phase: TurnPhase) {
+export function setCombatTurnPhase(phase: string) {
   gameState.combat.turnPhase = phase;
 }
 
-export function setCombatSellPile(pile: string[]) {
-  gameState.combat.sellPile = pile;
-}
-
 export function getLivingEnemies(): EnemyInstance[] {
-  return gameState.combat.enemies.filter((e) => e.hp > 0);
+  return gameState.combat.enemies.filter((e: EnemyInstance) => e.hp > 0);
 }
 
 /** Get the EnemyAction for a specific enemy index (or undefined if no action computed) */
 export function getEnemyAction(enemyIndex: number): EnemyAction | undefined {
-  return gameState.combat.enemyActions.find(a => a.enemyIndex === enemyIndex);
+  return gameState.combat.enemyActions.find((a: EnemyAction) => a.enemyIndex === enemyIndex);
 }
 
 export function combatNextTurn() {

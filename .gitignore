@@ -25,6 +25,10 @@ dist-ssr
 wm-cli
 wm-cli.exe
 
+# Prisma SQLite database
+prisma/dev.db
+prisma/dev.db-journal
+
 # Deepwork state files (git-local, readable by OpenCode)
 .slim/deepwork/
 

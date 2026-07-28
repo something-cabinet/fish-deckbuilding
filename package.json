@@ -10,7 +10,14 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
@@ -23,6 +30,12 @@
     "vitest": "^3.1.1"
   },
   "dependencies": {
-    "excalibur": "^0.32.0"
+    "@excaliburjs/plugin-spritefusion": "^0.32.0",
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "better-sqlite3": "^13.0.1",
+    "dotenv": "^17.4.2",
+    "excalibur": "^0.32.0",
+    "prisma": "^7.9.1"
   }
 }

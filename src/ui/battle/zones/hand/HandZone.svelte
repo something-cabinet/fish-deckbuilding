@@ -6,7 +6,7 @@
     selectedIndex: number | null;
     onHover: (cardId: string, event: MouseEvent) => void;
     onLeave: () => void;
-    onSellCard: (cardIndex: number) => void;
+    onSellCard?: (cardIndex: number) => void;
     onPlayCard: (cardIndex: number) => void;
     onSelectCard: (index: number) => void;
     onBlockCard?: (cardIndex: number) => void;
@@ -29,7 +29,7 @@
   <HandViewer
     {onHover}
     {onLeave}
-    {onSellCard}
+    onSellCard={onSellCard ?? (() => {})}
     {onPlayCard}
     onBlockCard={onBlockCard}
     {selectedIndex}

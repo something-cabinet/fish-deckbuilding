@@ -1,10 +1,8 @@
 /**
  * Game systems index.
  *
- * For this turn-based game, the primary orchestration is handled by
- * CombatOrchestrator (event-driven, called by UI/bridge).
- * Excalibur Systems (per-frame) can be added later for visual effects,
- * animations, or continuous behaviors.
+ * Systems layer — combat is now orchestrated by the pure-function CombatEngine.
+ * The legacy CombatOrchestrator has been removed in favor of direct CombatEngine calls.
  */
 
-export { CombatOrchestrator } from './CombatOrchestrator';
+export {};

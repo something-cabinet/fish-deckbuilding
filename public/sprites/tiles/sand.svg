@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .abyss { fill: #0a1628; }
+      .deep { fill: #0f2236; }
+      .coral { fill: #e85d4e; }
+      .gold { fill: #f4c430; }
+      .parchment { fill: #e8dcc5; }
+      .shallow { fill: #1a3a5c; }
+      .coral-light { fill: #ff6b5e; }
+    </style>
+  </defs>
+  
+  <!-- Base sand -->
+  <rect x="0" y="0" width="64" height="64" class="parchment"/>
+  
+  <!-- Sand grain texture -->
+  <rect x="4" y="4" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="12" y="8" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="20" y="4" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="28" y="12" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="36" y="6" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="44" y="10" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="52" y="4" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="60" y="8" width="2" height="2" class="gold" opacity="0.3"/>
+  
+  <rect x="8" y="16" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="16" y="20" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="24" y="16" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="32" y="24" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="40" y="18" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="48" y="22" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="56" y="16" width="2" height="2" class="gold" opacity="0.5"/>
+  
+  <rect x="4" y="28" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="12" y="32" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="20" y="28" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="28" y="36" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="36" y="30" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="44" y="34" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="52" y="28" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="60" y="32" width="2" height="2" class="gold" opacity="0.5"/>
+  
+  <rect x="8" y="40" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="16" y="44" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="24" y="40" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="32" y="48" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="40" y="42" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="48" y="46" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="56" y="40" width="2" height="2" class="gold" opacity="0.4"/>
+  
+  <rect x="4" y="52" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="12" y="56" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="20" y="52" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="28" y="56" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="36" y="54" width="2" height="2" class="gold" opacity="0.4"/>
+  <rect x="44" y="58" width="2" height="2" class="gold" opacity="0.3"/>
+  <rect x="52" y="52" width="2" height="2" class="gold" opacity="0.5"/>
+  <rect x="60" y="56" width="2" height="2" class="gold" opacity="0.4"/>
+  
+  <!-- Darker patches -->
+  <rect x="14" y="14" width="4" height="4" class="gold" opacity="0.2"/>
+  <rect x="38" y="38" width="6" height="4" class="gold" opacity="0.2"/>
+  <rect x="50" y="12" width="4" height="4" class="gold" opacity="0.2"/>
+  
+  <!-- Shell fragments -->
+  <rect x="10" y="10" width="2" height="2" class="coral-light" opacity="0.3"/>
+  <rect x="42" y="20" width="2" height="2" class="coral-light" opacity="0.2"/>
+  <rect x="30" y="50" width="2" height="2" class="coral-light" opacity="0.3"/>
+  
+  <!-- Tile border -->
+  <rect x="0" y="0" width="64" height="2" class="gold" opacity="0.2"/>
+  <rect x="0" y="0" width="2" height="64" class="gold" opacity="0.2"/>
+</svg>

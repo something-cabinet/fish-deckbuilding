@@ -2,25 +2,25 @@
  * Bridge layer: Excalibur EventEmitter → Svelte $state.
  *
  * Subscribes to the global eventBus and updates Svelte's reactive GameState.
- * Primary sync via `state:changed` snapshot event — eliminates per-field desync.
- * Granular events kept only for transient UI effects (interest flash, kill animation).
+ * Primary sync via `state:changed` snapshot event.
  *
  * Svelte components read from $state — they never call Excalibur APIs directly.
  */
 
 import { eventBus } from './events';
-import type { CombatState, RunState, Screen, EnemyInstance } from './combat/CardTypes';
+import type { UIBattleState, RunState, Screen, EnemyInstance } from './combat/CardTypes';
 import type { GameState } from '../lib/state.svelte';
 import { CombatOrchestrator } from './systems/CombatOrchestrator';
+import { IslandScene } from './scenes/IslandScene';
+import { getZoneById } from './map/islandData';
+import { ZoneType } from './map/IslandTypes';
+import { setCurrentZone, refreshUnlockedZones, setPendingAction, completeZone, handleDefeat, startDialogue } from '../lib/state.svelte';
 
 let gameStateRef: GameState | null = null;
 let currentOrchestrator: CombatOrchestrator | null = null;
+let islandSceneRef: IslandScene | null = null;
 let registered = false;
 
-/**
- * Register the bridge with a reference to Svelte's reactive GameState.
- * Safe to call multiple times — guarded by `registered` flag.
- */
 export function registerBridge(gs: GameState): void {
   if (registered) return;
   gameStateRef = gs;
@@ -28,24 +28,14 @@ export function registerBridge(gs: GameState): void {
   subscribeAll();
 }
 
-/**
- * Set the current combat orchestrator (called when entering/exiting battle).
- */
 export function setCurrentOrchestrator(orchestrator: CombatOrchestrator | null): void {
   currentOrchestrator = orchestrator;
 }
 
-/**
- * Get the current combat orchestrator for the UI layer.
- */
 export function getCurrentOrchestrator(): CombatOrchestrator | null {
   return currentOrchestrator;
 }
 
-/**
- * Create a fresh combat orchestrator and register it with the bridge.
- * Called when entering combat from the map scene.
- */
 export function createAndRegisterOrchestrator(
   runState: RunState,
   encounterEnemies: EnemyInstance[],
@@ -56,7 +46,6 @@ export function createAndRegisterOrchestrator(
   const orchestrator = new CombatOrchestrator();
   setCurrentOrchestrator(orchestrator);
 
-  // Initialize Svelte combat state with encounter data so enemies appear immediately
   if (gameStateRef) {
     gameStateRef.combat.enemies = encounterEnemies.map(e => ({ ...e }));
     gameStateRef.combat.encounterId = encounterId;
@@ -70,9 +59,6 @@ export function createAndRegisterOrchestrator(
   return orchestrator;
 }
 
-/**
- * Destroy the current orchestrator and unregister from the bridge.
- */
 export function destroyCurrentOrchestrator(): void {
   if (currentOrchestrator) {
     currentOrchestrator.destroy();
@@ -81,16 +67,18 @@ export function destroyCurrentOrchestrator(): void {
   }
 }
 
-/**
- * Unsubscribe all bridge listeners (cleanup on teardown).
- */
 export function unregisterBridge(): void {
   registered = false;
 }
 
-/** Subscribes to all game events and wires them to state.ts helpers. */
+/** Register the IslandScene so the bridge can sync state back to it. */
+export function registerIslandScene(scene: IslandScene): void {
+  islandSceneRef = scene;
+  // Don't immediately call syncFromState — IslandScene may not be initialized yet.
+  // syncFromState is called on map screen activation and on map state changes.
+}
+
 function subscribeAll(): void {
-  // ───── State snapshot (primary sync — fixes all P0 desyncs) ─────
   eventBus.on('state:changed', () => {
     if (!gameStateRef || !currentOrchestrator) return;
     const snapshot = currentOrchestrator.getStateSnapshot();
@@ -98,15 +86,12 @@ function subscribeAll(): void {
     if (snapshot.hand !== undefined) combat.hand = snapshot.hand;
     if (snapshot.battleDeck !== undefined) combat.battleDeck = snapshot.battleDeck;
     if (snapshot.battleDiscard !== undefined) combat.battleDiscard = snapshot.battleDiscard;
-    if (snapshot.sellPile !== undefined) combat.sellPile = snapshot.sellPile;
-    if (snapshot.coins !== undefined) combat.coins = snapshot.coins;
-    if (snapshot.creditUsed !== undefined) combat.creditUsed = snapshot.creditUsed;
+    if (snapshot.mana !== undefined) combat.mana = snapshot.mana;
     if (snapshot.heroHp !== undefined) combat.heroHp = snapshot.heroHp;
     if (snapshot.heroMaxHp !== undefined) combat.heroMaxHp = snapshot.heroMaxHp;
     if (snapshot.turnPhase !== undefined) combat.turnPhase = snapshot.turnPhase;
     if (snapshot.turnNumber !== undefined) combat.turnNumber = snapshot.turnNumber;
     if (snapshot.enemies !== undefined) {
-      // Merge snapshot enemy HP into existing enemy list (preserves id/name/structure)
       for (const snapEnemy of snapshot.enemies) {
         const existing = combat.enemies.find(e => e.id === snapEnemy.id);
         if (existing) existing.hp = snapEnemy.hp;
@@ -114,78 +99,169 @@ function subscribeAll(): void {
     }
   });
 
-  // ───── Interest flash (transient UI effect) ─────
-  eventBus.on('interest:due', (e) => {
+  // ── Animation event wiring (Phase 5) ──
+  // CombatOrchestrator emits these; the bridge stores the latest event
+  // for the Svelte animation layer to consume.
+
+  eventBus.on('anim:damage', (e) => {
     if (!gameStateRef) return;
-    gameStateRef.combat.interestDue = e.amount;
-    gameStateRef.combat.heroHp = e.heroHp;
+    // Store latest damage event for FloatingText/DamageFlash components
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'damage',
+      targetId: e.targetId,
+      amount: e.amount,
+      isCrit: e.isCrit ?? false,
+      position: e.position,
+    } as any;
   });
 
-  // ───── Defense phase (populates enemyActions for UI) ─────
-  eventBus.on('combat:defensePhase', (e) => {
+  eventBus.on('anim:heal', (e) => {
     if (!gameStateRef) return;
-    const combat = gameStateRef.combat;
-    combat.turnPhase = 'defense';
-    combat.enemyActions = e.enemyAttacks.map(a => ({
-      enemyIndex: combat.enemies.findIndex(en => en.id === a.enemyId),
-      type: 'attack' as const,
-      damage: a.damage,
-      target: 'hero' as const,
-    }));
-    // Store incoming damage for the defense prompt
-    combat.incomingDamage = e.incomingDamage;
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'heal',
+      targetId: e.targetId,
+      amount: e.amount,
+      position: e.position,
+    } as any;
   });
 
-  // ───── Victory (applies gold, transitions to card reward) ─────
+  eventBus.on('anim:gold', (e) => {
+    if (!gameStateRef) return;
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'gold',
+      amount: e.amount,
+      position: e.position,
+    } as any;
+  });
+
+  eventBus.on('anim:cardPlayed', (e) => {
+    if (!gameStateRef) return;
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'cardPlayed',
+      cardName: e.cardName,
+      originRect: e.originRect,
+    } as any;
+  });
+
+  eventBus.on('anim:armorGained', (e) => {
+    if (!gameStateRef) return;
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'armorGained',
+      targetId: e.targetId,
+      amount: e.amount,
+    } as any;
+  });
+
+  eventBus.on('anim:screenShake', (e) => {
+    if (!gameStateRef) return;
+    gameStateRef.combat.lastAnimEvent = {
+      type: 'screenShake',
+      intensity: e.intensity,
+    } as any;
+  });
+
   eventBus.on('combat:victory', (e) => {
     if (!gameStateRef) return;
     const run = gameStateRef.run;
     const combat = gameStateRef.combat;
-    // Sync hero HP from combat to run
+    // M1: bridge does NOT modify gold — RewardScreen owns the gold economy
     run.heroHp = combat.heroHp;
-    // Apply reward gold once
-    run.gold += e.rewardGold;
+    // AC-17: Post-battle heal — restore ~10 HP after victory, capped at maxHp
+    run.heroHp = Math.min(run.heroMaxHp, run.heroHp + 10);
     combat.rewardGold = e.rewardGold;
     combat.rewardCards = e.rewardCards;
+
+    // C4: Progression — complete the zone, check boss → advance act
+    const zone = getZoneById(gameStateRef.map.currentZone);
+    if (zone) {
+      completeZone(zone.id);
+      if (zone.isBossZone) {
+        // Advance to next act
+        gameStateRef.run.act++;
+        refreshUnlockedZones();
+        eventBus.emit('map:zoneCompleted', { zoneId: zone.id, zoneType: zone.type });
+
+        // Chapter 2 intro plays after the first boss (act 1 → 2)
+        if (gameStateRef.run.act === 2) {
+          startDialogue('chapter_2_intro');
+          battleOver = true;
+          return;
+        }
+      }
+    }
+
+    // Navigate to card reward screen
+    gameStateRef.screen = 'cardReward';
     battleOver = true;
   });
 
-  // ───── Defeat (transitions to death screen) ─────
   eventBus.on('combat:defeat', () => {
     if (!gameStateRef) return;
-    gameStateRef.screen = 'death';
+    // AC-16: Defeat preserves gold, deck, collection, map progress
+    // Restores minimal HP so player can continue or retry
+    handleDefeat();
     battleOver = true;
   });
 
-  // ───── Screen transitions ─────
   eventBus.on('screen:changed', (e) => {
     if (!gameStateRef) return;
     gameStateRef.screen = e.screen as Screen;
   });
+
+  // ── Island map events ──
+
+  eventBus.on('map:zoneEntered', (e) => {
+    if (!gameStateRef) return;
+
+    const zone = getZoneById(e.zoneId);
+    if (!zone) return;
+
+    // Update Svelte state
+    setCurrentZone(e.zoneId);
+    refreshUnlockedZones();
+
+    // Sync Illuminated scene visuals
+    if (islandSceneRef) {
+      islandSceneRef.syncFromState(gameStateRef.map);
+    }
+
+    // Zone-type-specific transitions
+    if (zone.type === ZoneType.Shop) {
+      gameStateRef.screen = 'shop';
+    } else if (zone.type === ZoneType.Rest) {
+      gameStateRef.screen = 'rest';
+    } else if (zone.type === ZoneType.Combat || zone.type === ZoneType.Boss) {
+      // Show confirmation prompt in overlay
+      setPendingAction({ type: 'battle', zoneId: e.zoneId, zoneName: zone.name });
+
+      // Final boss intro dialogue
+      if (zone.id === 'final_battle') {
+        startDialogue('final_boss_intro');
+      }
+    } else if (zone.type === ZoneType.Event) {
+      setPendingAction({ type: 'event', zoneId: e.zoneId, zoneName: zone.name });
+    }
+    // Town zones just update currentZone — no transition
+  });
+
+  eventBus.on('map:zoneCompleted', (e) => {
+    if (!gameStateRef) return;
+    completeZone(e.zoneId);
+    if (islandSceneRef) {
+      islandSceneRef.syncFromState(gameStateRef.map);
+    }
+  });
 }
 
-// Track whether a battle ended to prevent double gold/transition
 let battleOver = false;
 
-/**
- * Get and reset the battle-over flag.
- * Called from BattleHUD to discover if battle ended.
- */
 export function consumeBattleOver(): boolean {
   const was = battleOver;
   battleOver = false;
   return was;
 }
 
-/**
- * When returning from combat, sync combat results back to run state.
- * Call this before transitioning away from the battle screen.
- * NOTE: gold is already applied by the combat:victory bridge handler.
- * This only syncs hero HP if it wasn't already synced.
- */
 export function syncCombatResultToRun(): void {
   if (!gameStateRef) return;
-  // Hero HP should already be synced by combat:victory handler,
-  // but this ensures it's set if the handler didn't fire (e.g. defeat).
   gameStateRef.run.heroHp = gameStateRef.combat.heroHp;
 }

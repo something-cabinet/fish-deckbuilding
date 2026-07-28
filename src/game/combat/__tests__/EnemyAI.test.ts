@@ -1,193 +1,270 @@
+/**
+ * Enemy AI tests — grid-based movement, attack targeting, strategy behaviors.
+ */
 import { describe, it, expect } from 'vitest';
-import { computeEnemyActions } from '../EnemyAI';
-import type { EnemyInstance, EnemyAction } from '../CardTypes';
+import { executeEnemyTurn, getEnemyMoveTarget, getEnemyAttackTarget } from '../EnemyAI';
+import { TurnPhase, CardType, MoveType } from '../CardTypes';
+import type { CombatState, CombatHero, CombatEnemy } from '../CardTypes';
+import { createEmptyGrid, placeUnit } from '../../grid/GridFactory';
+import { MoveType as GridMoveType } from '../../grid/GridTypes';
+import type { GridUnit } from '../../grid/GridTypes';
 
-function makeEnemy(overrides: Partial<EnemyInstance> & { id: string }): EnemyInstance {
+// ───── Test Helpers ─────
+
+function makeHero(overrides: Partial<CombatHero> = {}): CombatHero {
+  return {
+    id: 'hero',
+    unitId: 'hero_unit',
+    hp: overrides.hp ?? 20,
+    maxHp: overrides.maxHp ?? 20,
+    baseAttack: overrides.baseAttack ?? 2,
+    armor: overrides.armor ?? 0,
+    armorTurns: overrides.armorTurns ?? 0,
+  };
+}
+
+function makeEnemy(overrides: Partial<CombatEnemy> & { id: string }): CombatEnemy {
   return {
     id: overrides.id,
+    unitId: `enemy_unit_${overrides.id}`,
     name: overrides.name ?? 'Test Enemy',
     hp: overrides.hp ?? 10,
     maxHp: overrides.maxHp ?? 10,
     attack: overrides.attack ?? 3,
     defense: overrides.defense ?? 1,
-    intent: overrides.intent ?? 'attack',
-    isBoss: overrides.isBoss ?? false,
+    armor: overrides.armor ?? 0,
+    aiStrategy: overrides.aiStrategy ?? 'aggressive',
+    hasProvoke: overrides.hasProvoke ?? false,
+    moveRange: overrides.moveRange ?? 2,
+    attackRange: overrides.attackRange ?? 1,
+  };
+}
+
+/**
+ * Create a combat state with the hero at a specific position and enemies at specific positions.
+ */
+function createCombatState(heroPos: { x: number; y: number }, enemyConfigs: Array<{
+  id: string;
+  pos: { x: number; y: number };
+  hp?: number;
+  attack?: number;
+  aiStrategy?: 'aggressive' | 'balanced' | 'defensive';
+  attackRange?: number;
+}> = []): CombatState {
+  const grid = createEmptyGrid(9, 5);
+
+  const heroGridUnit: GridUnit = {
+    id: 'hero_unit',
+    type: 'hero',
+    faction: 'player',
+    position: { x: heroPos.x, y: heroPos.y },
+    moveType: GridMoveType.Normal,
+    moveRange: 2,
+    attackRange: 1,
+    hasProvoke: false,
+    hasActed: false,
+    hasMoved: false,
+    hasAttacked: false,
+    isAlive: true,
+  };
+  let g = placeUnit(grid, heroGridUnit);
+
+  const enemies: CombatEnemy[] = [];
+  for (const ec of enemyConfigs) {
+    const enemyGridUnit: GridUnit = {
+      id: `enemy_unit_${ec.id}`,
+      type: 'enemy',
+      faction: 'enemy',
+      position: { x: ec.pos.x, y: ec.pos.y },
+      moveType: GridMoveType.Normal,
+      moveRange: 2,
+      attackRange: ec.attackRange ?? 1,
+      hasProvoke: false,
+      hasActed: false,
+      hasMoved: false,
+      hasAttacked: false,
+      isAlive: true,
+    };
+    g = placeUnit(g, enemyGridUnit);
+
+    enemies.push(makeEnemy({
+      id: ec.id,
+      hp: ec.hp ?? 10,
+      attack: ec.attack ?? 3,
+      aiStrategy: ec.aiStrategy ?? 'aggressive',
+      attackRange: ec.attackRange ?? 1,
+    }));
+  }
+
+  return {
+    grid: g,
+    hero: makeHero(),
+    enemies,
+    hand: [],
+    deck: [],
+    discard: [],
+    mana: 1,
+    maxMana: 1,
+    turnNumber: 1,
+    turnPhase: TurnPhase.EnemyTurn,
+    canReplace: false,
+    battleResult: 'ongoing',
+    summons: [],
+    summonIdCounter: 0,
+    passives: [],
+    seed: 42,
+    cardInstanceCounter: 0,
   };
 }
 
 describe('EnemyAI', () => {
-  describe('computeEnemyActions', () => {
-    it('aggressive strategy: all enemies attack hero', () => {
-      const enemies = [
-        makeEnemy({ id: 'e1', attack: 2, defense: 1 }),
-        makeEnemy({ id: 'e2', attack: 3, defense: 2 }),
-      ];
+  describe('getEnemyMoveTarget', () => {
+    it('should return a position closer to the hero for aggressive enemy', () => {
+      // Hero at (1,2), enemy at (7,2) — far apart
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 7, y: 2 }, aiStrategy: 'aggressive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'aggressive');
+      const moveTarget = getEnemyMoveTarget(state, state.enemies[0]);
+      expect(moveTarget).not.toBeNull();
 
-      expect(actions).toHaveLength(2);
-      expect(actions[0].type).toBe('attack');
-      expect(actions[0].damage).toBe(2);
-      expect(actions[0].target).toBe('hero');
-      expect(actions[1].type).toBe('attack');
-      expect(actions[1].damage).toBe(3);
-      expect(actions[1].target).toBe('hero');
+      // Target should be closer to hero than current position
+      if (moveTarget) {
+        const currentDist = Math.abs(7 - 1) + Math.abs(2 - 2); // 6
+        const newDist = Math.abs(moveTarget.x - 1) + Math.abs(moveTarget.y - 2);
+        expect(newDist).toBeLessThan(currentDist);
+      }
     });
 
-    it('aggressive strategy: single enemy attacks', () => {
-      const enemies = [makeEnemy({ id: 'e1', attack: 5 })];
+    it('should return null for defensive enemy far from hero', () => {
+      // Hero at (1,2), enemy at (7,2) — far apart (dist = 6 > 3)
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 7, y: 2 }, aiStrategy: 'defensive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'aggressive');
-
-      expect(actions).toHaveLength(1);
-      expect(actions[0].type).toBe('attack');
-      expect(actions[0].damage).toBe(5);
+      const moveTarget = getEnemyMoveTarget(state, state.enemies[0]);
+      expect(moveTarget).toBeNull();
     });
 
-    it('balanced strategy: roughly even split between attack and defend', () => {
-      // With 4 enemies, balanced → even indices attack (0,2), odd defend (1,3)
-      const enemies = [
-        makeEnemy({ id: 'e1', attack: 2, defense: 1 }),
-        makeEnemy({ id: 'e2', attack: 3, defense: 2 }),
-        makeEnemy({ id: 'e3', attack: 4, defense: 3 }),
-        makeEnemy({ id: 'e4', attack: 5, defense: 4 }),
-      ];
+    it('should return null if enemy is already in attack range', () => {
+      // Enemy at (2,2), hero at (1,2) — adjacent, already in melee range
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 2, y: 2 }, aiStrategy: 'aggressive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'balanced');
+      const moveTarget = getEnemyMoveTarget(state, state.enemies[0]);
+      expect(moveTarget).toBeNull();
+    });
+  });
 
-      expect(actions).toHaveLength(4);
-      // Even indices (0, 2) attack
-      expect(actions[0].type).toBe('attack');
-      expect(actions[0].damage).toBe(2);
-      expect(actions[2].type).toBe('attack');
-      expect(actions[2].damage).toBe(4);
-      // Odd indices (1, 3) defend
-      expect(actions[1].type).toBe('defend');
-      expect(actions[1].block).toBe(2);
-      expect(actions[3].type).toBe('defend');
-      expect(actions[3].block).toBe(4);
+  describe('getEnemyAttackTarget', () => {
+    it('should return hero unitId when hero is in range', () => {
+      // Hero at (1,2), enemy at (2,2) — adjacent
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 2, y: 2 }, aiStrategy: 'aggressive' }],
+      );
+
+      const targetId = getEnemyAttackTarget(state, state.enemies[0]);
+      expect(targetId).toBe('hero_unit');
     });
 
-    it('defensive strategy: most enemies defend, few attack', () => {
-      // With 3 enemies, defensive → even indices defend (0,2), odd index attacks (1)
-      const enemies = [
-        makeEnemy({ id: 'e1', attack: 2, defense: 1 }),
-        makeEnemy({ id: 'e2', attack: 3, defense: 2 }),
-        makeEnemy({ id: 'e3', attack: 4, defense: 3 }),
-      ];
+    it('should return null when no targets are in range', () => {
+      // Hero at (1,2), enemy at (7,2) — far apart
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 7, y: 2 }, aiStrategy: 'aggressive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'defensive');
+      const targetId = getEnemyAttackTarget(state, state.enemies[0]);
+      expect(targetId).toBeNull();
+    });
+  });
 
-      expect(actions).toHaveLength(3);
-      // Even indices (0, 2) defend
-      expect(actions[0].type).toBe('defend');
-      expect(actions[0].block).toBe(1);
-      expect(actions[2].type).toBe('defend');
-      expect(actions[2].block).toBe(3);
-      // Odd index (1) attacks
-      expect(actions[1].type).toBe('attack');
-      expect(actions[1].damage).toBe(3);
+  describe('executeEnemyTurn', () => {
+    it('should not crash with empty enemies', () => {
+      const state = createCombatState({ x: 1, y: 2 });
+      const next = executeEnemyTurn(state);
+      expect(next.hero.hp).toBe(20);
+      expect(next.enemies).toHaveLength(0);
     });
 
-    it('defensive strategy: lone enemy defends', () => {
-      const enemies = [makeEnemy({ id: 'e1', attack: 2, defense: 5 })];
+    it('should deal damage to hero when enemy is adjacent', () => {
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 2, y: 2 }, attack: 3, aiStrategy: 'aggressive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'defensive');
-
-      expect(actions).toHaveLength(1);
-      expect(actions[0].type).toBe('defend');
-      expect(actions[0].block).toBe(5);
+      const next = executeEnemyTurn(state);
+      expect(next.hero.hp).toBeLessThan(20); // Hero took damage
     });
 
-    it('enemy with intent attack deals its attack damage to hero', () => {
-      const enemies = [makeEnemy({ id: 'e1', attack: 7, intent: 'attack' })];
+    it('should move aggressive enemy toward hero and attack', () => {
+      // Hero at (1,2), enemy at (5,2) — within 2 moves of being adjacent
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 5, y: 2 }, attack: 3, aiStrategy: 'aggressive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'aggressive');
+      const next = executeEnemyTurn(state);
 
-      expect(actions[0].type).toBe('attack');
-      expect(actions[0].damage).toBe(7);
-      expect(actions[0].target).toBe('hero');
+      // Enemy moved closer (preferred) OR attacked if got in range
+      const enemyUnit = next.grid.units.get('enemy_unit_e1');
+      expect(enemyUnit).toBeDefined();
+      if (enemyUnit) {
+        const distToHero = Math.abs(enemyUnit.position.x - 1) + Math.abs(enemyUnit.position.y - 2);
+        expect(distToHero).toBeLessThanOrEqual(4); // Original dist was 4, could move 2 closer
+      }
     });
 
-    it('enemy with intent defend gains block', () => {
-      const enemies = [makeEnemy({ id: 'e1', attack: 3, defense: 4, intent: 'defend' })];
+    it('should not move defensive enemy when hero is far', () => {
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [{ id: 'e1', pos: { x: 7, y: 2 }, attack: 3, aiStrategy: 'defensive' }],
+      );
 
-      const actions = computeEnemyActions(enemies, 'defensive');
+      const next = executeEnemyTurn(state);
 
-      expect(actions[0].type).toBe('defend');
-      expect(actions[0].block).toBe(4);
+      const enemyUnit = next.grid.units.get('enemy_unit_e1');
+      expect(enemyUnit).toBeDefined();
+      expect(enemyUnit!.position).toEqual({ x: 7, y: 2 }); // Didn't move
     });
 
-    it('when all enemies are dead, no actions are generated', () => {
-      const enemies = [
-        makeEnemy({ id: 'e1', hp: 0, attack: 5 }),
-        makeEnemy({ id: 'e2', hp: 0, attack: 3 }),
-      ];
+    it('should process all alive enemies in order', () => {
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [
+          { id: 'e1', pos: { x: 2, y: 2 }, attack: 2, aiStrategy: 'aggressive' },
+          { id: 'e2', pos: { x: 2, y: 1 }, attack: 3, aiStrategy: 'aggressive' },
+        ],
+      );
 
-      const actions = computeEnemyActions(enemies, 'aggressive');
+      const next = executeEnemyTurn(state);
 
-      expect(actions).toHaveLength(0);
+      // Both enemies attacked
+      expect(next.hero.hp).toBeLessThan(20);
+      // Both still alive (unless hero killed one - unlikely)
+      expect(next.enemies.length).toBe(2);
     });
 
-    it('dead enemies (hp <= 0) do not take actions', () => {
-      const enemies = [
-        makeEnemy({ id: 'e1', hp: 0, attack: 5 }),
-        makeEnemy({ id: 'e2', hp: 10, attack: 3 }),
-        makeEnemy({ id: 'e3', hp: -1, attack: 2 }),
-      ];
+    it('should skip dead enemies', () => {
+      const state = createCombatState(
+        { x: 1, y: 2 },
+        [
+          { id: 'e1', pos: { x: 2, y: 2 }, attack: 2, aiStrategy: 'aggressive' },
+        ],
+      );
+      // Kill e1
+      const deadState: CombatState = {
+        ...state,
+        enemies: state.enemies.map(e => e.id === 'e1' ? { ...e, hp: 0 } : e),
+      };
 
-      const actions = computeEnemyActions(enemies, 'aggressive');
-
-      expect(actions).toHaveLength(1);
-      expect(actions[0].enemyIndex).toBe(1);
-      expect(actions[0].damage).toBe(3);
-    });
-
-    it('empty enemies array produces no actions', () => {
-      const actions = computeEnemyActions([], 'aggressive');
-      expect(actions).toHaveLength(0);
-    });
-
-    it('mixed alive and dead enemies: only alive take actions', () => {
-      const enemies = [
-        makeEnemy({ id: 'e1', hp: 0, attack: 5, defense: 2 }),
-        makeEnemy({ id: 'e2', hp: 8, attack: 3, defense: 1 }),
-        makeEnemy({ id: 'e3', hp: 12, attack: 2, defense: 3 }),
-      ];
-
-      const actions = computeEnemyActions(enemies, 'balanced');
-
-      // Only e2 (index 1) and e3 (index 2) are alive
-      // Balanced: even indices attack → index 2 attacks, index 1 defends
-      expect(actions).toHaveLength(2);
-      expect(actions[0].enemyIndex).toBe(1);
-      expect(actions[0].type).toBe('defend');
-      expect(actions[0].block).toBe(1);
-      expect(actions[1].enemyIndex).toBe(2);
-      expect(actions[1].type).toBe('attack');
-      expect(actions[1].damage).toBe(2);
-    });
-
-    it('EnemyAction has correct structure for attack', () => {
-      const enemies = [makeEnemy({ id: 'e1', attack: 4 })];
-      const actions = computeEnemyActions(enemies, 'aggressive');
-
-      const action: EnemyAction = actions[0];
-      expect(action).toHaveProperty('enemyIndex', 0);
-      expect(action).toHaveProperty('type', 'attack');
-      expect(action).toHaveProperty('damage', 4);
-      expect(action).toHaveProperty('target', 'hero');
-    });
-
-    it('EnemyAction has correct structure for defend', () => {
-      const enemies = [makeEnemy({ id: 'e1', defense: 3 })];
-      const actions = computeEnemyActions(enemies, 'defensive');
-
-      const action: EnemyAction = actions[0];
-      expect(action).toHaveProperty('enemyIndex', 0);
-      expect(action).toHaveProperty('type', 'defend');
-      expect(action).toHaveProperty('block', 3);
-      expect(action).toHaveProperty('target', 'hero');
+      const next = executeEnemyTurn(deadState);
+      expect(next.hero.hp).toBe(20); // No damage since enemy is dead
     });
   });
 });

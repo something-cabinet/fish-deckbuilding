@@ -1,5 +1,35 @@
-import type { RelicDef } from '../combat/RelicSystem';
-export type { RelicDef } from '../combat/RelicSystem';
+/**
+ * Relic data definitions.
+ *
+ * RelicDef and related types are defined inline (the old RelicSystem.ts has been removed).
+ */
+
+export type RelicTrigger =
+  | 'onTurnStart'
+  | 'onTurnEnd'
+  | 'onCombatStart'
+  | 'onCardPlayed'
+  | 'onDamageDealt'
+  | 'onDamageTaken'
+  | 'onEnemyKilled';
+
+export interface RelicEffectDef {
+  trigger: RelicTrigger;
+  effect: string;
+  value: number;
+  chance?: number;
+}
+
+export interface RelicDef {
+  id: string;
+  name: string;
+  description: string;
+  effects: RelicEffectDef[];
+  color: string;
+  rarity: 'common' | 'uncommon' | 'rare';
+}
+
+export type { RelicDef as RelicDefAlias };
 
 export const RELIC_DATA: Record<string, RelicDef> = {
   old_coin: {

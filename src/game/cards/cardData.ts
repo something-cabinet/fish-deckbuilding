@@ -1,486 +1,175 @@
-import type { CardDef } from '../combat/CardTypes';
+/**
+ * Card data definitions for the tactical combat engine.
+ *
+ * 11 starter cards with the new CardDefinition type.
+ * Cards are fish-themed for an underwater tactical RPG.
+ */
+import type { CardDefinition } from '../combat/CardTypes';
+import { CardType, MoveType } from '../combat/CardTypes';
 
-function coinColor(v: number): string {
-  if (v === 1) return '#e85d4e';
-  if (v === 2) return '#f4c430';
-  return '#3b82f6';
-}
+/**
+ * All card definitions indexed by id.
+ */
+export const CARD_DATA: Record<string, CardDefinition> = {
+  // ───── Attack Cards (4) ─────
 
-export const CARD_DATA: Record<string, CardDef> = {
-  // ───── Starter cards ─────
   fin_slash: {
     id: 'fin_slash',
     name: 'Fin Slash',
-    type: 'action',
-    cost: 1,
-    coinValue: 1,
-    attack: 3,
-    defense: 1,
-    description: 'Basic attack with a sharp fin.',
-    color: coinColor(1),
+    type: CardType.Attack,
+    manaCost: 1,
+    damage: 3,
+    description: 'A swift slash with your sharp fin. Deals 3 damage.',
   },
-  fin_slash_2: {
-    id: 'fin_slash_2',
-    name: 'Fin Slash',
-    type: 'action',
-    cost: 1,
-    coinValue: 1,
-    attack: 3,
-    defense: 1,
-    description: 'Basic attack with a sharp fin.',
-    color: coinColor(1),
+
+  razor_fin: {
+    id: 'razor_fin',
+    name: 'Razor Fin',
+    type: CardType.Attack,
+    manaCost: 2,
+    damage: 5,
+    description: 'A devastating fin strike. Deals 5 damage.',
   },
-  fin_slash_3: {
-    id: 'fin_slash_3',
-    name: 'Fin Slash',
-    type: 'action',
-    cost: 1,
-    coinValue: 1,
-    attack: 3,
-    defense: 1,
-    description: 'Basic attack with a sharp fin.',
-    color: coinColor(1),
+
+  crashing_wave: {
+    id: 'crashing_wave',
+    name: 'Crashing Wave',
+    type: CardType.Attack,
+    manaCost: 3,
+    damage: 4,
+    isAoE: true,
+    aoeRadius: 1,
+    description: 'Summon a crashing wave. Deals 4 damage to all enemies in an area.',
   },
+
+  water_jet: {
+    id: 'water_jet',
+    name: 'Water Jet',
+    type: CardType.Attack,
+    manaCost: 4,
+    damage: 8,
+    description: 'A pressurized jet of water. Deals 8 damage.',
+  },
+
+  // ───── Armor Cards (2) ─────
+
   bubble_shield: {
     id: 'bubble_shield',
     name: 'Bubble Shield',
-    type: 'action',
-    cost: 1,
-    coinValue: 1,
-    attack: 1,
-    defense: 4,
-    description: 'Strong defensive bubble.',
-    color: coinColor(1),
-  },
-  bubble_shield_2: {
-    id: 'bubble_shield_2',
-    name: 'Bubble Shield',
-    type: 'action',
-    cost: 1,
-    coinValue: 1,
-    attack: 1,
-    defense: 4,
-    description: 'Strong defensive bubble.',
-    color: coinColor(1),
-  },
-  ink_cloud: {
-    id: 'ink_cloud',
-    name: 'Ink Cloud',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 2,
-    description: 'Versatile ink attack.',
-    color: coinColor(2),
-  },
-  ink_cloud_2: {
-    id: 'ink_cloud_2',
-    name: 'Ink Cloud',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 2,
-    description: 'Versatile ink attack.',
-    color: coinColor(2),
-  },
-  desperate_strike: {
-    id: 'desperate_strike',
-    name: 'Desperate Strike',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 5,
-    defense: 1,
-    description: 'A devastating but costly blow.',
-    color: coinColor(1),
-  },
-  take_cover: {
-    id: 'take_cover',
-    name: 'Take Cover',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 1,
-    defense: 3,
-    description: 'Reliable defensive maneuver.',
-    color: coinColor(2),
-  },
-  small_loan: {
-    id: 'small_loan',
-    name: 'Small Loan',
-    type: 'action',
-    cost: 0,
-    coinValue: 3,
-    attack: 0,
-    defense: 0,
-    description: 'Pure coin — sell for 3 coins.',
-    color: coinColor(3),
+    type: CardType.Armor,
+    manaCost: 1,
+    armorAmount: 3,
+    description: 'Conjure a protective bubble. Gain 3 armor.',
   },
 
-  // ───── New attack cards (8) ─────
-  debt_collectors_call: {
-    id: 'debt_collectors_call',
-    name: "Debt Collector's Call",
-    type: 'action',
-    cost: 2,
-    coinValue: 2,
-    attack: 3,
-    defense: 0,
-    effects: [{ type: 'draw', value: 1 }],
-    description: 'Strike and draw a card. The collector always gets paid.',
-    color: coinColor(2),
-  },
-  interest_rate_hike: {
-    id: 'interest_rate_hike',
-    name: 'Interest Rate Hike',
-    type: 'action',
-    cost: 3,
-    coinValue: 1,
-    attack: 6,
-    defense: 1,
-    description: 'A punishing rate increase.',
-    color: coinColor(1),
-  },
-  bounced_check: {
-    id: 'bounced_check',
-    name: 'Bounced Check',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 1,
-    description: 'Cheap and unreliable, but sells well.',
-    color: coinColor(2),
-  },
-  foreclosure: {
-    id: 'foreclosure',
-    name: 'Foreclosure',
-    type: 'action',
-    cost: 4,
-    coinValue: 1,
-    attack: 3,
-    defense: 0,
-    keywords: ['double_strike'],
-    description: 'Seize everything — double damage.',
-    color: coinColor(1),
-  },
-  loan_extension: {
-    id: 'loan_extension',
-    name: 'Loan Extension',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 3,
-    defense: 2,
-    effects: [{ type: 'gainCoins', value: 1 }],
-    description: 'Attack and earn a coin. Extended terms available.',
-    color: coinColor(1),
-  },
-  credit_sweep: {
-    id: 'credit_sweep',
-    name: 'Credit Sweep',
-    type: 'action',
-    cost: 3,
-    coinValue: 1,
-    attack: 5,
-    defense: 1,
-    effects: [{ type: 'draw', value: 1 }],
-    description: 'Sweep the debt and draw a card.',
-    color: coinColor(1),
-  },
-  audit: {
-    id: 'audit',
-    name: 'Audit',
-    type: 'action',
-    cost: 2,
-    coinValue: 2,
-    attack: 3,
-    defense: 1,
-    effects: [{ type: 'gainCoins', value: 2 }],
-    description: 'Find discrepancies and earn extra coins.',
-    color: coinColor(2),
-  },
-  late_fee: {
-    id: 'late_fee',
-    name: 'Late Fee',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 0,
-    effects: [{ type: 'gainCoins', value: 1 }],
-    description: 'A small fee for every late payment.',
-    color: coinColor(2),
+  scale_armor: {
+    id: 'scale_armor',
+    name: 'Scale Armor',
+    type: CardType.Armor,
+    manaCost: 2,
+    armorAmount: 6,
+    description: 'Tough scale plating. Gain 6 armor.',
   },
 
-  // ───── New defense cards (5) ─────
-  collateral: {
-    id: 'collateral',
-    name: 'Collateral',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 0,
-    defense: 4,
-    keywords: ['taunt'],
-    description: 'Put up collateral to absorb hits.',
-    color: coinColor(2),
-  },
-  grace_period: {
-    id: 'grace_period',
-    name: 'Grace Period',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 1,
-    defense: 5,
-    effects: [{ type: 'heal', value: 2 }],
-    description: 'Block and restore a little HP.',
-    color: coinColor(1),
-  },
-  insurance_policy: {
-    id: 'insurance_policy',
-    name: 'Insurance Policy',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 0,
-    defense: 6,
-    effects: [{ type: 'draw', value: 1 }],
-    description: 'Heavy coverage with a card draw.',
-    color: coinColor(1),
-  },
-  tax_deduction: {
-    id: 'tax_deduction',
-    name: 'Tax Deduction',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 1,
-    defense: 3,
-    description: 'Write it off — cheap defense.',
-    color: coinColor(2),
-  },
-  debt_restructuring: {
-    id: 'debt_restructuring',
-    name: 'Debt Restructuring',
-    type: 'action',
-    cost: 3,
-    coinValue: 1,
-    attack: 2,
-    defense: 5,
-    effects: [{ type: 'heal', value: 3 }],
-    description: 'Restructure your debt and recover HP.',
-    color: coinColor(1),
+  // ───── Skill Cards (2) ─────
+
+  healing_rain: {
+    id: 'healing_rain',
+    name: 'Healing Rain',
+    type: CardType.Skill,
+    manaCost: 2,
+    healAmount: 4,
+    description: 'Soothing waters restore your HP. Heal 4.',
   },
 
-  // ───── New equipment cards (4) ─────
-  golden_visa: {
-    id: 'golden_visa',
-    name: 'Golden Visa',
-    type: 'action',
-    cost: 0,
-    coinValue: 3,
-    attack: 0,
-    defense: 0,
-    keywords: ['overdraft'],
-    description: 'Premium access — extends your credit limit.',
-    color: coinColor(3),
-  },
-  shell_company: {
-    id: 'shell_company',
-    name: 'Shell Company',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 2,
-    description: 'A front for all your operations.',
-    color: coinColor(2),
-  },
-  offshore_account: {
-    id: 'offshore_account',
-    name: 'Offshore Account',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 3,
-    defense: 3,
-    effects: [{ type: 'gainCoins', value: 3 }],
-    description: 'Hidden wealth — gain 3 coins.',
-    color: coinColor(1),
-  },
-  credit_card: {
-    id: 'credit_card',
-    name: 'Credit Card',
-    type: 'action',
-    cost: 0,
-    coinValue: 3,
-    attack: 1,
-    defense: 1,
-    keywords: ['rush'],
-    description: 'Buy now, pay later.',
-    color: coinColor(3),
+  battle_cry: {
+    id: 'battle_cry',
+    name: 'Battle Cry',
+    type: CardType.Skill,
+    manaCost: 1,
+    buffAttack: 2,
+    description: 'A rallying cry. Gain +2 attack for the battle.',
   },
 
-  // ───── New recruit cards (3) ─────
-  hire_the_shrimp: {
-    id: 'hire_the_shrimp',
-    name: 'Hire the Shrimp',
-    type: 'action',
-    cost: 2,
-    coinValue: 1,
-    attack: 3,
-    defense: 2,
-    description: 'A small but useful ally.',
-    color: coinColor(1),
-  },
-  iou: {
-    id: 'iou',
-    name: 'I.O.U.',
-    type: 'action',
-    cost: 1,
-    coinValue: 2,
-    attack: 2,
-    defense: 1,
-    description: 'Promise to pay later — versatile and cheap.',
-    color: coinColor(2),
-  },
-  merger: {
-    id: 'merger',
-    name: 'Merger',
-    type: 'action',
-    cost: 3,
-    coinValue: 1,
-    attack: 5,
-    defense: 3,
-    effects: [{ type: 'heal', value: 5 }],
-    description: 'Combine forces and restore major HP.',
-    color: coinColor(1),
+  // ───── Summon Cards (2) ─────
+
+  summon_minnow: {
+    id: 'summon_minnow',
+    name: 'Summon Minnow',
+    type: CardType.Summon,
+    manaCost: 2,
+    summonUnit: {
+      attack: 2,
+      maxHp: 3,
+      moveRange: 2,
+      attackRange: 1,
+      hasProvoke: false,
+      moveType: MoveType.Normal,
+    },
+    description: 'Summon a tiny minnow ally. Weak but mobile.',
   },
 
-  // ───── Enemy-only cards ─────
-  small_crab: {
-    id: 'small_crab',
-    name: 'Small Crab',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 2,
-    defense: 1,
-    description: 'Snip snip.',
-    color: coinColor(1),
-  },
-  jelly_drifter: {
-    id: 'jelly_drifter',
-    name: 'Jelly Drifter',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 3,
-    defense: 0,
-    description: 'A floating menace.',
-    color: coinColor(1),
-  },
-  puffer_fish: {
-    id: 'puffer_fish',
-    name: 'Puffer Fish',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 1,
-    defense: 3,
-    description: 'Spiky and defensive.',
-    color: coinColor(1),
-  },
-  collector_eel: {
-    id: 'collector_eel',
-    name: 'Collector Eel',
-    type: 'action',
-    cost: 0,
-    coinValue: 2,
-    attack: 5,
-    defense: 2,
-    description: 'Debt collector of the deep.',
-    color: coinColor(2),
-  },
-  hammerhead: {
-    id: 'hammerhead',
-    name: 'Hammerhead Enforcer',
-    type: 'action',
-    cost: 0,
-    coinValue: 2,
-    attack: 7,
-    defense: 2,
-    description: "The loan shark's enforcer.",
-    color: coinColor(2),
-  },
-  boss_leviathan: {
-    id: 'boss_leviathan',
-    name: 'Debt Leviathan',
-    type: 'action',
-    cost: 0,
-    coinValue: 3,
-    attack: 10,
-    defense: 4,
-    description: 'The living embodiment of debt.',
-    color: coinColor(3),
-  },
-  tentacle: {
-    id: 'tentacle',
-    name: 'Leviathan Tentacle',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 5,
-    defense: 1,
-    description: 'Thrashing appendage.',
-    color: coinColor(1),
+  summon_clam_guard: {
+    id: 'summon_clam_guard',
+    name: 'Summon Clam Guard',
+    type: CardType.Summon,
+    manaCost: 3,
+    summonUnit: {
+      attack: 2,
+      maxHp: 6,
+      moveRange: 1,
+      attackRange: 1,
+      hasProvoke: true,
+      moveType: MoveType.Normal,
+    },
+    description: 'Summon a sturdy clam guard with Provoke.',
   },
 
-  // ───── New enemy cards (2) ─────
-  shark_bite: {
-    id: 'shark_bite',
-    name: 'Shark Bite',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 4,
-    defense: 0,
-    description: 'A vicious bite.',
-    color: coinColor(1),
-  },
-  debt_wave: {
-    id: 'debt_wave',
-    name: 'Debt Wave',
-    type: 'action',
-    cost: 0,
-    coinValue: 1,
-    attack: 6,
-    defense: 0,
-    description: 'A crushing wave of obligation.',
-    color: coinColor(1),
+  // ───── Passive Card (1) ─────
+
+  deep_focus: {
+    id: 'deep_focus',
+    name: 'Deep Focus',
+    type: CardType.Passive,
+    manaCost: 1,
+    passiveEffect: 'manaRegen',
+    duration: 0,
+    description: 'Enter a deep trance. Grants mana regeneration for the battle.',
   },
 };
 
-/** The starter deck (10 cards as specified) */
-export const STARTER_DECK: string[] = [
+/**
+ * The starter deck — 11 cards.
+ * Includes multiple copies of basic cards for consistency.
+ */
+export const STARTER_DECK_IDS: string[] = [
   'fin_slash',
-  'fin_slash_2',
-  'fin_slash_3',
+  'fin_slash',
+  'razor_fin',
   'bubble_shield',
-  'bubble_shield_2',
-  'ink_cloud',
-  'ink_cloud_2',
-  'desperate_strike',
-  'take_cover',
-  'small_loan',
+  'bubble_shield',
+  'scale_armor',
+  'healing_rain',
+  'battle_cry',
+  'summon_minnow',
+  'summon_clam_guard',
+  'deep_focus',
 ];
 
-export function getCard(id: string): CardDef | undefined {
+/**
+ * Get a card definition by id.
+ */
+export function getCard(id: string): CardDefinition | undefined {
   return CARD_DATA[id];
 }
 
-
+/**
+ * Get the starter deck as CardDefinition[].
+ */
+export function getStarterDeck(): CardDefinition[] {
+  return STARTER_DECK_IDS.map(id => {
+    const card = CARD_DATA[id];
+    if (!card) throw new Error(`Card "${id}" not found in CARD_DATA`);
+    return { ...card };
+  });
+}
