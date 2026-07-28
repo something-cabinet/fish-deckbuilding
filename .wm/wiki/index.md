@@ -12,9 +12,12 @@ type: reference
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
+- [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
+- [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
 - [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
+- [svelte css grid battle ui](wiki/decisions/svelte-css-grid-battle-ui.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
 - [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
@@ -31,10 +34,12 @@ type: reference
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
 - [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
+- [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
+- [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 
@@ -49,21 +54,28 @@ type: reference
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
+- [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
 
 ## tasks
 
 - [Dynamic hand overlap for variable card count](wiki/tasks/dynamic-hand-overlap-for-variable-card-count.md) — *todo*
 - [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
+- [Grid Battle UI — render 9×5 grid, wire targeting, base attack, move, replace, restore integration tests](wiki/tasks/grid-battle-ui--render-95-grid-wire-targeting-base-attack-move-replace-restore-integration-tests.md) — *todo*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
 - [Review and rename card types to thematic names](wiki/tasks/review-and-rename-card-types-to-thematic-names.md) — *todo*
+- [Save/Load — replace Prisma with browser-localStorage, wire SaveScreen](wiki/tasks/saveload--replace-prisma-with-browser-localstorage-wire-savescreen.md) — *todo*
+- [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
 - [Deck/discard pile visualization](wiki/tasks/deckdiscard-pile-visualization.md) — *todo*
 - [Card visual states and hover interactions](wiki/tasks/card-visual-states-and-hover-interactions.md) — *todo*
 - [CSS theming system with custom properties](wiki/tasks/css-theming-system-with-custom-properties.md) — *todo*
+- [Dialogue system — wire DialogueBox into campaign flow](wiki/tasks/dialogue-system--wire-dialoguebox-into-campaign-flow.md) — *todo*
 - [Combat feedback animations](wiki/tasks/combat-feedback-animations.md) — *todo*
+- [Clean legacy fields, phase literals, dead code — economy, components, state](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--economy-components-state.md) — *todo*
+- [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
 - [Zone-based UI decomposition for battle screen](wiki/tasks/zone-based-ui-decomposition-for-battle-screen.md) — *done*
 
 ## Graph Stats
 
-- **Nodes:** 37
-- **Edges:** 64
+- **Nodes:** 49
+- **Edges:** 72
 
