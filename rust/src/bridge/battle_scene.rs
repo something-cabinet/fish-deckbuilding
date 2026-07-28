@@ -418,61 +418,53 @@ impl BattleScene {
     }
 
     fn handle_click(&mut self, pos: (i32, i32)) {
-        if self
-            .state
-            .as_ref()
-            .map_or(true, |s| s.phase != Phase::PlayerTurn)
-        {
-            return;
-        }
+        if self.state.as_ref().map_or(true, |s| s.phase != Phase::PlayerTurn) { return; }
+        if self.try_move_selected(pos) { return; }
+        if self.try_attack_adjacent(pos) { return; }
+        if self.try_select_unit(pos) { return; }
+        self.clear_selection();
+    }
 
-        if let Some(selected) = self.selected {
-            if self.valid_moves.contains(&pos) {
-                if let Some(s) = self.state.as_mut() {
-                    let _ = battle_engine::move_unit(s, selected, pos);
-                }
-                self.selected = None;
-                self.valid_moves.clear();
-                self.clear_overlays_ref();
-                self.sync_all();
-                return;
-            }
-        }
+    fn try_move_selected(&mut self, pos: (i32, i32)) -> bool {
+        let selected = match self.selected { Some(s) => s, None => return false };
+        if !self.valid_moves.contains(&pos) { return false; }
+        if let Some(s) = self.state.as_mut() { let _ = battle_engine::move_unit(s, selected, pos); }
+        self.selected = None;
+        self.valid_moves.clear();
+        self.clear_overlays_ref();
+        self.sync_all();
+        true
+    }
 
-        if let Some(selected) = self.selected {
-            let is_adjacent_enemy = self.state.as_ref().is_some_and(|s| {
-                s.grid.unit_at(pos).is_some_and(|u| {
-                    u.faction == Faction::Enemy && chebyshev_adjacent(selected, pos)
-                })
-            });
-            if is_adjacent_enemy {
-                if let Some(s) = self.state.as_mut() {
-                    let _ = battle_engine::player_attack(s, selected, pos);
-                }
-                self.selected = None;
-                self.valid_moves.clear();
-                self.clear_overlays_ref();
-                self.sync_all();
-                return;
-            }
-        }
-
-        let is_selectable = self.state.as_ref().is_some_and(|s| {
-            s.grid
-                .unit_at(pos)
-                .is_some_and(|u| u.faction == Faction::Hero && (!u.has_moved || !u.has_attacked))
+    fn try_attack_adjacent(&mut self, pos: (i32, i32)) -> bool {
+        let selected = match self.selected { Some(s) => s, None => return false };
+        let is_target = self.state.as_ref().is_some_and(|s| {
+            s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Enemy && chebyshev_adjacent(selected, pos))
         });
-        if is_selectable {
-            self.selected = Some(pos);
-            if let Some(s) = self.state.as_ref() {
-                self.valid_moves =
-                    grid_movement::get_movement_range(&s.grid, pos, constants::MOVE_BUDGET);
-            }
-            self.show_move_overlay(&self.valid_moves);
-            self.show_attack_highlight(pos);
-            return;
-        }
+        if !is_target { return false; }
+        if let Some(s) = self.state.as_mut() { let _ = battle_engine::player_attack(s, selected, pos); }
+        self.selected = None;
+        self.valid_moves.clear();
+        self.clear_overlays_ref();
+        self.sync_all();
+        true
+    }
 
+    fn try_select_unit(&mut self, pos: (i32, i32)) -> bool {
+        let is_selectable = self.state.as_ref().is_some_and(|s| {
+            s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Hero && (!u.has_moved || !u.has_attacked))
+        });
+        if !is_selectable { return false; }
+        self.selected = Some(pos);
+        if let Some(s) = self.state.as_ref() {
+            self.valid_moves = grid_movement::get_movement_range(&s.grid, pos, constants::MOVE_BUDGET);
+        }
+        self.show_move_overlay(&self.valid_moves);
+        self.show_attack_highlight(pos);
+        true
+    }
+
+    fn clear_selection(&mut self) {
         self.selected = None;
         self.valid_moves.clear();
         self.clear_overlays_ref();
