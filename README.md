@@ -61,6 +61,16 @@ npx serve path/to/exported/folder --cors
 
 Deploy with `vercel.json` (COOP/COEP headers for threaded WASM).
 
+### Deploying to Vercel
+
+Vercel's build container doesn't have Rust/Godot/Emscripten, so the web export is built in CI, not by Vercel. On every push to `main`, `.github/workflows/deploy.yml`:
+
+1. Installs Rust nightly + `wasm32-unknown-emscripten`, Emscripten SDK, and the Godot 4.7 editor + export templates (cached between runs).
+2. Runs `rust/build-web.sh` to build the release WASM extension and export the web player to `godot/web/`.
+3. Deploys `godot/web/` to Vercel via `vercel build --prebuilt` + `vercel deploy --prebuilt --prod`.
+
+Requires these repo secrets (from a Vercel project already linked via `vercel link` or the dashboard): `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. Trigger manually with the workflow's `workflow_dispatch` if needed.
+
 ### In Godot Editor
 
 Open `godot/` as a Godot 4 project. The Rust extension loads automatically via `godot/battle.gdextension`. Hit F5 to start the battle scene from the editor.

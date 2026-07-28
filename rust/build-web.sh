@@ -12,12 +12,12 @@ RUSTFLAGS="-C link-args=-pthread \
 -Z default-visibility=hidden \
 -Z link-native-libraries=no \
 -Z emscripten-wasm-eh=false" \
-cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
+cargo +nightly build --release -Zbuild-std --target wasm32-unknown-emscripten
 
-mv "target/wasm32-unknown-emscripten/debug/${CRATE}.wasm" \
-   "target/wasm32-unknown-emscripten/debug/${CRATE}.threads.wasm"
+mv "target/wasm32-unknown-emscripten/release/${CRATE}.wasm" \
+   "target/wasm32-unknown-emscripten/release/${CRATE}.threads.wasm"
 
-cargo +nightly build --features nothreads -Zbuild-std --target wasm32-unknown-emscripten
+cargo +nightly build --release --features nothreads -Zbuild-std --target wasm32-unknown-emscripten
 
 if command -v $GODOT &>/dev/null; then
   $GODOT --path ../godot/ --export-release "Web" --headless

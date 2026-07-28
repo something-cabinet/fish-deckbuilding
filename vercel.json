@@ -1,5 +1,6 @@
 {
-  "outputDirectory": "godot",
+  "outputDirectory": "godot/web",
+  "buildCommand": null,
   "headers": [
     {
       "source": "/(.*)\\.wasm",
