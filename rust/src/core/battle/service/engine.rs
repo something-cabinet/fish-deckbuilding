@@ -1,11 +1,7 @@
 use crate::core::battle::model::{BattleState, Phase};
-#[cfg(test)]
-use crate::core::battle::model::BattleResult;
 use crate::core::combat;
 use crate::core::constants;
 use crate::core::grid::{Faction, movement};
-#[cfg(test)]
-use crate::core::grid::{GridState, GridUnit};
 use crate::core::battle::ai::{self, Decision};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
