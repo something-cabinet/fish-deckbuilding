@@ -17,6 +17,7 @@ type: reference
 - [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
 - [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
 - [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
+- [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
@@ -50,6 +51,7 @@ type: reference
 - [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
 - [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
+- [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
@@ -57,6 +59,7 @@ type: reference
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
+- [Domain-Driven Barrel Structure](wiki/memory/domain-driven-barrel-structure.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 
 ## rules
@@ -97,6 +100,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 70
-- **Edges:** 86
+- **Nodes:** 73
+- **Edges:** 90
 
