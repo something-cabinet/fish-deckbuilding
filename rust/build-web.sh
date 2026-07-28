@@ -2,8 +2,6 @@
 set -euo pipefail
 
 CRATE="godot_battle_scaffold"
-GODOT=${GODOT_BIN:-godot4}
-GODOT=${GODOT:-godot}
 
 RUSTFLAGS="-C link-args=-pthread \
 -C target-feature=+atomics \
@@ -23,9 +21,3 @@ cargo build --release --features nothreads -Zbuild-std --target wasm32-unknown-e
 # the project, even when only exporting to Web — build a debug host lib so that
 # doesn't fail with "dynamic library not found".
 cargo build
-
-if command -v $GODOT &>/dev/null; then
-  $GODOT --path ../godot/ --export-release "Web" --headless
-else
-  echo "godot binary not found. Install Godot 4.3+ and set GODOT_BIN. Web export skipped."
-fi
