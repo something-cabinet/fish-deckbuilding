@@ -16,6 +16,7 @@ Open `godot/project.godot` in Godot 4 editor — hit F5 to run.
 
 - Rust (nightly): `rustup toolchain install nightly`
 - Godot 4.3+: [godotengine.org](https://godotengine.org/download/)
+- WM-CLI (wiki-mem tooling): `npm i -g @something-cabinet/wm-cli`
 - Web export requires Emscripten SDK:
   ```bash
   git clone https://github.com/emscripten-core/emsdk.git
