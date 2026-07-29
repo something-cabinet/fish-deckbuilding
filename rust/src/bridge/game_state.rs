@@ -22,11 +22,7 @@ where
     F: FnOnce(&mut RunState) -> R,
 {
     if let Ok(mut s) = RUN_STATE.lock() {
-        if let Some(ref mut state) = *s {
-            Some(f(state))
-        } else {
-            None
-        }
+        (*s).as_mut().map(|state| f(state))
     } else {
         None
     }
