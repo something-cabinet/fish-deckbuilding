@@ -215,7 +215,7 @@ impl BattleScene {
         tween.tween_property(&banner, "modulate", &rgba(255, 255, 255, 1.0).to_variant(), 0.3);
 
         // Execute enemy decision (mana + move/attack)
-        let decision = self.state.as_mut().map(|s| battle_engine::execute_enemy_decision_and_mana(s));
+        let decision = self.state.as_mut().map(battle_engine::execute_enemy_decision_and_mana);
         if let Some(Decision::Attack { target }) = decision {
             self.append_log(&format!("Enemy attacks hero at ({},{})", target.0, target.1));
         } else if let Some(Decision::Move { target, attack_after }) = decision {
@@ -252,7 +252,7 @@ impl BattleScene {
         let mut grid_node = self.base().get_node_as::<Node2D>("BattleGrid");
         let mut end_tween = grid_node.create_tween();
         end_tween.tween_interval(1.5);
-        end_tween.tween_callback(&Callable::from_object_method(&self_gd, "_finish_enemy_turn"));
+        end_tween.tween_callback(&Callable::from_object_method(self_gd, "_finish_enemy_turn"));
     }
 
     #[func]
@@ -1106,7 +1106,7 @@ impl BattleScene {
 
     // Hit flash on a unit (FR-2)
     fn flash_unit(&self, grid_pos: (i32, i32)) {
-        let faction_name = if self.state.as_ref().and_then(|s| s.grid.unit_at(grid_pos)).map_or(false, |u| u.faction == Faction::Hero) {
+        let faction_name = if self.state.as_ref().and_then(|s| s.grid.unit_at(grid_pos)).is_some_and(|u| u.faction == Faction::Hero) {
             "Unit_Hero"
         } else {
             "Unit_Enemy"
@@ -1128,7 +1128,7 @@ impl BattleScene {
         let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
         let current = log_label.get_text().to_string();
         let lines: Vec<&str> = current.split('\n').collect();
-        let mut new_lines: Vec<&str> = lines.iter().map(|s| *s).collect();
+        let mut new_lines: Vec<&str> = lines.to_vec();
         new_lines.push(text);
         if new_lines.len() > 11 {
             new_lines.remove(0);

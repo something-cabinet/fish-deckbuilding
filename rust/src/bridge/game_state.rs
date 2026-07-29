@@ -22,7 +22,7 @@ where
     F: FnOnce(&mut RunState) -> R,
 {
     if let Ok(mut s) = RUN_STATE.lock() {
-        (*s).as_mut().map(|state| f(state))
+        (*s).as_mut().map(f)
     } else {
         None
     }
