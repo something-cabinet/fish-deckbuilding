@@ -9,6 +9,7 @@ tags:
 - duelyst
 - cross-blitz
 status: approved
+implementation_notes: 'Tech-stack note: the Architecture Impact Matrix and NFR-1 below describe the original Excalibur.js/Svelte implementation and are stale — the project has since moved to Godot 4 + godot-rust (gdext), with pure game logic in rust/src/core (battle, combat, grid) and a thin gdext bridge (rust/src/bridge) driving Godot scenes under godot/scenes/. Phase 1 grid-combat implementation baseline is wiki:specs:godot-battle-scaffold. Design intent (overworld, campaign, card types, mana, save/load) in this spec remains valid; only the tech references (Excalibur.js, Svelte, TypeScript/Vitest, .svelte files) are outdated and should be read as "Godot/Rust equivalent."'
 ---
 
 ## Overview

@@ -1,8 +1,14 @@
 ---
 title: Fish Roguelite Deckbuilding Game
 type: spec
-tags: [game, excaliburjs, svelte5, roguelike, deckbuilder]
-status: draft
+tags:
+- game
+- excaliburjs
+- svelte5
+- roguelike
+- deckbuilder
+status: superseded
+implementation_notes: 'Superseded: engine pivoted from Excalibur.js + Svelte 5 to Godot 4 + godot-rust (gdext)/Rust. Design intent carried forward in wiki:specs:fish-tactical-rpg; current implementation baseline is wiki:specs:godot-battle-scaffold. Kept for historical reference only — do not implement against this spec''s Architecture section.'
 ---
 
 ## Overview

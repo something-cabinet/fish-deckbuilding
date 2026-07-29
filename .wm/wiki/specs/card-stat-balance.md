@@ -7,6 +7,7 @@ tags:
 - balance
 - fab
 status: approved
+implementation_notes: 'Tech-stack note: NFR-2 (svelte-check) and the cardData.ts reference in Technical Notes are stale — project moved to Godot 4 + godot-rust (gdext). Re-target NFR-2 as "cargo test passes, cargo clippy clean" and cardData.ts as the future Rust core card model once cards are implemented there. Design intent (coinValue color/power curve) still applies. Tracked by wiki:tasks:card-stat-balance-pass-against-fab-model.'
 ---
 
 ---

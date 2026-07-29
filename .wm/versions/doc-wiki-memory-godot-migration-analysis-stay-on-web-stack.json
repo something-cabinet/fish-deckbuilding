@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:memory:godot-migration-analysis-stay-on-web-stack",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-29T03:04:39.695Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "active",
+          "new_value": "archived"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

@@ -6,7 +6,8 @@ tags:
 - refactor
 - battle
 - zones
-status: approved
+status: superseded
+implementation_notes: 'Superseded: this spec decomposes BattleHUD.svelte, which no longer exists — engine moved to Godot 4 + godot-rust (gdext). Corresponding task was removed from the board. No Godot equivalent needed unless the Godot battle UI grows complex enough to warrant its own scene-decomposition spec.'
 ---
 
 ---

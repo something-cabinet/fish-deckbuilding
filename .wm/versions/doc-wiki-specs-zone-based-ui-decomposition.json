@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:specs:zone-based-ui-decomposition",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "status",
           "old_value": null,
           "new_value": "approved"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-07-29T03:05:20.692Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "approved",
+          "new_value": "superseded"
         }
       ],
       "path": "",

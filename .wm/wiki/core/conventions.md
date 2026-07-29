@@ -5,7 +5,7 @@ tags: [core, conventions]
 ---
 
 ---
-title: Fish Roguelite Deckbuilding — Conventions
+title: Fish Tactical RPG — Conventions
 type: core
 tags: [core, conventions]
 ---
@@ -24,41 +24,28 @@ wm-spec
 ```
 @wiki/rules/spec-driven-development
 
-### TDD — Red-Green-Refactor
-All implementation starts with a failing test. Pure functions are always test-first. UI components are excluded.
+### TDD — Red-Green-Refactor / Compiler-Driven Development
+All game logic starts with a failing test in the pure Rust core. The Rust type system (enums for Faction/Phase/Decision, `Result` for fallible operations) catches rule violations at compile time before tests even run.
 ```bash
-npm test          # run all tests (92 tests, ~1s)
-npm run test:watch  # watch mode
+cd rust
+cargo test                # run all core tests
+cargo clippy -- -D warnings
 ```
 @wiki/rules/tdd
 
 ## Code Conventions
 
-**Game logic (pure functions)**: TypeScript functions in `src/game/combat/`. No side effects, no DOM access. All state in → new state out. 79 tests. These are deterministic computations — always test-first.
+**Game logic (pure Rust)**: lives in `rust/src/core/{battle,combat,grid}/`, split into `model/` (types, no logic) and `service/` (pure functions operating on models). Zero Godot dependencies — testable standalone via `cargo test`.
 
-**ECS orchestration**: Turn-based game actions are coordinated by `CombatOrchestrator` (`src/game/systems/`). It owns Excalibur entities with typed Components (HealthComponent, CoinComponent, TurnComponent, DeckStateComponent, etc.) and emits events after every action. 13 integration tests.
+**gdext bridge**: `rust/src/bridge/` contains `#[derive(GodotClass)]` nodes (e.g. `battle_scene.rs`) that read Godot input/signals, call into the pure core, and write results back to scene state. Godot (scenes, nodes, signals) never appears inside `core/`.
 
-**Event bus**: Typed Excalibur EventEmitter in `src/game/events.ts`. Primary sync via `state:changed` snapshot event. Granular events only for transient UI effects.
+**GDScript**: used only for a minimal shim (`extends BattleScene`) in scene files where required; all real logic is Rust.
 
-**Bridge**: `src/game/bridge.ts` subscribes to events and syncs to Svelte `$state` reactively. UI never accesses Excalibur APIs directly — always goes through bridge or orchestrator.
+**Input handling**: use `_input()`, not `_unhandled_input()`, for click input in gdext nodes — see wiki:memory:gdextension-click-input-use-_input-over-_unhandled_input.
 
-**UI components**: Svelte 5 with `$state` runes. Components call the orchestrator via bridge or read from synced $state. No game logic, no orchestration, no tests required.
+**Hot reload**: Rust `cargo build` produces a cdylib Godot loads via `battle.gdextension`; signal reconnection on reload has known gotchas — see wiki:memory:gdext-hot-reload-pattern and wiki:tasks:godot-battle-07-hot-reload-fixes.
 
-**State**: Run/combat split. `RunState` persists across battles, `CombatState` is per-battle. The run deck is COPIED into the battle deck — never mutated during combat.
-@wiki/patterns/run-combat-state-split
-
-**Card system**: FaB-style `action` type. All playable cards are `action` type. A card's combat role is determined by its numeric stats (attack, defense) and effects/keywords — not by a type label. Cards have 3 purposes: SELL for coins (`coinValue`), PLAY as attack (`attack`), BLOCK for defense (`defense`). Effects and keywords resolve via Effects/Keywords modules.
-@wiki/decisions/fab-style-action-card-type
-
-**Enemies**: Flat `EnemyInstance[]` array with HP, attack, defense, intent, strategy. No grid positions.
-
-**Testing**: Vitest, ~1s for 92 tests (7 test files on pure functions + 1 on orchestrator). New test files go in `src/game/systems/__tests__/` for orchestration tests, `src/game/combat/__tests__/` for pure function tests.
-
-## Styling
-
-**Color palette**: CSS custom properties in `app.css`. Root variables only — no hex values in components. Theme: abyss (#0a1628), deep (#0f2236), coral (#e85d4e), gold (#f4c430), parchment (#e8dcc5).
-
-**Naming**: camelCase for variables/functions. PascalCase for types/interfaces. Svelte files are PascalCase. Test files match their source file name with `.test.ts` suffix.
+**Testing**: `cargo test` on the pure core. Bridge/scene layer has no automated tests (requires the Godot engine); bridge-layer test helpers (`#[func] test_click`, `debug_state`) exist for manual/in-editor verification.
 
 ## Wiki Structure
 
@@ -80,11 +67,11 @@ All pages use YAML frontmatter with `type` matching the directory. Pages are lin
 ## Golden Rules
 
 1. **Spec first** — never write code without a spec
-2. **Test first** — never implement without a failing test
-3. **Pure functions** — domain logic is pure, no side effects
-4. **State split** — run state and combat state are separate
-5. **Battle deck is a copy** — never mutate the run deck during combat
-6. **Snapshot sync** — emit full state snapshots, not per-field events
-7. **Thin UI** — Svelte reads from $state, never implements game logic
-8. **FaB-style action type** — all playable cards are `action` type; combat role comes from stats, not type label
-9. **CSS variables** — colors only in `app.css`, components use `var(--name)`
+2. **Test first** — never implement without a failing test (`cargo test`)
+3. **Pure core** — domain logic in `rust/src/core/` has zero Godot dependencies
+4. **Bridge is thin** — `rust/src/bridge/` only translates between Godot and the pure core, no game rules
+5. **No GDScript for logic** — GDScript is a shim only; all real logic is Rust via gdext
+6. **Model/service split** — each domain module separates data types (`model/`) from behavior (`service/`)
+7. **Compiler-driven** — prefer enums/`Result` over runtime checks to make illegal states unrepresentable
+
+Note: this file previously described the retired Excalibur.js/Svelte/TypeScript stack (FaB-style `action` card type, run/combat `$state` split, CSS variable theming, Vitest). Those conventions applied to code that no longer exists post-pivot (see wiki:decisions:godot-rust-gdext-pivot); design intent for cards/state may still apply and should be re-targeted at the Rust core when implemented there.

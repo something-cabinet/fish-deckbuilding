@@ -1,8 +1,13 @@
 ---
 title: Godot Migration Analysis — Stay on Web Stack
 type: memory
-tags: [decision, architecture, godot, excalibur]
-status: active
+tags:
+- decision
+- architecture
+- godot
+- excalibur
+status: archived
+implementation_notes: 'Superseded: the "stay on web stack" recommendation was overridden — the project migrated to Godot 4 + godot-rust (gdext) per wiki:decisions:godot-rust-gdext-pivot and shipped wiki:specs:godot-battle-scaffold. Kept for historical record of the analysis that preceded the reversal; do not follow its conclusion.'
 ---
 
 # Decision: Stay on Excalibur.js + Svelte, Do Not Migrate to Godot
