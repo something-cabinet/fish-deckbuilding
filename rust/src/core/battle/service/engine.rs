@@ -50,6 +50,7 @@ pub fn end_player_turn(state: &mut BattleState) {
     state.phase = Phase::EnemyTurn;
 }
 
+#[allow(dead_code)]
 pub fn execute_enemy_turn(state: &mut BattleState) {
     if state.phase != Phase::EnemyTurn { return; }
     state.enemy_mana = state.enemy_mana.min(state.enemy_max_mana - 1) + 1;
@@ -85,6 +86,43 @@ fn resolve_ai_attack(state: &mut BattleState, enemy_pos: (i32, i32), hero_pos: (
         state.check_over();
         !enemy_dead
     } else { false }
+}
+
+/// Executes the mana increment, AI decision, and movement/attack for the enemy turn.
+/// Returns the Decision made by the AI.
+pub fn execute_enemy_decision_and_mana(state: &mut BattleState) -> Decision {
+    if state.phase != Phase::EnemyTurn { return Decision::Wait; }
+    state.enemy_mana = state.enemy_mana.min(state.enemy_max_mana - 1) + 1;
+    let decision = ai::decide(&state.grid);
+    match decision {
+        Decision::Attack { target } => {
+            if let Some(&ep) = state.grid.find_faction(Faction::Enemy).first() {
+                resolve_ai_attack(state, ep, target);
+            }
+        }
+        Decision::Move { target, attack_after } => {
+            if let Some(&ep) = state.grid.find_faction(Faction::Enemy).first() {
+                state.grid.move_unit(ep, target);
+                if let Some(u) = state.grid.unit_at_mut(target) { u.has_moved = true; }
+                if let Some(hero_pos) = attack_after {
+                    resolve_ai_attack(state, target, hero_pos);
+                }
+            }
+        }
+        Decision::Wait => {}
+    }
+    decision
+}
+
+/// Plays all enemy cards synchronously (same as before, one card at a time).
+pub fn play_enemy_cards_sync(state: &mut BattleState) {
+    ai::play_enemy_cards(state);
+}
+
+/// Draws an enemy card and transitions to player turn if not battle over.
+pub fn enemy_draw_and_transition(state: &mut BattleState) {
+    state.draw_enemy_card();
+    if state.phase != Phase::BattleOver { start_player_turn(state); }
 }
 
 #[cfg(test)]

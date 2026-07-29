@@ -44,7 +44,7 @@ let Some(target_pos) = target else { break };
     }
 }
 
-fn pick_best_enemy_card(state: &BattleState, enemy_pos: (i32, i32)) -> Option<(usize, CardDef)> {
+pub(crate) fn pick_best_enemy_card(state: &BattleState, enemy_pos: (i32, i32)) -> Option<(usize, CardDef)> {
     let hp_pct = |pos| -> f32 {
         state.grid.unit_at(pos).map_or(0.0, |u| u.hp as f32 / u.max_hp as f32)
     };
@@ -92,7 +92,7 @@ fn total_damage(effects: &[crate::core::cards::CardEffect]) -> i32 {
     effects.iter().map(|e| match e.effect { Effect::Damage(d) => d, _ => 0 }).sum()
 }
 
-fn pick_enemy_card_target(state: &BattleState, enemy_pos: (i32, i32), card: &CardDef) -> Option<(i32, i32)> {
+pub(crate) fn pick_enemy_card_target(state: &BattleState, enemy_pos: (i32, i32), card: &CardDef) -> Option<(i32, i32)> {
     if let Some(effect) = card.effects.first() {
         match effect.effect {
             Effect::Damage(_) => {
@@ -139,7 +139,7 @@ fn find_best_aoe_target(state: &BattleState, caster: (i32, i32), range: i32, aoe
     best_tile
 }
 
-fn apply_effects(state: &mut BattleState, effects: &[crate::core::cards::CardEffect], target: (i32, i32)) {
+pub(crate) fn apply_effects(state: &mut BattleState, effects: &[crate::core::cards::CardEffect], target: (i32, i32)) {
     for card_effect in effects {
         let affected = cross_aoe(target, card_effect.aoe);
         for pos in affected {
