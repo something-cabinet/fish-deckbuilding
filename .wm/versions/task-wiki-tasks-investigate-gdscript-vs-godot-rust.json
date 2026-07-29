@@ -1,0 +1,53 @@
+{
+  "entity_id": "wiki:tasks:investigate-gdscript-vs-godot-rust",
+  "current_version": 3,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-29T02:06:19.016Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-07-29T02:07:05.831Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-07-29T02:07:25.568Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "title",
+          "old_value": "Investigate GDScript vs godot-rust for scene scripting",
+          "new_value": "Investigate GDScript vs godot-rust for scene scripting"
+        },
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

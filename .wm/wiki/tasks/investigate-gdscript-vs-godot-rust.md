@@ -1,9 +1,13 @@
 ---
 title: Investigate GDScript vs godot-rust for scene scripting
 type: task
-id: wiki:tasks:investigate-gdscript-vs-godot-rust
-status: todo
-tags: [godot, rust, gdscript, architecture, investigation]
+tags:
+- godot
+- rust
+- gdscript
+- architecture
+- investigation
+status: done
 ---
 
 ## Goal

@@ -13,6 +13,7 @@ type: reference
 - [gdext bridge pattern](wiki/concepts/gdext-bridge-pattern.md) — *draft*
 - [gdext scene node type mismatch](wiki/concepts/gdext-scene-node-type-mismatch.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
+- [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
 - [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
@@ -26,9 +27,11 @@ type: reference
 - [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
 - [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
+- [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
 - [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
+- [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
@@ -55,14 +58,18 @@ type: reference
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [gdext 0.5.4 API gotchas](wiki/memory/gdext-0-5-4-api-gotchas.md) — *active*
+- [gdext scene node type must match custom class](wiki/memory/gdext-scene-node-type-must-match-custom-class.md) — *active*
 - [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *active*
 - [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [Godot web deploy pipeline](wiki/memory/godot-web-deploy-pipeline.md) — *active*
+- [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
+- [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
+- [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [Vite HMR Incompatible with Excalibur Scenes](wiki/memory/vite-hmr-incompatible-with-excalibur-scenes.md) — *active*
@@ -102,7 +109,7 @@ type: reference
 - [Dialogue system — wire DialogueBox into campaign flow](wiki/tasks/dialogue-system--wire-dialoguebox-into-campaign-flow.md) — *todo*
 - [Dynamic hand overlap for variable card count](wiki/tasks/dynamic-hand-overlap-for-variable-card-count.md) — *todo*
 - [Grid Battle UI — render 9×5 grid, wire targeting, base attack, move, replace, restore integration tests](wiki/tasks/grid-battle-ui--render-95-grid-wire-targeting-base-attack-move-replace-restore-integration-tests.md) — *todo*
-- [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *todo*
+- [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
 - [Review and rename card types to thematic names](wiki/tasks/review-and-rename-card-types-to-thematic-names.md) — *todo*
 - [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
@@ -111,6 +118,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 84
-- **Edges:** 90
+- **Nodes:** 91
+- **Edges:** 92
 
