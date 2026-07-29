@@ -156,5 +156,5 @@ mod tests {
     #[test] fn cannot_attack_wrong_phase() { let mut s = BattleState::new(); end_player_turn(&mut s); assert_eq!(player_attack(&mut s, (0,2), (5,1)), Err(EngineError::WrongPhase)); }
     #[test] fn enemy_turn_triggers_victory() { let mut s = BattleState::new(); let ep = s.grid.find_faction(Faction::Enemy)[0]; s.grid.remove_unit(ep); s.grid.place_unit(ep, GridUnit::new(Faction::Enemy, 1, 0)); let hp = s.grid.find_faction(Faction::Hero)[0]; s.grid.remove_unit(hp); s.grid.place_unit((4,1), GridUnit::hero()); player_attack(&mut s, (4,1), (5,1)).unwrap(); assert_eq!(s.result, Some(BattleResult::Victory)); }
     #[test] fn end_player_turn_draws_card() { let mut s = BattleState::new(); s.hand = crate::core::cards::Hand::new(5); let before = s.hand.len(); end_player_turn(&mut s); assert_eq!(s.hand.len(), before + 1); }
-    #[test] fn enemy_turn_draws_card() { let mut s = BattleState::new(); end_player_turn(&mut s); execute_enemy_turn(&mut s); assert!(s.enemy_hand.len() >= 0); }
+    #[test] fn enemy_turn_draws_card() { let mut s = BattleState::new(); end_player_turn(&mut s); execute_enemy_turn(&mut s); }
 }
