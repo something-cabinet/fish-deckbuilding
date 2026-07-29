@@ -18,6 +18,7 @@ pub struct OverworldScene {
     run: Option<RunState>,
     nodes: Vec<OverworldNode>,
     hero_node_idx: i32,
+    self_gd: Option<Gd<OverworldScene>>,
     #[export]
     debug_clicks: i32,
     base: Base<Node2D>,
@@ -26,10 +27,12 @@ pub struct OverworldScene {
 #[godot_api]
 impl INode2D for OverworldScene {
     fn init(base: Base<Node2D>) -> Self {
-        Self { run: None, nodes: Vec::new(), hero_node_idx: 0, debug_clicks: 0, base }
+        Self { run: None, nodes: Vec::new(), hero_node_idx: 0, self_gd: None, debug_clicks: 0, base }
     }
 
     fn ready(&mut self) {
+        let base_gd = self.base.__script_gd();
+        self.self_gd = Some(base_gd.cast::<OverworldScene>());
         self.build_ui();
         self.start_run();
     }
@@ -55,13 +58,13 @@ impl INode2D for OverworldScene {
 
 #[godot_api]
 impl OverworldScene {
-    fn build_ui(&self) {
+    fn build_ui(&mut self) {
+        let Some(ref mut self_gd) = self.self_gd else { return };
         let mut bg = ColorRect::new_alloc();
         bg.set_mouse_filter(MouseFilter::IGNORE);
         bg.set_size(Vector2::new(1280.0, 720.0));
         bg.set_color(rgb(0x0b, 0x1a, 0x24));
         bg.set_name("Background");
-        let mut self_gd = self.to_gd();
         self_gd.add_child(&bg);
 
         let mut ui = CanvasLayer::new_alloc();
@@ -88,7 +91,7 @@ impl OverworldScene {
         deck_btn.set_position(Vector2::new(20.0, 70.0));
         deck_btn.set_size(Vector2::new(100.0, 30.0));
         deck_btn.set_text("Deck");
-        deck_btn.signals().pressed().connect_other(&self_gd, OverworldScene::on_deck_button);
+        deck_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_deck_button);
         ui.add_child(&deck_btn);
 
         self_gd.add_child(&ui);

@@ -66,6 +66,7 @@ pub struct BattleScene {
     prev_units: HashMap<String, (i32, i32)>,
     hovered_card: Option<usize>,
     aoe_preview_pos: Option<(i32, i32)>,
+    self_gd: Option<Gd<BattleScene>>,
     #[export]
     debug_unhandled_input_calls: i32,
     #[export]
@@ -88,6 +89,7 @@ impl INode2D for BattleScene {
             prev_units: HashMap::new(),
             hovered_card: None,
             aoe_preview_pos: None,
+            self_gd: None,
             debug_unhandled_input_calls: 0,
             debug_click_events_received: 0,
             base,
@@ -95,6 +97,9 @@ impl INode2D for BattleScene {
     }
 
     fn ready(&mut self) {
+        // Store a Gd<BattleScene> once for use in signal connections and callbacks
+        let base_gd = self.base.__script_gd();
+        self.self_gd = Some(base_gd.cast::<BattleScene>());
         self.build_grid();
         self.build_ui();
         self.start_battle();
@@ -243,7 +248,7 @@ impl BattleScene {
         self.sync_all();
 
         // Schedule end of enemy turn with pacing delay
-        let self_gd = self.to_gd();
+        let Some(ref self_gd) = self.self_gd else { return };
         let mut grid_node = self.base().get_node_as::<Node2D>("BattleGrid");
         let mut end_tween = grid_node.create_tween();
         end_tween.tween_interval(1.5);
@@ -380,16 +385,16 @@ impl BattleScene {
     }
 
     fn connect_signals(&self) {
-        let self_gd = self.to_gd();
+        let Some(ref self_gd) = self.self_gd else { return };
         let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
-        end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
+        end_btn.signals().pressed().connect_other(self_gd, BattleScene::on_end_turn);
         let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
         let restart_btn = banner.get_node_as::<Button>("RestartButton");
-        restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+        restart_btn.signals().pressed().connect_other(self_gd, BattleScene::on_restart);
         let return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
-        return_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_return_to_overworld);
+        return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
         let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
-        replace_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_replace);
+        replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
     }
 }
 
