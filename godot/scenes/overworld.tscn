@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dofw0wfqef0e6"]
 
-[node name="OverworldScene" type="Node2D"]
+[node name="OverworldScene" type="OverworldScene"]
 
 [node name="Camera2D" type="Camera2D"]
 anchor_mode = 0
