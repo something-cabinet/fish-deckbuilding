@@ -1,6 +1,7 @@
 {
+  "framework": null,
   "outputDirectory": "godot/web",
-  "buildCommand": null,
+  "buildCommand": "echo 'static Godot web export, no build needed'",
   "headers": [
     {
       "source": "/(.*)\\.wasm",
