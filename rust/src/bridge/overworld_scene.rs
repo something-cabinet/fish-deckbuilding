@@ -7,7 +7,7 @@ use godot::global::MouseButton;
 use godot::prelude::*;
 
 use crate::core::{
-    overworld::{self, NodeType, OverworldNode, RunState, create_zone_1, generate_rewards},
+    overworld::{NodeType, OverworldNode, RunState, create_zone_1},
     cards::all_starter_cards,
 };
 use super::game_state;

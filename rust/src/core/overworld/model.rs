@@ -6,7 +6,9 @@ pub enum NodeType {
     Boss,
     Rest,
     Shop,
+    #[allow(dead_code)]
     Enchanter,
+    #[allow(dead_code)]
     Gambler,
 }
 
@@ -27,7 +29,9 @@ pub struct RunState {
     pub card_collection: Vec<CardDef>,
     pub combat_deck: Vec<CardDef>,
     pub stash: Vec<CardDef>,
+    #[allow(dead_code)]
     pub current_node: Option<String>,
+    #[allow(dead_code)]
     pub unlocked_zones: Vec<String>,
     pub defeated_nodes: Vec<String>,
 }
@@ -73,6 +77,7 @@ impl RunState {
         self.gold += amount;
     }
 
+    #[allow(dead_code)]
     pub fn spend_gold(&mut self, amount: i32) -> bool {
         if self.gold >= amount {
             self.gold -= amount;
@@ -82,6 +87,7 @@ impl RunState {
         }
     }
 
+    #[allow(dead_code)]
     pub fn swap_deck_stash(&mut self, deck_idx: usize, stash_idx: usize) -> bool {
         if deck_idx >= self.combat_deck.len() && stash_idx >= self.stash.len() {
             return false;
