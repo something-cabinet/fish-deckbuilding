@@ -5,9 +5,16 @@ tags: [godot, prototype, battle, ui, approved]
 status: approved
 ---
 
+---
+title: Godot Battle Scaffold
+type: spec
+tags: [godot, prototype, battle, ui, approved]
+status: approved
+---
+
 ## Overview
 
-Godot 4 battle scaffold using godot-rust (gdext) with TDD + Compiler-Driven Development. Core logic is pure Rust (52 tests), scene layer is thin gdext bridge. Phase 1: one battle scene — Guppy vs Debt Collector on a 6×4 Duelyst-style grid.
+Godot 4 battle scaffold using godot-rust (gdext) with TDD + Compiler-Driven Development. Core logic is pure Rust (55 tests), scene layer is thin gdext bridge. Phase 1: one battle scene — Guppy vs Debt Collector on a 6×4 Duelyst-style grid.
 
 ## Locked Decisions
 
@@ -37,12 +44,9 @@ Godot 4 battle scaffold using godot-rust (gdext) with TDD + Compiler-Driven Deve
 - [X] AC-9: Enemy AI deterministic (Chebyshev min, lowest-y lowest-x tie-break)
 - [X] AC-10: Battle-over banner with Restart button
 - [X] AC-11: Mana HUD shows 3/3 (display-only)
-- [X] AC-12: 52 cargo tests for BFS, combat, AI determinism, turn cycle
+- [X] AC-12: 55 cargo tests for BFS, combat, AI determinism, turn cycle
 
 ## Remaining Gaps
 
 - D7 partial: scale-in tween on unit placement implemented; position tweens (move animation) and enemy turn event sequence deferred to Phase 2
-- AC-6 partial: selecting moved-but-not-attacked hero still shows movement overlay instead of only attack highlight
-- No export_presets.cfg for web export
-- CI has 14 warnings (unused barrel re-exports, clippy)
-- Bridge has no tests (requires Godot engine)
+- Bridge has no tests (requires Godot engine); bridge-layer test helpers added (`#[func] test_click`, `debug_state`)

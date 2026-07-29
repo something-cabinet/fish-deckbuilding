@@ -1,8 +1,10 @@
 
 use godot::classes::tween::{EaseType, TransitionType};
+use godot::classes::notify::CanvasItemNotification;
+use godot::classes::control::MouseFilter;
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D, Panel,
-    ProgressBar, StyleBox, StyleBoxFlat,
+    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
+    Panel, ProgressBar, StyleBox, StyleBoxFlat,
 };
 use godot::global::MouseButton;
 use godot::prelude::*;
@@ -52,6 +54,10 @@ pub struct BattleScene {
     selected: Option<(i32, i32)>,
     valid_moves: Vec<(i32, i32)>,
     animating: bool,
+    #[export]
+    debug_unhandled_input_calls: i32,
+    #[export]
+    debug_click_events_received: i32,
     base: Base<Node2D>,
 }
 
@@ -63,6 +69,8 @@ impl INode2D for BattleScene {
             selected: None,
             valid_moves: Vec::new(),
             animating: false,
+            debug_unhandled_input_calls: 0,
+            debug_click_events_received: 0,
             base,
         }
     }
@@ -71,29 +79,32 @@ impl INode2D for BattleScene {
         self.build_grid();
         self.build_ui();
         self.start_battle();
-        let self_gd = self.to_gd();
-        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
-        end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
-        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
-        let restart_btn = banner.get_node_as::<Button>("RestartButton");
-        restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+        self.connect_signals();
     }
 
-    fn unhandled_input(&mut self, event: Gd<InputEvent>) {
-        if self.animating {
-            return;
+    /// Reconnect typed signals after hot-reload.
+    ///
+    /// Godot auto-disconnects typed signal closures before unloading the old
+    /// library, so they must be re-bound after the new library loads.  This
+    /// method is called from both `ready()` and `EXTENSION_RELOADED` to
+    /// keep signal bindings alive across reload cycles.
+    fn on_notification(&mut self, what: CanvasItemNotification) {
+        if what == CanvasItemNotification::EXTENSION_RELOADED {
+            godot_print!("[BattleScene] EXTENSION_RELOADED — reconnecting signals + refreshing UI");
+            self.connect_signals();
+            self.sync_all();
         }
-        let mouse = match event.try_cast::<InputEventMouseButton>() {
-            Ok(m) => m,
-            Err(_) => return,
-        };
-        if !mouse.is_pressed() || mouse.get_button_index() != MouseButton::LEFT {
-            return;
-        }
-        let pos = match screen_to_grid(mouse.get_position()) {
-            Some(p) => p,
-            None => return,
-        };
+    }
+
+    fn input(&mut self, event: Gd<InputEvent>) {
+        // Use _input() instead of _unhandled_input() because grid clicks
+        // need to be handled BEFORE CanvasLayer Control nodes consume them.
+        // _input() fires before UI _gui_input, _unhandled_input fires after.
+        if self.animating { return; }
+        let Ok(mouse) = event.try_cast::<InputEventMouseButton>() else { return };
+        self.debug_click_events_received += 1;
+        if !mouse.is_pressed() || mouse.get_button_index() != MouseButton::LEFT { return; }
+        let Some(pos) = screen_to_grid(mouse.get_position()) else { return };
         self.handle_click(pos);
     }
 }
@@ -130,9 +141,72 @@ impl BattleScene {
     fn on_restart(&mut self) {
         self.start_battle();
     }
+
+    /// Test-click at grid coordinate (gx, gy) — bypasses Godot's input pipeline.
+    /// Calls handle_click directly so we can test the selection/move logic
+    /// from GDScript/RuntimeTest without needing real mouse events.
+    #[func]
+    fn test_click(&mut self, gx: i32, gy: i32) {
+        godot_print!("[RT:OK] test_click at grid ({}, {})", gx, gy);
+        self.handle_click((gx, gy));
+        // Print debug state after click
+        match self.selected {
+            Some((x, y)) => godot_print!("[RT:PRINT] selected = ({}, {})", x, y),
+            None => godot_print!("[RT:PRINT] selected = None"),
+        }
+        godot_print!("[RT:PRINT] valid_move_count = {}", self.valid_moves.len());
+    }
+
+    #[func]
+    fn debug_input_count(&self) {
+        godot_print!("[RT:PRINT] unhandled_input calls = {}", self.debug_unhandled_input_calls);
+        godot_print!("[RT:PRINT] click events received = {}", self.debug_click_events_received);
+    }
+
+    #[func]
+    fn debug_state(&self) {
+        match &self.state {
+            Some(s) => {
+                godot_print!("[RT:PRINT] turn = {}, mana = {}/{}", s.turn_number, s.mana, s.max_mana);
+                let p = match s.phase {
+                    Phase::PlayerTurn => "PlayerTurn",
+                    Phase::EnemyTurn => "EnemyTurn",
+                    Phase::BattleOver => "BattleOver",
+                };
+                godot_print!("[RT:PRINT] phase = {}", p);
+                godot_print!("[RT:PRINT] units = {}", s.grid.units.len());
+                // Print unit positions
+                for (pos, unit) in &s.grid.units {
+                    godot_print!("[RT:PRINT]   unit at ({},{}): faction={:?} hp={} atk={} moved={} attacked={} alive={}",
+                        pos.0, pos.1, unit.faction, unit.hp, unit.atk, unit.has_moved, unit.has_attacked, unit.alive);
+                }
+            }
+            None => godot_print!("[RT:PRINT] state = None"),
+        }
+    }
+
+    fn connect_signals(&self) {
+        let self_gd = self.to_gd();
+        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        end_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_end_turn);
+        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
+        let restart_btn = banner.get_node_as::<Button>("RestartButton");
+        restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+    }
 }
 
 
+// ---------------------------------------------------------------------------
+// Visual & UI helpers
+//
+// The BattleScene struct stores no `#[export]` fields.  All game state is
+// ephemeral: `init()` creates a blank scene, and `ready()` / `start_battle()`
+// populate it fresh.  This means hot-reload always resets the battle — which
+// is fine for the prototype.  If mid-battle state preservation across reload
+// is desired later, add `#[export]` fields on the struct with `#[init(val =
+// ...)]` defaults.  Godot serialises export fields before unloading the old
+// library and restores them onto the fresh instance.
+// ---------------------------------------------------------------------------
 impl BattleScene {
     fn build_grid(&self) {
         let mut container = self.base().get_node_as::<Node2D>("BattleGrid/Tiles");
@@ -141,6 +215,7 @@ impl BattleScene {
                 let mut tile = ColorRect::new_alloc();
                 let px = constants::GRID_ORIGIN_X + x * constants::TILE_SIZE;
                 let py = constants::GRID_ORIGIN_Y + y * constants::TILE_SIZE;
+                tile.set_mouse_filter(MouseFilter::IGNORE);
                 tile.set_position(Vector2::new(px as f32, py as f32));
                 tile.set_size(Vector2::new(
                     (constants::TILE_SIZE - 2) as f32,
@@ -266,6 +341,7 @@ impl BattleScene {
         root.add_child(&body);
 
         let mut eye = ColorRect::new_alloc();
+        eye.set_mouse_filter(MouseFilter::IGNORE);
         eye.set_size(Vector2::new(8.0, 8.0));
         eye.set_color(rgb(0xff, 0xff, 0xff));
         eye.set_position(Vector2::new(-16.0, -12.0));
@@ -301,6 +377,7 @@ impl BattleScene {
             let px = constants::GRID_ORIGIN_X + x * constants::TILE_SIZE;
             let py = constants::GRID_ORIGIN_Y + y * constants::TILE_SIZE;
             let mut highlight = ColorRect::new_alloc();
+            highlight.set_mouse_filter(MouseFilter::IGNORE);
             highlight.set_position(Vector2::new(px as f32, py as f32));
             highlight.set_size(Vector2::new(tile_px, tile_px));
             highlight.set_color(rgba(0xe8, 0x5d, 0x4e, 0.45));
@@ -352,6 +429,7 @@ impl BattleScene {
         border_color: Color,
     ) -> Gd<Panel> {
         let mut panel = Panel::new_alloc();
+        panel.set_mouse_filter(MouseFilter::IGNORE);
         panel.set_size(size);
         let mut style = StyleBoxFlat::new_gd();
         style.set_bg_color(bg);
@@ -364,6 +442,7 @@ impl BattleScene {
 
     fn hp_bar(hp: i32, max_hp: i32) -> Gd<ProgressBar> {
         let mut bar = ProgressBar::new_alloc();
+        bar.set_mouse_filter(MouseFilter::IGNORE);
         bar.set_size(Vector2::new(56.0, 8.0));
         bar.set_min(0.0);
         bar.set_max(max_hp as f64);
