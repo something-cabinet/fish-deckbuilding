@@ -77,6 +77,7 @@ pub struct BattleScene {
 #[godot_api]
 impl INode2D for BattleScene {
     fn init(base: Base<Node2D>) -> Self {
+        let self_gd = base.to_init_gd().cast::<BattleScene>();
         Self {
             state: None,
             selected: None,
@@ -89,7 +90,7 @@ impl INode2D for BattleScene {
             prev_units: HashMap::new(),
             hovered_card: None,
             aoe_preview_pos: None,
-            self_gd: None,
+            self_gd: Some(self_gd),
             debug_unhandled_input_calls: 0,
             debug_click_events_received: 0,
             base,
@@ -97,9 +98,6 @@ impl INode2D for BattleScene {
     }
 
     fn ready(&mut self) {
-        // Store a Gd<BattleScene> once for use in signal connections and callbacks
-        let base_gd = self.base.__script_gd();
-        self.self_gd = Some(base_gd.cast::<BattleScene>());
         self.build_grid();
         self.build_ui();
         self.start_battle();
