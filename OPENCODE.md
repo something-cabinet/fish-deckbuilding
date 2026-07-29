@@ -22,6 +22,7 @@ Compatibility entrypoint for runtimes that auto-detect `OPENCODE.md`.
 - Plan before implementation unless the user explicitly overrides that workflow.
 - Validate before considering work complete.
 - Proactively capture durable memory; do not wait for explicit instruction.
+- **Pre-Commit: Run `cargo clippy` before every commit. Fix all warnings.**
 
 ## Quick Reference
 

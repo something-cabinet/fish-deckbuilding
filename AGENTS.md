@@ -64,6 +64,15 @@ cargo test       # run all tests
 
 Tests live in `rust/src/core/`.
 
+### Pre-Commit — Clippy Check
+
+**Run `cargo clippy` before every commit** to catch style issues and potential bugs. Fix all warnings before committing.
+
+```bash
+cd rust
+cargo clippy     # fix all warnings before commit
+```
+
 ## Quick Reference
 
 ```bash
