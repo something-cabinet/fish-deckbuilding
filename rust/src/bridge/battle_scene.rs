@@ -854,7 +854,7 @@ impl BattleScene {
 
         // Death dissolve (FR-13): units that existed before but not in kept set
         for name in &existing_names {
-            if !kept.contains(name) && units_node.has_node(name) {
+            if !kept.contains(name) && units_node.has_node(name) && (name.starts_with("Unit_Hero") || name.starts_with("Unit_Enemy")) {
                 let mut node = units_node.get_node_as::<Node2D>(name);
                     let mut death_tween = node.create_tween();
                     death_tween.set_trans(TransitionType::QUINT);
