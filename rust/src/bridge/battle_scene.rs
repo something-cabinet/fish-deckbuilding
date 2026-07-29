@@ -15,7 +15,9 @@ use crate::core::{
     constants, grid::movement as grid_movement,
     grid::{Faction, GridUnit},
     cards::{CardEffect, Effect, cross_aoe},
+    overworld::{generate_rewards},
 };
+use super::game_state;
 
 fn chebyshev_adjacent(a: (i32, i32), b: (i32, i32)) -> bool {
     (a.0 - b.0).abs().max((a.1 - b.1).abs()) == 1
@@ -177,6 +179,28 @@ impl BattleScene {
     }
 
     #[func]
+    fn on_return_to_overworld(&mut self) {
+        // Generate rewards and update RunState
+        let is_boss = false;
+        let (reward_cards, gold) = generate_rewards(42, is_boss);
+        game_state::with_run_state(|run| {
+            run.add_gold(gold);
+            if let Some(card) = reward_cards.first() {
+                run.add_card(card.clone());
+            }
+            run.hp = self.state.as_ref().map_or(30, |s| {
+                s.grid.find_faction(Faction::Hero).first()
+                    .and_then(|p| s.grid.unit_at(*p))
+                    .map_or(30, |u| u.hp)
+            });
+        });
+
+        // Transition to overworld scene
+        let mut tree = self.base().get_tree();
+        let _ = tree.change_scene_to_file("res://scenes/overworld.tscn");
+    }
+
+    #[func]
     fn on_replace(&mut self) {
         let Some(s) = self.state.as_mut() else { return };
         if s.phase != Phase::PlayerTurn { return; }
@@ -270,6 +294,8 @@ impl BattleScene {
         let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
         let restart_btn = banner.get_node_as::<Button>("RestartButton");
         restart_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_restart);
+        let return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
+        return_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_return_to_overworld);
         let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
         replace_btn.signals().pressed().connect_other(&self_gd, BattleScene::on_replace);
     }

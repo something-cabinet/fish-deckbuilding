@@ -10,6 +10,7 @@ use crate::core::{
     overworld::{self, NodeType, OverworldNode, RunState, create_zone_1, generate_rewards},
     cards::all_starter_cards,
 };
+use super::game_state;
 
 #[derive(GodotClass)]
 #[class(base=Node2D)]
@@ -94,8 +95,13 @@ impl OverworldScene {
     }
 
     fn start_run(&mut self) {
-        let starter = all_starter_cards();
-        self.run = Some(RunState::new(30, 30, starter));
+        // Try to load existing run state (e.g., returning from battle)
+        if let Some(existing) = game_state::take_run_state() {
+            self.run = Some(existing);
+        } else {
+            let starter = all_starter_cards();
+            self.run = Some(RunState::new(30, 30, starter));
+        }
         self.nodes = create_zone_1();
         self.hero_node_idx = 0;
         self.refresh();
@@ -236,10 +242,17 @@ impl OverworldScene {
         match node.node_type {
             NodeType::Battle | NodeType::Boss => {
                 godot_print!("[Overworld] Starting battle at {}", node.id);
+                // Save run state and transition to battle
+                let run = self.run.take().unwrap();
+                game_state::set_run_state(run);
+                self.nodes = Vec::new();
+                let mut tree = self.base().get_tree();
+                let _ = tree.change_scene_to_file("res://scenes/battle/battle.tscn");
             }
             NodeType::Rest => {
                 run.heal(10);
                 run.defeated_nodes.push(node.id.clone());
+                self.refresh();
             }
             NodeType::Shop => {
                 godot_print!("[Overworld] Opening shop");
@@ -251,7 +264,6 @@ impl OverworldScene {
                 godot_print!("[Overworld] Opening gambler");
             }
         }
-        self.refresh();
     }
 
     #[func]

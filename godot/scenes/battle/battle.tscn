@@ -56,3 +56,11 @@ offset_top = 100.0
 offset_right = 280.0
 offset_bottom = 140.0
 text = "Restart"
+
+[node name="ReturnToOverworld" type="Button" parent="UI/ResultBanner" unique_id=1473823203]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 60.0
+offset_right = 280.0
+offset_bottom = 100.0
+text = "Return to Map"
