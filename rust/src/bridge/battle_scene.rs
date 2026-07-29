@@ -115,7 +115,7 @@ impl INode2D for BattleScene {
         // Check card hand clicks (bottom area)
         if pos.y >= 600.0 && pos.y <= 720.0 && pos.x >= 300.0 && pos.x <= 900.0 {
             let card_idx = ((pos.x - 300.0) / 120.0) as i32;
-            if card_idx >= 0 && card_idx < 5 {
+            if (0..5).contains(&card_idx) {
                 self.on_card_click(card_idx);
                 return;
             }

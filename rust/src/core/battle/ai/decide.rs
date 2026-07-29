@@ -93,7 +93,7 @@ fn total_damage(effects: &[crate::core::cards::CardEffect]) -> i32 {
 }
 
 fn pick_enemy_card_target(state: &BattleState, enemy_pos: (i32, i32), card: &CardDef) -> Option<(i32, i32)> {
-    for effect in &card.effects {
+    if let Some(effect) = card.effects.first() {
         match effect.effect {
             Effect::Damage(_) => {
                 let hero_positions = state.grid.find_faction(Faction::Hero);
