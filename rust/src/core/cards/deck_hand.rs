@@ -21,9 +21,7 @@ impl Hand {
         if index < self.cards.len() { Some(self.cards.remove(index)) } else { None }
     }
 
-    pub fn len(&self) -> usize { self.cards.len() }
-    pub fn is_full(&self) -> bool { (self.cards.len() as i32) >= self.max_size }
-    pub fn is_empty(&self) -> bool { self.cards.is_empty() }
+pub fn len(&self) -> usize { self.cards.len() }
 }
 
 impl Default for Hand {
@@ -80,7 +78,6 @@ impl Graveyard {
     pub fn drain(&mut self) -> Vec<CardDef> { std::mem::take(&mut self.cards) }
 
     pub fn len(&self) -> usize { self.cards.len() }
-    pub fn is_empty(&self) -> bool { self.cards.is_empty() }
 }
 
 impl Default for Graveyard {
@@ -162,7 +159,7 @@ mod tests {
         g.add(dummy_card("a"));
         g.add(dummy_card("b"));
         assert_eq!(g.drain().len(), 2);
-        assert!(g.is_empty());
+        assert_eq!(g.len(), 0);
     }
 
     #[test]

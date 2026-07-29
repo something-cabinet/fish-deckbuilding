@@ -3,6 +3,7 @@ pub enum Rarity {
     Common,
     Uncommon,
     Rare,
+    #[allow(dead_code)]
     Legendary,
 }
 
