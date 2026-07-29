@@ -2,5 +2,5 @@
 
 [node name="OverworldScene" type="OverworldScene"]
 
-[node name="Camera2D" type="Camera2D"]
+[node name="Camera2D" type="Camera2D" parent="."]
 anchor_mode = 0
