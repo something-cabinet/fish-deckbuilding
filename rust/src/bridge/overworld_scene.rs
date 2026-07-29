@@ -27,11 +27,12 @@ pub struct OverworldScene {
 #[godot_api]
 impl INode2D for OverworldScene {
     fn init(base: Base<Node2D>) -> Self {
-        let self_gd = base.to_init_gd().cast::<OverworldScene>();
-        Self { run: None, nodes: Vec::new(), hero_node_idx: 0, self_gd: Some(self_gd), debug_clicks: 0, base }
+        Self { run: None, nodes: Vec::new(), hero_node_idx: 0, self_gd: None, debug_clicks: 0, base }
     }
 
     fn ready(&mut self) {
+        let base_gd = self.base.__script_gd();
+        self.self_gd = Some(base_gd.cast::<OverworldScene>());
         self.build_ui();
         self.start_run();
     }
