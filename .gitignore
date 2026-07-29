@@ -27,3 +27,5 @@ emsdk/
 
 # Playtest screenshots
 playtest-*.png
+godot-tools/
+*.log
