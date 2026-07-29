@@ -285,7 +285,8 @@ impl BattleScene {
             });
         });
 
-        let mut tree = self.base().get_tree();
+        let base = self.base_mut();
+        let mut tree = base.get_tree();
         let _ = tree.change_scene_to_file("res://scenes/overworld.tscn");
     }
 

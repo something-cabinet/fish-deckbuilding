@@ -249,7 +249,8 @@ impl OverworldScene {
                 let run = self.run.take().unwrap();
                 game_state::set_run_state(run);
                 self.nodes = Vec::new();
-                let mut tree = self.base().get_tree();
+                let base = self.base_mut();
+                let mut tree = base.get_tree();
                 let _ = tree.change_scene_to_file("res://scenes/battle/battle.tscn");
             }
             NodeType::Rest => {
