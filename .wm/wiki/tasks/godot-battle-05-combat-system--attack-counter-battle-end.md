@@ -2,7 +2,8 @@
 title: [godot-battle-05] Combat system — attack, counter, battle end
 type: task
 id: wiki:tasks:godot-battle-05-combat-system--attack-counter-battle-end
-status: todo
+status: done
+superseded_by: Combat + battle end wired in Rust bridge (battle_scene.rs:try_attack_adjacent) — attack resolution via base_attack.rs, dead units removed, victory/defeat banner with restart. AC-7, AC-10 fulfilled.
 priority: medium
 tags: [from-spec, spec:godot-battle-scaffold, godot, combat]
 spec: wiki:specs:godot-battle-scaffold

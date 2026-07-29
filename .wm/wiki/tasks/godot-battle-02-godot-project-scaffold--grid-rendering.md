@@ -2,7 +2,8 @@
 title: [godot-battle-02] Godot project scaffold + grid rendering
 type: task
 id: wiki:tasks:godot-battle-02-godot-project-scaffold--grid-rendering
-status: todo
+status: done
+superseded_by: Grid rendered by Rust bridge (battle_scene.rs:build_grid) — 6×4 checkerboard tiles at 1280×720, Compatibility renderer. AC-1, NFR-3, NFR-1 fulfilled.
 priority: high
 tags: [from-spec, spec:godot-battle-scaffold, godot, scene]
 spec: wiki:specs:godot-battle-scaffold

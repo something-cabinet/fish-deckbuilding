@@ -2,7 +2,8 @@
 title: [godot-battle-04] Movement system + selection overlay
 type: task
 id: wiki:tasks:godot-battle-04-movement-system--selection-overlay
-status: todo
+status: done
+superseded_by: Movement + selection wired in Rust bridge (battle_scene.rs:handle_click, show_move_overlay, show_attack_highlight) — BFS range display, corner brackets, tween-free instant move, attack highlight on adjacent enemies. AC-4, AC-5, AC-6 fulfilled.
 priority: medium
 tags: [from-spec, spec:godot-battle-scaffold, godot, movement]
 spec: wiki:specs:godot-battle-scaffold

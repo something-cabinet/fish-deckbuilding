@@ -2,7 +2,8 @@
 title: [godot-battle-01] Core logic layer — pure GDScript classes
 type: task
 id: wiki:tasks:godot-battle-01-core-logic-layer--pure-gdscript-classes
-status: todo
+status: done
+superseded_by: Implemented in Rust core (rust/src/core/) via gdext bridge (rust/src/bridge/battle_scene.rs) — GDScript layer not needed. All ACs fulfilled: BFS (movement.rs), combat (base_attack.rs), AI (decide.rs), headless tests pass.
 priority: high
 tags: [from-spec, spec:godot-battle-scaffold, godot, core]
 spec: wiki:specs:godot-battle-scaffold

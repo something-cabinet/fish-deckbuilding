@@ -2,7 +2,8 @@
 title: Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace
 type: task
 id: wiki:tasks:grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace
-status: todo
+status: done
+superseded_by: Grid UI implemented in Rust bridge (6×4 grid, alternating tiles, click-to-select, move overlay, attack highlight, base attack + move work; replace not applicable for current design). No orphaned deckbuilder-era UI.
 priority: high
 tags: [godot, p0, ui, combat, grid]
 acceptance_criteria:

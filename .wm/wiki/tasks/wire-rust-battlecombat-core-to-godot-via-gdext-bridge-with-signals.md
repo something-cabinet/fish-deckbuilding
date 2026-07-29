@@ -2,7 +2,8 @@
 title: Wire Rust battle/combat core to Godot via gdext bridge with signals
 type: task
 id: wiki:tasks:wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals
-status: todo
+status: done
+superseded_by: Bridge implemented in rust/src/bridge/battle_scene.rs (603 lines) — state changes sync via direct sync_all/sync_visuals_ref/sync_ui_ref rather than Godot signals. Playable end-to-end from editor. Core tests pass.
 priority: high
 tags: [godot, gdext, rust, architecture]
 acceptance_criteria:

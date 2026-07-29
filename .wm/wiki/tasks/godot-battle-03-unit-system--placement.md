@@ -2,7 +2,8 @@
 title: [godot-battle-03] Unit system + placement
 type: task
 id: wiki:tasks:godot-battle-03-unit-system--placement
-status: todo
+status: done
+superseded_by: Units rendered by Rust bridge (battle_scene.rs:build_unit_root) — Guppy at (0,2), Debt Collector at (5,1), HP bars, faction colors, pulse tween for action-ready. AC-2, AC-3 fulfilled.
 priority: medium
 tags: [from-spec, spec:godot-battle-scaffold, godot, units]
 spec: wiki:specs:godot-battle-scaffold

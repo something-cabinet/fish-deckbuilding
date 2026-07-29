@@ -45,10 +45,14 @@ pub fn player_attack(state: &mut BattleState, attacker_pos: (i32, i32), defender
     Ok(PlayerAttackResult { combat_result, attacker_died: attacker_dead, defender_died: defender_dead, battle_over })
 }
 
-pub fn end_player_turn(state: &mut BattleState) { state.phase = Phase::EnemyTurn; }
+pub fn end_player_turn(state: &mut BattleState) {
+    state.draw_player_card();
+    state.phase = Phase::EnemyTurn;
+}
 
 pub fn execute_enemy_turn(state: &mut BattleState) {
     if state.phase != Phase::EnemyTurn { return; }
+    state.enemy_mana = state.enemy_mana.min(state.enemy_max_mana - 1) + 1;
     let decision = ai::decide(&state.grid);
     match decision {
         Decision::Attack { target } => {
@@ -63,6 +67,8 @@ pub fn execute_enemy_turn(state: &mut BattleState) {
         }
         Decision::Wait => {}
     }
+    ai::play_enemy_cards(state);
+    state.draw_enemy_card();
     if state.phase != Phase::BattleOver { start_player_turn(state); }
 }
 
@@ -101,7 +107,16 @@ mod tests {
     #[test] fn move_beyond_budget_fails() { let mut s = BattleState::new(); let hp = s.grid.find_faction(Faction::Hero)[0]; assert_eq!(move_unit(&mut s, hp, (3, 2)), Err(EngineError::MoveFailed)); }
     #[test] fn player_attack_resolves() { let mut s = BattleState::new(); let hp = s.grid.find_faction(Faction::Hero)[0]; s.grid.remove_unit(hp); s.grid.place_unit((4,1), GridUnit::hero()); let r = player_attack(&mut s, (4,1), (5,1)); assert!(r.is_ok()); assert_eq!(r.unwrap().combat_result.damage_dealt, 2); }
     #[test] fn full_turn_cycle() { let mut s = BattleState::new(); assert_eq!(s.phase, Phase::PlayerTurn); end_player_turn(&mut s); assert_eq!(s.phase, Phase::EnemyTurn); let t = s.turn_number; execute_enemy_turn(&mut s); assert_eq!(s.phase, Phase::PlayerTurn); assert_eq!(s.turn_number, t + 1); }
-    #[test] fn enemy_turn_moves_and_attacks() { let mut s = BattleState::new(); let hp = s.grid.find_faction(Faction::Hero)[0]; s.grid.remove_unit(hp); s.grid.place_unit((3,1), GridUnit::hero()); end_player_turn(&mut s); execute_enemy_turn(&mut s); let hp2 = s.grid.find_faction(Faction::Hero); assert!(!hp2.is_empty()); assert_eq!(s.grid.unit_at(hp2[0]).unwrap().hp, 28); let ep = s.grid.find_faction(Faction::Enemy); assert!(!ep.is_empty()); let c = (ep[0].0 - hp2[0].0).abs().max((ep[0].1 - hp2[0].1).abs()); assert_eq!(c, 1); }
+    #[test] fn enemy_turn_moves_and_attacks() {
+        let mut s = BattleState::new(); let hp = s.grid.find_faction(Faction::Hero)[0];
+        s.grid.remove_unit(hp); s.grid.place_unit((3,1), GridUnit::hero());
+        end_player_turn(&mut s); execute_enemy_turn(&mut s);
+        let hp2 = s.grid.find_faction(Faction::Hero); assert!(!hp2.is_empty());
+        let ep = s.grid.find_faction(Faction::Enemy); assert!(!ep.is_empty());
+        let c = (ep[0].0 - hp2[0].0).abs().max((ep[0].1 - hp2[0].1).abs()); assert_eq!(c, 1);
+    }
     #[test] fn cannot_attack_wrong_phase() { let mut s = BattleState::new(); end_player_turn(&mut s); assert_eq!(player_attack(&mut s, (0,2), (5,1)), Err(EngineError::WrongPhase)); }
     #[test] fn enemy_turn_triggers_victory() { let mut s = BattleState::new(); let ep = s.grid.find_faction(Faction::Enemy)[0]; s.grid.remove_unit(ep); s.grid.place_unit(ep, GridUnit::new(Faction::Enemy, 1, 0)); let hp = s.grid.find_faction(Faction::Hero)[0]; s.grid.remove_unit(hp); s.grid.place_unit((4,1), GridUnit::hero()); player_attack(&mut s, (4,1), (5,1)).unwrap(); assert_eq!(s.result, Some(BattleResult::Victory)); }
+    #[test] fn end_player_turn_draws_card() { let mut s = BattleState::new(); s.hand = crate::core::cards::Hand::new(5); let before = s.hand.len(); end_player_turn(&mut s); assert_eq!(s.hand.len(), before + 1); }
+    #[test] fn enemy_turn_draws_card() { let mut s = BattleState::new(); end_player_turn(&mut s); execute_enemy_turn(&mut s); assert!(s.enemy_hand.len() >= 0); }
 }

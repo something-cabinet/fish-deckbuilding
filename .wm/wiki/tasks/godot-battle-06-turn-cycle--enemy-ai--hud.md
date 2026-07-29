@@ -2,7 +2,8 @@
 title: [godot-battle-06] Turn cycle + enemy AI + HUD
 type: task
 id: wiki:tasks:godot-battle-06-turn-cycle--enemy-ai--hud
-status: todo
+status: done
+superseded_by: Turn cycle + AI + HUD wired in Rust bridge (battle_scene.rs:on_end_turn, run_enemy_turn, sync_ui_ref) — end turn → enemy AI → reset flags, mana crystals, turn label, end turn button disable. AC-8, AC-9, AC-11 fulfilled.
 priority: medium
 tags: [from-spec, spec:godot-battle-scaffold, godot, turn, ai]
 spec: wiki:specs:godot-battle-scaffold
