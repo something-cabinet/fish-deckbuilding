@@ -853,20 +853,20 @@ impl BattleScene {
         // Death dissolve (FR-13): units that existed before but not in kept set
         for name in &existing_names {
             if !kept.contains(name) && units_node.has_node(name) && (name.starts_with("Unit_Hero") || name.starts_with("Unit_Enemy")) {
-                let mut node = units_node.get_node_as::<Node2D>(name);
-                    let mut death_tween = node.create_tween();
-                    death_tween.set_trans(TransitionType::QUINT);
-                    death_tween.set_ease(EaseType::IN);
-                    death_tween.tween_property(&node, "scale", &Vector2::new(0.0, 0.0).to_variant(), 0.3);
-                    death_tween.parallel()
-                        .tween_property(&node, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.3);
-                    let mut node_clone = node.clone();
-                    death_tween.tween_callback(&Callable::from_fn("death_free", move |_args: &[&Variant]| {
-                        if let Some(mut parent) = node_clone.get_parent() {
-                            parent.remove_child(&node_clone);
-                        }
-                        node_clone.queue_free();
-                    }));
+                let Some(mut node) = units_node.try_get_node_as::<Node2D>(name) else { continue };
+                let mut death_tween = node.create_tween();
+                death_tween.set_trans(TransitionType::QUINT);
+                death_tween.set_ease(EaseType::IN);
+                death_tween.tween_property(&node, "scale", &Vector2::new(0.0, 0.0).to_variant(), 0.3);
+                death_tween.parallel()
+                    .tween_property(&node, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.3);
+                let mut node_clone = node.clone();
+                death_tween.tween_callback(&Callable::from_fn("death_free", move |_args: &[&Variant]| {
+                    if let Some(mut parent) = node_clone.get_parent() {
+                        parent.remove_child(&node_clone);
+                    }
+                    node_clone.queue_free();
+                }));
             }
         }
     }
@@ -1080,6 +1080,7 @@ impl BattleScene {
         let py = (constants::GRID_ORIGIN_Y + grid_pos.1 * constants::TILE_SIZE + 20) as f32;
         let mut label = Label::new_alloc();
         label.set_text(&format!("{}", amount));
+        label.set_name("FloatingDamage");
         label.set_position(Vector2::new(px, py));
         label.set_horizontal_alignment(HorizontalAlignment::CENTER);
         label.add_theme_color_override("font_color", color);
