@@ -1,0 +1,20 @@
+{
+  "entity_id": "wiki:tasks:combat-feedback-animations-godot-tweenanimationplayer",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:05:57.519Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

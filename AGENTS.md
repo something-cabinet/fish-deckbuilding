@@ -89,3 +89,11 @@ wm validate               # Validate refs + SDD coverage
 ```
 
 <!-- WIKI-MEM GUIDELINES END -->
+
+## Cloned Dependency Source
+
+Read-only dependency source repositories are available under
+`.slim/clonedeps/repos/` for inspection. Do not edit these clones.
+
+- `.slim/clonedeps/repos/open-duelyst__duelyst/` - `open-duelyst/duelyst` at `main`; Duelyst open-source game source for gameplay parity analysis, grid combat design, card/unit systems, and asset reference.
+

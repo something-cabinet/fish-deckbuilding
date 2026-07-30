@@ -1,0 +1,20 @@
+{
+  "entity_id": "wiki:tasks:grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:06:06.245Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

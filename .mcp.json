@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "wm": {
-      "command": "wm-cli",
-      "args": ["mcp"]
+      "args": [
+        "mcp"
+      ],
+      "command": "/Users/nhkhanh/.nvm/versions/node/v20.20.2/lib/node_modules/@something-cabinet/wm-cli/node_modules/@something-cabinet/wm-cli-darwin-arm64/wm-cli"
     }
   }
 }

@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:rules:spec-driven-development",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:06:22.210Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "# SDD — Spec-Driven Development\n\n**Everything has a spec first.** No code is written until a spec exists that defines the requirements, acceptance criteria, and locked decisions.\n\n## The Cycle\n\n1. **Spec first** — create or update a spec page (`wiki:specs:`) before any implementation\n2. **Decisions locked** — Socratic exploration resolves gray areas before writing begins\n3. **ACs defined** — every spec has observable, testable acceptance criteria\n4. **Plans derived from spec** — tasks and implementation plans are generated from approved specs\n5. **Verify against spec** — implementation is validated by checking acceptance criteria\n\n## Why\n\n- Prevents guessing wrong about requirements\n- Forces gray-area resolution before code commits\n- Creates a single source of truth for what should be built\n- Acceptance criteria make it clear when \"done\" is reached\n\n## Tooling\n\n```bash\n# Create a new spec\nwm-spec\n\n# Validate spec coverage\nwm-validate\n\n# Plan from an approved spec\n/wm-plan --from @doc/specs/<name>\n```\n\n## Existing Specs\n\n- `wiki:specs:fish-roguelite-deckbuilding` — the full game spec\n\n## Exceptions\n\n- Quick bug fixes with single-AC scope\n- Exploratory spikes with an explicit \"spike\" tag",
+          "new_value": "---\ntitle: Spec-Driven Development\ntype: rule\nstatus: draft\ntags: [rule, workflow]\ncategory: process\nrationale: Writing a spec before code prevents wasted effort from ambiguous requirements and reduces rework. Lock decisions before implementation begins.\n---\n\n# Spec-Driven Development\n\nEverything has a spec before code. Lock decisions via Socratic exploration, define ACs, then implement.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

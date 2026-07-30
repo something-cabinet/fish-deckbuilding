@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:rules:tdd",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:06:23.353Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "# TDD — Test-First for Everything\n\n**Red-Green-Refactor** applies to ALL implementation:\n\n1. **RED** — Write a failing test that defines the expected behavior\n2. **GREEN** — Write the minimum code to make it pass\n3. **REFACTOR** — Clean up while tests stay green\n\nNo implementation code is written without a test first. This includes combat logic, state transitions, card effects, enemy AI, and any other game code. UI components (Svelte) are excluded — they call tested pure functions.\n\n```bash\nnpm test       # run all tests\nnpm run test:watch  # watch mode\n```\n\nTests live in `src/game/combat/__tests__/` and run in ~400ms.",
+          "new_value": "---\ntitle: TDD — Test-First for Everything\ntype: rule\nstatus: draft\ntags: [rule, testing]\ncategory: process\nrationale: Test-first catches design issues early, creates a safety net for refactoring, and ensures code is testable by construction. Red-Green-Refactor is the standard.\n---\n\n# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

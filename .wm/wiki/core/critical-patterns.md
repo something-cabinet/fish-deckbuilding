@@ -96,7 +96,7 @@ Mouse clicks on a GDExtension bridge scene with CanvasLayer UI never reach `_unh
 
 **What to do differently:** For grid/tactical game scenes that need to catch clicks before UI consumes them, override `_input()` (maps to Godot's `_input`) instead of `_unhandled_input()`. `_input()` fires before `_gui_input` on Control nodes, so CanvasLayer UI cannot consume the event first. Do NOT try to fix this by setting `mouse_filter = IGNORE` on every visual node — you'll miss one.
 
-**Full entry:** @wiki/concepts:gdext-bridge-pattern#input-handling-use-_input-over-_unhandled_input-for-gdextension-bridge-scenes-with-canvaslayer-ui
+**Full entry:** @wiki/concepts/gdext-bridge-pattern#input-handling-use-_input-over-_unhandled_input-for-gdextension-bridge-scenes-with-canvaslayer-ui
 
 ---
 
@@ -111,3 +111,17 @@ The `actions-rust-lang/setup-rust-toolchain@v1` action exports `RUSTFLAGS=-D war
 **What to do differently:** Build scripts that rely on `.cargo/config.toml` rustflags must be self-contained. Extract shared flags into a variable and set `RUSTFLAGS` explicitly for **every** cargo invocation, not just the first one. Consider adding `rustflags: ''` to `setup-rust-toolchain` to prevent it from setting `RUSTFLAGS` if you manage flags through config.toml.
 
 **Full entry:** @wiki/concepts/rustflags-env-overrides-config-toml
+
+---
+
+## 2026-07-30 — Valid Targets Single Source of Truth Prevents UI/Logic Drift
+
+**Category:** pattern
+**Source:** @wiki/patterns:valid-targets-single-source-of-truth
+**Tags:** [testing, ui, orchestration, pattern]
+
+One `valid_targets()` function in the pure core is called by the bridge overlay, click validation, AI, and engine. The same code determines which tiles are valid and validates the player's click. No drift between "what the UI shows" and "what the engine accepts" — the exact failure mode behind every P0 in this project's history. The three-layer bridge deadlock (2026-07-30 repeat of the untested orchestration pattern) was fixed by this architecture.
+
+**What to do differently:** Any time a UI action requires validation, put the validation logic in a pure core function that both the overlay renderer and the action handler call. Never let the bridge implement its own targeting/rules logic. Integration-test the full click path (select → move → attack) through the bridge's own test helpers.
+
+**Full entry:** @wiki/patterns/valid-targets-single-source-of-truth

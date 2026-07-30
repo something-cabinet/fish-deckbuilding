@@ -22,11 +22,15 @@ pub enum Effect {
     ApplyBuff(BuffType, i32),
 }
 
+use crate::core::grid::Range;
+use crate::core::cards::targeting::TargetFilter;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CardEffect {
     pub effect: Effect,
-    pub range: i32,
-    pub aoe: i32,
+    pub range: Range,
+    pub target: TargetFilter,
+    pub affect_pattern: Vec<(i32, i32)>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -50,45 +54,32 @@ impl CardDef {
     }
 }
 
-pub fn cross_aoe(center: (i32, i32), radius: i32) -> Vec<(i32, i32)> {
-    let mut tiles = vec![center];
-    for d in 1..=radius.saturating_sub(1) {
-        tiles.push((center.0 + d, center.1));
-        tiles.push((center.0 - d, center.1));
-        tiles.push((center.0, center.1 + d));
-        tiles.push((center.0, center.1 - d));
-    }
-    tiles
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::grid::Range;
+    use crate::core::cards::targeting::TargetFilter;
 
     #[test]
-    fn aoe_1_is_center_only() {
-        let tiles = cross_aoe((3, 2), 1);
-        assert_eq!(tiles, vec![(3, 2)]);
+    fn card_effect_uses_range_enum() {
+        let effect = CardEffect {
+            effect: Effect::Damage(3),
+            range: Range::Melee,
+            target: TargetFilter::EnemyUnit,
+            affect_pattern: vec![],
+        };
+        assert_eq!(effect.range, Range::Melee);
+        assert_eq!(effect.target, TargetFilter::EnemyUnit);
     }
 
     #[test]
-    fn aoe_2_is_center_plus_cardinal() {
-        let mut tiles = cross_aoe((3, 2), 2);
-        tiles.sort();
-        let mut expected = vec![(3, 2), (4, 2), (2, 2), (3, 3), (3, 1)];
-        expected.sort();
-        assert_eq!(tiles, expected);
-    }
-
-    #[test]
-    fn aoe_3_is_cross_radius_2() {
-        let mut tiles = cross_aoe((3, 2), 3);
-        tiles.sort();
-        let mut expected = vec![
-            (3, 2), (4, 2), (2, 2), (3, 3), (3, 1),
-            (5, 2), (1, 2), (3, 4), (3, 0),
-        ];
-        expected.sort();
-        assert_eq!(tiles, expected);
+    fn ranged_effect_uses_ranged() {
+        let effect = CardEffect {
+            effect: Effect::Damage(2),
+            range: Range::Ranged,
+            target: TargetFilter::EnemyUnit,
+            affect_pattern: vec![],
+        };
+        assert_eq!(effect.range, Range::Ranged);
     }
 }

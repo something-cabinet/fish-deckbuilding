@@ -1,21 +1,7 @@
 {
   "entity_id": "wiki:tasks:investigate-gdscript-vs-godot-rust",
-  "current_version": 3,
+  "current_version": 4,
   "versions": [
-    {
-      "id": "v1",
-      "version": 1,
-      "timestamp": "2026-07-29T02:06:19.016Z",
-      "author": null,
-      "changes": [
-        {
-          "field": "status",
-          "old_value": "todo",
-          "new_value": "in-progress"
-        }
-      ],
-      "compacted": false
-    },
     {
       "id": "v2",
       "version": 2,
@@ -45,6 +31,20 @@
           "field": "status",
           "old_value": "in-progress",
           "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-07-30T04:05:59.577Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
         }
       ],
       "compacted": false
