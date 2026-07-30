@@ -1,7 +1,7 @@
 ---
 title: Enemy Card Reveal Animation & Graveyard Viewer
 type: spec
-status: draft
+status: implemented
 tags:
 - game-design
 - ui
