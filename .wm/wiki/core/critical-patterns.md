@@ -97,3 +97,17 @@ Mouse clicks on a GDExtension bridge scene with CanvasLayer UI never reach `_unh
 **What to do differently:** For grid/tactical game scenes that need to catch clicks before UI consumes them, override `_input()` (maps to Godot's `_input`) instead of `_unhandled_input()`. `_input()` fires before `_gui_input` on Control nodes, so CanvasLayer UI cannot consume the event first. Do NOT try to fix this by setting `mouse_filter = IGNORE` on every visual node — you'll miss one.
 
 **Full entry:** @wiki/concepts:gdext-bridge-pattern#input-handling-use-_input-over-_unhandled_input-for-gdextension-bridge-scenes-with-canvaslayer-ui
+
+---
+
+## 2026-07-30 — RUSTFLAGS Env Overrides .cargo/config.toml in CI
+
+**Category:** failure
+**Source:** @wiki/concepts:rustflags-env-overrides-config-toml
+**Tags:** [rust, ci, build, emscripten, gdext]
+
+The `actions-rust-lang/setup-rust-toolchain@v1` action exports `RUSTFLAGS=-D warnings` into the job environment. `RUSTFLAGS` env has highest Cargo precedence — when set, Cargo completely ignores `target.*.rustflags` from `.cargo/config.toml`. The threaded wasm build worked because it set `RUSTFLAGS` explicitly (duplicating config flags), but the nothreads build omitted it — inheriting only `-D warnings`, losing `-sSIDE_MODULE=2`, `-Z emscripten-wasm-eh=false`, etc. The artifact would have been structurally broken, silently, with no error.
+
+**What to do differently:** Build scripts that rely on `.cargo/config.toml` rustflags must be self-contained. Extract shared flags into a variable and set `RUSTFLAGS` explicitly for **every** cargo invocation, not just the first one. Consider adding `rustflags: ''` to `setup-rust-toolchain` to prevent it from setting `RUSTFLAGS` if you manage flags through config.toml.
+
+**Full entry:** @wiki/concepts/rustflags-env-overrides-config-toml
