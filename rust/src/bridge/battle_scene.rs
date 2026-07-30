@@ -1321,10 +1321,10 @@ impl BattleScene {
         for i in 0..5 {
             let slot_name = format!("CardSlot_{}", i);
             let mut slot = hand_container.get_node_as::<Panel>(&slot_name);
-            let mut name_label = slot.get_node_as::<Label>("NameLabel");
-            let mut cost_label = slot.get_node_as::<Label>("CostLabel");
-            let mut effects_label = slot.get_node_as::<Label>("EffectsLabel");
-            let mut range_label = slot.get_node_as::<Label>("RangeLabel");
+            let mut name_label: Gd<Label> = slot.get("name_label").try_to().expect("name_label missing");
+            let mut cost_label: Gd<Label> = slot.get("cost_label").try_to().expect("cost_label missing");
+            let mut effects_label: Gd<Label> = slot.get("effects_label").try_to().expect("effects_label missing");
+            let mut range_label: Gd<Label> = slot.get("range_label").try_to().expect("range_label missing");
             if i < state.hand.len() {
                 let card = &state.hand.cards[i];
                 let can_play = state.mana >= card.cost && state.phase == Phase::PlayerTurn;

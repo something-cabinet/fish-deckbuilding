@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cdbjq704ttgda"]
 
+[ext_resource type="Script" path="res://scenes/battle/card_slot.gd" id="1"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cost"]
 bg_color = Color(0.043, 0.102, 0.141, 0.7)
 corner_radius_top_left = 14
@@ -8,6 +10,7 @@ corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
 [node name="CardSlot" type="Panel" unique_id=1434956568]
+script = ExtResource("1")
 offset_right = 150.0
 offset_bottom = 120.0
 
