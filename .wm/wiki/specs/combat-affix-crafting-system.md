@@ -1,7 +1,7 @@
 ---
 title: Combat Affix & Crafting System
 type: spec
-status: approved
+status: implemented
 tags:
 - game-design
 - combat
@@ -140,7 +140,25 @@ No card data model exists in Rust. The card system is greenfield. The affix spec
 ### Rust Architecture
 Core logic lives in `rust/src/core/` (model/service split, zero Godot deps). The affix/crafting system would be new modules under `core/` (e.g., `cards/`, `affix/`, `crafting/`). The existing Run/Combat State Split pattern separates persistent state (deck, gold) from per-battle state (hand, draw pile).
 
-## Open Questions
+## Implementation Notes
+
+Implemented in commit `9e70ee6`:
+
+| AC | Status | Notes |
+|----|--------|-------|
+| AC-1: Affix slots by rarity | ✅ | `Rarity::max_affixes()` — Common 0, Uncommon 1, Rare 2, Legendary 3 |
+| AC-2: 80/20 type distribution | ✅ | `generate_affixes()` — 80% in-type, 20% off-type |
+| AC-3: Deck/stash swapping | ✅ | Pre-existing (`swap_deck_stash`) |
+| AC-4: Enchanter reroll | ✅ | `enchanter_reroll()` — 50g cost |
+| AC-5: Gambler add slot | ✅ | `gambler_add_slot()` — 100g cost |
+| AC-6: Corrupted visual | ❌ | Not implemented |
+| AC-6a: Implicit affixes | ✅ | 3 corruption-only implicits |
+| AC-6b: Weighted outcomes | ✅ | 6 outcomes with correct weights |
+| AC-7: Character unique cards | ❌ | Not implemented (only Guppy exists) |
+| AC-8: Infinite loop prevention | ❌ | Not implemented (affects effect resolution) |
+| AC-9: Deterministic seeds | ✅ | Same seed + same card = same result |
+
+Open items tracked separately: corrupted visual indicators (FR-6b), character unique cards (D4/FR-7), infinite loop prevention (FR-9).
 
 - [ ] **OQ-1: Gold costs** — What are the specific gold costs for each crafting operation? (No existing economy to balance against; costs can be placeholder values like 50/100/200 for reroll/add-slot/corrupt)
 - [ ] **OQ-2: Character classes** — What additional characters exist beyond Guppy? (Greenfield — needs design work)
