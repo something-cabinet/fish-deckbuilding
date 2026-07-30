@@ -1,5 +1,44 @@
 [gd_scene format=3 uid="uid://cybafp41gg0xs"]
 
+[ext_resource type="PackedScene" uid="" path="res://scenes/battle/hand_container.tscn" id="1"]
+[ext_resource type="PackedScene" uid="" path="res://scenes/battle/graveyard_viewer.tscn" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_log"]
+bg_color = Color(0.043, 0.102, 0.141, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.227, 0.431, 0.541, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+bg_color = Color(0.043, 0.102, 0.141, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.376, 0.647, 0.98, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_popup"]
+bg_color = Color(0.118, 0.227, 0.298, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.42, 0.42, 1)
+
 [node name="BattleScene" type="BattleScene" unique_id=1079967444]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1052448833]
@@ -41,6 +80,8 @@ offset_top = 20.0
 offset_right = 1260.0
 offset_bottom = 60.0
 text = "End Turn"
+focus_mode = 2
+custom_minimum_size = Vector2(160, 40)
 
 [node name="ResultBanner" type="Panel" parent="UI" unique_id=1348621194]
 visible = false
@@ -56,6 +97,8 @@ offset_top = 100.0
 offset_right = 280.0
 offset_bottom = 140.0
 text = "Restart"
+focus_mode = 2
+custom_minimum_size = Vector2(160, 40)
 
 [node name="ReturnToOverworld" type="Button" parent="UI/ResultBanner" unique_id=1473823203]
 layout_mode = 0
@@ -64,3 +107,203 @@ offset_top = 60.0
 offset_right = 280.0
 offset_bottom = 100.0
 text = "Return to Map"
+focus_mode = 2
+custom_minimum_size = Vector2(160, 40)
+
+[node name="HandContainer" parent="UI" instance=ExtResource("1")]
+
+[node name="ManaCrystals" type="Node2D" parent="UI"]
+position = Vector2(1000, 50)
+
+[node name="Crystal_0" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 0
+offset_top = 0
+offset_right = 18
+offset_bottom = 26
+
+[node name="Crystal_1" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 22
+offset_top = 0
+offset_right = 40
+offset_bottom = 26
+
+[node name="Crystal_2" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 44
+offset_top = 0
+offset_right = 62
+offset_bottom = 26
+
+[node name="Crystal_3" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 66
+offset_top = 0
+offset_right = 84
+offset_bottom = 26
+
+[node name="Crystal_4" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 88
+offset_top = 0
+offset_right = 106
+offset_bottom = 26
+
+[node name="Crystal_5" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 110
+offset_top = 0
+offset_right = 128
+offset_bottom = 26
+
+[node name="Crystal_6" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 132
+offset_top = 0
+offset_right = 150
+offset_bottom = 26
+
+[node name="Crystal_7" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 154
+offset_top = 0
+offset_right = 172
+offset_bottom = 26
+
+[node name="Crystal_8" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 176
+offset_top = 0
+offset_right = 194
+offset_bottom = 26
+
+[node name="Crystal_9" type="Panel" parent="UI/ManaCrystals"]
+offset_left = 198
+offset_top = 0
+offset_right = 216
+offset_bottom = 26
+
+[node name="CombatLog" type="Panel" parent="UI"]
+offset_left = 20
+offset_top = 320
+offset_right = 320
+offset_bottom = 600
+theme_override_styles/panel = SubResource("StyleBoxFlat_log")
+
+[node name="LogLabel" type="RichTextLabel" parent="UI/CombatLog"]
+offset_left = 4
+offset_top = 4
+offset_right = 296
+offset_bottom = 276
+text = "[b]Combat Log[/b]"
+bbcode_enabled = true
+scroll_active = true
+theme_override_colors/default_color = Color(0.557, 0.706, 0.769, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="CardTooltip" type="Panel" parent="UI"]
+visible = false
+offset_left = 0
+offset_top = 0
+offset_right = 200
+offset_bottom = 100
+theme_override_styles/panel = SubResource("StyleBoxFlat_tooltip")
+
+[node name="TooltipName" type="Label" parent="UI/CardTooltip"]
+offset_left = 10
+offset_top = 8
+offset_right = 190
+offset_bottom = 32
+text = ""
+theme_override_colors/font_color = Color(0.839, 0.91, 0.937, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="TooltipCost" type="Label" parent="UI/CardTooltip"]
+offset_left = 10
+offset_top = 32
+offset_right = 190
+offset_bottom = 50
+text = ""
+theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="TooltipDesc" type="Label" parent="UI/CardTooltip"]
+offset_left = 10
+offset_top = 52
+offset_right = 190
+offset_bottom = 112
+text = ""
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
+theme_override_font_sizes/font_size = 11
+
+[node name="EnemyCardPopup" type="Panel" parent="UI"]
+visible = false
+offset_left = 490
+offset_top = 300
+offset_right = 790
+offset_bottom = 480
+theme_override_styles/panel = SubResource("StyleBoxFlat_popup")
+
+[node name="PopupName" type="Label" parent="UI/EnemyCardPopup"]
+offset_left = 10
+offset_top = 10
+offset_right = 290
+offset_bottom = 38
+text = ""
+theme_override_colors/font_color = Color(0.839, 0.91, 0.937, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="PopupCost" type="Label" parent="UI/EnemyCardPopup"]
+offset_left = 10
+offset_top = 44
+offset_right = 290
+offset_bottom = 64
+text = ""
+theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="PopupEffects" type="Label" parent="UI/EnemyCardPopup"]
+offset_left = 10
+offset_top = 70
+offset_right = 290
+offset_bottom = 170
+text = ""
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
+theme_override_font_sizes/font_size = 13
+
+[node name="EnemyTurnBanner" type="Label" parent="UI"]
+visible = false
+offset_left = 340
+offset_top = 280
+offset_right = 940
+offset_bottom = 360
+text = "Enemy Turn..."
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(1, 0.42, 0.42, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="GraveyardPanel" parent="UI" instance=ExtResource("2")]
+offset_left = 850
+offset_top = 50
+offset_right = 1250
+offset_bottom = 580
+
+[node name="EnemyHandLabel" type="Label" parent="UI"]
+offset_left = 1080
+offset_top = 80
+offset_right = 1280
+offset_bottom = 100
+text = ""
+theme_override_colors/font_color = Color(1, 0.42, 0.42, 1)
+
+[node name="ReplaceButton" type="Button" parent="UI"]
+offset_left = 1060
+offset_top = 610
+offset_right = 1160
+offset_bottom = 650
+text = "Replace"
+custom_minimum_size = Vector2(100, 40)
+
+[node name="DeckCountButton" type="Button" parent="UI"]
+offset_left = 1060
+offset_top = 660
+offset_right = 1160
+offset_bottom = 680
+text = ""
+flat = true
+theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
