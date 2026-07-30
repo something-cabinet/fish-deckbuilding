@@ -220,6 +220,35 @@ btn.signals().pressed().connect_other(&self_gd, MyClass::on_handler);
 
 **UI container nodes should be `Control`, not `Node2D`:** When a node holds UI children (Panels, Labels, Buttons), use `Control` as the base type instead of `Node2D`. Control nodes participate in the anchor/offset layout system, inherit themes, and correctly position their Control children. A `Node2D` parent forces Control children to use absolute pixel offsets with no layout inheritance. In tscn, use `type="Control"`; in Rust bridge code, use `get_node_as::<Control>()`.
 
+### GDScript @export for Rust bridge node access
+
+Instead of hardcoded path strings in `get_node_as::<T>("PathString")`, attach a GDScript to the UI scene with `@export var` declarations. Rust reads the exported variables via `get("variable_name").try_to::<Gd<T>>()`.
+
+This decouples the Rust bridge from the exact tscn hierarchy — nodes can be reparented or renamed in the editor as long as the `@export var` is reassigned:
+
+**GDScript** (attached to the UI CanvasLayer):
+```gdscript
+extends CanvasLayer
+
+@export var mana_label: Label
+@export var turn_label: Label
+@export var end_turn_button: Button
+```
+
+**Rust bridge** (accessing via script exports):
+```rust
+let ui = self.base().get_node_as::<CanvasLayer>("UI");
+let mana_label: Gd<Label> = ui.get("mana_label").try_to().expect("mana_label missing");
+mana_label.set_text("3 / 3");
+```
+
+**Rules:**
+- These scripts contain ZERO game logic — only `@export var` declarations
+- Exported variable names use snake_case (e.g. `end_turn_button`, `tooltip_name`)
+- Use `.expect("name")` with the variable name for clear panic messages on missing exports
+- Non-UI nodes (grid tiles, units, movement overlays) keep `get_node_as` path access
+- Dynamically-indexed nodes (CardSlot_{i}, Crystal_{i}) keep path-based parent lookup
+
 ## Related
 - @wiki/tasks:godot-battle-07-hot-reload-fixes
 - @wiki/specs:godot-battle-scaffold

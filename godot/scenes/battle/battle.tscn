@@ -70,14 +70,34 @@ color = Color(0.043, 0.102, 0.141, 1)
 
 [node name="Units" type="Node2D" parent="." unique_id=400325636]
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=1473622508 node_paths=PackedStringArray("mana_label", "turn_label", "end_turn_button", "result_banner", "restart_button", "return_button")]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1473622508 node_paths=PackedStringArray("mana_label", "turn_label", "end_turn_button", "result_banner", "restart_button", "return_to_overworld", "enemy_turn_banner", "enemy_hand_label", "replace_button", "deck_count_button", "tooltip_panel", "tooltip_name", "tooltip_cost", "tooltip_desc", "popup_panel", "popup_name", "popup_cost", "popup_effects", "log_panel", "log_label", "gy_panel", "gy_title", "gy_close_button", "gy_player_title", "gy_enemy_title", "gy_scroll")]
 script = ExtResource("2")
 mana_label = NodePath("ManaLabel")
 turn_label = NodePath("TurnLabel")
 end_turn_button = NodePath("EndTurnButton")
 result_banner = NodePath("ResultBanner")
 restart_button = NodePath("ResultBanner/RestartButton")
-return_button = NodePath("ResultBanner/ReturnToOverworld")
+return_to_overworld = NodePath("ResultBanner/ReturnToOverworld")
+enemy_turn_banner = NodePath("EnemyTurnBanner")
+enemy_hand_label = NodePath("EnemyHandLabel")
+replace_button = NodePath("ReplaceButton")
+deck_count_button = NodePath("DeckCountButton")
+tooltip_panel = NodePath("CardTooltip")
+tooltip_name = NodePath("CardTooltip/TooltipName")
+tooltip_cost = NodePath("CardTooltip/TooltipCost")
+tooltip_desc = NodePath("CardTooltip/TooltipDesc")
+popup_panel = NodePath("EnemyCardPopup")
+popup_name = NodePath("EnemyCardPopup/PopupName")
+popup_cost = NodePath("EnemyCardPopup/PopupCost")
+popup_effects = NodePath("EnemyCardPopup/PopupEffects")
+log_panel = NodePath("CombatLog")
+log_label = NodePath("CombatLog/LogLabel")
+gy_panel = NodePath("GraveyardPanel")
+gy_title = NodePath("GraveyardPanel/GYTitle")
+gy_close_button = NodePath("GraveyardPanel/GYCloseButton")
+gy_player_title = NodePath("GraveyardPanel/GYPlayerTitle")
+gy_enemy_title = NodePath("GraveyardPanel/GYEnemyTitle")
+gy_scroll = NodePath("GraveyardPanel/GYScroll")
 
 [node name="ManaLabel" type="Label" parent="UI" unique_id=1050416353]
 offset_left = 20.0

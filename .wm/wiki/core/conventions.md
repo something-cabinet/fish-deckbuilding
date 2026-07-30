@@ -39,7 +39,10 @@ cargo clippy -- -D warnings
 
 **gdext bridge**: `rust/src/bridge/` contains `#[derive(GodotClass)]` nodes (e.g. `battle_scene.rs`) that read Godot input/signals, call into the pure core, and write results back to scene state. Godot (scenes, nodes, signals) never appears inside `core/`.
 
-**GDScript**: used only for a minimal shim (`extends BattleScene`) in scene files where required; all real logic is Rust.
+**GDScript**: used for:
+- A minimal shim (`extends BattleScene`) in scene files where required
+- **UI node wiring** — `@export var` declarations on UI scene scripts that expose node references to the Rust bridge. No game logic in these scripts — only exported variable declarations.
+- All real game logic remains in Rust via gdext
 
 **Input handling**: use `_input()`, not `_unhandled_input()`, for click input in gdext nodes — see wiki:memory:gdextension-click-input-use-_input-over-_unhandled_input.
 
