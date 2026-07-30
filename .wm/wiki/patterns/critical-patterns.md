@@ -24,12 +24,12 @@ Core functions should return data the bridge needs (Vec<CardDef>, AttackResult, 
 
 **Full entry:** @wiki/patterns/return-value-bridge-sync
 
-## 2026-07-30 gdext procedural UI: focus/buttons/anchors
+## 2026-07-30 gdext UI: tscn over procedural Rust for panels
 
 **Category:** pattern
-**Source:** @commit-d7b15cf
-**Tags:** [gdext, ui, focus, layout]
+**Source:** @wiki/specs/ui-panels-to-tscn
+**Tags:** [gdext, ui, layout, tscn]
 
-Use `FocusMode::ALL` on all interactive buttons, `LayoutPreset` for anchored HUD positions, `set_flat(true)` instead of Label + manual click detection, and `ScrollContainer` for scrollable content. These patterns prevent fragile rect-based hit testing and make keyboard/gamepad navigation work. The 30-min cost of debugging click-through issues on labels is eliminated.
+UI panel layout should be defined in `.tscn` scene files, not in Rust `build_ui()` code. The bridge retains sync logic (updating labels, toggling visibility, signal connections). Theme overrides (colors, fonts, StyleBoxFlat) go in the tscn via `theme_override_*` properties. Self-contained panel groups (hand container, graveyard viewer) become sub-scenes instanced into the main scene. This eliminates Rust recompilation for UI tweaks and enables Godot editor visual layout.
 
-**Full entry:** @wiki/concepts:gdext-bridge-pattern (Control / UI node configuration section)
+**Full entry:** @wiki/specs/ui-panels-to-tscn

@@ -101,11 +101,16 @@ type: reference
 - [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
 - [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
+- [UI panels migrated from Rust bridge to tscn](wiki/memory/ui-panels-migrated-from-rust-bridge-to-tscn.md) — *active*
 - [Unified Range Enum (Melee/Ranged)](wiki/memory/unified-range-enum-melee-ranged.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [Valid Targets Single Source of Truth](wiki/memory/valid-targets-single-source-of-truth.md) — *active*
 - [Vite HMR Incompatible with Excalibur Scenes](wiki/memory/vite-hmr-incompatible-with-excalibur-scenes.md) — *active*
 - [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
+
+## patterns
+
+- [Incremental UI Migration from Rust Bridge to tscn](wiki/patterns/incremental-ui-to-tscn.md) — *draft*
 
 ## rules
 
@@ -136,7 +141,7 @@ type: reference
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
-- [UI Panels from Rust Bridge to tscn](wiki/specs/ui-panels-to-tscn.md) — *draft*
+- [UI Panels from Rust Bridge to tscn](wiki/specs/ui-panels-to-tscn.md) — *approved*
 - [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *superseded*
 
@@ -161,6 +166,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 134
-- **Edges:** 138
+- **Nodes:** 136
+- **Edges:** 146
 
