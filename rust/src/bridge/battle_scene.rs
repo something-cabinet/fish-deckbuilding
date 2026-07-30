@@ -1148,7 +1148,7 @@ impl BattleScene {
         log_label.set_text(&new_lines.join("\n"));
         let count = log_label.get_paragraph_count();
         if count > 0 {
-            log_label.scroll_to_line(count as i32 - 1);
+            log_label.scroll_to_line(count - 1);
         }
     }
 
