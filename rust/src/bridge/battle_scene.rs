@@ -2,10 +2,11 @@ use std::collections::HashMap;
 
 use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::notify::CanvasItemNotification;
-use godot::classes::control::MouseFilter;
+use godot::classes::control::{FocusMode, LayoutPreset, MouseFilter};
+use godot::classes::scroll_container::ScrollMode;
 use godot::classes::{
     Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
-    Panel, ProgressBar, RichTextLabel, StyleBox, StyleBoxFlat,
+    Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat,
 };
 use godot::classes::text_server::AutowrapMode;
 use godot::global::{HorizontalAlignment, MouseButton, VerticalAlignment};
@@ -173,19 +174,13 @@ self.clear_overlays_ref();
             return;
         }
 
-        // Check card hand clicks (bottom area)
+        // Card hand clicks (bottom area)
         if pos.y >= 600.0 && pos.y <= 720.0 && pos.x >= 300.0 && pos.x <= 1050.0 {
             let card_idx = ((pos.x - 300.0) / 150.0) as i32;
             if (0..5).contains(&card_idx) {
                 self.on_card_click(card_idx);
                 return;
             }
-        }
-
-        // Deck count label click — toggle graveyard viewer
-        if pos.x >= 1060.0 && pos.x <= 1160.0 && pos.y >= 660.0 && pos.y <= 680.0 {
-            self.on_deck_label_clicked();
-            return;
         }
 
         // Grid clicks for movement/attack
@@ -447,6 +442,9 @@ impl BattleScene {
 
         let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
         gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
+
+        let deck_btn = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        deck_btn.signals().pressed().connect_other(self_gd, BattleScene::on_deck_label_clicked);
     }
 }
 
@@ -480,6 +478,26 @@ impl BattleScene {
 
     fn build_ui(&self) {
         let mut ui = self.base().get_node_as::<CanvasLayer>("UI");
+
+        // --- Scene-defined node setup (focus, anchors, sizing) ---
+        let mut end_btn = ui.get_node_as::<Button>("EndTurnButton");
+        end_btn.set_focus_mode(FocusMode::ALL);
+        end_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
+        end_btn.set_anchors_and_offsets_preset(LayoutPreset::TOP_RIGHT);
+
+        let mut ml = ui.get_node_as::<Label>("ManaLabel");
+        ml.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
+
+        let mut tl = ui.get_node_as::<Label>("TurnLabel");
+        tl.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
+
+        let banner = ui.get_node_as::<Panel>("ResultBanner");
+        let mut restart_btn = banner.get_node_as::<Button>("RestartButton");
+        restart_btn.set_focus_mode(FocusMode::ALL);
+        restart_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
+        let mut return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
+        return_btn.set_focus_mode(FocusMode::ALL);
+        return_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
 
         // Mana crystals
         let mut crystals = Node2D::new_alloc();
@@ -560,16 +578,20 @@ impl BattleScene {
         replace_btn.set_position(Vector2::new(1060.0, 610.0));
         replace_btn.set_size(Vector2::new(100.0, 40.0));
         replace_btn.set_text("Replace");
+        replace_btn.set_focus_mode(FocusMode::ALL);
+        replace_btn.set_custom_minimum_size(Vector2::new(100.0, 40.0));
         ui.add_child(&replace_btn);
 
-        // Deck count label
-        let mut deck_label = Label::new_alloc();
-        deck_label.set_name("DeckCountLabel");
-        deck_label.set_position(Vector2::new(1060.0, 660.0));
-        deck_label.set_size(Vector2::new(100.0, 20.0));
-        deck_label.set_text("");
-        deck_label.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-        ui.add_child(&deck_label);
+        // Deck count button — clickable to toggle graveyard viewer
+        let mut deck_btn = Button::new_alloc();
+        deck_btn.set_name("DeckCountButton");
+        deck_btn.set_position(Vector2::new(1060.0, 660.0));
+        deck_btn.set_size(Vector2::new(100.0, 20.0));
+        deck_btn.set_text("");
+        deck_btn.set_focus_mode(FocusMode::ALL);
+        deck_btn.set_flat(true);
+        deck_btn.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+        ui.add_child(&deck_btn);
 
         // Enemy hand label
         let mut enemy_hand_label = Label::new_alloc();
@@ -609,6 +631,7 @@ impl BattleScene {
         gy_close.set_size(Vector2::new(24.0, 24.0));
         gy_close.set_text("X");
         gy_close.set_flat(true);
+        gy_close.set_focus_mode(FocusMode::ALL);
         gy_close.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
         gy_panel.add_child(&gy_close);
 
@@ -631,6 +654,15 @@ impl BattleScene {
         gy_enemy_title.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
         gy_enemy_title.add_theme_font_size_override("font_size", 11);
         gy_panel.add_child(&gy_enemy_title);
+
+        // Scrollable area for graveyard entries
+        let mut gy_scroll = ScrollContainer::new_alloc();
+        gy_scroll.set_name("GYScroll");
+        gy_scroll.set_position(Vector2::new(0.0, 56.0));
+        gy_scroll.set_size(Vector2::new(400.0, 474.0));
+        gy_scroll.set_horizontal_scroll_mode(ScrollMode::DISABLED);
+        gy_scroll.set_vertical_scroll_mode(ScrollMode::AUTO);
+        gy_panel.add_child(&gy_scroll);
 
         // Enemy card reveal popup — hidden by default (FR-1)
         let mut card_popup = Panel::new_alloc();
@@ -1171,7 +1203,7 @@ impl BattleScene {
         let mut banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
         banner.set_visible(state.phase == Phase::BattleOver);
 
-        let mut dl = self.base().get_node_as::<Label>("UI/DeckCountLabel");
+        let mut dl = self.base().get_node_as::<Button>("UI/DeckCountButton");
         dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
 
         let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
@@ -1188,8 +1220,8 @@ impl BattleScene {
 
     fn sync_gy_viewer(&self, state: &BattleState) {
         self.clear_gy_entries();
-        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
-        for (col, gy, start_y) in [("Player", &state.graveyard, 56), ("Enemy", &state.enemy_graveyard, 56)] {
+        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
+        for (col, gy, start_y) in [("Player", &state.graveyard, 0), ("Enemy", &state.enemy_graveyard, 0)] {
             let x_offset = if col == "Player" { 10 } else { 200 };
             for (i, card) in gy.cards.iter().rev().enumerate() {
                 if i >= 10 { break; }
@@ -1202,7 +1234,7 @@ impl BattleScene {
                 es.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.9));
                 es.set_corner_radius_all(4);
                 entry.add_theme_stylebox_override("panel", &es.upcast::<StyleBox>());
-                panel.add_child(&entry);
+                scroll.add_child(&entry);
 
                 let mut nl = Label::new_alloc();
                 nl.set_position(Vector2::new(4.0, 2.0));
@@ -1234,13 +1266,16 @@ impl BattleScene {
     }
 
     fn clear_gy_entries(&self) {
-        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let mut scroll = match self.base().try_get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll") {
+            Some(s) => s,
+            None => return,
+        };
         for i in 0..20 {
             for prefix in &["Player", "Enemy"] {
                 let name = format!("GYEntry_{}_{}", prefix, i);
-                if panel.has_node(&name) {
-                    let mut child = panel.get_node_as::<Node2D>(&name);
-                    panel.remove_child(&child);
+                if scroll.has_node(&name) {
+                    let mut child = scroll.get_node_as::<Node2D>(&name);
+                    scroll.remove_child(&child);
                     child.queue_free();
                 }
             }

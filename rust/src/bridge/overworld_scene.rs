@@ -1,4 +1,4 @@
-use godot::classes::control::MouseFilter;
+use godot::classes::control::{FocusMode, MouseFilter};
 use godot::classes::{
     Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
     Panel, StyleBox, StyleBoxFlat,
@@ -91,6 +91,8 @@ impl OverworldScene {
         deck_btn.set_position(Vector2::new(20.0, 70.0));
         deck_btn.set_size(Vector2::new(100.0, 30.0));
         deck_btn.set_text("Deck");
+        deck_btn.set_focus_mode(FocusMode::ALL);
+        deck_btn.set_custom_minimum_size(Vector2::new(100.0, 30.0));
         deck_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_deck_button);
         ui.add_child(&deck_btn);
 
