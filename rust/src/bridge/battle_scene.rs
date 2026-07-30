@@ -2,21 +2,19 @@ use std::collections::HashMap;
 
 use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::notify::CanvasItemNotification;
-use godot::classes::control::{FocusMode, LayoutPreset, MouseFilter};
-use godot::classes::scroll_container::ScrollMode;
+use godot::classes::control::MouseFilter;
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
+    Button, CanvasLayer, ColorRect, Control, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
     Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat,
 };
-use godot::classes::text_server::AutowrapMode;
-use godot::global::{HorizontalAlignment, MouseButton, VerticalAlignment};
+use godot::global::{HorizontalAlignment, MouseButton};
 use godot::prelude::*;
 
 use crate::core::{
     battle::{self as battle_engine, BattleResult, BattleState, Phase, Decision},
     combat,
     constants, grid::movement as grid_movement,
-    grid::{Faction, GridUnit},
+    grid::{Faction, GridUnit, Range},
 cards::{CardDef, CardEffect, Effect, apply_affect_pattern, valid_targets, TargetFilter},
     overworld::{generate_rewards},
 };
@@ -110,7 +108,6 @@ impl INode2D for BattleScene {
         let base_gd = self.base.__script_gd();
         self.self_gd = Some(base_gd.cast::<BattleScene>());
         self.build_grid();
-        self.build_ui();
         self.start_battle();
         self.connect_signals();
     }
@@ -199,7 +196,6 @@ impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
         if !self.end_player_turn_if_valid() { return; }
-        self.append_log("[b]--- Enemy Turn ---[/b]");
         self.hovered_card = None;
         self.hide_tooltip();
         self.card_targeting = false;
@@ -226,7 +222,8 @@ impl BattleScene {
         self.store_prev_unit_positions();
 
         // Show enemy turn banner
-        let mut banner = self.base().get_node_as::<Label>("UI/EnemyTurnBanner");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut banner: Gd<Label> = ui.get("enemy_turn_banner").try_to().expect("enemy_turn_banner missing");
         banner.set_visible(true);
         banner.set_modulate(rgba(255, 255, 255, 0.0));
         let mut tween = banner.create_tween();
@@ -294,7 +291,8 @@ impl BattleScene {
 
     #[func]
     fn _finish_enemy_turn(&mut self) {
-        let mut banner = self.base().get_node_as::<Label>("UI/EnemyTurnBanner");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut banner: Gd<Label> = ui.get("enemy_turn_banner").try_to().expect("enemy_turn_banner missing");
         let mut tween = banner.create_tween();
         tween.tween_property(&banner, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.3);
         let banner_clone = banner.clone();
@@ -454,22 +452,20 @@ impl BattleScene {
         }
     }
 
-    fn connect_signals(&self) {
+fn connect_signals(&self) {
         let Some(ref self_gd) = self.self_gd else { return };
-        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let end_btn: Gd<Button> = ui.get("end_turn_button").try_to().expect("end_turn_button missing");
         end_btn.signals().pressed().connect_other(self_gd, BattleScene::on_end_turn);
-        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
-        let restart_btn = banner.get_node_as::<Button>("RestartButton");
+        let restart_btn = self.base().get_node_as::<Button>("UI/ResultBanner/RestartButton");
         restart_btn.signals().pressed().connect_other(self_gd, BattleScene::on_restart);
-        let return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
+        let return_btn = self.base().get_node_as::<Button>("UI/ResultBanner/ReturnToOverworld");
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
-        let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
+        let replace_btn: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
-
         let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
         gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
-
-        let deck_btn = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        let deck_btn: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         deck_btn.signals().pressed().connect_other(self_gd, BattleScene::on_deck_label_clicked);
     }
 }
@@ -502,315 +498,7 @@ impl BattleScene {
         }
     }
 
-    fn build_ui(&self) {
-        let mut ui = self.base().get_node_as::<CanvasLayer>("UI");
-
-        // --- Scene-defined node setup (focus, anchors, sizing) ---
-        let mut end_btn = ui.get_node_as::<Button>("EndTurnButton");
-        end_btn.set_focus_mode(FocusMode::ALL);
-        end_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
-        end_btn.set_anchors_and_offsets_preset(LayoutPreset::TOP_RIGHT);
-
-        let mut ml = ui.get_node_as::<Label>("ManaLabel");
-        ml.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
-
-        let mut tl = ui.get_node_as::<Label>("TurnLabel");
-        tl.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
-
-        let banner = ui.get_node_as::<Panel>("ResultBanner");
-        let mut restart_btn = banner.get_node_as::<Button>("RestartButton");
-        restart_btn.set_focus_mode(FocusMode::ALL);
-        restart_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
-        let mut return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
-        return_btn.set_focus_mode(FocusMode::ALL);
-        return_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
-
-        // Mana crystals
-        let mut crystals = Node2D::new_alloc();
-        crystals.set_name("ManaCrystals");
-        crystals.set_position(Vector2::new(1000.0, 50.0));
-        for i in 0..constants::MAX_MANA {
-            let mut crystal = Panel::new_alloc();
-            crystal.set_size(Vector2::new(18.0, 26.0));
-            crystal.set_position(Vector2::new(i as f32 * 22.0, 0.0));
-            crystal.set_name(&format!("Crystal_{}", i));
-            let style = Self::mana_crystal_style(true);
-            crystal.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
-            crystals.add_child(&crystal);
-        }
-        ui.add_child(&crystals);
-
-        // Hand container - larger cards 150x120 (FR-15)
-        let mut hand_container = Node2D::new_alloc();
-        hand_container.set_name("HandContainer");
-        hand_container.set_position(Vector2::new(300.0, 610.0));
-        for i in 0..5 {
-            let mut card_slot = Panel::new_alloc();
-            card_slot.set_size(Vector2::new(150.0, 120.0));
-            card_slot.set_position(Vector2::new(i as f32 * 150.0, 0.0));
-            card_slot.set_name(&format!("CardSlot_{}", i));
-            let mut style = StyleBoxFlat::new_gd();
-            style.set_bg_color(rgb(0x1e, 0x3a, 0x4c));
-            style.set_corner_radius_all(6);
-            style.set_border_width_all(1);
-            style.set_border_color(rgb(0x3a, 0x6e, 0x8a));
-            card_slot.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
-
-            // Card name at top (FR-15)
-            let mut name_label = Label::new_alloc();
-            name_label.set_name("NameLabel");
-            name_label.set_position(Vector2::new(6.0, 4.0));
-            name_label.set_size(Vector2::new(138.0, 24.0));
-            name_label.set_text("");
-            name_label.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
-            name_label.add_theme_font_size_override("font_size", 14);
-            card_slot.add_child(&name_label);
-
-            // Mana cost badge in top-right corner (FR-15)
-            let mut cost_label = Label::new_alloc();
-            cost_label.set_name("CostLabel");
-            cost_label.set_position(Vector2::new(118.0, 4.0));
-            cost_label.set_size(Vector2::new(28.0, 28.0));
-            cost_label.set_text("");
-            cost_label.set_horizontal_alignment(HorizontalAlignment::CENTER);
-            cost_label.set_vertical_alignment(VerticalAlignment::CENTER);
-            cost_label.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
-            cost_label.add_theme_font_size_override("font_size", 14);
-            let mut cost_style = StyleBoxFlat::new_gd();
-            cost_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.7));
-            cost_style.set_corner_radius_all(14);
-            cost_style.set_border_width_all(0);
-            cost_label.add_theme_stylebox_override("normal", &cost_style.upcast::<StyleBox>());
-            card_slot.add_child(&cost_label);
-
-            // Effect description in dedicated lower section (FR-15)
-            let mut effects_label = Label::new_alloc();
-            effects_label.set_name("EffectsLabel");
-            effects_label.set_position(Vector2::new(6.0, 36.0));
-            effects_label.set_size(Vector2::new(138.0, 80.0));
-            effects_label.set_text("");
-            effects_label.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-            effects_label.add_theme_font_size_override("font_size", 12);
-            effects_label.set_autowrap_mode(AutowrapMode::WORD_SMART);
-            card_slot.add_child(&effects_label);
-
-            hand_container.add_child(&card_slot);
-        }
-        ui.add_child(&hand_container);
-
-        // Replace button
-        let mut replace_btn = Button::new_alloc();
-        replace_btn.set_name("ReplaceButton");
-        replace_btn.set_position(Vector2::new(1060.0, 610.0));
-        replace_btn.set_size(Vector2::new(100.0, 40.0));
-        replace_btn.set_text("Replace");
-        replace_btn.set_focus_mode(FocusMode::ALL);
-        replace_btn.set_custom_minimum_size(Vector2::new(100.0, 40.0));
-        ui.add_child(&replace_btn);
-
-        // Deck count button — clickable to toggle graveyard viewer
-        let mut deck_btn = Button::new_alloc();
-        deck_btn.set_name("DeckCountButton");
-        deck_btn.set_position(Vector2::new(1060.0, 660.0));
-        deck_btn.set_size(Vector2::new(100.0, 20.0));
-        deck_btn.set_text("");
-        deck_btn.set_focus_mode(FocusMode::ALL);
-        deck_btn.set_flat(true);
-        deck_btn.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-        ui.add_child(&deck_btn);
-
-        // Enemy hand label
-        let mut enemy_hand_label = Label::new_alloc();
-        enemy_hand_label.set_name("EnemyHandLabel");
-        enemy_hand_label.set_position(Vector2::new(1080.0, 80.0));
-        enemy_hand_label.set_size(Vector2::new(200.0, 20.0));
-        enemy_hand_label.set_text("");
-        enemy_hand_label.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
-        ui.add_child(&enemy_hand_label);
-
-        // Graveyard viewer panel — hidden by default (FR-5, FR-6)
-        let mut gy_panel = Panel::new_alloc();
-        gy_panel.set_name("GraveyardPanel");
-        gy_panel.set_position(Vector2::new(850.0, 50.0));
-        gy_panel.set_size(Vector2::new(400.0, 530.0));
-        gy_panel.set_visible(false);
-        let mut gy_style = StyleBoxFlat::new_gd();
-        gy_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.95));
-        gy_style.set_corner_radius_all(8);
-        gy_style.set_border_width_all(1);
-        gy_style.set_border_color(rgb(0x3a, 0x6e, 0x8a));
-        gy_panel.add_theme_stylebox_override("panel", &gy_style.upcast::<StyleBox>());
-        ui.add_child(&gy_panel);
-
-        let mut gy_title = Label::new_alloc();
-        gy_title.set_name("GYTitle");
-        gy_title.set_position(Vector2::new(10.0, 8.0));
-        gy_title.set_size(Vector2::new(360.0, 24.0));
-        gy_title.set_text("Graveyard (click card for details)");
-        gy_title.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
-        gy_title.add_theme_font_size_override("font_size", 12);
-        gy_panel.add_child(&gy_title);
-
-        let mut gy_close = Button::new_alloc();
-        gy_close.set_name("GYCloseButton");
-        gy_close.set_position(Vector2::new(370.0, 6.0));
-        gy_close.set_size(Vector2::new(24.0, 24.0));
-        gy_close.set_text("X");
-        gy_close.set_flat(true);
-        gy_close.set_focus_mode(FocusMode::ALL);
-        gy_close.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
-        gy_panel.add_child(&gy_close);
-
-        // Player graveyard column title
-        let mut gy_player_title = Label::new_alloc();
-        gy_player_title.set_name("GYPlayerTitle");
-        gy_player_title.set_position(Vector2::new(10.0, 36.0));
-        gy_player_title.set_size(Vector2::new(180.0, 18.0));
-        gy_player_title.set_text("Hero Graveyard");
-        gy_player_title.add_theme_color_override("font_color", rgb(0x4f, 0xd1, 0xc5));
-        gy_player_title.add_theme_font_size_override("font_size", 11);
-        gy_panel.add_child(&gy_player_title);
-
-        // Enemy graveyard column title
-        let mut gy_enemy_title = Label::new_alloc();
-        gy_enemy_title.set_name("GYEnemyTitle");
-        gy_enemy_title.set_position(Vector2::new(200.0, 36.0));
-        gy_enemy_title.set_size(Vector2::new(180.0, 18.0));
-        gy_enemy_title.set_text("Enemy Graveyard");
-        gy_enemy_title.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
-        gy_enemy_title.add_theme_font_size_override("font_size", 11);
-        gy_panel.add_child(&gy_enemy_title);
-
-        // Scrollable area for graveyard entries
-        let mut gy_scroll = ScrollContainer::new_alloc();
-        gy_scroll.set_name("GYScroll");
-        gy_scroll.set_position(Vector2::new(0.0, 56.0));
-        gy_scroll.set_size(Vector2::new(400.0, 474.0));
-        gy_scroll.set_horizontal_scroll_mode(ScrollMode::DISABLED);
-        gy_scroll.set_vertical_scroll_mode(ScrollMode::AUTO);
-        gy_panel.add_child(&gy_scroll);
-
-        // Enemy card reveal popup — hidden by default (FR-1)
-        let mut card_popup = Panel::new_alloc();
-        card_popup.set_name("EnemyCardPopup");
-        card_popup.set_position(Vector2::new(490.0, 300.0));
-        card_popup.set_size(Vector2::new(300.0, 180.0));
-        card_popup.set_visible(false);
-        let mut popup_style = StyleBoxFlat::new_gd();
-        popup_style.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.95));
-        popup_style.set_corner_radius_all(8);
-        popup_style.set_border_width_all(1);
-        popup_style.set_border_color(rgb(0xff, 0x6b, 0x6b));
-        card_popup.add_theme_stylebox_override("panel", &popup_style.upcast::<StyleBox>());
-        ui.add_child(&card_popup);
-
-        let mut popup_name = Label::new_alloc();
-        popup_name.set_name("PopupName");
-        popup_name.set_position(Vector2::new(10.0, 10.0));
-        popup_name.set_size(Vector2::new(280.0, 28.0));
-        popup_name.set_text("");
-        popup_name.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
-        popup_name.add_theme_font_size_override("font_size", 18);
-        card_popup.add_child(&popup_name);
-
-        let mut popup_cost = Label::new_alloc();
-        popup_cost.set_name("PopupCost");
-        popup_cost.set_position(Vector2::new(10.0, 44.0));
-        popup_cost.set_size(Vector2::new(280.0, 20.0));
-        popup_cost.set_text("");
-        popup_cost.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
-        popup_cost.add_theme_font_size_override("font_size", 14);
-        card_popup.add_child(&popup_cost);
-
-        let mut popup_effects = Label::new_alloc();
-        popup_effects.set_name("PopupEffects");
-        popup_effects.set_position(Vector2::new(10.0, 70.0));
-        popup_effects.set_size(Vector2::new(280.0, 100.0));
-        popup_effects.set_text("");
-        popup_effects.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-        popup_effects.add_theme_font_size_override("font_size", 13);
-        popup_effects.set_autowrap_mode(AutowrapMode::WORD_SMART);
-        card_popup.add_child(&popup_effects);
-
-        // Enemy turn banner (FR-4)
-        let mut enemy_banner = Label::new_alloc();
-        enemy_banner.set_name("EnemyTurnBanner");
-        enemy_banner.set_position(Vector2::new(340.0, 280.0));
-        enemy_banner.set_size(Vector2::new(600.0, 80.0));
-        enemy_banner.set_text("Enemy Turn...");
-        enemy_banner.set_horizontal_alignment(HorizontalAlignment::CENTER);
-        enemy_banner.set_vertical_alignment(VerticalAlignment::CENTER);
-        enemy_banner.set_visible(false);
-        enemy_banner.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
-        enemy_banner.add_theme_font_size_override("font_size", 48);
-        ui.add_child(&enemy_banner);
-
-        // Combat log panel (FR-14) — enlarged with scrolling
-        let mut log_bg = Panel::new_alloc();
-        log_bg.set_name("CombatLog");
-        log_bg.set_position(Vector2::new(20.0, 320.0));
-        log_bg.set_size(Vector2::new(300.0, 280.0));
-        let mut log_style = StyleBoxFlat::new_gd();
-        log_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.85));
-        log_style.set_corner_radius_all(6);
-        log_style.set_border_width_all(1);
-        log_style.set_border_color(rgb(0x3a, 0x6e, 0x8a));
-        log_bg.add_theme_stylebox_override("panel", &log_style.upcast::<StyleBox>());
-        ui.add_child(&log_bg);
-
-        let mut log_label = RichTextLabel::new_alloc();
-        log_label.set_name("LogLabel");
-        log_label.set_position(Vector2::new(4.0, 4.0));
-        log_label.set_size(Vector2::new(292.0, 272.0));
-        log_label.set_text("[b]Combat Log[/b]");
-        log_label.set_use_bbcode(true);
-        log_label.set_scroll_active(true);
-        log_label.add_theme_color_override("default_color", rgb(0x8e, 0xb4, 0xc4));
-        log_label.add_theme_font_size_override("font_size", 12);
-        log_bg.add_child(&log_label);
-
-        // Card tooltip panel (FR-6) — hidden by default
-        let mut tooltip = Panel::new_alloc();
-        tooltip.set_name("CardTooltip");
-        tooltip.set_position(Vector2::new(0.0, 0.0));
-        tooltip.set_size(Vector2::new(200.0, 100.0));
-        tooltip.set_visible(false);
-        let mut tooltip_style = StyleBoxFlat::new_gd();
-        tooltip_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.95));
-        tooltip_style.set_corner_radius_all(8);
-        tooltip_style.set_border_width_all(1);
-        tooltip_style.set_border_color(rgb(0x60, 0xa5, 0xfa));
-        tooltip.add_theme_stylebox_override("panel", &tooltip_style.upcast::<StyleBox>());
-        ui.add_child(&tooltip);
-
-        let mut tooltip_name = Label::new_alloc();
-        tooltip_name.set_name("TooltipName");
-        tooltip_name.set_position(Vector2::new(10.0, 8.0));
-        tooltip_name.set_size(Vector2::new(180.0, 24.0));
-        tooltip_name.set_text("");
-        tooltip_name.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
-        tooltip_name.add_theme_font_size_override("font_size", 14);
-        tooltip.add_child(&tooltip_name);
-
-        let mut tooltip_cost = Label::new_alloc();
-        tooltip_cost.set_name("TooltipCost");
-        tooltip_cost.set_position(Vector2::new(10.0, 32.0));
-        tooltip_cost.set_size(Vector2::new(180.0, 18.0));
-        tooltip_cost.set_text("");
-        tooltip_cost.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
-        tooltip_cost.add_theme_font_size_override("font_size", 12);
-        tooltip.add_child(&tooltip_cost);
-
-        let mut tooltip_desc = Label::new_alloc();
-        tooltip_desc.set_name("TooltipDesc");
-        tooltip_desc.set_position(Vector2::new(10.0, 52.0));
-        tooltip_desc.set_size(Vector2::new(180.0, 60.0));
-        tooltip_desc.set_text("");
-        tooltip_desc.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-        tooltip_desc.add_theme_font_size_override("font_size", 11);
-        tooltip_desc.set_autowrap_mode(AutowrapMode::WORD_SMART);
-        tooltip.add_child(&tooltip_desc);
-    }
+    // All UI nodes now defined in .tscn (hand_container.tscn, graveyard_viewer.tscn, battle.tscn)
 
     fn handle_mouse_motion(&mut self, pos: Vector2) {
         // Card hover detection (FR-6)
@@ -855,14 +543,18 @@ impl BattleScene {
         let Some(s) = self.state.as_ref() else { return };
         let Some(card) = s.hand.cards.get(idx) else { return };
         let mut tooltip = self.base().get_node_as::<Panel>("UI/CardTooltip");
-        let mut name_label = tooltip.get_node_as::<Label>("TooltipName");
-        let mut cost_label = tooltip.get_node_as::<Label>("TooltipCost");
-        let mut desc_label = tooltip.get_node_as::<Label>("TooltipDesc");
+        let mut name_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipName");
+        let mut cost_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipCost");
+        let mut desc_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipDesc");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
         let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
-        desc_label.set_text(&effect_strs.join(", "));
+        let range_str = card.effects.first().map(|e| match e.range {
+            crate::core::grid::Range::Melee => "Melee",
+            crate::core::grid::Range::Ranged => "Ranged",
+        }).unwrap_or("");
+        desc_label.set_text(&format!("{}\nRange: {}", effect_strs.join(", "), range_str));
 
         let tooltip_x = 300.0 + (idx as f32 * 150.0);
         tooltip.set_position(Vector2::new(tooltip_x, 510.0));
@@ -1223,12 +915,14 @@ impl BattleScene {
             None => return,
         };
 
-        let mut ml = self.base().get_node_as::<Label>("UI/ManaLabel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+
+        let mut ml: Gd<Label> = ui.get("mana_label").try_to().expect("mana_label missing");
         ml.set_text(&format!("{} / {}", state.mana, state.max_mana));
         ml.set_modulate(rgb(0xd6, 0xe8, 0xef));
         self.sync_mana_crystals(state);
 
-        let mut tl = self.base().get_node_as::<Label>("UI/TurnLabel");
+        let mut tl: Gd<Label> = ui.get("turn_label").try_to().expect("turn_label missing");
         tl.set_text(&match state.phase {
             Phase::PlayerTurn => format!("Your Turn — Turn {}", state.turn_number),
             Phase::EnemyTurn => "Enemy Turn...".into(),
@@ -1244,13 +938,13 @@ impl BattleScene {
             Phase::BattleOver => rgb(0xf4, 0xc4, 0x30),
         });
 
-        let mut eb = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        let mut eb: Gd<Button> = ui.get("end_turn_button").try_to().expect("end_turn_button missing");
         eb.set_disabled(state.phase != Phase::PlayerTurn);
 
-        let mut banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
+        let mut banner: Gd<Panel> = ui.get("result_banner").try_to().expect("result_banner missing");
         banner.set_visible(state.phase == Phase::BattleOver);
 
-        let mut dl = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        let mut dl: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
 
         let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
@@ -1258,10 +952,10 @@ impl BattleScene {
             self.sync_gy_viewer(state);
         }
 
-        let mut ehl = self.base().get_node_as::<Label>("UI/EnemyHandLabel");
+        let mut ehl: Gd<Label> = ui.get("enemy_hand_label").try_to().expect("enemy_hand_label missing");
         ehl.set_text(&format!("Enemy hand: {} cards", state.enemy_hand.len()));
 
-        let mut rb = self.base().get_node_as::<Button>("UI/ReplaceButton");
+        let mut rb: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         rb.set_disabled(state.replace_used || state.phase != Phase::PlayerTurn);
     }
 
@@ -1313,10 +1007,7 @@ impl BattleScene {
     }
 
     fn clear_gy_entries(&self) {
-        let mut scroll = match self.base().try_get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll") {
-            Some(s) => s,
-            None => return,
-        };
+        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
         for i in 0..20 {
             for prefix in &["Player", "Enemy"] {
                 let name = format!("GYEntry_{}_{}", prefix, i);
@@ -1331,9 +1022,9 @@ impl BattleScene {
 
     fn show_enemy_card_popup(&self, card: &CardDef) {
         let mut popup = self.base().get_node_as::<Panel>("UI/EnemyCardPopup");
-        let mut name_label = popup.get_node_as::<Label>("PopupName");
-        let mut cost_label = popup.get_node_as::<Label>("PopupCost");
-        let mut effects_label = popup.get_node_as::<Label>("PopupEffects");
+        let mut name_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupName");
+        let mut cost_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupCost");
+        let mut effects_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupEffects");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
@@ -1459,7 +1150,7 @@ impl BattleScene {
         log_label.set_text(&new_lines.join("\n"));
         let count = log_label.get_paragraph_count();
         if count > 0 {
-            log_label.scroll_to_line(count as i32 - 1);
+            log_label.scroll_to_line(count - 1);
         }
     }
 
@@ -1624,13 +1315,14 @@ impl BattleScene {
             None => return,
         };
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let hand_container = ui.get_node_as::<Node2D>("HandContainer");
+        let hand_container = ui.get_node_as::<Control>("HandContainer");
         for i in 0..5 {
             let slot_name = format!("CardSlot_{}", i);
             let mut slot = hand_container.get_node_as::<Panel>(&slot_name);
-            let mut name_label = slot.get_node_as::<Label>("NameLabel");
-            let mut cost_label = slot.get_node_as::<Label>("CostLabel");
-            let mut effects_label = slot.get_node_as::<Label>("EffectsLabel");
+            let mut name_label: Gd<Label> = slot.get("name_label").try_to().expect("name_label missing");
+            let mut cost_label: Gd<Label> = slot.get("cost_label").try_to().expect("cost_label missing");
+            let mut effects_label: Gd<Label> = slot.get("effects_label").try_to().expect("effects_label missing");
+            let mut range_label: Gd<Label> = slot.get("range_label").try_to().expect("range_label missing");
             if i < state.hand.len() {
                 let card = &state.hand.cards[i];
                 let can_play = state.mana >= card.cost && state.phase == Phase::PlayerTurn;
@@ -1638,6 +1330,11 @@ impl BattleScene {
                 cost_label.set_text(&format!("{}", card.cost));
                 let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
                 effects_label.set_text(&effect_strs.join(", "));
+                let range_str = card.effects.first().map(|e| match e.range {
+                    Range::Melee => "Melee",
+                    Range::Ranged => "Ranged",
+                }).unwrap_or("");
+                range_label.set_text(range_str);
 
                 let mut style = StyleBoxFlat::new_gd();
                 if can_play {
@@ -1673,6 +1370,7 @@ impl BattleScene {
                 name_label.set_text("");
                 cost_label.set_text("");
                 effects_label.set_text("");
+                range_label.set_text("");
                 slot.set_visible(false);
             }
         }

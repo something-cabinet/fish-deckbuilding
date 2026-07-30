@@ -1,6 +1,43 @@
 [gd_scene format=3 uid="uid://dofw0wfqef0e6"]
 
-[node name="OverworldScene" type="OverworldScene"]
+[ext_resource type="Script" uid="uid://d14i30fy2teg1" path="res://scenes/overworld_ui.gd" id="1"]
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="OverworldScene" type="OverworldScene" unique_id=51701325]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=798512568]
 anchor_mode = 0
+
+[node name="Background" type="ColorRect" parent="." unique_id=1035839786]
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.043, 0.102, 0.141, 1)
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=605930431 node_paths=PackedStringArray("hp_label", "gold_label", "deck_button", "map_container")]
+script = ExtResource("1")
+hp_label = NodePath("HpLabel")
+gold_label = NodePath("GoldLabel")
+deck_button = NodePath("DeckButton")
+map_container = NodePath("MapContainer")
+
+[node name="MapContainer" type="Node2D" parent="UI" unique_id=1030834606]
+
+[node name="HpLabel" type="Label" parent="UI" unique_id=1515051564]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 44.0
+
+[node name="GoldLabel" type="Label" parent="UI" unique_id=451819809]
+offset_left = 20.0
+offset_top = 44.0
+offset_right = 220.0
+offset_bottom = 68.0
+
+[node name="DeckButton" type="Button" parent="UI" unique_id=1013121704]
+custom_minimum_size = Vector2(100, 30)
+offset_left = 20.0
+offset_top = 70.0
+offset_right = 120.0
+offset_bottom = 100.0
+text = "Deck"

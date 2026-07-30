@@ -1,6 +1,5 @@
-use godot::classes::control::{FocusMode, MouseFilter};
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
+    Button, CanvasLayer, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
     Panel, StyleBox, StyleBoxFlat,
 };
 use godot::global::MouseButton;
@@ -59,44 +58,10 @@ impl INode2D for OverworldScene {
 #[godot_api]
 impl OverworldScene {
     fn build_ui(&mut self) {
-        let Some(ref mut self_gd) = self.self_gd else { return };
-        let mut bg = ColorRect::new_alloc();
-        bg.set_mouse_filter(MouseFilter::IGNORE);
-        bg.set_size(Vector2::new(1280.0, 720.0));
-        bg.set_color(rgb(0x0b, 0x1a, 0x24));
-        bg.set_name("Background");
-        self_gd.add_child(&bg);
-
-        let mut ui = CanvasLayer::new_alloc();
-        ui.set_name("UI");
-
-        let mut map_container = Node2D::new_alloc();
-        map_container.set_name("MapContainer");
-        ui.add_child(&map_container);
-
-        let mut hp_label = Label::new_alloc();
-        hp_label.set_name("HpLabel");
-        hp_label.set_position(Vector2::new(20.0, 20.0));
-        hp_label.set_size(Vector2::new(200.0, 24.0));
-        ui.add_child(&hp_label);
-
-        let mut gold_label = Label::new_alloc();
-        gold_label.set_name("GoldLabel");
-        gold_label.set_position(Vector2::new(20.0, 44.0));
-        gold_label.set_size(Vector2::new(200.0, 24.0));
-        ui.add_child(&gold_label);
-
-        let mut deck_btn = Button::new_alloc();
-        deck_btn.set_name("DeckButton");
-        deck_btn.set_position(Vector2::new(20.0, 70.0));
-        deck_btn.set_size(Vector2::new(100.0, 30.0));
-        deck_btn.set_text("Deck");
-        deck_btn.set_focus_mode(FocusMode::ALL);
-        deck_btn.set_custom_minimum_size(Vector2::new(100.0, 30.0));
+        let Some(ref self_gd) = self.self_gd else { return };
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let deck_btn: Gd<Button> = ui.get("deck_button").try_to().expect("deck_button missing");
         deck_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_deck_button);
-        ui.add_child(&deck_btn);
-
-        self_gd.add_child(&ui);
     }
 
     fn start_run(&mut self) {
@@ -124,7 +89,7 @@ impl OverworldScene {
 
     fn clear_map(&self) {
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         while container.get_child_count() > 0 {
             if let Some(mut child) = container.get_child(0) {
                 container.remove_child(&child);
@@ -134,7 +99,7 @@ impl OverworldScene {
     }
 
     fn draw_connections(&self, ui: &Gd<CanvasLayer>) {
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         for node in &self.nodes {
             for conn in &node.connections {
                 if let Some(target) = self.nodes.iter().find(|n| &n.id == conn) {
@@ -156,7 +121,7 @@ impl OverworldScene {
     }
 
     fn draw_nodes(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         for node in &self.nodes {
             let nx = (200 + node.grid_x * 150) as f32;
             let ny = (80 + node.grid_y * 90) as f32;
@@ -202,7 +167,7 @@ impl OverworldScene {
         let node = &self.nodes[self.hero_node_idx as usize];
         let nx = (200 + node.grid_x * 150) as f32;
         let ny = (80 + node.grid_y * 90) as f32;
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
 
         let mut panel = Panel::new_alloc();
         panel.set_name("HeroIcon");
@@ -224,11 +189,11 @@ impl OverworldScene {
     }
 
     fn update_hud(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
-        let mut hp_label = ui.get_node_as::<Label>("HpLabel");
+        let mut hp_label: Gd<Label> = ui.get("hp_label").try_to().expect("hp_label missing");
         hp_label.set_text(&format!("HP: {}/{}", run.hp, run.max_hp));
         hp_label.add_theme_color_override("font_color", rgb(0x4f, 0xd1, 0xc5));
 
-        let mut gold_label = ui.get_node_as::<Label>("GoldLabel");
+        let mut gold_label: Gd<Label> = ui.get("gold_label").try_to().expect("gold_label missing");
         gold_label.set_text(&format!("Gold: {}", run.gold));
         gold_label.add_theme_color_override("font_color", rgb(0xf4, 0xc4, 0x30));
     }

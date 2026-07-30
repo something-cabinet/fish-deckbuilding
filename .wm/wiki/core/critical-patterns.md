@@ -4,12 +4,6 @@ type: core
 tags: [critical]
 ---
 
----
-title: Critical Patterns
-type: core
-tags: [critical]
----
-
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -125,3 +119,17 @@ One `valid_targets()` function in the pure core is called by the bridge overlay,
 **What to do differently:** Any time a UI action requires validation, put the validation logic in a pure core function that both the overlay renderer and the action handler call. Never let the bridge implement its own targeting/rules logic. Integration-test the full click path (select → move → attack) through the bridge's own test helpers.
 
 **Full entry:** @wiki/patterns/valid-targets-single-source-of-truth
+
+---
+
+## 2026-07-31 — Scene Branch Extraction: Sub-Scene Scripts Own Their @export Refs
+
+**Category:** pattern
+**Source:** @wiki/patterns:scene-branch-extraction
+**Tags:** [godot, scene, refactor, gdext]
+
+When a scene grows too large, extract self-contained node branches into their own `.tscn` files with their own GDScript. The sub-scene's script owns its internal `@export var` node references. The parent only exports a reference to the sub-scene root. Rust bridge code accesses sub-scene internals via `self.base().get_node_as::<T>("Parent/SubScene/Child")` — full paths resolve correctly through sub-scene boundaries.
+
+**What to do differently:** Extract any node branch with 3+ children and its own visual identity into a sub-scene. Give the sub-scene a script that owns its internal node refs. Update Rust code to use full paths from the scene root instead of `ui.get("export_name")`. This keeps scenes manageable (<150 lines per tscn) and decouples the Rust bridge from GDScript property names.
+
+**Full entry:** @wiki/patterns/scene-branch-extraction

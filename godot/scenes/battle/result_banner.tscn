@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://fdcvek17s23x"]
+
+[ext_resource type="Script" path="res://scenes/battle/result_banner.gd" id="1"]
+
+[node name="ResultBanner" type="Panel" node_paths=PackedStringArray("restart_button", "return_to_overworld")]
+visible = false
+offset_left = 440.0
+offset_top = 260.0
+offset_right = 840.0
+offset_bottom = 460.0
+script = ExtResource("1")
+restart_button = NodePath("RestartButton")
+return_to_overworld = NodePath("ReturnToOverworld")
+
+[node name="RestartButton" type="Button" parent="."]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 0
+offset_left = 120.0
+offset_top = 100.0
+offset_right = 280.0
+offset_bottom = 140.0
+text = "Restart"
+
+[node name="ReturnToOverworld" type="Button" parent="."]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 0
+offset_left = 120.0
+offset_top = 60.0
+offset_right = 280.0
+offset_bottom = 100.0
+text = "Return to Map"

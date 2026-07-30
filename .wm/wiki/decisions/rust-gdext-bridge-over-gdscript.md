@@ -20,7 +20,8 @@ Implement the entire scene layer — including grid rendering, unit display, inp
 
 ## Consequences
 - Hot-reload requires the Rust bridge to re-connect signals manually (handled via `EXTENSION_RELOADED` notification)
-- Visual UI elements must be created procedurally in Rust code rather than designed in the Godot editor
+- UI panel layout is defined in `.tscn` scene files (hand_container.tscn, graveyard_viewer.tscn, battle.tscn) and styled via theme overrides, not Rust code — see @wiki/specs/ui-panels-to-tscn
+- The Rust bridge retains only sync logic (updating labels, toggling visibility, signal connections) — no node creation
 - GDScript-only developers cannot easily modify the scene layer
 - The 7 godot-battle-* tasks were marked as superseded since their GDScript approach was never used
 
