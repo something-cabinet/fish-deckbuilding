@@ -110,6 +110,7 @@ impl INode2D for BattleScene {
             godot_print!("[BattleScene] EXTENSION_RELOADED — reconnecting signals + refreshing UI");
             self.connect_signals();
             self.sync_all();
+            self.store_prev_unit_positions();
         }
     }
 
@@ -136,9 +137,10 @@ impl INode2D for BattleScene {
             let Some(card) = s.play_card(self.selected_card_index) else {
                 self.card_targeting = false;
                 self.aoe_preview_pos = None;
-                self.clear_overlays_ref();
-                self.sync_all();
-                return;
+self.clear_overlays_ref();
+        self.sync_all();
+        self.store_prev_unit_positions();
+        return;
             };
             let card_name = card.name.to_string();
             let effects = card.effects.clone();
@@ -157,6 +159,7 @@ impl INode2D for BattleScene {
             self.aoe_preview_pos = None;
             self.clear_selection();
             self.sync_all();
+            self.store_prev_unit_positions();
             return;
         }
 
@@ -246,6 +249,9 @@ impl BattleScene {
 
         self.sync_all();
 
+        // Store current positions so future sync calls don't re-animate stale moves
+        self.store_prev_unit_positions();
+
         // Schedule end of enemy turn with pacing delay
         let Some(ref self_gd) = self.self_gd else { return };
         let mut grid_node = self.base().get_node_as::<Node2D>("BattleGrid");
@@ -297,6 +303,7 @@ impl BattleScene {
         let idx = 0;
         if s.replace_card(idx) {
             self.sync_all();
+            self.store_prev_unit_positions();
         }
     }
 
@@ -1154,6 +1161,7 @@ impl BattleScene {
         self.valid_moves.clear();
         self.clear_overlays_ref();
         self.sync_all();
+        self.store_prev_unit_positions();
         true
     }
 
@@ -1180,6 +1188,7 @@ impl BattleScene {
         self.valid_moves.clear();
         self.clear_overlays_ref();
         self.sync_all();
+        self.store_prev_unit_positions();
         true
     }
 
