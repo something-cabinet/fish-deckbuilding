@@ -21,12 +21,15 @@ type: reference
 - [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
+- [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
 - [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
+- [duelyst offset list affect pattern](wiki/patterns/duelyst-offset-list-affect-pattern.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
 - [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
+- [valid targets single source of truth](wiki/patterns/valid-targets-single-source-of-truth.md) — *draft*
 - [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
 - [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
@@ -35,10 +38,14 @@ type: reference
 - [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
 - [dev profile build optimization](wiki/decisions/dev-profile-build-optimization.md) — *draft*
 - [svelte css grid battle ui](wiki/decisions/svelte-css-grid-battle-ui.md) — *draft*
+- [unified range enum for units and cards](wiki/decisions/unified-range-enum-for-units-and-cards.md) — *draft*
 - [rust gdext bridge over gdscript](wiki/decisions/rust-gdext-bridge-over-gdscript.md) — *draft*
+- [attack focused exhaustion](wiki/decisions/attack-focused-exhaustion.md) — *draft*
+- [duelyst accurate move then attack ordering](wiki/decisions/duelyst-accurate-move-then-attack-ordering.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
 - [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
+- [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
 - [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
 - [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
 - [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
@@ -101,6 +108,9 @@ type: reference
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *superseded*
+- [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *draft*
+- [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
+- [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *superseded*
@@ -109,6 +119,7 @@ type: reference
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
+- [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Card System — In-Battle Hand, Deck, and Play](wiki/specs/card-system-in-battle-deck.md) — *approved*
 - [Combat Affix & Crafting System](wiki/specs/combat-affix-crafting-system.md) — *approved*
@@ -136,6 +147,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 109
-- **Edges:** 100
+- **Nodes:** 120
+- **Edges:** 104
 

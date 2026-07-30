@@ -1,10 +1,23 @@
 ---
 title: Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through
 type: task
-id: wiki:tasks:post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through
+tags:
+- p1
+- gameplay
+- encounters
 status: todo
 priority: medium
-tags: [p1, gameplay, encounters]
+implementation_notes: '## Acceptance Criteria 1. Hero HP healed to (maxHp + healAmount) after battle, capped at heroMaxHp 2. heroMaxHp properly respected as ceiling for all healing 3. Per-zone encounter pools defined and selectable 4. Enemy AI strategy parameter is passed through to decision engine'
+acceptance_criteria:
+- text: Hero HP healed to (maxHp + healAmount) after battle, capped at heroMaxHp
+  checked: false
+- text: heroMaxHp properly respected as ceiling for all healing
+  checked: false
+- text: Per-zone encounter pools defined and selectable
+  checked: false
+- text: Enemy AI strategy parameter is passed through to decision engine
+  checked: false
+assignee: you
 ---
 
 P1 batch from final validation:

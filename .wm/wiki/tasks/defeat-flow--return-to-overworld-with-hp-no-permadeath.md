@@ -1,10 +1,23 @@
 ---
 title: Defeat flow — return to overworld with HP, no permadeath
 type: task
-id: wiki:tasks:defeat-flow--return-to-overworld-with-hp-no-permadeath
+tags:
+- p0
+- gameplay
+- defeat
 status: todo
 priority: high
-tags: [p0, gameplay, defeat]
+implementation_notes: '## Acceptance Criteria 1. Losing a battle returns player to overworld with current HP 2. No gold or cards lost on defeat 3. Player can re-attempt the battle or explore elsewhere 4. DeathScreen no longer triggers total wipe'
+acceptance_criteria:
+- text: Losing a battle returns player to overworld with current HP
+  checked: false
+- text: No gold or cards lost on defeat
+  checked: false
+- text: Player can re-attempt the battle or explore elsewhere
+  checked: false
+- text: DeathScreen no longer triggers total wipe
+  checked: false
+assignee: you
 ---
 
 P0 — DeathScreen.svelte:21-24 only action is resetGame() → menu, total wipe of gold/deck/map progress. Spec AC-16: "Losing a battle returns player to overworld with current HP. No gold or cards are lost. Can re-attempt the battle or explore elsewhere."

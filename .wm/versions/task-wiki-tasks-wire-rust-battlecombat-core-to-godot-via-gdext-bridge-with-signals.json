@@ -1,0 +1,20 @@
+{
+  "entity_id": "wiki:tasks:wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:06:04.587Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

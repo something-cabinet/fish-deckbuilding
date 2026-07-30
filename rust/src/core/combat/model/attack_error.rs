@@ -5,4 +5,5 @@ pub enum AttackError {
     NotAdjacent,
     AlreadyAttacked,
     SameFaction,
+    TauntForcesTarget,
 }

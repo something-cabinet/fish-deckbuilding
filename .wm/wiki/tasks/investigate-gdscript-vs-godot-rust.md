@@ -8,6 +8,17 @@ tags:
 - architecture
 - investigation
 status: done
+implementation_notes: '## Acceptance Criteria 1. GDScript and godot-rust compared on compile time complexity 2. Web export feasibility evaluated 3. Team skill / onboarding curve assessed 4. Final recommendation with rationale documented'
+acceptance_criteria:
+- text: GDScript and godot-rust compared on compile time complexity
+  checked: false
+- text: Web export feasibility evaluated
+  checked: false
+- text: Team skill / onboarding curve assessed
+  checked: false
+- text: Final recommendation with rationale documented
+  checked: false
+assignee: you
 ---
 
 ## Goal

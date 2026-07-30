@@ -28,3 +28,11 @@ emsdk/
 playtest-*.png
 godot-tools/
 *.log
+
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/clonedeps/repos/
+# END oh-my-opencode-slim clonedeps
+
+# BEGIN deepwork
+.slim/deepwork/
+# END deepwork

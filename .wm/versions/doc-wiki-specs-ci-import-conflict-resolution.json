@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:specs:ci-import-conflict-resolution",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T04:06:11.977Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "## Overview\n\nCI fails on `cargo clippy -D warnings` due to unused `#[cfg(test)]` imports in `engine.rs`. The module-level `#[cfg(test)]` imports are redundant because the test module inside the same file imports the same types.\n\n### Current state\n\n```rust\n// engine.rs\n#[cfg(test)]\nuse crate::core::battle::model::BattleResult;  // Line 3 — CI says \"unused\"\n#[cfg(test)]\nuse crate::core::grid::{GridState, GridUnit};  // Line 8 — CI says \"unused\"\n\n#[cfg(test)]\nmod tests {\n    use crate::core::battle::model::BattleResult;  // Line 91 — duplicate\n    // ... test code uses BattleResult::Victory\n}\n```\n\nDuring `lib test` compilation: the module-level `#[cfg(test)]` import at line 3 is visible, but the test module at line 91+ has its own copy, so the compiler considers line 3 unused.\n\n## Options\n\n### A: Remove module-level `#[cfg(test)]` imports (keep in test module)\nRemove lines 2-3 and 7-8. Tests get their imports from their own `use` statements at line 91+.\n\n### B: Remove duplicate test-module imports (keep module-level)\nRemove the `use crate::core::battle::model::BattleResult;` from inside the test module (line 91). The module-level `#[cfg(test)]` import already makes it available in test code.\n\n### C: Consolidate — single `#[cfg(test)]` block with all test imports\nMove all test-only imports into a single `#[cfg(test)]` block at the module level, remove them from the test module.\n\n## Acceptance Criteria\n- [ ] `cargo clippy -- -D warnings` passes on CI nightly\n- [ ] No duplicate imports for the same type in the same file\n- [ ] All test code compiles and passes (55 tests)",
+          "new_value": "---\ntitle: CI Import Conflict Resolution\ntype: spec\nstatus: draft\ntags: [spec, ci, quality]\nstakeholders: [\"development-team\"]\n---\n\n## Overview\n\nResolve import conflicts in CI pipeline.\n\n## Stakeholders\n\n- Development team\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

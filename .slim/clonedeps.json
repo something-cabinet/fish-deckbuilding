@@ -1,14 +1,14 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-07-27T21:30:00.000Z",
+  "updatedAt": "2026-07-30T00:00:00.000Z",
   "dependencies": [
     {
-      "name": "Talishar-FE",
-      "resolvedVersion": "HEAD (35a473bc)",
-      "repoUrl": "https://github.com/Talishar/Talishar-FE.git",
+      "name": "open-duelyst/duelyst",
+      "resolvedVersion": "main (2843f24)",
+      "repoUrl": "https://github.com/open-duelyst/duelyst.git",
       "ref": "main",
-      "path": ".slim/clonedeps/repos/Talishar-FE",
-      "reason": "FaB TCG online implementation with card UI, game board, and combat flow patterns. Referenced by zone-decomposition, hand-overlap, card-states, feedback-animations, css-theming, pile-visualization tasks."
+      "path": ".slim/clonedeps/repos/open-duelyst__duelyst",
+      "reason": "Reference source for Duelyst-style grid combat game — gameplay systems, UI, grid mechanics, card/unit systems, and asset pipeline for parity analysis"
     }
   ]
 }
