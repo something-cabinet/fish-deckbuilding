@@ -141,6 +141,7 @@ type: reference
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
+- [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *draft*
 - [UI Panels from Rust Bridge to tscn](wiki/specs/ui-panels-to-tscn.md) — *approved*
 - [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *superseded*
@@ -166,6 +167,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 136
-- **Edges:** 146
+- **Nodes:** 137
+- **Edges:** 145
 

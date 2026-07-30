@@ -1,7 +1,8 @@
 ---
 title: UI Exported Node References — GDScript @export for Rust Bridge
 type: spec
-status: approved
+id: wiki:specs:ui-exported-node-refs
+status: draft
 tags: [spec, ui, gdext, rust, gdscript]
 ---
 
@@ -31,7 +32,7 @@ Add GDScript to every UI scene/component that the Rust bridge updates, with `@ex
 |-----------|------|---------------|
 | Card slot | `card_slot.tscn` | `name_label`, `cost_label`, `effects_label`, `range_label` (all Label) |
 | Battle UI | `battle.tscn` (new script) | `mana_label`, `turn_label`, `end_turn_button`, `result_banner`, `enemy_turn_banner`, `enemy_hand_label`, `replace_button`, `deck_count_button` |
-| Card tooltip | `battle.tscn` | `tooltip_panel`, `tooltip_name`, `tooltip_cost`, `tooltip_desc` |
+| Card tooltip | `battle.tscn` (or separate sub-scene) | `tooltip_panel`, `tooltip_name`, `tooltip_cost`, `tooltip_desc` |
 | Enemy card popup | `battle.tscn` | `popup_panel`, `popup_name`, `popup_cost`, `popup_effects` |
 | Combat log | `battle.tscn` | `log_panel`, `log_label` |
 | Graveyard panel | `battle.tscn` | `gy_panel`, `gy_title`, `gy_close_button`, `gy_player_title`, `gy_enemy_title`, `gy_scroll` |
@@ -90,6 +91,25 @@ let name_label: Gd<Label> = slot.get("name_label")
     .expect("name_label export missing or wrong type");
 ```
 
+### Script template
+
+```gdscript
+extends Panel  # or Control, Button, etc.
+
+@export var name_label: Label
+@export var cost_label: Label
+@export var effects_label: Label
+@export var range_label: Label
+```
+
+### Migration order
+
+1. Create GDScript files for each component
+2. Attach scripts to the tscn nodes and assign exported variables in the editor
+3. Migrate Rust `get_node_as` calls to `get("name")` in the bridge code
+4. Remove unused import paths, verify with `cargo clippy`
+5. Run the game and verify each component
+
 ### What stays as path-based
 
 The following are game-world nodes, not UI — they keep `get_node_as` path access:
@@ -97,3 +117,7 @@ The following are game-world nodes, not UI — they keep `get_node_as` path acce
 - `Units`, `Unit_Hero`, `Unit_Enemy` — unit rendering
 - `Body`, `HpBar`, `SelectionRing`, `MovePip`, `AtkPip`, `GlowRing` — unit sub-nodes
 - `Camera2D`, `Background` — scene infrastructure
+
+## Open Questions
+
+- [ ] Should the `card_slot.tscn` script be `extends Panel` (since its root is a Panel), or `extends Control` (more generic)?
