@@ -62,7 +62,7 @@ impl GridState {
 mod tests {
     use super::*;
     #[test] fn in_bounds_accepts_valid() { let g = GridState::default_grid(); assert!(g.in_bounds((0,0))); assert!(g.in_bounds((5,3))); }
-    #[test] fn in_bounds_rejects_invalid() { let g = GridState::default_grid(); assert!(!g.in_bounds((-1,0))); assert!(!g.in_bounds((0,-1))); assert!(!g.in_bounds((6,0))); }
+    #[test] fn in_bounds_rejects_invalid() { let g = GridState::default_grid(); assert!(!g.in_bounds((-1,0))); assert!(!g.in_bounds((0,-1))); assert!(!g.in_bounds((9,0))); }
     #[test] fn place_and_retrieve_unit() { let mut g = GridState::default_grid(); g.place_unit((2,2), GridUnit::hero()); assert!(g.unit_at((2,2)).is_some()); }
     #[test] fn enemy_at_checks_faction() { let mut g = GridState::default_grid(); g.place_unit((1,1), GridUnit::hero()); g.place_unit((3,3), GridUnit::enemy()); assert!(!g.enemy_at((1,1))); assert!(g.enemy_at((3,3))); }
     #[test] fn friendly_at_different_from_self() { let mut g = GridState::default_grid(); g.place_unit((2,2), GridUnit::hero()); g.place_unit((2,3), GridUnit::hero()); assert!(!g.friendly_at((2,2),(2,2))); assert!(g.friendly_at((2,3),(2,2))); let mut h = GridState::default_grid(); h.place_unit((0,0), GridUnit::hero()); h.place_unit((0,1), GridUnit::enemy()); assert!(!h.friendly_at((0,1),(0,0))); }

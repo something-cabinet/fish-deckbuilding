@@ -9,37 +9,52 @@ type: reference
 
 ## concepts
 
-- [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
-- [gdext bridge pattern](wiki/concepts/gdext-bridge-pattern.md) — *draft*
-- [gdext scene node type mismatch](wiki/concepts/gdext-scene-node-type-mismatch.md) — *draft*
-- [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
-- [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
-- [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
-- [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
-- [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
-- [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
-- [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
-- [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
-- [svelte css grid battle ui](wiki/decisions/svelte-css-grid-battle-ui.md) — *draft*
-- [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
-- [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
-- [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
-- [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
-- [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
-- [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
-- [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
-- [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
-- [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
-- [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
-- [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
-- [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
-- [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
-- [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
-- [godot battle 02 godot project scaffold  grid rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *draft*
-- [godot battle 03 unit system  placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *draft*
 - [godot battle 04 movement system  selection overlay](wiki/tasks/godot-battle-04-movement-system--selection-overlay.md) — *draft*
 - [godot battle 05 combat system  attack counter battle end](wiki/tasks/godot-battle-05-combat-system--attack-counter-battle-end.md) — *draft*
+- [godot battle 03 unit system  placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *draft*
 - [godot battle 06 turn cycle  enemy ai  hud](wiki/tasks/godot-battle-06-turn-cycle--enemy-ai--hud.md) — *draft*
+- [godot battle 02 godot project scaffold  grid rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *draft*
+- [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
+- [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
+- [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
+- [effects first card model](wiki/patterns/effects-first-card-model.md) — *draft*
+- [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
+- [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
+- [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
+- [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
+- [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
+- [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
+- [duelyst offset list affect pattern](wiki/patterns/duelyst-offset-list-affect-pattern.md) — *draft*
+- [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
+- [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
+- [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
+- [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
+- [valid targets single source of truth](wiki/patterns/valid-targets-single-source-of-truth.md) — *draft*
+- [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
+- [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
+- [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
+- [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
+- [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
+- [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
+- [dev profile build optimization](wiki/decisions/dev-profile-build-optimization.md) — *draft*
+- [svelte css grid battle ui](wiki/decisions/svelte-css-grid-battle-ui.md) — *draft*
+- [unified range enum for units and cards](wiki/decisions/unified-range-enum-for-units-and-cards.md) — *draft*
+- [rust gdext bridge over gdscript](wiki/decisions/rust-gdext-bridge-over-gdscript.md) — *draft*
+- [attack focused exhaustion](wiki/decisions/attack-focused-exhaustion.md) — *draft*
+- [duelyst accurate move then attack ordering](wiki/decisions/duelyst-accurate-move-then-attack-ordering.md) — *draft*
+- [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
+- [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
+- [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
+- [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
+- [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
+- [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
+- [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
+- [rustflags env overrides config toml](wiki/concepts/rustflags-env-overrides-config-toml.md) — *draft*
+- [clippy rejects unused reserved code](wiki/concepts/clippy-rejects-unused-reserved-code.md) — *draft*
+- [cascade panic type assumption godot](wiki/concepts/cascade-panic-type-assumption-godot.md) — *draft*
+- [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
+- [gdext scene node type mismatch](wiki/concepts/gdext-scene-node-type-mismatch.md) — *draft*
+- [css variable theming system](wiki/howto/css-variable-theming-system.md) — *draft*
 
 ## cores
 
@@ -50,74 +65,88 @@ type: reference
 
 ## memorys
 
-- [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
-- [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
-- [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
-- [Domain-Driven Barrel Structure](wiki/memory/domain-driven-barrel-structure.md) — *active*
-- [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
+- [Effects-First Card Model](wiki/memory/effects-first-card-model.md) — *draft*
+- [Rust CI build optimization](wiki/memory/rust-ci-build-optimization.md) — *active*
+- [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *archived*
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
+- [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
+- [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
+- [gdext scene node type must match custom class](wiki/memory/gdext-scene-node-type-must-match-custom-class.md) — *active*
+- [Godot web deploy pipeline](wiki/memory/godot-web-deploy-pipeline.md) — *active*
+- [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
+- [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [gdext 0.5.4 API gotchas](wiki/memory/gdext-0-5-4-api-gotchas.md) — *active*
-- [gdext scene node type must match custom class](wiki/memory/gdext-scene-node-type-must-match-custom-class.md) — *active*
-- [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *active*
-- [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
-- [Godot web deploy pipeline](wiki/memory/godot-web-deploy-pipeline.md) — *active*
-- [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
-- [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
-- [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
-- [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
 - [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
-- [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
-- [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
-- [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
+- [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
+- [gdext hot-reload signal reconnection](wiki/memory/gdext-hot-reload-pattern.md) — *active*
+- [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
+- [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
 - [Vite HMR Incompatible with Excalibur Scenes](wiki/memory/vite-hmr-incompatible-with-excalibur-scenes.md) — *active*
-- [Zone-Based UI Decomposition](wiki/memory/zone-based-ui-decomposition.md) — *active*
+- [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
+- [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
+- [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
+- [Domain-Driven Barrel Structure](wiki/memory/domain-driven-barrel-structure.md) — *active*
+- [Clippy CI Dead Code](wiki/memory/clippy-ci-dead-code.md) — *draft*
+- [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
+- [GDExtension Click Input — Use _input() Over _unhandled_input()](wiki/memory/gdextension-click-input-use-_input-over-_unhandled_input.md) — *active*
+- [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
+- [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
 
 ## rules
 
 - [No Comments in Project Code](wiki/rules/no-comments-in-code.md) — *active*
-- [No else — Prefer Early Return](wiki/rules/no-else-prefer-early-return.md) — *active*
-- [No Magic Values — Use Enums and Constants](wiki/rules/no-magic-values.md) — *active*
 - [Rust Anti-Patterns](wiki/rules/rust-anti-patterns.md) — *active*
-- [Spec Before Any Action](wiki/rules/spec-before-action.md) — *active*
 - [Spec-Driven Development](wiki/rules/spec-driven-development.md) — *draft*
 - [TDD — Test-First for Everything](wiki/rules/tdd.md) — *draft*
+- [No Magic Values — Use Enums and Constants](wiki/rules/no-magic-values.md) — *active*
+- [Spec Before Any Action](wiki/rules/spec-before-action.md) — *active*
+- [No else — Prefer Early Return](wiki/rules/no-else-prefer-early-return.md) — *active*
 
 ## specs
 
-- [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
+- [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *superseded*
+- [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *draft*
+- [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
+- [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
-- [CI Warning Cleanup](wiki/specs/ci-warning-cleanup.md) — *approved*
-- [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *draft*
-- [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
+- [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *superseded*
+- [Enemy System — Deck, AI Card Play, and Difficulty](wiki/specs/enemy-system-deck-ai-difficulty.md) — *approved*
+- [Battle UI/UX Upgrades](wiki/specs/battle-ui-ux-upgrades.md) — *approved*
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
+- [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
-- [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *approved*
+- [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
+- [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
+- [Card System — In-Battle Hand, Deck, and Play](wiki/specs/card-system-in-battle-deck.md) — *approved*
+- [Combat Affix & Crafting System](wiki/specs/combat-affix-crafting-system.md) — *approved*
+- [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
+- [CI Warning Cleanup](wiki/specs/ci-warning-cleanup.md) — *approved*
 
 ## tasks
 
+- [Combat feedback animations (Godot Tween/AnimationPlayer)](wiki/tasks/combat-feedback-animations-godot-tweenanimationplayer.md) — *todo*
+- [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
+- [Card visual states and hover interactions (Godot StyleBox/theming)](wiki/tasks/card-visual-states-and-hover-interactions-godot-styleboxtheming.md) — *todo*
+- [Godot Battle 07 - Hot-Reload Fixes & Parity](wiki/tasks/godot-battle-07-hot-reload-fixes.md) — *done*
+- [Save/Load — Godot ConfigFile/Resource persistence, wire to menu](wiki/tasks/saveload--godot-configfileresource-persistence-wire-to-menu.md) — *todo*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
-- [Card visual states and hover interactions](wiki/tasks/card-visual-states-and-hover-interactions.md) — *todo*
-- [Clean legacy fields, phase literals, dead code — economy, components, state](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--economy-components-state.md) — *todo*
-- [Combat feedback animations](wiki/tasks/combat-feedback-animations.md) — *todo*
-- [CSS theming system with custom properties](wiki/tasks/css-theming-system-with-custom-properties.md) — *todo*
-- [Deck/discard pile visualization](wiki/tasks/deckdiscard-pile-visualization.md) — *todo*
-- [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
-- [Dialogue system — wire DialogueBox into campaign flow](wiki/tasks/dialogue-system--wire-dialoguebox-into-campaign-flow.md) — *todo*
-- [Dynamic hand overlap for variable card count](wiki/tasks/dynamic-hand-overlap-for-variable-card-count.md) — *todo*
-- [Grid Battle UI — render 9×5 grid, wire targeting, base attack, move, replace, restore integration tests](wiki/tasks/grid-battle-ui--render-95-grid-wire-targeting-base-attack-move-replace-restore-integration-tests.md) — *todo*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
+- [Clean legacy fields, phase literals, dead code — Rust core](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--rust-core.md) — *todo*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
-- [Review and rename card types to thematic names](wiki/tasks/review-and-rename-card-types-to-thematic-names.md) — *todo*
-- [Rewrite combat into Excalibur ECS with events](wiki/tasks/rewrite-combat-into-excalibur-ecs-with-events.md) — *in-review*
-- [Save/Load — replace Prisma with browser-localStorage, wire SaveScreen](wiki/tasks/saveload--replace-prisma-with-browser-localstorage-wire-savescreen.md) — *todo*
-- [Zone-based UI decomposition for battle screen](wiki/tasks/zone-based-ui-decomposition-for-battle-screen.md) — *done*
+- [Wire Rust battle/combat core to Godot via gdext bridge with signals](wiki/tasks/wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals.md) — *done*
+- [Deck/discard pile visualization (Godot)](wiki/tasks/deckdiscard-pile-visualization-godot.md) — *todo*
+- [Dialogue system — wire dialogue scene into campaign flow (Godot)](wiki/tasks/dialogue-system--wire-dialogue-scene-into-campaign-flow-godot.md) — *todo*
+- [Godot Theme resource system for consistent UI styling](wiki/tasks/godot-theme-resource-system-for-consistent-ui-styling.md) — *todo*
+- [Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace](wiki/tasks/grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace.md) — *done*
+- [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
+- [Dynamic hand layout for variable card count (Godot Control nodes)](wiki/tasks/dynamic-hand-layout-for-variable-card-count-godot-control-nodes.md) — *todo*
 
 ## Graph Stats
 
-- **Nodes:** 91
-- **Edges:** 92
+- **Nodes:** 120
+- **Edges:** 104
 

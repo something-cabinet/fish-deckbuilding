@@ -14,16 +14,13 @@ use godot::prelude::*;
 
 use crate::core::{
     battle::{self as battle_engine, BattleResult, BattleState, Phase, Decision},
+    combat,
     constants, grid::movement as grid_movement,
     grid::{Faction, GridUnit},
-    cards::{CardDef, CardEffect, Effect, cross_aoe},
+cards::{CardDef, CardEffect, Effect, apply_affect_pattern, valid_targets, TargetFilter},
     overworld::{generate_rewards},
 };
 use super::game_state;
-
-fn chebyshev_adjacent(a: (i32, i32), b: (i32, i32)) -> bool {
-    (a.0 - b.0).abs().max((a.1 - b.1).abs()) == 1
-}
 
 enum Corner { TL, TR, BL, BR }
 
@@ -77,6 +74,7 @@ pub struct BattleScene {
     prev_units: HashMap<String, (i32, i32)>,
     hovered_card: Option<usize>,
     aoe_preview_pos: Option<(i32, i32)>,
+    valid_card_targets: Vec<(i32, i32)>,
     self_gd: Option<Gd<BattleScene>>,
     #[export]
     debug_unhandled_input_calls: i32,
@@ -100,6 +98,7 @@ impl INode2D for BattleScene {
             prev_units: HashMap::new(),
             hovered_card: None,
             aoe_preview_pos: None,
+            valid_card_targets: Vec::new(),
             self_gd: None,
             debug_unhandled_input_calls: 0,
             debug_click_events_received: 0,
@@ -144,14 +143,19 @@ impl INode2D for BattleScene {
         // Card targeting mode: click on grid to resolve card effect
         if self.card_targeting {
             let Some(grid_pos) = screen_to_grid(pos) else { return };
+            // Validate target is within valid targets (P3-B1)
+            if !self.valid_card_targets.contains(&grid_pos) {
+                // Invalid target — ignore click, don't consume card
+                return;
+            }
             let Some(s) = self.state.as_mut() else { return };
             let Some(card) = s.play_card(self.selected_card_index) else {
                 self.card_targeting = false;
                 self.aoe_preview_pos = None;
-self.clear_overlays_ref();
-        self.sync_all();
-        self.store_prev_unit_positions();
-        return;
+self.valid_card_targets.clear();
+                self.clear_overlays_ref();
+                self.sync_all();
+                return;
             };
             let card_name = card.name.to_string();
             let effects = card.effects.clone();
@@ -168,6 +172,7 @@ self.clear_overlays_ref();
             self.append_log(&format!("Played {} targeting ({},{})", card_name, grid_pos.0, grid_pos.1));
             self.card_targeting = false;
             self.aoe_preview_pos = None;
+            self.valid_card_targets.clear();
             self.clear_selection();
             self.sync_all();
             self.store_prev_unit_positions();
@@ -227,17 +232,25 @@ impl BattleScene {
         let mut tween = banner.create_tween();
         tween.tween_property(&banner, "modulate", &rgba(255, 255, 255, 1.0).to_variant(), 0.3);
 
-        // Execute enemy decision (mana + move/attack)
-        let decision = self.state.as_mut().map(battle_engine::execute_enemy_decision_and_mana);
-        if let Some(Decision::Attack { target }) = decision {
-            self.append_log(&format!("Enemy attacks hero at ({},{})", target.0, target.1));
-        } else if let Some(Decision::Move { target, attack_after }) = decision {
-            self.append_log(&format!("Enemy moves to ({},{})", target.0, target.1));
-            if attack_after.is_some() {
-                self.append_log("Enemy attacks!");
+        // Execute enemy decisions (mana + move/attack)
+        let decisions = self.state.as_mut().map(battle_engine::execute_enemy_decision_and_mana);
+        if let Some(decisions) = decisions {
+            for d in &decisions {
+                match d {
+                    Decision::Attack { target } => {
+                        self.append_log(&format!("Enemy attacks hero at ({},{})", target.0, target.1));
+                    }
+                    Decision::Move { target, attack_after } => {
+                        self.append_log(&format!("Enemy moves to ({},{})", target.0, target.1));
+                        if attack_after.is_some() {
+                            self.append_log("Enemy attacks!");
+                        }
+                    }
+                    Decision::Wait => {
+                        self.append_log("Enemy waits");
+                    }
+                }
             }
-        } else {
-            self.append_log("Enemy waits");
         }
 
         self.sync_visuals_ref();
@@ -352,13 +365,26 @@ impl BattleScene {
         if !s.can_play_card(idx) { return; }
 
         let card = &s.hand.cards[idx].clone();
-        let has_self_target = card.effects.iter().any(|e| e.range == 0);
-        let has_targeted = card.effects.iter().any(|e| e.range > 0);
+        let has_self_target = card.effects.iter().any(|e| e.target == TargetFilter::Self_);
+        let has_targeted = card.effects.iter().any(|e| e.target != TargetFilter::Self_);
 
         if has_targeted && !has_self_target {
+            // Compute valid targets using valid_targets() (P3-B1)
+            let mut targets = Vec::new();
+            if let Some(effect) = card.effects.first() {
+                if let Some(caster) = s.grid.find_faction(Faction::Hero).first().copied() {
+                    targets = valid_targets(effect, caster, &s.grid, Faction::Hero);
+                }
+            }
+            if targets.is_empty() {
+                self.append_log(&format!("No valid targets for {}", card.name));
+                return;
+            }
+            self.valid_card_targets = targets;
             self.card_targeting = true;
             self.selected_card_index = idx;
             self.selected_card_effect_idx = 0;
+            self.show_valid_card_targets();
             self.append_log(&format!("Select target for {}", card.name));
             godot_print!("[BattleScene] Select a target for {}", card.name);
             self.sync_ui_ref();
@@ -420,8 +446,8 @@ impl BattleScene {
                 godot_print!("[RT:PRINT] hand = {}, deck = {}, gy = {}", s.hand.len(), s.deck.len(), s.graveyard.len());
                 godot_print!("[RT:PRINT] enemy_hand = {}, enemy_deck = {}", s.enemy_hand.len(), s.enemy_deck.len());
                 for (pos, unit) in &s.grid.units {
-                    godot_print!("[RT:PRINT]   unit at ({},{}): faction={:?} hp={} atk={} moved={} attacked={} alive={}",
-                        pos.0, pos.1, unit.faction, unit.hp, unit.atk, unit.has_moved, unit.has_attacked, unit.alive);
+                    godot_print!("[RT:PRINT]   unit at ({},{}): faction={:?} hp={} atk={} moves={}/{} attacks={}/{} alive={}",
+                        pos.0, pos.1, unit.faction, unit.hp, unit.atk, unit.moves_made, unit.max_moves, unit.attacks_made, unit.max_attacks, unit.alive);
                 }
             }
             None => godot_print!("[RT:PRINT] state = None"),
@@ -502,11 +528,11 @@ impl BattleScene {
         // Mana crystals
         let mut crystals = Node2D::new_alloc();
         crystals.set_name("ManaCrystals");
-        crystals.set_position(Vector2::new(1080.0, 50.0));
+        crystals.set_position(Vector2::new(1000.0, 50.0));
         for i in 0..constants::MAX_MANA {
             let mut crystal = Panel::new_alloc();
             crystal.set_size(Vector2::new(18.0, 26.0));
-            crystal.set_position(Vector2::new(i as f32 * 28.0, 0.0));
+            crystal.set_position(Vector2::new(i as f32 * 22.0, 0.0));
             crystal.set_name(&format!("Crystal_{}", i));
             let style = Self::mana_crystal_style(true);
             crystal.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
@@ -814,9 +840,10 @@ impl BattleScene {
                 if let Some(s) = self.state.as_ref() {
                     if let Some(card) = s.hand.cards.get(self.selected_card_index) {
                         if let Some(effect) = card.effects.first() {
-                            if effect.aoe > 1 && self.aoe_preview_pos != Some(grid_pos) {
+                            let has_aoe = !effect.affect_pattern.is_empty();
+                            if has_aoe && self.aoe_preview_pos != Some(grid_pos) {
                                 self.aoe_preview_pos = Some(grid_pos);
-                                self.show_aoe_preview(grid_pos, effect.aoe);
+                                self.show_aoe_preview(grid_pos, &effect.affect_pattern);
                             }
                         }
                     }
@@ -848,7 +875,7 @@ impl BattleScene {
         tooltip.set_visible(false);
     }
 
-    fn show_aoe_preview(&self, center: (i32, i32), aoe_radius: i32) {
+    fn show_aoe_preview(&self, center: (i32, i32), affect_pattern: &[(i32, i32)]) {
         let mut container = self.base().get_node_as::<Node2D>("BattleGrid/MovementOverlay");
         // Remove only AOE preview tiles
         let mut to_remove = Vec::new();
@@ -868,7 +895,7 @@ impl BattleScene {
         }
 
         let tile_px = (constants::TILE_SIZE - 2) as f32;
-        let tiles = cross_aoe(center, aoe_radius);
+        let tiles = apply_affect_pattern(center, affect_pattern);
         for &(x, y) in &tiles {
             let px = constants::GRID_ORIGIN_X + x * constants::TILE_SIZE;
             let py = constants::GRID_ORIGIN_Y + y * constants::TILE_SIZE;
@@ -878,6 +905,22 @@ impl BattleScene {
             highlight.set_size(Vector2::new(tile_px, tile_px));
             highlight.set_color(rgba(0xf4, 0x97, 0x2c, 0.4));
             highlight.set_name(&format!("AoeTile_{}_{}", x, y));
+            container.add_child(&highlight);
+        }
+    }
+
+    fn show_valid_card_targets(&self) {
+        let tile_px = (constants::TILE_SIZE - 2) as f32;
+        let mut container = self.base().get_node_as::<Node2D>("BattleGrid/MovementOverlay");
+        for &(x, y) in &self.valid_card_targets {
+            let px = constants::GRID_ORIGIN_X + x * constants::TILE_SIZE;
+            let py = constants::GRID_ORIGIN_Y + y * constants::TILE_SIZE;
+            let mut highlight = ColorRect::new_alloc();
+            highlight.set_mouse_filter(MouseFilter::IGNORE);
+            highlight.set_position(Vector2::new(px as f32, py as f32));
+            highlight.set_size(Vector2::new(tile_px, tile_px));
+            highlight.set_color(rgba(0xf4, 0xc4, 0x30, 0.35)); // gold/yellow overlay
+            highlight.set_name(&format!("CardTarget_{}_{}", x, y));
             container.add_child(&highlight);
         }
     }
@@ -914,6 +957,7 @@ impl BattleScene {
         self.valid_moves.clear();
         self.card_targeting = false;
         self.aoe_preview_pos = None;
+        self.valid_card_targets.clear();
         self.hovered_card = None;
         self.combat_log.clear();
         self.prev_units.clear();
@@ -978,7 +1022,7 @@ impl BattleScene {
                 // Update body modulate
                 if existing.has_node("Body") {
                     let mut body = existing.get_node_as::<Panel>("Body");
-                    body.set_modulate(if unit.has_moved || unit.has_attacked {
+                    body.set_modulate(if unit.exhausted() {
                         rgba(255, 255, 255, 0.75)
                     } else {
                         rgba(255, 255, 255, 1.0)
@@ -1002,15 +1046,17 @@ impl BattleScene {
                 if existing.has_node("MovePip") {
                     let mut move_pip = existing.get_node_as::<Label>("MovePip");
                     if unit.faction == Faction::Hero {
-                        move_pip.set_text(if unit.has_moved { "X" } else { "Y" });
-                        move_pip.set_modulate(if unit.has_moved { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
+                        let moves_exhausted = unit.moves_made >= unit.max_moves;
+                        move_pip.set_text(if moves_exhausted { "X" } else { "Y" });
+                        move_pip.set_modulate(if moves_exhausted { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
                     }
                 }
                 if existing.has_node("AtkPip") {
                     let mut atk_pip = existing.get_node_as::<Label>("AtkPip");
                     if unit.faction == Faction::Hero {
-                        atk_pip.set_text(if unit.has_attacked { "X" } else { "Y" });
-                        atk_pip.set_modulate(if unit.has_attacked { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
+                        let atk_exhausted = unit.attacks_made >= unit.max_attacks;
+                        atk_pip.set_text(if atk_exhausted { "X" } else { "Y" });
+                        atk_pip.set_modulate(if atk_exhausted { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
                     }
                 }
 
@@ -1018,7 +1064,7 @@ impl BattleScene {
             } else {
                 // New unit — create with spawn animation
                 let mut unit_root = self.build_unit_root(pos, unit, state);
-                let can_pulse = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && !unit.has_moved;
+                let can_pulse = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && unit.attacks_made < unit.max_attacks;
                 if can_pulse {
                     Self::attach_pulse_tween(&mut unit_root.get_node_as::<Panel>("GlowRing"));
                 }
@@ -1080,7 +1126,7 @@ impl BattleScene {
         shadow.set_position(Vector2::new(-26.0, -24.0));
         root.add_child(&shadow);
 
-        let can_act = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && !unit.has_moved;
+        let can_act = unit.faction == Faction::Hero && state.phase == Phase::PlayerTurn && !unit.exhausted();
         let glow_color = match unit.faction { Faction::Hero => rgb(0x7f, 0xff, 0xe6), Faction::Enemy => rgb(0xff, 0x6b, 0x6b) };
         let mut glow = Self::rounded_panel(rgba(0, 0, 0, 0.0), Vector2::new(68.0, 68.0), 34, 4, glow_color);
         glow.set_position(Vector2::new(-34.0, -34.0));
@@ -1094,7 +1140,7 @@ impl BattleScene {
         let mut body = Self::rounded_panel(body_color, Vector2::new(56.0, 56.0), 12, 2, border_color);
         body.set_position(Vector2::new(-28.0, -28.0));
         body.set_name("Body");
-        if unit.has_moved || unit.has_attacked { body.set_modulate(rgba(255, 255, 255, 0.75)); }
+        if unit.exhausted() { body.set_modulate(rgba(255, 255, 255, 0.75)); }
         root.add_child(&body);
 
         // Selection ring (FR-11) — bright outline, hidden by default
@@ -1124,8 +1170,9 @@ impl BattleScene {
             move_pip.set_name("MovePip");
             move_pip.set_position(Vector2::new(-32.0, 22.0));
             move_pip.set_size(Vector2::new(16.0, 16.0));
-            move_pip.set_text(if unit.has_moved { "X" } else { "Y" });
-            move_pip.set_modulate(if unit.has_moved { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
+            let moves_exhausted = unit.moves_made >= unit.max_moves;
+            move_pip.set_text(if moves_exhausted { "X" } else { "Y" });
+            move_pip.set_modulate(if moves_exhausted { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
             move_pip.add_theme_color_override("font_color", rgb(0xff, 0xff, 0xff));
             move_pip.add_theme_font_size_override("font_size", 14);
             move_pip.set_horizontal_alignment(HorizontalAlignment::CENTER);
@@ -1135,8 +1182,9 @@ impl BattleScene {
             atk_pip.set_name("AtkPip");
             atk_pip.set_position(Vector2::new(-16.0, 22.0));
             atk_pip.set_size(Vector2::new(16.0, 16.0));
-            atk_pip.set_text(if unit.has_attacked { "X" } else { "Y" });
-            atk_pip.set_modulate(if unit.has_attacked { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
+            let atk_exhausted = unit.attacks_made >= unit.max_attacks;
+            atk_pip.set_text(if atk_exhausted { "X" } else { "Y" });
+            atk_pip.set_modulate(if atk_exhausted { rgb(0xff, 0x6b, 0x6b) } else { rgb(0x4f, 0xd1, 0xc5) });
             atk_pip.add_theme_color_override("font_color", rgb(0xff, 0xff, 0xff));
             atk_pip.add_theme_font_size_override("font_size", 14);
             atk_pip.set_horizontal_alignment(HorizontalAlignment::CENTER);
@@ -1152,7 +1200,7 @@ impl BattleScene {
             None => return,
         };
         let Some(unit) = state.grid.unit_at(selected_pos) else { return };
-        if unit.has_attacked { return; }
+        if unit.attacks_made >= unit.max_attacks { return; }
         let enemies = state.grid.adjacent_enemies(selected_pos);
         if enemies.is_empty() { return; }
         let mut container = self.base().get_node_as::<Node2D>("BattleGrid/MovementOverlay");
@@ -1423,11 +1471,18 @@ impl BattleScene {
     fn try_move_selected(&mut self, pos: (i32, i32)) -> bool {
         let selected = match self.selected { Some(s) => s, None => return false };
         if !self.valid_moves.contains(&pos) { return false; }
-        if let Some(s) = self.state.as_mut() { let _ = battle_engine::move_unit(s, selected, pos); }
+        if let Some(s) = self.state.as_mut() {
+            if let Err(e) = battle_engine::move_unit(s, selected, pos) {
+                godot_error!("Move failed: {:?}", e);
+                return false;
+            }
+        }
         self.append_log(&format!("Hero moves to ({},{})", pos.0, pos.1));
-        self.selected = None;
+        // Duelyst rule: keep unit selected for potential attack after moving
+        self.selected = Some(pos);
         self.valid_moves.clear();
         self.clear_overlays_ref();
+        self.show_attack_highlight(pos);
         self.sync_all();
         self.store_prev_unit_positions();
         true
@@ -1435,12 +1490,22 @@ impl BattleScene {
 
     fn try_attack_adjacent(&mut self, pos: (i32, i32)) -> bool {
         let selected = match self.selected { Some(s) => s, None => return false };
-        let is_target = self.state.as_ref().is_some_and(|s| {
-            s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Enemy && chebyshev_adjacent(selected, pos))
+            let is_target = self.state.as_ref().is_some_and(|s| {
+            let is_enemy = s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Enemy);
+            let in_range = s.grid.unit_at(selected).is_some_and(|attacker| {
+                combat::base_attack::base_attack_validate_range(selected, pos, attacker.range).is_ok()
+            });
+            is_enemy && in_range
         });
         if !is_target { return false; }
         let result = self.state.as_mut().and_then(|s| {
-            battle_engine::player_attack(s, selected, pos).ok()
+            match battle_engine::player_attack(s, selected, pos) {
+                Ok(r) => Some(r),
+                Err(e) => {
+                    godot_error!("Attack failed: {:?}", e);
+                    None
+                }
+            }
         });
         if let Some(r) = &result {
             self.append_log(&format!("Hero attacks enemy for {} damage", r.combat_result.damage_dealt));
@@ -1462,14 +1527,14 @@ impl BattleScene {
 
     fn try_select_unit(&mut self, pos: (i32, i32)) -> bool {
         let is_selectable = self.state.as_ref().is_some_and(|s| {
-            s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Hero && (!u.has_moved || !u.has_attacked))
+            s.grid.unit_at(pos).is_some_and(|u| u.faction == Faction::Hero && !u.exhausted())
         });
         if !is_selectable { return false; }
         self.selected = Some(pos);
         if let Some(s) = self.state.as_ref() {
             self.valid_moves = grid_movement::get_movement_range(&s.grid, pos, constants::MOVE_BUDGET);
-            let has_moved = s.grid.unit_at(pos).is_some_and(|u| u.has_moved);
-            if !has_moved { self.show_move_overlay(&self.valid_moves); }
+            let can_move = s.grid.unit_at(pos).is_some_and(|u| u.moves_made < u.max_moves);
+            if can_move { self.show_move_overlay(&self.valid_moves); }
         }
         self.show_attack_highlight(pos);
         self.sync_visuals_ref();
@@ -1479,6 +1544,7 @@ impl BattleScene {
     fn clear_selection(&mut self) {
         self.selected = None;
         self.valid_moves.clear();
+        self.valid_card_targets.clear();
         self.clear_overlays_ref();
     }
 
@@ -1610,7 +1676,7 @@ impl BattleScene {
     }
 
     fn apply_card_effect_to_state(state: &mut BattleState, card_effect: &CardEffect, target: (i32, i32)) {
-        let affected = cross_aoe(target, card_effect.aoe);
+        let affected = apply_affect_pattern(target, &card_effect.affect_pattern);
         for pos in affected {
             if !state.grid.in_bounds(pos) { continue; }
             match &card_effect.effect {
@@ -1641,7 +1707,7 @@ impl BattleScene {
     }
 
     fn visualize_card_effect(&self, card_effect: &CardEffect, target: (i32, i32), _hero_pos: Option<(i32, i32)>) {
-        let affected = cross_aoe(target, card_effect.aoe);
+        let affected = apply_affect_pattern(target, &card_effect.affect_pattern);
         for pos in affected {
             match &card_effect.effect {
                 Effect::Damage(d) => {

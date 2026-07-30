@@ -41,7 +41,7 @@ impl BattleState {
 
         Self {
             grid, phase: Phase::PlayerTurn, turn_number: 1,
-            mana: constants::START_MANA, max_mana: constants::MAX_MANA, result: None,
+            mana: constants::START_MANA, max_mana: constants::START_MANA, result: None,
             hand, deck, graveyard: Graveyard::new(),
             replace_used: false,
             enemy_hand, enemy_deck, enemy_graveyard: Graveyard::new(),
@@ -51,6 +51,10 @@ impl BattleState {
 
     pub fn reset_turn(&mut self) {
         self.turn_number += 1;
+        // Mana ramping: +1 max_mana per turn, start at 1, max 9
+        if self.max_mana < constants::MAX_MANA {
+            self.max_mana += 1;
+        }
         self.mana = self.max_mana;
         self.replace_used = false;
         for unit in self.grid.units.values_mut() {
@@ -230,5 +234,50 @@ mod tests {
         s.replace_used = true;
         s.reset_turn();
         assert!(!s.replace_used);
+    }
+
+    #[test]
+    fn starting_mana_is_1() {
+        let s = BattleState::new();
+        assert_eq!(s.max_mana, 1);
+        assert_eq!(s.mana, 1);
+    }
+
+    #[test]
+    fn mana_hud_values_are_correct() {
+        let mut s = BattleState::new();
+        // Turn 1: start 1/1
+        assert_eq!(s.mana, 1);
+        assert_eq!(s.max_mana, 1);
+        // After reset (simulating end of turn + start of next): 2/2
+        s.reset_turn();
+        assert_eq!(s.mana, 2);
+        assert_eq!(s.max_mana, 2);
+    }
+
+    #[test]
+    fn mana_ramps_by_1_per_turn() {
+        let mut s = BattleState::new();
+        assert_eq!(s.max_mana, 1);
+        assert_eq!(s.mana, 1);
+        s.reset_turn(); // → turn 2
+        assert_eq!(s.max_mana, 2);
+        assert_eq!(s.mana, 2);
+        s.reset_turn(); // → turn 3
+        assert_eq!(s.max_mana, 3);
+        assert_eq!(s.mana, 3);
+    }
+
+    #[test]
+    fn mana_capped_at_9() {
+        let mut s = BattleState::new();
+        s.max_mana = 9;
+        s.mana = 9;
+        s.reset_turn();
+        assert_eq!(s.max_mana, 9);
+        assert_eq!(s.mana, 9);
+        s.reset_turn();
+        assert_eq!(s.max_mana, 9);
+        assert_eq!(s.mana, 9);
     }
 }
