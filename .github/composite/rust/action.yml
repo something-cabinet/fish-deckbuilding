@@ -43,7 +43,7 @@ runs:
         rustup default "$TOOLCHAIN"
 
     - name: "Set up sccache"
-      uses: mozilla-actions/sccache-action@v0.0.10
+      uses: mozilla-actions/sccache-action@v0.0.11
 
     - name: "Extract Rust version for cache key"
       shell: bash
@@ -69,4 +69,6 @@ runs:
         echo "CARGO_TERM_COLOR=always" >> $GITHUB_ENV
         echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
         echo "RUST_BACKTRACE=short" >> $GITHUB_ENV
+        echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
         rustc --version --verbose
