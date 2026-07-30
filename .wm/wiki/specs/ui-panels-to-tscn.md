@@ -88,6 +88,10 @@ Move static UI panel layout definitions from Rust procedural code (`build_ui()` 
 
 ## Technical Notes
 
+### Sub-scene limitation with godot-rust gdext
+
+Sub-scenes (`instance=ExtResource(...)`) do NOT work with godot-rust gdext — `get_node_as` cannot find children of instanced scenes during `ready()`. All UI nodes must be defined directly in the main scene file. This overrides the earlier decision to use sub-scenes.
+
 ### Migration pattern per component
 
 1. Define the node tree in the `.tscn` file (using Godot editor or direct tscn editing)

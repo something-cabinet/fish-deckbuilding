@@ -45,6 +45,9 @@ Migrate static UI panel layout from Rust to `.tscn` scene files using an increme
 ### Path consistency is critical
 The Rust bridge references nodes by path strings like `"UI/HandContainer/CardSlot_0"`. The tscn hierarchy must match exactly — same node names, parent-child relationships, and case sensitivity.
 
+### godot-rust sub-scene limitation
+Sub-scene instances (`instance=ExtResource("1")`) do NOT work reliably with godot-rust gdext — `get_node_as` cannot find children of instanced scenes during `ready()`. All UI nodes must be defined **directly** in the main scene file, not in sub-scenes. This was discovered at runtime when `get_node_as::<Panel>("CardSlot_0")` panicked on an instanced sub-scene child. Inlining the nodes into `battle.tscn` resolved the issue.
+
 ### Sub-resources for styles
 Inline `StyleBoxFlat` resources use the `[sub_resource]` format in tscn:
 ```gdscript
