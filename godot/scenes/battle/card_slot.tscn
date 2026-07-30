@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cdbjq704ttgda"]
 
-[ext_resource type="Script" path="res://scenes/battle/card_slot.gd" id="1"]
+[ext_resource type="Script" uid="uid://cw2lcmevdajnm" path="res://scenes/battle/card_slot.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cost"]
 bg_color = Color(0.043, 0.102, 0.141, 0.7)
@@ -9,10 +9,14 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[node name="CardSlot" type="Panel" unique_id=1434956568]
-script = ExtResource("1")
+[node name="CardSlot" type="Panel" unique_id=1434956568 node_paths=PackedStringArray("name_label", "cost_label", "effects_label", "range_label")]
 offset_right = 150.0
 offset_bottom = 120.0
+script = ExtResource("1")
+name_label = NodePath("NameLabel")
+cost_label = NodePath("CostLabel")
+effects_label = NodePath("EffectsLabel")
+range_label = NodePath("RangeLabel")
 
 [node name="NameLabel" type="Label" parent="." unique_id=524931308]
 layout_mode = 0
@@ -46,12 +50,11 @@ theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
 
-[node name="RangeLabel" type="Label" parent="."]
+[node name="RangeLabel" type="Label" parent="." unique_id=1333272590]
 layout_mode = 0
 offset_left = 6.0
 offset_top = 98.0
 offset_right = 144.0
 offset_bottom = 116.0
-text = ""
 theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
 theme_override_font_sizes/font_size = 10

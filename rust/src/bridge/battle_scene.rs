@@ -462,7 +462,7 @@ impl BattleScene {
         end_btn.signals().pressed().connect_other(self_gd, BattleScene::on_end_turn);
         let restart_btn: Gd<Button> = ui.get("restart_button").try_to().expect("restart_button missing");
         restart_btn.signals().pressed().connect_other(self_gd, BattleScene::on_restart);
-        let return_btn: Gd<Button> = ui.get("return_button").try_to().expect("return_button missing");
+        let return_btn: Gd<Button> = ui.get("return_to_overworld").try_to().expect("return_to_overworld missing");
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
         let replace_btn: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);

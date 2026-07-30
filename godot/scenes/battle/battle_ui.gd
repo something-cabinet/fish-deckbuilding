@@ -5,7 +5,7 @@ extends CanvasLayer
 @export var end_turn_button: Button
 @export var result_banner: Panel
 @export var restart_button: Button
-@export var return_button: Button
+@export var return_to_overworld: Button
 @export var enemy_turn_banner: Label
 @export var enemy_hand_label: Label
 @export var replace_button: Button
