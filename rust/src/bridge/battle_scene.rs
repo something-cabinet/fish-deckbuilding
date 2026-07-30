@@ -4,7 +4,7 @@ use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::notify::CanvasItemNotification;
 use godot::classes::control::MouseFilter;
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
+    Button, CanvasLayer, ColorRect, Control, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
     Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat,
 };
 use godot::global::{HorizontalAlignment, MouseButton};
@@ -1313,7 +1313,7 @@ impl BattleScene {
             None => return,
         };
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let hand_container = ui.get_node_as::<Node2D>("HandContainer");
+        let hand_container = ui.get_node_as::<Control>("HandContainer");
         for i in 0..5 {
             let slot_name = format!("CardSlot_{}", i);
             let mut slot = hand_container.get_node_as::<Panel>(&slot_name);
