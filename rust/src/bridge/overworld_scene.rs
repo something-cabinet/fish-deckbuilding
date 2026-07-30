@@ -59,7 +59,8 @@ impl INode2D for OverworldScene {
 impl OverworldScene {
     fn build_ui(&mut self) {
         let Some(ref self_gd) = self.self_gd else { return };
-        let deck_btn = self.base().get_node_as::<Button>("UI/DeckButton");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let deck_btn: Gd<Button> = ui.get("deck_button").try_to().expect("deck_button missing");
         deck_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_deck_button);
     }
 
@@ -88,7 +89,7 @@ impl OverworldScene {
 
     fn clear_map(&self) {
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         while container.get_child_count() > 0 {
             if let Some(mut child) = container.get_child(0) {
                 container.remove_child(&child);
@@ -98,7 +99,7 @@ impl OverworldScene {
     }
 
     fn draw_connections(&self, ui: &Gd<CanvasLayer>) {
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         for node in &self.nodes {
             for conn in &node.connections {
                 if let Some(target) = self.nodes.iter().find(|n| &n.id == conn) {
@@ -120,7 +121,7 @@ impl OverworldScene {
     }
 
     fn draw_nodes(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         for node in &self.nodes {
             let nx = (200 + node.grid_x * 150) as f32;
             let ny = (80 + node.grid_y * 90) as f32;
@@ -166,7 +167,7 @@ impl OverworldScene {
         let node = &self.nodes[self.hero_node_idx as usize];
         let nx = (200 + node.grid_x * 150) as f32;
         let ny = (80 + node.grid_y * 90) as f32;
-        let mut container = ui.get_node_as::<Node2D>("MapContainer");
+        let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
 
         let mut panel = Panel::new_alloc();
         panel.set_name("HeroIcon");
@@ -188,11 +189,11 @@ impl OverworldScene {
     }
 
     fn update_hud(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
-        let mut hp_label = ui.get_node_as::<Label>("HpLabel");
+        let mut hp_label: Gd<Label> = ui.get("hp_label").try_to().expect("hp_label missing");
         hp_label.set_text(&format!("HP: {}/{}", run.hp, run.max_hp));
         hp_label.add_theme_color_override("font_color", rgb(0x4f, 0xd1, 0xc5));
 
-        let mut gold_label = ui.get_node_as::<Label>("GoldLabel");
+        let mut gold_label: Gd<Label> = ui.get("gold_label").try_to().expect("gold_label missing");
         gold_label.set_text(&format!("Gold: {}", run.gold));
         gold_label.add_theme_color_override("font_color", rgb(0xf4, 0xc4, 0x30));
     }

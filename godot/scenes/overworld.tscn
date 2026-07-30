@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://dofw0wfqef0e6"]
 
+[ext_resource type="Script" path="res://scenes/overworld_ui.gd" id="1"]
+
 [node name="OverworldScene" type="OverworldScene"]
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -12,6 +14,7 @@ mouse_filter = 2
 color = Color(0.043, 0.102, 0.141, 1)
 
 [node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("1")
 
 [node name="MapContainer" type="Node2D" parent="UI"]
 
