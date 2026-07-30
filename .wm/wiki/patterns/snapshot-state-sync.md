@@ -61,3 +61,9 @@ If the subscriber also needs to mutate state bidirectionally, the snapshot shoul
 ## Related
 - @task-tasks:rewrite-combat-into-excalibur-ecs-with-events
 - @wiki/decisions/pure-function-ecs-pivot
+
+## Snapshot Invalidation
+
+**Critical corollary**: Snapshots must be invalidated after every sync cycle. A snapshot taken before a mutation and used for diffing in `sync_visuals_ref` will cause phantom re-animations if the snapshot is not updated after sync completes. The pattern is: snapshot → mutate → sync → **invalidate snapshot**.
+
+See @wiki/concepts/stale-animation-snapshot-gdext for a concrete failure where stale snapshot reuse caused enemies to re-animate their old moves during the player's turn.

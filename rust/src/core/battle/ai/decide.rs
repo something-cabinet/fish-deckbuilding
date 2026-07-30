@@ -11,9 +11,10 @@ pub enum Decision {
     Wait,
 }
 
-pub fn play_enemy_cards(state: &mut BattleState) {
-    if state.phase == Phase::BattleOver { return; }
-    let Some(enemy_pos) = state.grid.find_faction(Faction::Enemy).first().copied() else { return };
+pub fn play_enemy_cards(state: &mut BattleState) -> Vec<CardDef> {
+    let mut played = Vec::new();
+    if state.phase == Phase::BattleOver { return played; }
+    let Some(enemy_pos) = state.grid.find_faction(Faction::Enemy).first().copied() else { return played };
     loop {
         let best = pick_best_enemy_card(state, enemy_pos);
         let Some((idx, card)) = best else { break };
@@ -22,9 +23,11 @@ let Some(target_pos) = target else { break };
             state.enemy_mana -= card.cost;
         state.enemy_hand.remove(idx);
         state.enemy_graveyard.add(card.clone());
+        played.push(card.clone());
         apply_effects(state, &card.effects, target_pos);
-        if state.phase == Phase::BattleOver { return; }
+        if state.phase == Phase::BattleOver { return played; }
     }
+    played
 }
 
 pub(crate) fn pick_best_enemy_card(state: &BattleState, enemy_pos: (i32, i32)) -> Option<(usize, CardDef)> {

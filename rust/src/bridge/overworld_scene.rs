@@ -1,4 +1,4 @@
-use godot::classes::control::MouseFilter;
+use godot::classes::control::{FocusMode, MouseFilter};
 use godot::classes::{
     Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, Label, Line2D, Node2D,
     Panel, StyleBox, StyleBoxFlat,
@@ -91,6 +91,8 @@ impl OverworldScene {
         deck_btn.set_position(Vector2::new(20.0, 70.0));
         deck_btn.set_size(Vector2::new(100.0, 30.0));
         deck_btn.set_text("Deck");
+        deck_btn.set_focus_mode(FocusMode::ALL);
+        deck_btn.set_custom_minimum_size(Vector2::new(100.0, 30.0));
         deck_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_deck_button);
         ui.add_child(&deck_btn);
 
@@ -249,7 +251,8 @@ impl OverworldScene {
                 let run = self.run.take().unwrap();
                 game_state::set_run_state(run);
                 self.nodes = Vec::new();
-                let mut tree = self.base().get_tree();
+                let base = self.base_mut();
+                let mut tree = base.get_tree();
                 let _ = tree.change_scene_to_file("res://scenes/battle/battle.tscn");
             }
             NodeType::Rest => {
@@ -262,9 +265,23 @@ impl OverworldScene {
             }
             NodeType::Enchanter => {
                 godot_print!("[Overworld] Opening enchanter");
+                for (i, card) in run.combat_deck.iter().enumerate() {
+                    let affix_strs: Vec<String> = card.affixes.iter().map(|a| a.description.to_string()).collect();
+                    godot_print!("  [{}] {} (affixes: {:?})", i, card.name, affix_strs);
+                }
+                if let Some(card) = run.enchanter_reroll(0, 0, 42) {
+                    godot_print!("[Overworld] Rerolled affix on: {}", card.name);
+                }
+                run.defeated_nodes.push(node.id.clone());
+                self.refresh();
             }
             NodeType::Gambler => {
                 godot_print!("[Overworld] Opening gambler");
+                if let Some(card) = run.gambler_add_slot(0, 42) {
+                    godot_print!("[Overworld] Added slot to: {}", card.name);
+                }
+                run.defeated_nodes.push(node.id.clone());
+                self.refresh();
             }
         }
     }

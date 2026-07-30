@@ -2,10 +2,11 @@ use std::collections::HashMap;
 
 use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::notify::CanvasItemNotification;
-use godot::classes::control::MouseFilter;
+use godot::classes::control::{FocusMode, LayoutPreset, MouseFilter};
+use godot::classes::scroll_container::ScrollMode;
 use godot::classes::{
     Button, CanvasLayer, ColorRect, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
-    Panel, ProgressBar, RichTextLabel, StyleBox, StyleBoxFlat,
+    Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat,
 };
 use godot::classes::text_server::AutowrapMode;
 use godot::global::{HorizontalAlignment, MouseButton, VerticalAlignment};
@@ -16,7 +17,7 @@ use crate::core::{
     combat,
     constants, grid::movement as grid_movement,
     grid::{Faction, GridUnit},
-    cards::{CardEffect, Effect, apply_affect_pattern, valid_targets, TargetFilter},
+cards::{CardDef, CardEffect, Effect, apply_affect_pattern, valid_targets, TargetFilter},
     overworld::{generate_rewards},
 };
 use super::game_state;
@@ -33,6 +34,16 @@ fn rgb(r: u8, g: u8, b: u8) -> Color {
 
 fn rgba(r: u8, g: u8, b: u8, a: f32) -> Color {
     Color::from_rgba(hex(r), hex(g), hex(b), a)
+}
+
+fn effect_to_string(effect: &Effect) -> String {
+    match effect {
+        Effect::Damage(v) => format!("{} dmg", v),
+        Effect::Heal(v) => format!("{} heal", v),
+        Effect::Shield(v) => format!("{} shield", v),
+        Effect::DrawCards(v) => format!("draw {}", v),
+        Effect::ApplyBuff(bt, v) => format!("{:?} {}", bt, v),
+    }
 }
 
 fn screen_to_grid(pos: Vector2) -> Option<(i32, i32)> {
@@ -109,6 +120,7 @@ impl INode2D for BattleScene {
             godot_print!("[BattleScene] EXTENSION_RELOADED — reconnecting signals + refreshing UI");
             self.connect_signals();
             self.sync_all();
+            self.store_prev_unit_positions();
         }
     }
 
@@ -140,7 +152,7 @@ impl INode2D for BattleScene {
             let Some(card) = s.play_card(self.selected_card_index) else {
                 self.card_targeting = false;
                 self.aoe_preview_pos = None;
-                self.valid_card_targets.clear();
+self.valid_card_targets.clear();
                 self.clear_overlays_ref();
                 self.sync_all();
                 return;
@@ -157,16 +169,17 @@ impl INode2D for BattleScene {
             for effect in &effects {
                 self.visualize_card_effect(effect, grid_pos, hero_pos);
             }
-            self.append_log(&format!("Played {} targeting ({},{})", card_name, grid_pos.0, grid_pos.1));
+            self.append_log(&format!("[color=#7fffe6]Played[/color] [color=#60a5fa]{}[/color] targeting ({},{})", card_name, grid_pos.0, grid_pos.1));
             self.card_targeting = false;
             self.aoe_preview_pos = None;
             self.valid_card_targets.clear();
             self.clear_selection();
             self.sync_all();
+            self.store_prev_unit_positions();
             return;
         }
 
-        // Check card hand clicks (bottom area)
+        // Card hand clicks (bottom area)
         if pos.y >= 600.0 && pos.y <= 720.0 && pos.x >= 300.0 && pos.x <= 1050.0 {
             let card_idx = ((pos.x - 300.0) / 150.0) as i32;
             if (0..5).contains(&card_idx) {
@@ -186,7 +199,7 @@ impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
         if !self.end_player_turn_if_valid() { return; }
-        self.append_log("--- Enemy Turn ---");
+        self.append_log("[b]--- Enemy Turn ---[/b]");
         self.hovered_card = None;
         self.hide_tooltip();
         self.card_targeting = false;
@@ -225,16 +238,16 @@ impl BattleScene {
             for d in &decisions {
                 match d {
                     Decision::Attack { target } => {
-                        self.append_log(&format!("Enemy attacks hero at ({},{})", target.0, target.1));
+                        self.append_log(&format!("[color=#f4972c]Enemy attacks hero[/color] at ({},{})", target.0, target.1));
                     }
                     Decision::Move { target, attack_after } => {
-                        self.append_log(&format!("Enemy moves to ({},{})", target.0, target.1));
+                        self.append_log(&format!("[color=#e8dcc5]Enemy moves to ({},{})[/color]", target.0, target.1));
                         if attack_after.is_some() {
-                            self.append_log("Enemy attacks!");
+                            self.append_log("[color=#f4972c]Enemy attacks![/color]");
                         }
                     }
                     Decision::Wait => {
-                        self.append_log("Enemy waits");
+                        self.append_log("[color=#8eb4c4]Enemy waits[/color]");
                     }
                 }
             }
@@ -245,20 +258,31 @@ impl BattleScene {
         self.sync_hand_ref();
 
         // Execute enemy card plays
-        if let Some(s) = self.state.as_mut() {
-            battle_engine::play_enemy_cards_sync(s);
-        }
+        let played_cards = if let Some(s) = self.state.as_mut() {
+            battle_engine::play_enemy_cards_sync(s)
+        } else { Vec::new() };
 
-        self.append_log("Enemy plays cards");
+        for card in &played_cards {
+            let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+            self.append_log(&format!("[color=#f4972c]Enemy plays[/color] [color=#60a5fa]{}[/color] ({})", card.name, desc.join(", ")));
+        }
+        if played_cards.is_empty() {
+            self.append_log("[color=#8eb4c4]Enemy plays no cards[/color]");
+        } else {
+            self.show_enemy_card_popup(&played_cards[0]);
+        }
 
         // Draw enemy card and transition
         if let Some(s) = self.state.as_mut() {
             battle_engine::enemy_draw_and_transition(s);
             let count = s.enemy_hand.len();
-            self.append_log(&format!("Enemy draws a card (hand: {})", count));
+            self.append_log(&format!("[color=#e8dcc5]Enemy draws a card (hand: {})[/color]", count));
         }
 
         self.sync_all();
+
+        // Store current positions so future sync calls don't re-animate stale moves
+        self.store_prev_unit_positions();
 
         // Schedule end of enemy turn with pacing delay
         let Some(ref self_gd) = self.self_gd else { return };
@@ -299,7 +323,8 @@ impl BattleScene {
             });
         });
 
-        let mut tree = self.base().get_tree();
+        let base = self.base_mut();
+        let mut tree = base.get_tree();
         let _ = tree.change_scene_to_file("res://scenes/overworld.tscn");
     }
 
@@ -310,6 +335,25 @@ impl BattleScene {
         let idx = 0;
         if s.replace_card(idx) {
             self.sync_all();
+            self.store_prev_unit_positions();
+        }
+    }
+
+    #[func]
+    fn on_gy_close(&mut self) {
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        panel.set_visible(false);
+    }
+
+    #[func]
+    fn on_deck_label_clicked(&mut self) {
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let is_visible = panel.is_visible();
+        panel.set_visible(!is_visible);
+        if panel.is_visible() {
+            if let Some(state) = self.state.as_ref() {
+                self.sync_gy_viewer(state);
+            }
         }
     }
 
@@ -333,7 +377,7 @@ impl BattleScene {
                 }
             }
             if targets.is_empty() {
-                self.append_log(&format!("No valid targets for {}", card.name));
+                self.append_log(&format!("[color=#f4972c]No valid targets[/color] for [color=#60a5fa]{}[/color]", card.name));
                 return;
             }
             self.valid_card_targets = targets;
@@ -341,7 +385,7 @@ impl BattleScene {
             self.selected_card_index = idx;
             self.selected_card_effect_idx = 0;
             self.show_valid_card_targets();
-            self.append_log(&format!("Select target for {}", card.name));
+            self.append_log(&format!("[color=#7fffe6]Select target[/color] for [color=#60a5fa]{}[/color]", card.name));
             godot_print!("[BattleScene] Select a target for {}", card.name);
             self.sync_ui_ref();
             return;
@@ -362,7 +406,7 @@ impl BattleScene {
         for effect in &effects {
             self.visualize_card_effect(effect, match hero_pos { Some(p) => p, None => return }, hero_pos);
         }
-        self.append_log(&format!("Played {} on self", card_name));
+        self.append_log(&format!("[color=#7fffe6]Played[/color] [color=#60a5fa]{}[/color] on self", card_name));
         self.card_targeting = false;
         self.clear_selection();
         self.sync_all();
@@ -421,6 +465,12 @@ impl BattleScene {
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
         let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
+
+        let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
+        gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
+
+        let deck_btn = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        deck_btn.signals().pressed().connect_other(self_gd, BattleScene::on_deck_label_clicked);
     }
 }
 
@@ -454,6 +504,26 @@ impl BattleScene {
 
     fn build_ui(&self) {
         let mut ui = self.base().get_node_as::<CanvasLayer>("UI");
+
+        // --- Scene-defined node setup (focus, anchors, sizing) ---
+        let mut end_btn = ui.get_node_as::<Button>("EndTurnButton");
+        end_btn.set_focus_mode(FocusMode::ALL);
+        end_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
+        end_btn.set_anchors_and_offsets_preset(LayoutPreset::TOP_RIGHT);
+
+        let mut ml = ui.get_node_as::<Label>("ManaLabel");
+        ml.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
+
+        let mut tl = ui.get_node_as::<Label>("TurnLabel");
+        tl.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
+
+        let banner = ui.get_node_as::<Panel>("ResultBanner");
+        let mut restart_btn = banner.get_node_as::<Button>("RestartButton");
+        restart_btn.set_focus_mode(FocusMode::ALL);
+        restart_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
+        let mut return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
+        return_btn.set_focus_mode(FocusMode::ALL);
+        return_btn.set_custom_minimum_size(Vector2::new(160.0, 40.0));
 
         // Mana crystals
         let mut crystals = Node2D::new_alloc();
@@ -534,16 +604,20 @@ impl BattleScene {
         replace_btn.set_position(Vector2::new(1060.0, 610.0));
         replace_btn.set_size(Vector2::new(100.0, 40.0));
         replace_btn.set_text("Replace");
+        replace_btn.set_focus_mode(FocusMode::ALL);
+        replace_btn.set_custom_minimum_size(Vector2::new(100.0, 40.0));
         ui.add_child(&replace_btn);
 
-        // Deck count label
-        let mut deck_label = Label::new_alloc();
-        deck_label.set_name("DeckCountLabel");
-        deck_label.set_position(Vector2::new(1060.0, 660.0));
-        deck_label.set_size(Vector2::new(100.0, 20.0));
-        deck_label.set_text("");
-        deck_label.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
-        ui.add_child(&deck_label);
+        // Deck count button — clickable to toggle graveyard viewer
+        let mut deck_btn = Button::new_alloc();
+        deck_btn.set_name("DeckCountButton");
+        deck_btn.set_position(Vector2::new(1060.0, 660.0));
+        deck_btn.set_size(Vector2::new(100.0, 20.0));
+        deck_btn.set_text("");
+        deck_btn.set_focus_mode(FocusMode::ALL);
+        deck_btn.set_flat(true);
+        deck_btn.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+        ui.add_child(&deck_btn);
 
         // Enemy hand label
         let mut enemy_hand_label = Label::new_alloc();
@@ -553,6 +627,110 @@ impl BattleScene {
         enemy_hand_label.set_text("");
         enemy_hand_label.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
         ui.add_child(&enemy_hand_label);
+
+        // Graveyard viewer panel — hidden by default (FR-5, FR-6)
+        let mut gy_panel = Panel::new_alloc();
+        gy_panel.set_name("GraveyardPanel");
+        gy_panel.set_position(Vector2::new(850.0, 50.0));
+        gy_panel.set_size(Vector2::new(400.0, 530.0));
+        gy_panel.set_visible(false);
+        let mut gy_style = StyleBoxFlat::new_gd();
+        gy_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.95));
+        gy_style.set_corner_radius_all(8);
+        gy_style.set_border_width_all(1);
+        gy_style.set_border_color(rgb(0x3a, 0x6e, 0x8a));
+        gy_panel.add_theme_stylebox_override("panel", &gy_style.upcast::<StyleBox>());
+        ui.add_child(&gy_panel);
+
+        let mut gy_title = Label::new_alloc();
+        gy_title.set_name("GYTitle");
+        gy_title.set_position(Vector2::new(10.0, 8.0));
+        gy_title.set_size(Vector2::new(360.0, 24.0));
+        gy_title.set_text("Graveyard (click card for details)");
+        gy_title.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+        gy_title.add_theme_font_size_override("font_size", 12);
+        gy_panel.add_child(&gy_title);
+
+        let mut gy_close = Button::new_alloc();
+        gy_close.set_name("GYCloseButton");
+        gy_close.set_position(Vector2::new(370.0, 6.0));
+        gy_close.set_size(Vector2::new(24.0, 24.0));
+        gy_close.set_text("X");
+        gy_close.set_flat(true);
+        gy_close.set_focus_mode(FocusMode::ALL);
+        gy_close.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
+        gy_panel.add_child(&gy_close);
+
+        // Player graveyard column title
+        let mut gy_player_title = Label::new_alloc();
+        gy_player_title.set_name("GYPlayerTitle");
+        gy_player_title.set_position(Vector2::new(10.0, 36.0));
+        gy_player_title.set_size(Vector2::new(180.0, 18.0));
+        gy_player_title.set_text("Hero Graveyard");
+        gy_player_title.add_theme_color_override("font_color", rgb(0x4f, 0xd1, 0xc5));
+        gy_player_title.add_theme_font_size_override("font_size", 11);
+        gy_panel.add_child(&gy_player_title);
+
+        // Enemy graveyard column title
+        let mut gy_enemy_title = Label::new_alloc();
+        gy_enemy_title.set_name("GYEnemyTitle");
+        gy_enemy_title.set_position(Vector2::new(200.0, 36.0));
+        gy_enemy_title.set_size(Vector2::new(180.0, 18.0));
+        gy_enemy_title.set_text("Enemy Graveyard");
+        gy_enemy_title.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
+        gy_enemy_title.add_theme_font_size_override("font_size", 11);
+        gy_panel.add_child(&gy_enemy_title);
+
+        // Scrollable area for graveyard entries
+        let mut gy_scroll = ScrollContainer::new_alloc();
+        gy_scroll.set_name("GYScroll");
+        gy_scroll.set_position(Vector2::new(0.0, 56.0));
+        gy_scroll.set_size(Vector2::new(400.0, 474.0));
+        gy_scroll.set_horizontal_scroll_mode(ScrollMode::DISABLED);
+        gy_scroll.set_vertical_scroll_mode(ScrollMode::AUTO);
+        gy_panel.add_child(&gy_scroll);
+
+        // Enemy card reveal popup — hidden by default (FR-1)
+        let mut card_popup = Panel::new_alloc();
+        card_popup.set_name("EnemyCardPopup");
+        card_popup.set_position(Vector2::new(490.0, 300.0));
+        card_popup.set_size(Vector2::new(300.0, 180.0));
+        card_popup.set_visible(false);
+        let mut popup_style = StyleBoxFlat::new_gd();
+        popup_style.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.95));
+        popup_style.set_corner_radius_all(8);
+        popup_style.set_border_width_all(1);
+        popup_style.set_border_color(rgb(0xff, 0x6b, 0x6b));
+        card_popup.add_theme_stylebox_override("panel", &popup_style.upcast::<StyleBox>());
+        ui.add_child(&card_popup);
+
+        let mut popup_name = Label::new_alloc();
+        popup_name.set_name("PopupName");
+        popup_name.set_position(Vector2::new(10.0, 10.0));
+        popup_name.set_size(Vector2::new(280.0, 28.0));
+        popup_name.set_text("");
+        popup_name.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+        popup_name.add_theme_font_size_override("font_size", 18);
+        card_popup.add_child(&popup_name);
+
+        let mut popup_cost = Label::new_alloc();
+        popup_cost.set_name("PopupCost");
+        popup_cost.set_position(Vector2::new(10.0, 44.0));
+        popup_cost.set_size(Vector2::new(280.0, 20.0));
+        popup_cost.set_text("");
+        popup_cost.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
+        popup_cost.add_theme_font_size_override("font_size", 14);
+        card_popup.add_child(&popup_cost);
+
+        let mut popup_effects = Label::new_alloc();
+        popup_effects.set_name("PopupEffects");
+        popup_effects.set_position(Vector2::new(10.0, 70.0));
+        popup_effects.set_size(Vector2::new(280.0, 100.0));
+        popup_effects.set_text("");
+        popup_effects.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+        popup_effects.add_theme_font_size_override("font_size", 13);
+        popup_effects.set_autowrap_mode(AutowrapMode::WORD_SMART);
+        card_popup.add_child(&popup_effects);
 
         // Enemy turn banner (FR-4)
         let mut enemy_banner = Label::new_alloc();
@@ -567,11 +745,11 @@ impl BattleScene {
         enemy_banner.add_theme_font_size_override("font_size", 48);
         ui.add_child(&enemy_banner);
 
-        // Combat log panel (FR-14)
+        // Combat log panel (FR-14) — enlarged with scrolling
         let mut log_bg = Panel::new_alloc();
         log_bg.set_name("CombatLog");
-        log_bg.set_position(Vector2::new(20.0, 400.0));
-        log_bg.set_size(Vector2::new(240.0, 200.0));
+        log_bg.set_position(Vector2::new(20.0, 320.0));
+        log_bg.set_size(Vector2::new(300.0, 280.0));
         let mut log_style = StyleBoxFlat::new_gd();
         log_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.85));
         log_style.set_corner_radius_all(6);
@@ -583,13 +761,12 @@ impl BattleScene {
         let mut log_label = RichTextLabel::new_alloc();
         log_label.set_name("LogLabel");
         log_label.set_position(Vector2::new(4.0, 4.0));
-        log_label.set_size(Vector2::new(232.0, 192.0));
-        log_label.set_text("Combat Log");
+        log_label.set_size(Vector2::new(292.0, 272.0));
+        log_label.set_text("[b]Combat Log[/b]");
         log_label.set_use_bbcode(true);
         log_label.set_scroll_active(true);
-        log_label.set_fit_content(true);
         log_label.add_theme_color_override("default_color", rgb(0x8e, 0xb4, 0xc4));
-        log_label.add_theme_font_size_override("font_size", 11);
+        log_label.add_theme_font_size_override("font_size", 12);
         log_bg.add_child(&log_label);
 
         // Card tooltip panel (FR-6) — hidden by default
@@ -785,7 +962,7 @@ impl BattleScene {
         self.prev_units.clear();
         self.clear_overlays_ref();
         let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
-        log_label.set_text("Combat Log");
+        log_label.set_text("[b]Combat Log[/b]");
         self.sync_all();
     }
 
@@ -1073,14 +1250,111 @@ impl BattleScene {
         let mut banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
         banner.set_visible(state.phase == Phase::BattleOver);
 
-        let mut dl = self.base().get_node_as::<Label>("UI/DeckCountLabel");
-        dl.set_text(&format!("Deck: {} | Gy: {}", state.deck.len(), state.graveyard.len()));
+        let mut dl = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
+
+        let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        if gy_panel.is_visible() {
+            self.sync_gy_viewer(state);
+        }
 
         let mut ehl = self.base().get_node_as::<Label>("UI/EnemyHandLabel");
         ehl.set_text(&format!("Enemy hand: {} cards", state.enemy_hand.len()));
 
         let mut rb = self.base().get_node_as::<Button>("UI/ReplaceButton");
         rb.set_disabled(state.replace_used || state.phase != Phase::PlayerTurn);
+    }
+
+    fn sync_gy_viewer(&self, state: &BattleState) {
+        self.clear_gy_entries();
+        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
+        for (col, gy, start_y) in [("Player", &state.graveyard, 0), ("Enemy", &state.enemy_graveyard, 0)] {
+            let x_offset = if col == "Player" { 10 } else { 200 };
+            for (i, card) in gy.cards.iter().rev().enumerate() {
+                if i >= 10 { break; }
+                let y = start_y + i * 46;
+                let mut entry = Panel::new_alloc();
+                entry.set_name(&format!("GYEntry_{}_{}", col, i));
+                entry.set_position(Vector2::new(x_offset as f32, y as f32));
+                entry.set_size(Vector2::new(180.0, 42.0));
+                let mut es = StyleBoxFlat::new_gd();
+                es.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.9));
+                es.set_corner_radius_all(4);
+                entry.add_theme_stylebox_override("panel", &es.upcast::<StyleBox>());
+                scroll.add_child(&entry);
+
+                let mut nl = Label::new_alloc();
+                nl.set_position(Vector2::new(4.0, 2.0));
+                nl.set_size(Vector2::new(120.0, 18.0));
+                nl.set_text(card.name);
+                nl.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+                nl.add_theme_font_size_override("font_size", 10);
+                entry.add_child(&nl);
+
+                let mut cl = Label::new_alloc();
+                cl.set_position(Vector2::new(130.0, 2.0));
+                cl.set_size(Vector2::new(46.0, 18.0));
+                cl.set_text(&format!("{}", card.cost));
+                cl.set_horizontal_alignment(HorizontalAlignment::CENTER);
+                cl.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
+                cl.add_theme_font_size_override("font_size", 10);
+                entry.add_child(&cl);
+
+                let mut el = Label::new_alloc();
+                let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+                el.set_position(Vector2::new(4.0, 20.0));
+                el.set_size(Vector2::new(172.0, 20.0));
+                el.set_text(&desc.join(", "));
+                el.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+                el.add_theme_font_size_override("font_size", 9);
+                entry.add_child(&el);
+            }
+        }
+    }
+
+    fn clear_gy_entries(&self) {
+        let mut scroll = match self.base().try_get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll") {
+            Some(s) => s,
+            None => return,
+        };
+        for i in 0..20 {
+            for prefix in &["Player", "Enemy"] {
+                let name = format!("GYEntry_{}_{}", prefix, i);
+                if scroll.has_node(&name) {
+                    let mut child = scroll.get_node_as::<Node2D>(&name);
+                    scroll.remove_child(&child);
+                    child.queue_free();
+                }
+            }
+        }
+    }
+
+    fn show_enemy_card_popup(&self, card: &CardDef) {
+        let mut popup = self.base().get_node_as::<Panel>("UI/EnemyCardPopup");
+        let mut name_label = popup.get_node_as::<Label>("PopupName");
+        let mut cost_label = popup.get_node_as::<Label>("PopupCost");
+        let mut effects_label = popup.get_node_as::<Label>("PopupEffects");
+
+        name_label.set_text(card.name);
+        cost_label.set_text(&format!("Cost: {}", card.cost));
+        let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+        effects_label.set_text(&desc.join("\n"));
+
+        popup.set_visible(true);
+        popup.set_scale(Vector2::new(0.0, 0.0));
+        popup.set_modulate(rgba(255, 255, 255, 1.0));
+
+        let mut tween = popup.create_tween();
+        tween.set_trans(TransitionType::BACK);
+        tween.set_ease(EaseType::OUT);
+        tween.tween_property(&popup, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.2);
+        tween.tween_interval(1.0);
+        let mut popup_clone = popup.clone();
+        tween.tween_property(&popup, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.2);
+        tween.tween_callback(&Callable::from_fn("hide_popup", move |_args: &[&Variant]| {
+            popup_clone.set_visible(false);
+            popup_clone.set_modulate(rgba(255, 255, 255, 1.0));
+        }));
     }
 
     fn rounded_panel(bg: Color, size: Vector2, corner_radius: i32, border_width: i32, border_color: Color) -> Gd<Panel> {
@@ -1172,7 +1446,7 @@ impl BattleScene {
         }
     }
 
-    // Append to combat log (FR-14)
+    // Append to combat log (FR-14) — BBCode colored
     fn append_log(&self, text: &str) {
         let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
         let current = log_label.get_text().to_string();
@@ -1183,6 +1457,10 @@ impl BattleScene {
             new_lines.remove(0);
         }
         log_label.set_text(&new_lines.join("\n"));
+        let count = log_label.get_paragraph_count();
+        if count > 0 {
+            log_label.scroll_to_line(count as i32 - 1);
+        }
     }
 
     fn handle_click(&mut self, pos: (i32, i32)) {
@@ -1202,13 +1480,14 @@ impl BattleScene {
                 return false;
             }
         }
-        self.append_log(&format!("Hero moves to ({},{})", pos.0, pos.1));
+        self.append_log(&format!("[color=#e8dcc5]Hero moves to ({},{})[/color]", pos.0, pos.1));
         // Duelyst rule: keep unit selected for potential attack after moving
         self.selected = Some(pos);
         self.valid_moves.clear();
         self.clear_overlays_ref();
         self.show_attack_highlight(pos);
         self.sync_all();
+        self.store_prev_unit_positions();
         true
     }
 
@@ -1232,11 +1511,11 @@ impl BattleScene {
             }
         });
         if let Some(r) = &result {
-            self.append_log(&format!("Hero attacks enemy for {} damage", r.combat_result.damage_dealt));
+            self.append_log(&format!("[color=#7fffe6]Hero attacks[/color] enemy for [color=#ff6b6b]{} damage[/color]", r.combat_result.damage_dealt));
             self.spawn_floating_number(pos, r.combat_result.damage_dealt, rgb(0xff, 0x6b, 0x6b));
             self.flash_unit(pos);
             if r.combat_result.counter_damage > 0 {
-                self.append_log(&format!("Enemy counterattacks for {} damage", r.combat_result.counter_damage));
+                self.append_log(&format!("[color=#f4972c]Enemy counterattacks[/color] for [color=#ff6b6b]{} damage[/color]", r.combat_result.counter_damage));
                 self.spawn_floating_number(selected, r.combat_result.counter_damage, rgb(0xff, 0x6b, 0x6b));
                 self.flash_unit(selected);
             }
@@ -1245,6 +1524,7 @@ impl BattleScene {
         self.valid_moves.clear();
         self.clear_overlays_ref();
         self.sync_all();
+        self.store_prev_unit_positions();
         true
     }
 

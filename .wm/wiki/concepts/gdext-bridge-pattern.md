@@ -167,6 +167,57 @@ fn connect_signals(&self) {
 - A script can only *add* behavior on top of the node's actual native type — it cannot narrow a plain `Node2D`.
 - Symptom: `Script inherits from native type 'X', so it can't be assigned to an object of type: 'Y'`
 
+### Control / UI node configuration (godot 0.5.4 — Godot 4.7)
+
+Focus management for keyboard/gamepad navigation:
+
+```rust
+use godot::classes::control::FocusMode;
+
+button.set_focus_mode(FocusMode::ALL);  // enables Tab/arrow-key navigation
+label.set_focus_mode(FocusMode::NONE);   // decorative nodes — default, explicit is fine
+```
+
+Anchor presets for responsive layout (replaces manual `set_position`/`set_size`):
+
+```rust
+use godot::classes::control::LayoutPreset;
+
+// Top-right anchored: window resize keeps it pinned to top-right
+end_btn.set_anchors_and_offsets_preset(LayoutPreset::TOP_RIGHT);
+
+// Top-left anchored: standard HUD position
+label.set_anchors_and_offsets_preset(LayoutPreset::TOP_LEFT);
+```
+
+`custom_minimum_size` prevents buttons from collapsing to zero:
+
+```rust
+button.set_custom_minimum_size(Vector2::new(160.0, 40.0));
+```
+
+`ScrollContainer` for scrollable content areas (like graveyard viewer):
+
+```rust
+use godot::classes::scroll_container::ScrollMode;
+
+let mut scroll = ScrollContainer::new_alloc();
+scroll.set_horizontal_scroll_mode(ScrollMode::DISABLED);
+scroll.set_vertical_scroll_mode(ScrollMode::AUTO);  // shows scrollbar when content overflows
+```
+
+**Label-as-button → proper Button conversion:** Instead of placing a Label and detecting clicks via manual rect checks in `_input()`, use a `Button` with `set_flat(true)` to look like a label while getting proper signal handling:
+
+```rust
+let mut btn = Button::new_alloc();
+btn.set_flat(true);                    // no button background/border
+btn.set_focus_mode(FocusMode::ALL);    // keyboard navigable
+btn.signals().pressed().connect_other(&self_gd, MyClass::on_handler);
+// Remove manual rect-based click detection from _input()
+```
+
+**Key difference:** `set_flat(true)` makes the button invisible (no background/border) while retaining click and focus behavior. This is preferable to a Label with manual hit-testing in `_input()`.
+
 ## Related
 - @wiki/tasks:godot-battle-07-hot-reload-fixes
 - @wiki/specs:godot-battle-scaffold
