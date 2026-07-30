@@ -216,7 +216,9 @@ btn.signals().pressed().connect_other(&self_gd, MyClass::on_handler);
 // Remove manual rect-based click detection from _input()
 ```
 
-**Key difference:** `set_flat(true)` makes the button invisible (no background/border) while retaining click and focus behavior. This is preferable to a Label with manual hit-testing in `_input()`.
+**Key difference:** `set_flat(true)` makes the button invisible (no background/border) while retaining click and behavior. This is preferable to a Label with manual hit-testing in `_input()`.
+
+**UI container nodes should be `Control`, not `Node2D`:** When a node holds UI children (Panels, Labels, Buttons), use `Control` as the base type instead of `Node2D`. Control nodes participate in the anchor/offset layout system, inherit themes, and correctly position their Control children. A `Node2D` parent forces Control children to use absolute pixel offsets with no layout inheritance. In tscn, use `type="Control"`; in Rust bridge code, use `get_node_as::<Control>()`.
 
 ## Related
 - @wiki/tasks:godot-battle-07-hot-reload-fixes
