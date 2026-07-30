@@ -275,7 +275,7 @@ pub fn apply_affixes_to_effects(card: &CardDef) -> Vec<CardEffect> {
             Effect::ApplyBuff(bt, v) => Effect::ApplyBuff(bt, v),
         };
 
-        CardEffect { effect: new_effect, range: ce.range, aoe: ce.aoe }
+        CardEffect { effect: new_effect, range: ce.range, target: ce.target, affect_pattern: ce.affect_pattern.clone() }
     }).collect()
 }
 
@@ -283,10 +283,12 @@ pub fn apply_affixes_to_effects(card: &CardDef) -> Vec<CardEffect> {
 mod tests {
     use super::*;
     use crate::core::cards::{CardEffect, Effect, Rarity, CardDef};
+    use crate::core::grid::Range;
+    use crate::core::cards::targeting::TargetFilter;
 
     fn test_card() -> CardDef {
         CardDef::new("test", "Test", 1, vec![
-            CardEffect { effect: Effect::Damage(3), range: 1, aoe: 1 },
+            CardEffect { effect: Effect::Damage(3), range: Range::Melee, target: TargetFilter::EnemyUnit, affect_pattern: vec![] },
         ], Rarity::Rare)
     }
 
@@ -314,7 +316,7 @@ mod tests {
     #[test]
     fn generate_affixes_uncommon_returns_one() {
         let card = CardDef::new("u", "U", 1, vec![
-            CardEffect { effect: Effect::Damage(2), range: 1, aoe: 1 },
+            CardEffect { effect: Effect::Damage(2), range: Range::Melee, target: TargetFilter::EnemyUnit, affect_pattern: vec![] },
         ], Rarity::Uncommon);
         let affixes = generate_affixes(&card, 42);
         assert_eq!(affixes.len(), 1);
@@ -323,7 +325,7 @@ mod tests {
     #[test]
     fn generate_affixes_deterministic() {
         let card = CardDef::new("d", "D", 1, vec![
-            CardEffect { effect: Effect::Damage(2), range: 1, aoe: 1 },
+            CardEffect { effect: Effect::Damage(2), range: Range::Melee, target: TargetFilter::EnemyUnit, affect_pattern: vec![] },
         ], Rarity::Rare);
         let a1 = generate_affixes(&card, 42);
         let a2 = generate_affixes(&card, 42);
@@ -342,7 +344,7 @@ mod tests {
     #[test]
     fn gambler_add_slot_increases_count() {
         let card = CardDef::new("g", "G", 1, vec![
-            CardEffect { effect: Effect::Shield(4), range: 0, aoe: 1 },
+            CardEffect { effect: Effect::Shield(4), range: Range::Melee, target: TargetFilter::Self_, affect_pattern: vec![] },
         ], Rarity::Rare);
         let result = gambler_add_slot(&card, 42);
         assert_eq!(result.affixes.len(), 1);
@@ -351,7 +353,7 @@ mod tests {
     #[test]
     fn gambler_add_slot_fails_at_max() {
         let card = CardDef::new("g", "G", 1, vec![
-            CardEffect { effect: Effect::Damage(2), range: 1, aoe: 1 },
+            CardEffect { effect: Effect::Damage(2), range: Range::Melee, target: TargetFilter::EnemyUnit, affect_pattern: vec![] },
         ], Rarity::Common);
         let result = gambler_add_slot(&card, 42);
         assert_eq!(result.affixes.len(), 0);

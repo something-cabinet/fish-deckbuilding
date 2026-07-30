@@ -169,7 +169,7 @@ self.valid_card_targets.clear();
             for effect in &effects {
                 self.visualize_card_effect(effect, grid_pos, hero_pos);
             }
-            self.append_log(&format!("Played {} targeting ({},{})", card_name, grid_pos.0, grid_pos.1));
+            self.append_log(&format!("[color=#7fffe6]Played[/color] [color=#60a5fa]{}[/color] targeting ({},{})", card_name, grid_pos.0, grid_pos.1));
             self.card_targeting = false;
             self.aoe_preview_pos = None;
             self.valid_card_targets.clear();
@@ -199,7 +199,7 @@ impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
         if !self.end_player_turn_if_valid() { return; }
-        self.append_log("--- Enemy Turn ---");
+        self.append_log("[b]--- Enemy Turn ---[/b]");
         self.hovered_card = None;
         self.hide_tooltip();
         self.card_targeting = false;
@@ -238,16 +238,16 @@ impl BattleScene {
             for d in &decisions {
                 match d {
                     Decision::Attack { target } => {
-                        self.append_log(&format!("Enemy attacks hero at ({},{})", target.0, target.1));
+                        self.append_log(&format!("[color=#f4972c]Enemy attacks hero[/color] at ({},{})", target.0, target.1));
                     }
                     Decision::Move { target, attack_after } => {
-                        self.append_log(&format!("Enemy moves to ({},{})", target.0, target.1));
+                        self.append_log(&format!("[color=#e8dcc5]Enemy moves to ({},{})[/color]", target.0, target.1));
                         if attack_after.is_some() {
-                            self.append_log("Enemy attacks!");
+                            self.append_log("[color=#f4972c]Enemy attacks![/color]");
                         }
                     }
                     Decision::Wait => {
-                        self.append_log("Enemy waits");
+                        self.append_log("[color=#8eb4c4]Enemy waits[/color]");
                     }
                 }
             }
@@ -264,10 +264,10 @@ impl BattleScene {
 
         for card in &played_cards {
             let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
-            self.append_log(&format!("Enemy plays {} ({})", card.name, desc.join(", ")));
+            self.append_log(&format!("[color=#f4972c]Enemy plays[/color] [color=#60a5fa]{}[/color] ({})", card.name, desc.join(", ")));
         }
         if played_cards.is_empty() {
-            self.append_log("Enemy plays no cards");
+            self.append_log("[color=#8eb4c4]Enemy plays no cards[/color]");
         } else {
             self.show_enemy_card_popup(&played_cards[0]);
         }
@@ -276,7 +276,7 @@ impl BattleScene {
         if let Some(s) = self.state.as_mut() {
             battle_engine::enemy_draw_and_transition(s);
             let count = s.enemy_hand.len();
-            self.append_log(&format!("Enemy draws a card (hand: {})", count));
+            self.append_log(&format!("[color=#e8dcc5]Enemy draws a card (hand: {})[/color]", count));
         }
 
         self.sync_all();
@@ -377,7 +377,7 @@ impl BattleScene {
                 }
             }
             if targets.is_empty() {
-                self.append_log(&format!("No valid targets for {}", card.name));
+                self.append_log(&format!("[color=#f4972c]No valid targets[/color] for [color=#60a5fa]{}[/color]", card.name));
                 return;
             }
             self.valid_card_targets = targets;
@@ -385,7 +385,7 @@ impl BattleScene {
             self.selected_card_index = idx;
             self.selected_card_effect_idx = 0;
             self.show_valid_card_targets();
-            self.append_log(&format!("Select target for {}", card.name));
+            self.append_log(&format!("[color=#7fffe6]Select target[/color] for [color=#60a5fa]{}[/color]", card.name));
             godot_print!("[BattleScene] Select a target for {}", card.name);
             self.sync_ui_ref();
             return;
@@ -406,7 +406,7 @@ impl BattleScene {
         for effect in &effects {
             self.visualize_card_effect(effect, match hero_pos { Some(p) => p, None => return }, hero_pos);
         }
-        self.append_log(&format!("Played {} on self", card_name));
+        self.append_log(&format!("[color=#7fffe6]Played[/color] [color=#60a5fa]{}[/color] on self", card_name));
         self.card_targeting = false;
         self.clear_selection();
         self.sync_all();
@@ -745,11 +745,11 @@ impl BattleScene {
         enemy_banner.add_theme_font_size_override("font_size", 48);
         ui.add_child(&enemy_banner);
 
-        // Combat log panel (FR-14)
+        // Combat log panel (FR-14) — enlarged with scrolling
         let mut log_bg = Panel::new_alloc();
         log_bg.set_name("CombatLog");
-        log_bg.set_position(Vector2::new(20.0, 400.0));
-        log_bg.set_size(Vector2::new(240.0, 200.0));
+        log_bg.set_position(Vector2::new(20.0, 320.0));
+        log_bg.set_size(Vector2::new(300.0, 280.0));
         let mut log_style = StyleBoxFlat::new_gd();
         log_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.85));
         log_style.set_corner_radius_all(6);
@@ -761,13 +761,12 @@ impl BattleScene {
         let mut log_label = RichTextLabel::new_alloc();
         log_label.set_name("LogLabel");
         log_label.set_position(Vector2::new(4.0, 4.0));
-        log_label.set_size(Vector2::new(232.0, 192.0));
-        log_label.set_text("Combat Log");
+        log_label.set_size(Vector2::new(292.0, 272.0));
+        log_label.set_text("[b]Combat Log[/b]");
         log_label.set_use_bbcode(true);
         log_label.set_scroll_active(true);
-        log_label.set_fit_content(true);
         log_label.add_theme_color_override("default_color", rgb(0x8e, 0xb4, 0xc4));
-        log_label.add_theme_font_size_override("font_size", 11);
+        log_label.add_theme_font_size_override("font_size", 12);
         log_bg.add_child(&log_label);
 
         // Card tooltip panel (FR-6) — hidden by default
@@ -963,7 +962,7 @@ impl BattleScene {
         self.prev_units.clear();
         self.clear_overlays_ref();
         let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
-        log_label.set_text("Combat Log");
+        log_label.set_text("[b]Combat Log[/b]");
         self.sync_all();
     }
 
@@ -1447,7 +1446,7 @@ impl BattleScene {
         }
     }
 
-    // Append to combat log (FR-14)
+    // Append to combat log (FR-14) — BBCode colored
     fn append_log(&self, text: &str) {
         let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
         let current = log_label.get_text().to_string();
@@ -1458,6 +1457,10 @@ impl BattleScene {
             new_lines.remove(0);
         }
         log_label.set_text(&new_lines.join("\n"));
+        let count = log_label.get_paragraph_count();
+        if count > 0 {
+            log_label.scroll_to_line(count as i32 - 1);
+        }
     }
 
     fn handle_click(&mut self, pos: (i32, i32)) {
@@ -1477,7 +1480,7 @@ impl BattleScene {
                 return false;
             }
         }
-        self.append_log(&format!("Hero moves to ({},{})", pos.0, pos.1));
+        self.append_log(&format!("[color=#e8dcc5]Hero moves to ({},{})[/color]", pos.0, pos.1));
         // Duelyst rule: keep unit selected for potential attack after moving
         self.selected = Some(pos);
         self.valid_moves.clear();
@@ -1508,11 +1511,11 @@ impl BattleScene {
             }
         });
         if let Some(r) = &result {
-            self.append_log(&format!("Hero attacks enemy for {} damage", r.combat_result.damage_dealt));
+            self.append_log(&format!("[color=#7fffe6]Hero attacks[/color] enemy for [color=#ff6b6b]{} damage[/color]", r.combat_result.damage_dealt));
             self.spawn_floating_number(pos, r.combat_result.damage_dealt, rgb(0xff, 0x6b, 0x6b));
             self.flash_unit(pos);
             if r.combat_result.counter_damage > 0 {
-                self.append_log(&format!("Enemy counterattacks for {} damage", r.combat_result.counter_damage));
+                self.append_log(&format!("[color=#f4972c]Enemy counterattacks[/color] for [color=#ff6b6b]{} damage[/color]", r.combat_result.counter_damage));
                 self.spawn_floating_number(selected, r.combat_result.counter_damage, rgb(0xff, 0x6b, 0x6b));
                 self.flash_unit(selected);
             }
