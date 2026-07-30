@@ -14,7 +14,7 @@ use crate::core::{
     battle::{self as battle_engine, BattleResult, BattleState, Phase, Decision},
     combat,
     constants, grid::movement as grid_movement,
-    grid::{Faction, GridUnit},
+    grid::{Faction, GridUnit, Range},
 cards::{CardDef, CardEffect, Effect, apply_affect_pattern, valid_targets, TargetFilter},
     overworld::{generate_rewards},
 };
@@ -551,7 +551,11 @@ impl BattleScene {
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
         let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
-        desc_label.set_text(&effect_strs.join(", "));
+        let range_str = card.effects.first().map(|e| match e.range {
+            crate::core::grid::Range::Melee => "Melee",
+            crate::core::grid::Range::Ranged => "Ranged",
+        }).unwrap_or("");
+        desc_label.set_text(&format!("{}\nRange: {}", effect_strs.join(", "), range_str));
 
         let tooltip_x = 300.0 + (idx as f32 * 150.0);
         tooltip.set_position(Vector2::new(tooltip_x, 510.0));
@@ -1320,6 +1324,7 @@ impl BattleScene {
             let mut name_label = slot.get_node_as::<Label>("NameLabel");
             let mut cost_label = slot.get_node_as::<Label>("CostLabel");
             let mut effects_label = slot.get_node_as::<Label>("EffectsLabel");
+            let mut range_label = slot.get_node_as::<Label>("RangeLabel");
             if i < state.hand.len() {
                 let card = &state.hand.cards[i];
                 let can_play = state.mana >= card.cost && state.phase == Phase::PlayerTurn;
@@ -1327,6 +1332,11 @@ impl BattleScene {
                 cost_label.set_text(&format!("{}", card.cost));
                 let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
                 effects_label.set_text(&effect_strs.join(", "));
+                let range_str = card.effects.first().map(|e| match e.range {
+                    Range::Melee => "Melee",
+                    Range::Ranged => "Ranged",
+                }).unwrap_or("");
+                range_label.set_text(range_str);
 
                 let mut style = StyleBoxFlat::new_gd();
                 if can_play {
@@ -1362,6 +1372,7 @@ impl BattleScene {
                 name_label.set_text("");
                 cost_label.set_text("");
                 effects_label.set_text("");
+                range_label.set_text("");
                 slot.set_visible(false);
             }
         }

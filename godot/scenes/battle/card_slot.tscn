@@ -36,9 +36,19 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(20, 50)
 layout_mode = 0
 offset_left = 6.0
-offset_top = 36.0
+offset_top = 30.0
 offset_right = 144.0
-offset_bottom = 116.0
+offset_bottom = 96.0
 theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
+
+[node name="RangeLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 98.0
+offset_right = 144.0
+offset_bottom = 116.0
+text = ""
+theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
+theme_override_font_sizes/font_size = 10
