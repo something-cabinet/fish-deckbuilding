@@ -23,3 +23,13 @@ After every `sync_all()` call, invalidate the animation snapshot (`store_prev_un
 Core functions should return data the bridge needs (Vec<CardDef>, AttackResult, etc.) rather than making the bridge infer state changes from diffs. This eliminates fragile before/after comparison logic and keeps the bridge as a thin display layer.
 
 **Full entry:** @wiki/patterns/return-value-bridge-sync
+
+## 2026-07-30 gdext procedural UI: focus/buttons/anchors
+
+**Category:** pattern
+**Source:** @commit-d7b15cf
+**Tags:** [gdext, ui, focus, layout]
+
+Use `FocusMode::ALL` on all interactive buttons, `LayoutPreset` for anchored HUD positions, `set_flat(true)` instead of Label + manual click detection, and `ScrollContainer` for scrollable content. These patterns prevent fragile rect-based hit testing and make keyboard/gamepad navigation work. The 30-min cost of debugging click-through issues on labels is eliminated.
+
+**Full entry:** @wiki/concepts:gdext-bridge-pattern (Control / UI node configuration section)
