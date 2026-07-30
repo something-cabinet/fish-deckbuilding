@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cdcvek17s24x"]
+
+[ext_resource type="Script" uid="uid://b3q3q2qhv3m0" path="res://scenes/battle/combat_log.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_log"]
+bg_color = Color(0.043, 0.102, 0.141, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.227, 0.431, 0.541, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="CombatLog" type="Panel" node_paths=PackedStringArray("log_label")]
+offset_left = 20.0
+offset_top = 167.0
+offset_right = 268.0
+offset_bottom = 600.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_log")
+script = ExtResource("1")
+log_label = NodePath("LogLabel")
+
+[node name="LogLabel" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 296.0
+offset_bottom = 276.0
+theme_override_colors/default_color = Color(0.557, 0.706, 0.769, 1)
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+text = "[b]Combat Log[/b]"

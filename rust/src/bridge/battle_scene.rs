@@ -196,7 +196,6 @@ impl BattleScene {
     #[func]
     fn on_end_turn(&mut self) {
         if !self.end_player_turn_if_valid() { return; }
-        self.append_log("[b]--- Enemy Turn ---[/b]");
         self.hovered_card = None;
         self.hide_tooltip();
         self.card_targeting = false;
@@ -340,15 +339,13 @@ impl BattleScene {
 
     #[func]
     fn on_gy_close(&mut self) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
         panel.set_visible(false);
     }
 
     #[func]
     fn on_deck_label_clicked(&mut self) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
         let is_visible = panel.is_visible();
         panel.set_visible(!is_visible);
         if panel.is_visible() {
@@ -455,21 +452,19 @@ impl BattleScene {
         }
     }
 
-    fn connect_signals(&self) {
+fn connect_signals(&self) {
         let Some(ref self_gd) = self.self_gd else { return };
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
         let end_btn: Gd<Button> = ui.get("end_turn_button").try_to().expect("end_turn_button missing");
         end_btn.signals().pressed().connect_other(self_gd, BattleScene::on_end_turn);
-        let restart_btn: Gd<Button> = ui.get("restart_button").try_to().expect("restart_button missing");
+        let restart_btn = self.base().get_node_as::<Button>("UI/ResultBanner/RestartButton");
         restart_btn.signals().pressed().connect_other(self_gd, BattleScene::on_restart);
-        let return_btn: Gd<Button> = ui.get("return_to_overworld").try_to().expect("return_to_overworld missing");
+        let return_btn = self.base().get_node_as::<Button>("UI/ResultBanner/ReturnToOverworld");
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
         let replace_btn: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
-
-        let gy_close: Gd<Button> = ui.get("gy_close_button").try_to().expect("gy_close_button missing");
+        let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
         gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
-
         let deck_btn: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         deck_btn.signals().pressed().connect_other(self_gd, BattleScene::on_deck_label_clicked);
     }
@@ -547,11 +542,10 @@ impl BattleScene {
     fn show_card_tooltip(&mut self, idx: usize) {
         let Some(s) = self.state.as_ref() else { return };
         let Some(card) = s.hand.cards.get(idx) else { return };
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut tooltip: Gd<Panel> = ui.get("tooltip_panel").try_to().expect("tooltip_panel missing");
-        let mut name_label: Gd<Label> = ui.get("tooltip_name").try_to().expect("tooltip_name missing");
-        let mut cost_label: Gd<Label> = ui.get("tooltip_cost").try_to().expect("tooltip_cost missing");
-        let mut desc_label: Gd<Label> = ui.get("tooltip_desc").try_to().expect("tooltip_desc missing");
+        let mut tooltip = self.base().get_node_as::<Panel>("UI/CardTooltip");
+        let mut name_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipName");
+        let mut cost_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipCost");
+        let mut desc_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipDesc");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
@@ -568,8 +562,7 @@ impl BattleScene {
     }
 
     fn hide_tooltip(&mut self) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut tooltip: Gd<Panel> = ui.get("tooltip_panel").try_to().expect("tooltip_panel missing");
+        let mut tooltip = self.base().get_node_as::<Panel>("UI/CardTooltip");
         tooltip.set_visible(false);
     }
 
@@ -660,8 +653,7 @@ impl BattleScene {
         self.combat_log.clear();
         self.prev_units.clear();
         self.clear_overlays_ref();
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut log_label: Gd<RichTextLabel> = ui.get("log_label").try_to().expect("log_label missing");
+        let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
         log_label.set_text("[b]Combat Log[/b]");
         self.sync_all();
     }
@@ -955,7 +947,7 @@ impl BattleScene {
         let mut dl: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
 
-        let gy_panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
+        let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
         if gy_panel.is_visible() {
             self.sync_gy_viewer(state);
         }
@@ -969,8 +961,7 @@ impl BattleScene {
 
     fn sync_gy_viewer(&self, state: &BattleState) {
         self.clear_gy_entries();
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut scroll: Gd<ScrollContainer> = ui.get("gy_scroll").try_to().expect("gy_scroll missing");
+        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
         for (col, gy, start_y) in [("Player", &state.graveyard, 0), ("Enemy", &state.enemy_graveyard, 0)] {
             let x_offset = if col == "Player" { 10 } else { 200 };
             for (i, card) in gy.cards.iter().rev().enumerate() {
@@ -1016,11 +1007,7 @@ impl BattleScene {
     }
 
     fn clear_gy_entries(&self) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut scroll: Gd<ScrollContainer> = match ui.get("gy_scroll").try_to() {
-            Ok(s) => s,
-            Err(_) => return,
-        };
+        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
         for i in 0..20 {
             for prefix in &["Player", "Enemy"] {
                 let name = format!("GYEntry_{}_{}", prefix, i);
@@ -1034,11 +1021,10 @@ impl BattleScene {
     }
 
     fn show_enemy_card_popup(&self, card: &CardDef) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut popup: Gd<Panel> = ui.get("popup_panel").try_to().expect("popup_panel missing");
-        let mut name_label: Gd<Label> = ui.get("popup_name").try_to().expect("popup_name missing");
-        let mut cost_label: Gd<Label> = ui.get("popup_cost").try_to().expect("popup_cost missing");
-        let mut effects_label: Gd<Label> = ui.get("popup_effects").try_to().expect("popup_effects missing");
+        let mut popup = self.base().get_node_as::<Panel>("UI/EnemyCardPopup");
+        let mut name_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupName");
+        let mut cost_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupCost");
+        let mut effects_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupEffects");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
@@ -1153,8 +1139,7 @@ impl BattleScene {
 
     // Append to combat log (FR-14) — BBCode colored
     fn append_log(&self, text: &str) {
-        let ui = self.base().get_node_as::<CanvasLayer>("UI");
-        let mut log_label: Gd<RichTextLabel> = ui.get("log_label").try_to().expect("log_label missing");
+        let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
         let current = log_label.get_text().to_string();
         let lines: Vec<&str> = current.split('\n').collect();
         let mut new_lines: Vec<&str> = lines.to_vec();

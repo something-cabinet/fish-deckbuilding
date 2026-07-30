@@ -15,6 +15,7 @@ type: reference
 - [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
 - [gdext scene node type mismatch](wiki/concepts/gdext-scene-node-type-mismatch.md) — *draft*
 - [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
+- [gdscript method shadowing builtins](wiki/concepts/gdscript-method-shadowing-builtins.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
 - [rustflags env overrides config toml](wiki/concepts/rustflags-env-overrides-config-toml.md) — *draft*
 - [stale animation snapshot gdext](wiki/concepts/stale-animation-snapshot-gdext.md) — *draft*
@@ -28,6 +29,7 @@ type: reference
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
 - [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
 - [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
+- [move export refs to sub scene scripts](wiki/decisions/move-export-refs-to-sub-scene-scripts.md) — *draft*
 - [pure function affix operations](wiki/decisions/pure-function-affix-operations.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [rust gdext bridge over gdscript](wiki/decisions/rust-gdext-bridge-over-gdscript.md) — *draft*
@@ -48,6 +50,7 @@ type: reference
 - [return value bridge sync](wiki/patterns/return-value-bridge-sync.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
+- [scene branch extraction](wiki/patterns/scene-branch-extraction.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
 - [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
@@ -89,11 +92,13 @@ type: reference
 - [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *archived*
 - [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [Godot web deploy pipeline](wiki/memory/godot-web-deploy-pipeline.md) — *active*
+- [Move Export Refs to Sub-Scene Scripts](wiki/memory/move-export-refs-to-sub-scene-scripts.md) — *active*
 - [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 - [Return-Value Bridge Sync Pattern](wiki/memory/return-value-bridge-sync.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Rust CI build optimization](wiki/memory/rust-ci-build-optimization.md) — *active*
+- [Scene Branch Extraction Pattern](wiki/memory/scene-branch-extraction-pattern.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
 - [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
@@ -167,6 +172,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 137
-- **Edges:** 145
+- **Nodes:** 142
+- **Edges:** 151
 
