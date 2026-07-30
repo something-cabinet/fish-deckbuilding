@@ -15,7 +15,7 @@ use crate::core::{
     battle::{self as battle_engine, BattleResult, BattleState, Phase, Decision},
     constants, grid::movement as grid_movement,
     grid::{Faction, GridUnit},
-    cards::{CardEffect, Effect, cross_aoe},
+    cards::{CardDef, CardEffect, Effect, cross_aoe},
     overworld::{generate_rewards},
 };
 use super::game_state;
@@ -36,6 +36,16 @@ fn rgb(r: u8, g: u8, b: u8) -> Color {
 
 fn rgba(r: u8, g: u8, b: u8, a: f32) -> Color {
     Color::from_rgba(hex(r), hex(g), hex(b), a)
+}
+
+fn effect_to_string(effect: &Effect) -> String {
+    match effect {
+        Effect::Damage(v) => format!("{} dmg", v),
+        Effect::Heal(v) => format!("{} heal", v),
+        Effect::Shield(v) => format!("{} shield", v),
+        Effect::DrawCards(v) => format!("draw {}", v),
+        Effect::ApplyBuff(bt, v) => format!("{:?} {}", bt, v),
+    }
 }
 
 fn screen_to_grid(pos: Vector2) -> Option<(i32, i32)> {
@@ -172,6 +182,12 @@ self.clear_overlays_ref();
             }
         }
 
+        // Deck count label click — toggle graveyard viewer
+        if pos.x >= 1060.0 && pos.x <= 1160.0 && pos.y >= 660.0 && pos.y <= 680.0 {
+            self.on_deck_label_clicked();
+            return;
+        }
+
         // Grid clicks for movement/attack
         let Some(grid_pos) = screen_to_grid(pos) else { return };
         self.handle_click(grid_pos);
@@ -234,11 +250,19 @@ impl BattleScene {
         self.sync_hand_ref();
 
         // Execute enemy card plays
-        if let Some(s) = self.state.as_mut() {
-            battle_engine::play_enemy_cards_sync(s);
-        }
+        let played_cards = if let Some(s) = self.state.as_mut() {
+            battle_engine::play_enemy_cards_sync(s)
+        } else { Vec::new() };
 
-        self.append_log("Enemy plays cards");
+        for card in &played_cards {
+            let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+            self.append_log(&format!("Enemy plays {} ({})", card.name, desc.join(", ")));
+        }
+        if played_cards.is_empty() {
+            self.append_log("Enemy plays no cards");
+        } else {
+            self.show_enemy_card_popup(&played_cards[0]);
+        }
 
         // Draw enemy card and transition
         if let Some(s) = self.state.as_mut() {
@@ -304,6 +328,24 @@ impl BattleScene {
         if s.replace_card(idx) {
             self.sync_all();
             self.store_prev_unit_positions();
+        }
+    }
+
+    #[func]
+    fn on_gy_close(&mut self) {
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        panel.set_visible(false);
+    }
+
+    #[func]
+    fn on_deck_label_clicked(&mut self) {
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let is_visible = panel.is_visible();
+        panel.set_visible(!is_visible);
+        if panel.is_visible() {
+            if let Some(state) = self.state.as_ref() {
+                self.sync_gy_viewer(state);
+            }
         }
     }
 
@@ -402,6 +444,9 @@ impl BattleScene {
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
         let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
+
+        let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
+        gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
     }
 }
 
@@ -534,6 +579,100 @@ impl BattleScene {
         enemy_hand_label.set_text("");
         enemy_hand_label.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
         ui.add_child(&enemy_hand_label);
+
+        // Graveyard viewer panel — hidden by default (FR-5, FR-6)
+        let mut gy_panel = Panel::new_alloc();
+        gy_panel.set_name("GraveyardPanel");
+        gy_panel.set_position(Vector2::new(850.0, 50.0));
+        gy_panel.set_size(Vector2::new(400.0, 530.0));
+        gy_panel.set_visible(false);
+        let mut gy_style = StyleBoxFlat::new_gd();
+        gy_style.set_bg_color(rgba(0x0b, 0x1a, 0x24, 0.95));
+        gy_style.set_corner_radius_all(8);
+        gy_style.set_border_width_all(1);
+        gy_style.set_border_color(rgb(0x3a, 0x6e, 0x8a));
+        gy_panel.add_theme_stylebox_override("panel", &gy_style.upcast::<StyleBox>());
+        ui.add_child(&gy_panel);
+
+        let mut gy_title = Label::new_alloc();
+        gy_title.set_name("GYTitle");
+        gy_title.set_position(Vector2::new(10.0, 8.0));
+        gy_title.set_size(Vector2::new(360.0, 24.0));
+        gy_title.set_text("Graveyard (click card for details)");
+        gy_title.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+        gy_title.add_theme_font_size_override("font_size", 12);
+        gy_panel.add_child(&gy_title);
+
+        let mut gy_close = Button::new_alloc();
+        gy_close.set_name("GYCloseButton");
+        gy_close.set_position(Vector2::new(370.0, 6.0));
+        gy_close.set_size(Vector2::new(24.0, 24.0));
+        gy_close.set_text("X");
+        gy_close.set_flat(true);
+        gy_close.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
+        gy_panel.add_child(&gy_close);
+
+        // Player graveyard column title
+        let mut gy_player_title = Label::new_alloc();
+        gy_player_title.set_name("GYPlayerTitle");
+        gy_player_title.set_position(Vector2::new(10.0, 36.0));
+        gy_player_title.set_size(Vector2::new(180.0, 18.0));
+        gy_player_title.set_text("Hero Graveyard");
+        gy_player_title.add_theme_color_override("font_color", rgb(0x4f, 0xd1, 0xc5));
+        gy_player_title.add_theme_font_size_override("font_size", 11);
+        gy_panel.add_child(&gy_player_title);
+
+        // Enemy graveyard column title
+        let mut gy_enemy_title = Label::new_alloc();
+        gy_enemy_title.set_name("GYEnemyTitle");
+        gy_enemy_title.set_position(Vector2::new(200.0, 36.0));
+        gy_enemy_title.set_size(Vector2::new(180.0, 18.0));
+        gy_enemy_title.set_text("Enemy Graveyard");
+        gy_enemy_title.add_theme_color_override("font_color", rgb(0xff, 0x6b, 0x6b));
+        gy_enemy_title.add_theme_font_size_override("font_size", 11);
+        gy_panel.add_child(&gy_enemy_title);
+
+        // Enemy card reveal popup — hidden by default (FR-1)
+        let mut card_popup = Panel::new_alloc();
+        card_popup.set_name("EnemyCardPopup");
+        card_popup.set_position(Vector2::new(490.0, 300.0));
+        card_popup.set_size(Vector2::new(300.0, 180.0));
+        card_popup.set_visible(false);
+        let mut popup_style = StyleBoxFlat::new_gd();
+        popup_style.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.95));
+        popup_style.set_corner_radius_all(8);
+        popup_style.set_border_width_all(1);
+        popup_style.set_border_color(rgb(0xff, 0x6b, 0x6b));
+        card_popup.add_theme_stylebox_override("panel", &popup_style.upcast::<StyleBox>());
+        ui.add_child(&card_popup);
+
+        let mut popup_name = Label::new_alloc();
+        popup_name.set_name("PopupName");
+        popup_name.set_position(Vector2::new(10.0, 10.0));
+        popup_name.set_size(Vector2::new(280.0, 28.0));
+        popup_name.set_text("");
+        popup_name.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+        popup_name.add_theme_font_size_override("font_size", 18);
+        card_popup.add_child(&popup_name);
+
+        let mut popup_cost = Label::new_alloc();
+        popup_cost.set_name("PopupCost");
+        popup_cost.set_position(Vector2::new(10.0, 44.0));
+        popup_cost.set_size(Vector2::new(280.0, 20.0));
+        popup_cost.set_text("");
+        popup_cost.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
+        popup_cost.add_theme_font_size_override("font_size", 14);
+        card_popup.add_child(&popup_cost);
+
+        let mut popup_effects = Label::new_alloc();
+        popup_effects.set_name("PopupEffects");
+        popup_effects.set_position(Vector2::new(10.0, 70.0));
+        popup_effects.set_size(Vector2::new(280.0, 100.0));
+        popup_effects.set_text("");
+        popup_effects.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+        popup_effects.add_theme_font_size_override("font_size", 13);
+        popup_effects.set_autowrap_mode(AutowrapMode::WORD_SMART);
+        card_popup.add_child(&popup_effects);
 
         // Enemy turn banner (FR-4)
         let mut enemy_banner = Label::new_alloc();
@@ -1033,13 +1172,107 @@ impl BattleScene {
         banner.set_visible(state.phase == Phase::BattleOver);
 
         let mut dl = self.base().get_node_as::<Label>("UI/DeckCountLabel");
-        dl.set_text(&format!("Deck: {} | Gy: {}", state.deck.len(), state.graveyard.len()));
+        dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
+
+        let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        if gy_panel.is_visible() {
+            self.sync_gy_viewer(state);
+        }
 
         let mut ehl = self.base().get_node_as::<Label>("UI/EnemyHandLabel");
         ehl.set_text(&format!("Enemy hand: {} cards", state.enemy_hand.len()));
 
         let mut rb = self.base().get_node_as::<Button>("UI/ReplaceButton");
         rb.set_disabled(state.replace_used || state.phase != Phase::PlayerTurn);
+    }
+
+    fn sync_gy_viewer(&self, state: &BattleState) {
+        self.clear_gy_entries();
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        for (col, gy, start_y) in [("Player", &state.graveyard, 56), ("Enemy", &state.enemy_graveyard, 56)] {
+            let x_offset = if col == "Player" { 10 } else { 200 };
+            for (i, card) in gy.cards.iter().rev().enumerate() {
+                if i >= 10 { break; }
+                let y = start_y + i * 46;
+                let mut entry = Panel::new_alloc();
+                entry.set_name(&format!("GYEntry_{}_{}", col, i));
+                entry.set_position(Vector2::new(x_offset as f32, y as f32));
+                entry.set_size(Vector2::new(180.0, 42.0));
+                let mut es = StyleBoxFlat::new_gd();
+                es.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.9));
+                es.set_corner_radius_all(4);
+                entry.add_theme_stylebox_override("panel", &es.upcast::<StyleBox>());
+                panel.add_child(&entry);
+
+                let mut nl = Label::new_alloc();
+                nl.set_position(Vector2::new(4.0, 2.0));
+                nl.set_size(Vector2::new(120.0, 18.0));
+                nl.set_text(card.name);
+                nl.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+                nl.add_theme_font_size_override("font_size", 10);
+                entry.add_child(&nl);
+
+                let mut cl = Label::new_alloc();
+                cl.set_position(Vector2::new(130.0, 2.0));
+                cl.set_size(Vector2::new(46.0, 18.0));
+                cl.set_text(&format!("{}", card.cost));
+                cl.set_horizontal_alignment(HorizontalAlignment::CENTER);
+                cl.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
+                cl.add_theme_font_size_override("font_size", 10);
+                entry.add_child(&cl);
+
+                let mut el = Label::new_alloc();
+                let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+                el.set_position(Vector2::new(4.0, 20.0));
+                el.set_size(Vector2::new(172.0, 20.0));
+                el.set_text(&desc.join(", "));
+                el.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
+                el.add_theme_font_size_override("font_size", 9);
+                entry.add_child(&el);
+            }
+        }
+    }
+
+    fn clear_gy_entries(&self) {
+        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        for i in 0..20 {
+            for prefix in &["Player", "Enemy"] {
+                let name = format!("GYEntry_{}_{}", prefix, i);
+                if panel.has_node(&name) {
+                    let mut child = panel.get_node_as::<Node2D>(&name);
+                    panel.remove_child(&child);
+                    child.queue_free();
+                }
+            }
+        }
+    }
+
+    fn show_enemy_card_popup(&self, card: &CardDef) {
+        let mut popup = self.base().get_node_as::<Panel>("UI/EnemyCardPopup");
+        let mut name_label = popup.get_node_as::<Label>("PopupName");
+        let mut cost_label = popup.get_node_as::<Label>("PopupCost");
+        let mut effects_label = popup.get_node_as::<Label>("PopupEffects");
+
+        name_label.set_text(card.name);
+        cost_label.set_text(&format!("Cost: {}", card.cost));
+        let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
+        effects_label.set_text(&desc.join("\n"));
+
+        popup.set_visible(true);
+        popup.set_scale(Vector2::new(0.0, 0.0));
+        popup.set_modulate(rgba(255, 255, 255, 1.0));
+
+        let mut tween = popup.create_tween();
+        tween.set_trans(TransitionType::BACK);
+        tween.set_ease(EaseType::OUT);
+        tween.tween_property(&popup, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.2);
+        tween.tween_interval(1.0);
+        let mut popup_clone = popup.clone();
+        tween.tween_property(&popup, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.2);
+        tween.tween_callback(&Callable::from_fn("hide_popup", move |_args: &[&Variant]| {
+            popup_clone.set_visible(false);
+            popup_clone.set_modulate(rgba(255, 255, 255, 1.0));
+        }));
     }
 
     fn rounded_panel(bg: Color, size: Vector2, corner_radius: i32, border_width: i32, border_color: Color) -> Gd<Panel> {

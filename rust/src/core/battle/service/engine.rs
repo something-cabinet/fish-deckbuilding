@@ -3,6 +3,7 @@ use crate::core::combat;
 use crate::core::constants;
 use crate::core::grid::{Faction, movement};
 use crate::core::battle::ai::{self, Decision};
+use crate::core::cards::CardDef;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EngineError {
@@ -115,8 +116,9 @@ pub fn execute_enemy_decision_and_mana(state: &mut BattleState) -> Decision {
 }
 
 /// Plays all enemy cards synchronously (same as before, one card at a time).
-pub fn play_enemy_cards_sync(state: &mut BattleState) {
-    ai::play_enemy_cards(state);
+/// Returns the cards that were played.
+pub fn play_enemy_cards_sync(state: &mut BattleState) -> Vec<CardDef> {
+    ai::play_enemy_cards(state)
 }
 
 /// Draws an enemy card and transitions to player turn if not battle over.
