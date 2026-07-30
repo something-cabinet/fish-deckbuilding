@@ -1,3 +1,4 @@
+pub mod affix;
 pub mod model;
 pub mod starter_deck;
 pub mod deck_hand;

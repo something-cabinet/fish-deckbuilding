@@ -1,3 +1,4 @@
+use crate::core::cards::affix;
 use crate::core::cards::CardDef;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -111,13 +112,48 @@ impl RunState {
             false
         }
     }
+
+    pub fn enchanter_reroll(&mut self, deck_idx: usize, affix_idx: usize, seed: u64) -> Option<&CardDef> {
+        if self.gold < 50 { return None; }
+        if deck_idx >= self.combat_deck.len() { return None; }
+        if affix_idx >= self.combat_deck[deck_idx].affixes.len() { return None; }
+        self.gold -= 50;
+        let card = self.combat_deck[deck_idx].clone();
+        let new_card = affix::enchanter_reroll(&card, affix_idx, seed);
+        self.combat_deck[deck_idx] = new_card;
+        Some(&self.combat_deck[deck_idx])
+    }
+
+    pub fn gambler_add_slot(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
+        if self.gold < 100 { return None; }
+        if deck_idx >= self.combat_deck.len() { return None; }
+        if self.combat_deck[deck_idx].affixes.len() >= self.combat_deck[deck_idx].rarity.max_affixes() { return None; }
+        self.gold -= 100;
+        let card = self.combat_deck[deck_idx].clone();
+        let new_card = affix::gambler_add_slot(&card, seed);
+        self.combat_deck[deck_idx] = new_card;
+        Some(&self.combat_deck[deck_idx])
+    }
+
+    #[allow(dead_code)]
+    pub fn corrupt_card(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
+        if self.gold < 200 { return None; }
+        if deck_idx >= self.combat_deck.len() { return None; }
+        self.gold -= 200;
+        let card = self.combat_deck[deck_idx].clone();
+        let (new_card, _) = affix::corrupt(&card, seed);
+        self.combat_deck[deck_idx] = new_card;
+        Some(&self.combat_deck[deck_idx])
+    }
 }
 
 pub fn create_zone_1() -> Vec<OverworldNode> {
     vec![
-        OverworldNode { id: "start".into(), node_type: NodeType::Rest, connections: vec!["battle_1a".into(), "battle_1b".into()], grid_x: 2, grid_y: 0 },
+        OverworldNode { id: "start".into(), node_type: NodeType::Rest, connections: vec!["battle_1a".into(), "battle_1b".into(), "gambler_1".into()], grid_x: 2, grid_y: 0 },
+        OverworldNode { id: "gambler_1".into(), node_type: NodeType::Gambler, connections: vec!["enchanter_1".into()], grid_x: 2, grid_y: 1 },
         OverworldNode { id: "battle_1a".into(), node_type: NodeType::Battle, connections: vec!["shop_1".into()], grid_x: 0, grid_y: 2 },
         OverworldNode { id: "battle_1b".into(), node_type: NodeType::Battle, connections: vec!["rest_1".into()], grid_x: 4, grid_y: 2 },
+        OverworldNode { id: "enchanter_1".into(), node_type: NodeType::Enchanter, connections: vec!["shop_1".into(), "rest_1".into()], grid_x: 2, grid_y: 3 },
         OverworldNode { id: "shop_1".into(), node_type: NodeType::Shop, connections: vec!["boss_1".into()], grid_x: 0, grid_y: 4 },
         OverworldNode { id: "rest_1".into(), node_type: NodeType::Rest, connections: vec!["boss_1".into()], grid_x: 4, grid_y: 4 },
         OverworldNode { id: "boss_1".into(), node_type: NodeType::Boss, connections: vec!["zone_2_gate".into()], grid_x: 2, grid_y: 6 },
@@ -166,15 +202,26 @@ mod tests {
         ]);
         s.reset_combat_deck();
         assert_eq!(s.combat_deck.len(), 3);
-        // Move first card to stash
         assert!(s.swap_deck_stash(0, 0));
         assert_eq!(s.combat_deck.len(), 2);
         assert_eq!(s.stash.len(), 1);
     }
 
     #[test]
-    fn zone_1_has_6_nodes() {
+    fn zone_1_has_8_nodes() {
         let zone = create_zone_1();
-        assert_eq!(zone.len(), 6);
+        assert_eq!(zone.len(), 8);
+    }
+
+    #[test]
+    fn zone_1_has_enchanter() {
+        let zone = create_zone_1();
+        assert!(zone.iter().any(|n| n.id == "enchanter_1"));
+    }
+
+    #[test]
+    fn zone_1_has_gambler() {
+        let zone = create_zone_1();
+        assert!(zone.iter().any(|n| n.id == "gambler_1"));
     }
 }

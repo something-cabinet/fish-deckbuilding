@@ -36,6 +36,9 @@ pub struct CardDef {
     pub cost: i32,
     pub effects: Vec<CardEffect>,
     pub rarity: Rarity,
+    pub affixes: Vec<super::affix::Affix>,
+    pub corrupted: bool,
+    pub implicit_affix: Option<super::affix::Affix>,
 }
 
 impl CardDef {
@@ -46,7 +49,25 @@ impl CardDef {
         effects: Vec<CardEffect>,
         rarity: Rarity,
     ) -> Self {
-        Self { id, name, cost, effects, rarity }
+        Self { id, name, cost, effects, rarity, affixes: Vec::new(), corrupted: false, implicit_affix: None }
+    }
+
+    #[allow(dead_code)]
+    pub fn with_affixes(mut self, affixes: Vec<super::affix::Affix>) -> Self {
+        self.affixes = affixes;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_corrupted(mut self, corrupted: bool) -> Self {
+        self.corrupted = corrupted;
+        self
+    }
+
+    #[allow(dead_code)]
+    pub fn with_implicit(mut self, implicit: Option<super::affix::Affix>) -> Self {
+        self.implicit_affix = implicit;
+        self
     }
 }
 
