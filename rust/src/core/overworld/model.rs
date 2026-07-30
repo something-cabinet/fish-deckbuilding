@@ -113,24 +113,24 @@ impl RunState {
         }
     }
 
-    pub fn enchanter_reroll(&mut self, deck_idx: usize, affix_idx: usize, seed: u64) -> Option<&CardDef> {
+    pub fn gambler_reroll_affix(&mut self, deck_idx: usize, affix_idx: usize, seed: u64) -> Option<&CardDef> {
         if self.gold < 50 { return None; }
         if deck_idx >= self.combat_deck.len() { return None; }
         if affix_idx >= self.combat_deck[deck_idx].affixes.len() { return None; }
         self.gold -= 50;
         let card = self.combat_deck[deck_idx].clone();
-        let new_card = affix::enchanter_reroll(&card, affix_idx, seed);
+        let new_card = affix::gambler_reroll_affix(&card, affix_idx, seed);
         self.combat_deck[deck_idx] = new_card;
         Some(&self.combat_deck[deck_idx])
     }
 
-    pub fn gambler_add_slot(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
+    pub fn enchanter_add_slot(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
         if self.gold < 100 { return None; }
         if deck_idx >= self.combat_deck.len() { return None; }
         if self.combat_deck[deck_idx].affixes.len() >= self.combat_deck[deck_idx].rarity.max_affixes() { return None; }
         self.gold -= 100;
         let card = self.combat_deck[deck_idx].clone();
-        let new_card = affix::gambler_add_slot(&card, seed);
+        let new_card = affix::enchanter_add_slot(&card, seed);
         self.combat_deck[deck_idx] = new_card;
         Some(&self.combat_deck[deck_idx])
     }

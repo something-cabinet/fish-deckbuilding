@@ -111,7 +111,7 @@ pub fn generate_affixes(card: &CardDef, seed: u64) -> Vec<Affix> {
     result
 }
 
-pub fn enchanter_reroll(card: &CardDef, affix_idx: usize, seed: u64) -> CardDef {
+pub fn gambler_reroll_affix(card: &CardDef, affix_idx: usize, seed: u64) -> CardDef {
     let mut new_card = card.clone();
     if affix_idx >= new_card.affixes.len() { return new_card; }
 
@@ -129,7 +129,7 @@ pub fn enchanter_reroll(card: &CardDef, affix_idx: usize, seed: u64) -> CardDef 
     new_card
 }
 
-pub fn gambler_add_slot(card: &CardDef, seed: u64) -> CardDef {
+pub fn enchanter_add_slot(card: &CardDef, seed: u64) -> CardDef {
     let mut new_card = card.clone();
     if new_card.affixes.len() >= new_card.rarity.max_affixes() { return new_card; }
 
@@ -333,29 +333,29 @@ mod tests {
     }
 
     #[test]
-    fn enchanter_reroll_replaces_affix() {
+    fn gambler_reroll_affix_replaces_affix() {
         let card = test_card_with_affixes();
         let original_desc = card.affixes[0].description;
-        let result = enchanter_reroll(&card, 0, 99);
+        let result = gambler_reroll_affix(&card, 0, 99);
         assert_eq!(result.affixes.len(), 1);
         assert_ne!(result.affixes[0].description, original_desc);
     }
 
     #[test]
-    fn gambler_add_slot_increases_count() {
+    fn enchanter_add_slot_increases_count() {
         let card = CardDef::new("g", "G", 1, vec![
             CardEffect { effect: Effect::Shield(4), range: Range::Melee, target: TargetFilter::Self_, affect_pattern: vec![] },
         ], Rarity::Rare);
-        let result = gambler_add_slot(&card, 42);
+        let result = enchanter_add_slot(&card, 42);
         assert_eq!(result.affixes.len(), 1);
     }
 
     #[test]
-    fn gambler_add_slot_fails_at_max() {
+    fn enchanter_add_slot_fails_at_max() {
         let card = CardDef::new("g", "G", 1, vec![
             CardEffect { effect: Effect::Damage(2), range: Range::Melee, target: TargetFilter::EnemyUnit, affect_pattern: vec![] },
         ], Rarity::Common);
-        let result = gambler_add_slot(&card, 42);
+        let result = enchanter_add_slot(&card, 42);
         assert_eq!(result.affixes.len(), 0);
     }
 

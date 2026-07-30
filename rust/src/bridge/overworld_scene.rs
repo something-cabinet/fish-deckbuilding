@@ -234,16 +234,16 @@ impl OverworldScene {
                     let affix_strs: Vec<String> = card.affixes.iter().map(|a| a.description.to_string()).collect();
                     godot_print!("  [{}] {} (affixes: {:?})", i, card.name, affix_strs);
                 }
-                if let Some(card) = run.enchanter_reroll(0, 0, 42) {
-                    godot_print!("[Overworld] Rerolled affix on: {}", card.name);
+                if let Some(card) = run.enchanter_add_slot(0, 42) {
+                    godot_print!("[Overworld] Added slot to: {}", card.name);
                 }
                 run.defeated_nodes.push(node.id.clone());
                 self.refresh();
             }
             NodeType::Gambler => {
                 godot_print!("[Overworld] Opening gambler");
-                if let Some(card) = run.gambler_add_slot(0, 42) {
-                    godot_print!("[Overworld] Added slot to: {}", card.name);
+                if let Some(card) = run.gambler_reroll_affix(0, 0, 42) {
+                    godot_print!("[Overworld] Rerolled affix on: {}", card.name);
                 }
                 run.defeated_nodes.push(node.id.clone());
                 self.refresh();
