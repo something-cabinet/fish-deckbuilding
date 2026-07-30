@@ -42,6 +42,9 @@ runs:
         done
         rustup default "$TOOLCHAIN"
 
+    - name: "Set up sccache"
+      uses: mozilla-actions/sccache-action@v0.0.10
+
     - name: "Extract Rust version for cache key"
       shell: bash
       run: |
