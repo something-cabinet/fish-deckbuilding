@@ -26,53 +26,6 @@ Compatibility entrypoint for runtimes that auto-detect `AGENTS.md`.
 - Use memory tools: `wm_memory.list` at session start, `wm_memory.add` after tasks for reusable knowledge.
 - Proactively capture durable memory; do not wait for explicit instruction.
 
-## Project Rules
-
-### SDD — Spec-Driven Development
-
-**Everything has a spec first.** No code is written until a spec exists that defines the requirements, acceptance criteria, and locked decisions.
-
-1. **Spec first** — create or update a spec page (`wiki:specs:`) before any implementation
-2. **Decisions locked** — Socratic exploration resolves gray areas before writing begins
-3. **ACs defined** — every spec has observable, testable acceptance criteria
-4. **Plans derived from spec** — tasks and implementation plans are generated from approved specs
-
-The game spec is at `wiki:specs:fish-roguelite-deckbuilding`. All phases and tasks reference its locked decisions.
-
-```bash
-# Create a new spec
-wm-spec
-
-# Plan from an approved spec
-/wm-plan --from @doc/specs/<name>
-```
-
-### TDD — Test-First for Everything
-
-**Red-Green-Refactor** applies to ALL implementation:
-
-1. **RED** — Write a failing test that defines the expected behavior
-2. **GREEN** — Write the minimum code to make it pass
-3. **REFACTOR** — Clean up while tests stay green
-
-No implementation code is written without a test first. This includes combat logic, state transitions, card effects, enemy AI, and any other game code. The Godot bridge layer (gdext) is excluded — it calls tested pure Rust functions.
-
-```bash
-cd rust
-cargo test       # run all tests
-```
-
-Tests live in `rust/src/core/`.
-
-### Pre-Commit — Clippy Check
-
-**Run `cargo clippy` before every commit** to catch style issues and potential bugs. Fix all warnings before committing.
-
-```bash
-cd rust
-cargo clippy     # fix all warnings before commit
-```
-
 ## Quick Reference
 
 ```bash
@@ -89,11 +42,3 @@ wm validate               # Validate refs + SDD coverage
 ```
 
 <!-- WIKI-MEM GUIDELINES END -->
-
-## Cloned Dependency Source
-
-Read-only dependency source repositories are available under
-`.slim/clonedeps/repos/` for inspection. Do not edit these clones.
-
-- `.slim/clonedeps/repos/open-duelyst__duelyst/` - `open-duelyst/duelyst` at `main`; Duelyst open-source game source for gameplay parity analysis, grid combat design, card/unit systems, and asset reference.
-
