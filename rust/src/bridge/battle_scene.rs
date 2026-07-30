@@ -223,7 +223,8 @@ impl BattleScene {
         self.store_prev_unit_positions();
 
         // Show enemy turn banner
-        let mut banner = self.base().get_node_as::<Label>("UI/EnemyTurnBanner");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut banner: Gd<Label> = ui.get("enemy_turn_banner").try_to().expect("enemy_turn_banner missing");
         banner.set_visible(true);
         banner.set_modulate(rgba(255, 255, 255, 0.0));
         let mut tween = banner.create_tween();
@@ -291,7 +292,8 @@ impl BattleScene {
 
     #[func]
     fn _finish_enemy_turn(&mut self) {
-        let mut banner = self.base().get_node_as::<Label>("UI/EnemyTurnBanner");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut banner: Gd<Label> = ui.get("enemy_turn_banner").try_to().expect("enemy_turn_banner missing");
         let mut tween = banner.create_tween();
         tween.tween_property(&banner, "modulate", &rgba(255, 255, 255, 0.0).to_variant(), 0.3);
         let banner_clone = banner.clone();
@@ -338,13 +340,15 @@ impl BattleScene {
 
     #[func]
     fn on_gy_close(&mut self) {
-        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
         panel.set_visible(false);
     }
 
     #[func]
     fn on_deck_label_clicked(&mut self) {
-        let mut panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
         let is_visible = panel.is_visible();
         panel.set_visible(!is_visible);
         if panel.is_visible() {
@@ -453,20 +457,20 @@ impl BattleScene {
 
     fn connect_signals(&self) {
         let Some(ref self_gd) = self.self_gd else { return };
-        let end_btn = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let end_btn: Gd<Button> = ui.get("end_turn_button").try_to().expect("end_turn_button missing");
         end_btn.signals().pressed().connect_other(self_gd, BattleScene::on_end_turn);
-        let banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
-        let restart_btn = banner.get_node_as::<Button>("RestartButton");
+        let restart_btn: Gd<Button> = ui.get("restart_button").try_to().expect("restart_button missing");
         restart_btn.signals().pressed().connect_other(self_gd, BattleScene::on_restart);
-        let return_btn = banner.get_node_as::<Button>("ReturnToOverworld");
+        let return_btn: Gd<Button> = ui.get("return_button").try_to().expect("return_button missing");
         return_btn.signals().pressed().connect_other(self_gd, BattleScene::on_return_to_overworld);
-        let replace_btn = self.base().get_node_as::<Button>("UI/ReplaceButton");
+        let replace_btn: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         replace_btn.signals().pressed().connect_other(self_gd, BattleScene::on_replace);
 
-        let gy_close = self.base().get_node_as::<Button>("UI/GraveyardPanel/GYCloseButton");
+        let gy_close: Gd<Button> = ui.get("gy_close_button").try_to().expect("gy_close_button missing");
         gy_close.signals().pressed().connect_other(self_gd, BattleScene::on_gy_close);
 
-        let deck_btn = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        let deck_btn: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         deck_btn.signals().pressed().connect_other(self_gd, BattleScene::on_deck_label_clicked);
     }
 }
@@ -543,10 +547,11 @@ impl BattleScene {
     fn show_card_tooltip(&mut self, idx: usize) {
         let Some(s) = self.state.as_ref() else { return };
         let Some(card) = s.hand.cards.get(idx) else { return };
-        let mut tooltip = self.base().get_node_as::<Panel>("UI/CardTooltip");
-        let mut name_label = tooltip.get_node_as::<Label>("TooltipName");
-        let mut cost_label = tooltip.get_node_as::<Label>("TooltipCost");
-        let mut desc_label = tooltip.get_node_as::<Label>("TooltipDesc");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut tooltip: Gd<Panel> = ui.get("tooltip_panel").try_to().expect("tooltip_panel missing");
+        let mut name_label: Gd<Label> = ui.get("tooltip_name").try_to().expect("tooltip_name missing");
+        let mut cost_label: Gd<Label> = ui.get("tooltip_cost").try_to().expect("tooltip_cost missing");
+        let mut desc_label: Gd<Label> = ui.get("tooltip_desc").try_to().expect("tooltip_desc missing");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
@@ -563,7 +568,8 @@ impl BattleScene {
     }
 
     fn hide_tooltip(&mut self) {
-        let mut tooltip = self.base().get_node_as::<Panel>("UI/CardTooltip");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut tooltip: Gd<Panel> = ui.get("tooltip_panel").try_to().expect("tooltip_panel missing");
         tooltip.set_visible(false);
     }
 
@@ -654,7 +660,8 @@ impl BattleScene {
         self.combat_log.clear();
         self.prev_units.clear();
         self.clear_overlays_ref();
-        let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut log_label: Gd<RichTextLabel> = ui.get("log_label").try_to().expect("log_label missing");
         log_label.set_text("[b]Combat Log[/b]");
         self.sync_all();
     }
@@ -916,12 +923,14 @@ impl BattleScene {
             None => return,
         };
 
-        let mut ml = self.base().get_node_as::<Label>("UI/ManaLabel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+
+        let mut ml: Gd<Label> = ui.get("mana_label").try_to().expect("mana_label missing");
         ml.set_text(&format!("{} / {}", state.mana, state.max_mana));
         ml.set_modulate(rgb(0xd6, 0xe8, 0xef));
         self.sync_mana_crystals(state);
 
-        let mut tl = self.base().get_node_as::<Label>("UI/TurnLabel");
+        let mut tl: Gd<Label> = ui.get("turn_label").try_to().expect("turn_label missing");
         tl.set_text(&match state.phase {
             Phase::PlayerTurn => format!("Your Turn — Turn {}", state.turn_number),
             Phase::EnemyTurn => "Enemy Turn...".into(),
@@ -937,30 +946,31 @@ impl BattleScene {
             Phase::BattleOver => rgb(0xf4, 0xc4, 0x30),
         });
 
-        let mut eb = self.base().get_node_as::<Button>("UI/EndTurnButton");
+        let mut eb: Gd<Button> = ui.get("end_turn_button").try_to().expect("end_turn_button missing");
         eb.set_disabled(state.phase != Phase::PlayerTurn);
 
-        let mut banner = self.base().get_node_as::<Panel>("UI/ResultBanner");
+        let mut banner: Gd<Panel> = ui.get("result_banner").try_to().expect("result_banner missing");
         banner.set_visible(state.phase == Phase::BattleOver);
 
-        let mut dl = self.base().get_node_as::<Button>("UI/DeckCountButton");
+        let mut dl: Gd<Button> = ui.get("deck_count_button").try_to().expect("deck_count_button missing");
         dl.set_text(&format!("Deck: {} | GY: {} | {}", state.deck.len(), state.graveyard.len(), state.enemy_graveyard.len()));
 
-        let gy_panel = self.base().get_node_as::<Panel>("UI/GraveyardPanel");
+        let gy_panel: Gd<Panel> = ui.get("gy_panel").try_to().expect("gy_panel missing");
         if gy_panel.is_visible() {
             self.sync_gy_viewer(state);
         }
 
-        let mut ehl = self.base().get_node_as::<Label>("UI/EnemyHandLabel");
+        let mut ehl: Gd<Label> = ui.get("enemy_hand_label").try_to().expect("enemy_hand_label missing");
         ehl.set_text(&format!("Enemy hand: {} cards", state.enemy_hand.len()));
 
-        let mut rb = self.base().get_node_as::<Button>("UI/ReplaceButton");
+        let mut rb: Gd<Button> = ui.get("replace_button").try_to().expect("replace_button missing");
         rb.set_disabled(state.replace_used || state.phase != Phase::PlayerTurn);
     }
 
     fn sync_gy_viewer(&self, state: &BattleState) {
         self.clear_gy_entries();
-        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut scroll: Gd<ScrollContainer> = ui.get("gy_scroll").try_to().expect("gy_scroll missing");
         for (col, gy, start_y) in [("Player", &state.graveyard, 0), ("Enemy", &state.enemy_graveyard, 0)] {
             let x_offset = if col == "Player" { 10 } else { 200 };
             for (i, card) in gy.cards.iter().rev().enumerate() {
@@ -1006,9 +1016,10 @@ impl BattleScene {
     }
 
     fn clear_gy_entries(&self) {
-        let mut scroll = match self.base().try_get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll") {
-            Some(s) => s,
-            None => return,
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut scroll: Gd<ScrollContainer> = match ui.get("gy_scroll").try_to() {
+            Ok(s) => s,
+            Err(_) => return,
         };
         for i in 0..20 {
             for prefix in &["Player", "Enemy"] {
@@ -1023,10 +1034,11 @@ impl BattleScene {
     }
 
     fn show_enemy_card_popup(&self, card: &CardDef) {
-        let mut popup = self.base().get_node_as::<Panel>("UI/EnemyCardPopup");
-        let mut name_label = popup.get_node_as::<Label>("PopupName");
-        let mut cost_label = popup.get_node_as::<Label>("PopupCost");
-        let mut effects_label = popup.get_node_as::<Label>("PopupEffects");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut popup: Gd<Panel> = ui.get("popup_panel").try_to().expect("popup_panel missing");
+        let mut name_label: Gd<Label> = ui.get("popup_name").try_to().expect("popup_name missing");
+        let mut cost_label: Gd<Label> = ui.get("popup_cost").try_to().expect("popup_cost missing");
+        let mut effects_label: Gd<Label> = ui.get("popup_effects").try_to().expect("popup_effects missing");
 
         name_label.set_text(card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
@@ -1141,7 +1153,8 @@ impl BattleScene {
 
     // Append to combat log (FR-14) — BBCode colored
     fn append_log(&self, text: &str) {
-        let mut log_label = self.base().get_node_as::<RichTextLabel>("UI/CombatLog/LogLabel");
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut log_label: Gd<RichTextLabel> = ui.get("log_label").try_to().expect("log_label missing");
         let current = log_label.get_text().to_string();
         let lines: Vec<&str> = current.split('\n').collect();
         let mut new_lines: Vec<&str> = lines.to_vec();
