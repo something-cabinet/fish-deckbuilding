@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b5f3q2qhv3na"]
 
-[ext_resource type="Script" uid="uid://b2q3q2qhv3m9" path="res://scenes/battle/enemy_card_popup.gd" id="1"]
+[ext_resource type="Script" uid="uid://cqggmq8rswo3v" path="res://scenes/battle/enemy_card_popup.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_popup"]
 bg_color = Color(0.118, 0.227, 0.298, 0.95)
@@ -14,7 +14,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="EnemyCardPopup" type="Panel" node_paths=PackedStringArray("name_label", "cost_label", "effects_label")]
+[node name="EnemyCardPopup" type="Panel" unique_id=1985754171 node_paths=PackedStringArray("name_label", "cost_label", "effects_label")]
 visible = false
 offset_left = 490.0
 offset_top = 300.0
@@ -26,7 +26,7 @@ name_label = NodePath("PopupName")
 cost_label = NodePath("PopupCost")
 effects_label = NodePath("PopupEffects")
 
-[node name="PopupName" type="Label" parent="."]
+[node name="PopupName" type="Label" parent="." unique_id=2087839236]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
@@ -35,7 +35,7 @@ offset_bottom = 38.0
 theme_override_colors/font_color = Color(0.839, 0.91, 0.937, 1)
 theme_override_font_sizes/font_size = 18
 
-[node name="PopupCost" type="Label" parent="."]
+[node name="PopupCost" type="Label" parent="." unique_id=2139925908]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 44.0
@@ -44,7 +44,7 @@ offset_bottom = 64.0
 theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
 theme_override_font_sizes/font_size = 14
 
-[node name="PopupEffects" type="Label" parent="."]
+[node name="PopupEffects" type="Label" parent="." unique_id=2114318301]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 70.0
