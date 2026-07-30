@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./../.github/composite/rust
+      - uses: ./.github/composite/rust
 
       - name: Cache emsdk
         uses: actions/cache@v4

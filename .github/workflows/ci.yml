@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./../.github/composite/rust
+      - uses: ./.github/composite/rust
         with:
           components: clippy
       - run: cargo check --manifest-path rust/Cargo.toml
