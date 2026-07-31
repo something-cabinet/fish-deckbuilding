@@ -1,4 +1,5 @@
 use crate::core::cards::affix;
+use crate::core::cards::affix::CorruptOutcome;
 use crate::core::cards::CardDef;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -35,6 +36,7 @@ pub struct RunState {
     #[allow(dead_code)]
     pub unlocked_zones: Vec<String>,
     pub defeated_nodes: Vec<String>,
+    pub last_corrupt_outcome: Option<CorruptOutcome>,
 }
 
 impl RunState {
@@ -49,6 +51,7 @@ impl RunState {
             current_node: None,
             unlocked_zones: vec!["zone_1".to_string()],
             defeated_nodes: Vec::new(),
+            last_corrupt_outcome: None,
         };
         state.reset_combat_deck();
         state
@@ -141,7 +144,8 @@ impl RunState {
         if deck_idx >= self.combat_deck.len() { return None; }
         self.gold -= 200;
         let card = self.combat_deck[deck_idx].clone();
-        let (new_card, _) = affix::corrupt(&card, seed);
+        let (new_card, outcome) = affix::corrupt(&card, seed);
+        self.last_corrupt_outcome = Some(outcome);
         self.combat_deck[deck_idx] = new_card;
         Some(&self.combat_deck[deck_idx])
     }
