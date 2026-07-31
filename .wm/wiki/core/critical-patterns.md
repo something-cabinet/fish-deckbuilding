@@ -133,3 +133,17 @@ When a scene grows too large, extract self-contained node branches into their ow
 **What to do differently:** Extract any node branch with 3+ children and its own visual identity into a sub-scene. Give the sub-scene a script that owns its internal node refs. Update Rust code to use full paths from the scene root instead of `ui.get("export_name")`. This keeps scenes manageable (<150 lines per tscn) and decouples the Rust bridge from GDScript property names.
 
 **Full entry:** @wiki/patterns/scene-branch-extraction
+
+---
+
+## 2026-07-31 — Container-Based Layout for Dynamically-Created UI in gdext
+
+**Category:** pattern
+**Source:** @wiki/patterns/container-based-card-slot-layout
+**Tags:** [godot, ui, gdext, layout]
+
+When creating card slots, inventory items, or list entries dynamically via Rust gdext, use `VBoxContainer`/`HBoxContainer` inside a `Panel` instead of `set_position`/`set_size` absolute positioning. Absolute positioning on Labels inside Panels that are children of a `GridContainer` causes text overlap because the container layout pass overrides child positions. Container-based layout avoids this entirely.
+
+**What to do differently:** Never use `set_position`/`set_size` on children of dynamically-created Panels that are managed by a Container. Always nest a `VBoxContainer` (or `HBoxContainer`) inside the styled Panel, then add Labels to the container. Use `HBoxContainer` for side-by-side elements like cost + affix count.
+
+**Full entry:** @wiki/patterns/container-based-card-slot-layout

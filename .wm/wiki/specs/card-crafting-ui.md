@@ -55,7 +55,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 ### Non-Functional Requirements
 
 - NFR-1: Panel follows the same dark theme as existing UI (`#0b1a24` bg, `#4fd1c5` accent)
-- NFR-2: All UI nodes defined directly in `overworld.tscn` (no sub-scenes — gdext compatibility)
+- NFR-2: Self-contained UI panels (CardDetail, ActionSection, ResultSection, ConfirmDialog) extracted as sub-scenes. Sub-scenes work with gdext when using full absolute paths from `self.base()` — see @wiki/patterns/scene-branch-extraction
 - NFR-3: Rust bridge (`overworld_scene.rs`) syncs all UI state via `get_node_as` — no GDScript additions
 - NFR-4: Panel toggles visibility (shown/hidden) — does not change scene
 - NFR-5: Close button restores overworld map interaction
@@ -150,7 +150,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 
 ### Panel structure in overworld.tscn
 
-All nodes placed directly under the existing `UI` CanvasLayer (no sub-scenes):
+Self-contained panel groups extracted as sub-scenes. Full paths from `self.base()` resolve correctly through sub-scene boundaries. Sub-scenes have no GDScript — the Rust bridge accesses children via `get_node_as` with absolute paths.
 
 ```
 UI/CraftingPanel (Panel, hidden by default)
@@ -162,13 +162,14 @@ UI/CraftingPanel (Panel, hidden by default)
 │   ├── ModeTabs/EnchanterTab (Button, "Enchanter")
 │   ├── ModeTabs/GamblerTab (Button, "Gambler")
 │   └── ModeTabs/CorruptTab (Button, "Corrupt")
-├── CraftingPanel/CardBrowser (ScrollContainer)
+├── CraftingPanel/CardBrowser (Panel)
 │   ├── CardBrowser/DeckStashToggle (HBoxContainer)
 │   │   ├── DeckStashToggle/DeckButton (Button, "Deck", toggled by default)
 │   │   └── DeckStashToggle/StashButton (Button, "Stash")
-│   └── CardBrowser/Grid (GridContainer, 3 columns)
-│       └── CardSlot_* (Panel, populated dynamically)
-├── CraftingPanel/CardDetail (Panel, shown on card click)
+│   └── CardBrowser/Scroll (ScrollContainer)
+│       └── Scroll/Grid (GridContainer, 3 columns)
+│           └── CardSlot_* (Panel, populated dynamically via Rust)
+├── CraftingPanel/CardDetail (Panel, sub-scene: crafting_card_detail.tscn)
 │   ├── CardDetail/NameLabel
 │   ├── CardDetail/CostLabel
 │   ├── CardDetail/EffectsLabel
@@ -179,16 +180,16 @@ UI/CraftingPanel (Panel, hidden by default)
 │   │   └── AffixList/Affix_3
 │   ├── CardDetail/ImplicitAffix (Label, hidden if none)
 │   └── CardDetail/CorruptedBanner (Label, "CORRUPTED", red)
-├── CraftingPanel/ActionSection
+├── CraftingPanel/ActionSection (Panel, sub-scene: crafting_action_section.tscn)
 │   ├── ActionSection/CostLabel (Label, "Cost: 100g")
 │   ├── ActionSection/WarningLabel (Label, hidden, for corrupt warning)
 │   └── ActionSection/ActionButton (Button, text changes per mode)
-├── CraftingPanel/ResultSection (Panel, hidden, shown after operation)
+├── CraftingPanel/ResultSection (Panel, sub-scene: crafting_result_section.tscn)
 │   ├── ResultSection/OutcomeLabel (Label, "Boost!", colored)
 │   ├── ResultSection/BeforeCard (Panel, original card)
 │   ├── ResultSection/AfterCard (Panel, modified card)
 │   └── ResultSection/AcceptButton (Button, "Accept")
-└── CraftingPanel/ConfirmDialog (Panel, hidden)
+└── CraftingPanel/ConfirmDialog (Panel, sub-scene: crafting_confirm_dialog.tscn)
     ├── ConfirmDialog/Message (Label, action description + cost)
     ├── ConfirmDialog/ConfirmButton (Button)
     └── ConfirmDialog/CancelButton (Button)
