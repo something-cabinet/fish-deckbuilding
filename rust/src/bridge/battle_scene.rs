@@ -4,8 +4,8 @@ use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::notify::CanvasItemNotification;
 use godot::classes::control::MouseFilter;
 use godot::classes::{
-    Button, CanvasLayer, ColorRect, Control, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
-    Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat,
+    Button, CanvasLayer, ColorRect, Control, HBoxContainer, INode2D, InputEvent, InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D,
+    Panel, ProgressBar, RichTextLabel, ScrollContainer, StyleBox, StyleBoxFlat, VBoxContainer,
 };
 use godot::global::{HorizontalAlignment, MouseButton};
 use godot::prelude::*;
@@ -42,6 +42,14 @@ fn effect_to_string(effect: &Effect) -> String {
         Effect::DrawCards(v) => format!("draw {}", v),
         Effect::ApplyBuff(bt, v) => format!("{:?} {}", bt, v),
     }
+}
+
+fn affix_summary(card: &CardDef, separator: &str) -> String {
+    let mut parts: Vec<String> = card.affixes.iter().map(|a| a.description.clone()).collect();
+    if let Some(ref imp) = card.implicit_affix {
+        parts.push(format!("* {}", imp.description));
+    }
+    parts.join(separator)
 }
 
 fn screen_to_grid(pos: Vector2) -> Option<(i32, i32)> {
@@ -155,7 +163,7 @@ self.valid_card_targets.clear();
                 return;
             };
             let card_name = card.name.to_string();
-            let effects = card.effects.clone();
+            let effects = crate::core::cards::affix::apply_affixes_to_effects(&card);
             // Apply state changes first
             for effect in &effects {
                 Self::apply_card_effect_to_state(s, effect, grid_pos);
@@ -393,7 +401,7 @@ impl BattleScene {
         let card_name = card.name.to_string();
         let card = s.play_card(idx);
         let Some(card) = card else { return };
-        let effects = card.effects.clone();
+        let effects = crate::core::cards::affix::apply_affixes_to_effects(&card);
         let hero_pos = s.grid.find_faction(Faction::Hero).first().copied();
         // Apply state changes
         for effect in &effects {
@@ -546,15 +554,19 @@ impl BattleScene {
         let mut name_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipName");
         let mut cost_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipCost");
         let mut desc_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipDesc");
+        let mut affix_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipAffixes");
 
         name_label.set_text(&card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
-        let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
+        // Effective effects (base + affix bonuses) so the tooltip matches what the card actually does.
+        let effective_effects = crate::core::cards::affix::apply_affixes_to_effects(card);
+        let effect_strs: Vec<String> = effective_effects.iter().map(|e| format!("{:?}", e.effect)).collect();
         let range_str = card.effects.first().map(|e| match e.range {
             crate::core::grid::Range::Melee => "Melee",
             crate::core::grid::Range::Ranged => "Ranged",
         }).unwrap_or("");
         desc_label.set_text(&format!("{}\nRange: {}", effect_strs.join(", "), range_str));
+        affix_label.set_text(&affix_summary(card, "\n"));
 
         let tooltip_x = 300.0 + (idx as f32 * 150.0);
         tooltip.set_position(Vector2::new(tooltip_x, 510.0));
@@ -643,7 +655,11 @@ impl BattleScene {
     }
 
     fn start_battle(&mut self) {
-        self.state = Some(BattleState::new());
+        let player_deck = game_state::with_run_state(|run| run.combat_deck.clone());
+        self.state = Some(match player_deck {
+            Some(cards) if !cards.is_empty() => BattleState::new_with_player_deck(cards),
+            _ => BattleState::new(),
+        });
         self.selected = None;
         self.valid_moves.clear();
         self.card_targeting = false;
@@ -960,63 +976,70 @@ impl BattleScene {
     }
 
     fn sync_gy_viewer(&self, state: &BattleState) {
-        self.clear_gy_entries();
         let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
-        for (col, gy, start_y) in [("Player", &state.graveyard, 0), ("Enemy", &state.enemy_graveyard, 0)] {
-            let x_offset = if col == "Player" { 10 } else { 200 };
-            for (i, card) in gy.cards.iter().rev().enumerate() {
-                if i >= 10 { break; }
-                let y = start_y + i * 46;
+        // ScrollContainer is itself a Container — it lays out its children and
+        // overrides any manually-set position/size on them (see
+        // wiki/concepts/absolute-positioning-panel-children-gdext). It must get
+        // exactly one direct child; put both columns inside that single child.
+        while scroll.get_child_count() > 0 {
+            if let Some(mut child) = scroll.get_child(0) {
+                scroll.remove_child(&child);
+                child.queue_free();
+            }
+        }
+
+        let mut root = HBoxContainer::new_alloc();
+        root.set_name("GYRoot");
+        root.add_theme_constant_override("separation", 12);
+        scroll.add_child(&root);
+
+        for (gy, name_color) in [
+            (&state.graveyard, rgb(0xd6, 0xe8, 0xef)),
+            (&state.enemy_graveyard, rgb(0xff, 0x8f, 0x8f)),
+        ] {
+            let mut column = VBoxContainer::new_alloc();
+            column.set_custom_minimum_size(Vector2::new(180.0, 0.0));
+            column.add_theme_constant_override("separation", 4);
+
+            for card in gy.cards.iter().rev().take(10) {
                 let mut entry = Panel::new_alloc();
-                entry.set_name(&format!("GYEntry_{}_{}", col, i));
-                entry.set_position(Vector2::new(x_offset as f32, y as f32));
-                entry.set_size(Vector2::new(180.0, 42.0));
+                entry.set_custom_minimum_size(Vector2::new(180.0, 42.0));
                 let mut es = StyleBoxFlat::new_gd();
                 es.set_bg_color(rgba(0x1e, 0x3a, 0x4c, 0.9));
                 es.set_corner_radius_all(4);
                 entry.add_theme_stylebox_override("panel", &es.upcast::<StyleBox>());
-                scroll.add_child(&entry);
 
+                let mut vbox = VBoxContainer::new_alloc();
+                vbox.add_theme_constant_override("separation", 1);
+                vbox.set_offsets_preset(godot::classes::control::LayoutPreset::FULL_RECT);
+
+                let mut row = HBoxContainer::new_alloc();
                 let mut nl = Label::new_alloc();
-                nl.set_position(Vector2::new(4.0, 2.0));
-                nl.set_size(Vector2::new(120.0, 18.0));
                 nl.set_text(&card.name);
-                nl.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
+                nl.add_theme_color_override("font_color", name_color);
                 nl.add_theme_font_size_override("font_size", 10);
-                entry.add_child(&nl);
+                nl.set_h_size_flags(godot::classes::control::SizeFlags::EXPAND_FILL);
+                row.add_child(&nl);
 
                 let mut cl = Label::new_alloc();
-                cl.set_position(Vector2::new(130.0, 2.0));
-                cl.set_size(Vector2::new(46.0, 18.0));
                 cl.set_text(&format!("{}", card.cost));
-                cl.set_horizontal_alignment(HorizontalAlignment::CENTER);
+                cl.set_horizontal_alignment(HorizontalAlignment::RIGHT);
                 cl.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
                 cl.add_theme_font_size_override("font_size", 10);
-                entry.add_child(&cl);
+                row.add_child(&cl);
+                vbox.add_child(&row);
 
                 let mut el = Label::new_alloc();
                 let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
-                el.set_position(Vector2::new(4.0, 20.0));
-                el.set_size(Vector2::new(172.0, 20.0));
                 el.set_text(&desc.join(", "));
                 el.add_theme_color_override("font_color", rgb(0x8e, 0xb4, 0xc4));
                 el.add_theme_font_size_override("font_size", 9);
-                entry.add_child(&el);
-            }
-        }
-    }
+                vbox.add_child(&el);
 
-    fn clear_gy_entries(&self) {
-        let mut scroll = self.base().get_node_as::<ScrollContainer>("UI/GraveyardPanel/GYScroll");
-        for i in 0..20 {
-            for prefix in &["Player", "Enemy"] {
-                let name = format!("GYEntry_{}_{}", prefix, i);
-                if scroll.has_node(&name) {
-                    let mut child = scroll.get_node_as::<Node2D>(&name);
-                    scroll.remove_child(&child);
-                    child.queue_free();
-                }
+                entry.add_child(&vbox);
+                column.add_child(&entry);
             }
+            root.add_child(&column);
         }
     }
 
@@ -1322,14 +1345,18 @@ impl BattleScene {
             let mut name_label: Gd<Label> = slot.get("name_label").try_to().expect("name_label missing");
             let mut cost_label: Gd<Label> = slot.get("cost_label").try_to().expect("cost_label missing");
             let mut effects_label: Gd<Label> = slot.get("effects_label").try_to().expect("effects_label missing");
+            let mut affix_label: Gd<Label> = slot.get("affix_label").try_to().expect("affix_label missing");
             let mut range_label: Gd<Label> = slot.get("range_label").try_to().expect("range_label missing");
             if i < state.hand.len() {
                 let card = &state.hand.cards[i];
                 let can_play = state.mana >= card.cost && state.phase == Phase::PlayerTurn;
                 name_label.set_text(&card.name);
                 cost_label.set_text(&format!("{}", card.cost));
-                let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
+                // Effective effects (base + affix bonuses) so the displayed numbers match what the card actually does.
+                let effective_effects = crate::core::cards::affix::apply_affixes_to_effects(card);
+                let effect_strs: Vec<String> = effective_effects.iter().map(|e| format!("{:?}", e.effect)).collect();
                 effects_label.set_text(&effect_strs.join(", "));
+                affix_label.set_text(&affix_summary(card, ", "));
                 let range_str = card.effects.first().map(|e| match e.range {
                     Range::Melee => "Melee",
                     Range::Ranged => "Ranged",
@@ -1370,6 +1397,7 @@ impl BattleScene {
                 name_label.set_text("");
                 cost_label.set_text("");
                 effects_label.set_text("");
+                affix_label.set_text("");
                 range_label.set_text("");
                 slot.set_visible(false);
             }

@@ -2,11 +2,20 @@
 title: Session 2026-07-31 Crafting/Save/Hover
 type: memory
 tags: [crafting, ui, hover, save, gdext]
+status: active
+---
+
+---
+title: Session 2026-07-31 Crafting/Save/Hover
+type: memory
+tags: [crafting, ui, hover, save, gdext]
 layer: session
 status: active
 ---
 
 # Session 2026-07-31 — Crafting UI, Hover, Save/Load
+
+> **Superseded by typed pages:** the Overworld Node Refresh finding below is now the canonical @wiki/patterns/overworld-node-action-refresh page (which also documents a second instance — gold label desync — found in a follow-up session). Prefer that page for future reference; this flat session note is kept for historical context only.
 
 ## Overworld Node Refresh
 Enchanter/Gambler node clicks advance `hero_node_idx` but never called `self.refresh()`, causing the map display to desync. The hero icon stayed at the old position, accessible-node highlighting was stale, and clicking connected nodes silently did nothing in `on_node_click`. Fixed by adding `self.refresh()` to the Enchanter/Gambler branches.

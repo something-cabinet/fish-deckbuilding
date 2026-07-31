@@ -4,6 +4,12 @@ type: core
 tags: [critical]
 ---
 
+---
+title: Critical Patterns
+type: core
+tags: [critical]
+---
+
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -16,9 +22,9 @@ Promoted learnings from completed work. Read this at the start of every session 
 **Source:** @wiki/concepts:untested-ui-orchestration-p0s
 **Tags:** [testing, ui, orchestration]
 
-All P0 bugs across BOTH architectures (roguelite and tactical RPG) lived in the untested UI wiring layer. The pure function layer had 0 bugs across 194 tests. Root cause: no integration tests for the orchestrator code that connects game logic to UI. The project's own NFR-2 was written to prevent this, but the orchestrator test suite was deleted during cleanup and not rebuilt — causing the same failure pattern to recur.
+All P0 bugs across THREE occurrences (roguelite, tactical RPG, and the godot-rust bridge layer) lived in the untested UI/bridge wiring layer. The pure function layer had 0 bugs across 79-194 tests each time. Root cause: no integration tests for the orchestrator/bridge code that connects game logic to UI. The project's own NFR-2 was written to prevent this, but the pattern still recurred — twice via deleted test suites, once via a pure function (`apply_affixes_to_effects`) that was fully unit-tested but never actually called from the bridge (`#[allow(dead_code)]` masked it).
 
-**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. NEVER delete orchestrator tests without replacement. UI components should be thin — call tested controllers.
+**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. NEVER delete orchestrator tests without replacement. UI components should be thin — call tested controllers. **When you see `#[allow(dead_code)]` on a `pub fn` in `core/`, grep its call sites before trusting that the feature it implements actually works in-game** — a green unit test suite proves nothing about whether the bridge ever calls the function.
 
 **Full entry:** @wiki/concepts/untested-ui-orchestration-p0s
 
@@ -147,3 +153,17 @@ When creating card slots, inventory items, or list entries dynamically via Rust 
 **What to do differently:** Never use `set_position`/`set_size` on children of dynamically-created Panels that are managed by a Container. Always nest a `VBoxContainer` (or `HBoxContainer`) inside the styled Panel, then add Labels to the container. Use `HBoxContainer` for side-by-side elements like cost + affix count.
 
 **Full entry:** @wiki/patterns/container-based-card-slot-layout
+
+---
+
+## 2026-07-31 — Every State Mutation Must Resync ALL Displays of That State, Not Just the Active One
+
+**Category:** pattern
+**Source:** @wiki/patterns:overworld-node-action-refresh
+**Tags:** [godot, gdext, ui, state-sync]
+
+In a Rust/gdext bridge scene, `set_text()` calls do not auto-bind to a data source — every Label showing a piece of core state (map hero position, gold) must be explicitly re-synced after every mutation. Two separate bugs in the overworld scene followed this exact shape: (1) entering an Enchanter/Gambler node moved `hero_node_idx` without calling `self.refresh()`, leaving the map's hero icon and accessible-node highlighting stale; (2) spending gold on a craft updated `RunState.gold` without re-syncing either the top-left HUD gold label or the crafting panel's own header gold label, so the two labels could show different numbers until the player navigated away and back.
+
+**What to do differently:** After any bridge method that mutates shared state (`RunState`, hero position, etc.), explicitly call every sync/refresh function that touches a UI element displaying that state — don't rely on the next unrelated redraw to catch it up. When a value is shown in more than one place (HUD + panel header), resync both at the same call site as the mutation.
+
+**Full entry:** @wiki/patterns/overworld-node-action-refresh

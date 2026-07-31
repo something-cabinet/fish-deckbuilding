@@ -25,11 +25,15 @@ pub struct BattleState {
 
 impl BattleState {
     pub fn new() -> Self {
+        Self::new_with_player_deck(starter_deck())
+    }
+
+    pub fn new_with_player_deck(player_cards: Vec<CardDef>) -> Self {
         let mut grid = GridState::new(constants::GRID_WIDTH, constants::GRID_HEIGHT);
         grid.place_unit(constants::HERO_START, GridUnit::hero());
         grid.place_unit(constants::ENEMY_START, GridUnit::enemy());
 
-        let mut deck = Deck::new(starter_deck());
+        let mut deck = Deck::new(player_cards);
         deck.shuffle(42);
         let mut hand = Hand::new(5);
         for _ in 0..5 { if let Some(c) = deck.draw() { hand.add(c); } }

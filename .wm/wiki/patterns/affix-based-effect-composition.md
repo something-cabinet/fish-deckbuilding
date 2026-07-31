@@ -1,4 +1,16 @@
 ---
+{}
+relates_to:
+  - {type: relates_to, target: wiki:concepts:untested-ui-orchestration-p0s}
+---
+
+---
+{}
+relates_to:
+  - {type: references, target: wiki:tasks:crafting-ui-actions}
+---
+
+---
 title: Pattern: Affix-Based Effect Composition for Card Games
 type: pattern
 tags: [pattern, cards, affix, rust, game-design]
@@ -56,6 +68,14 @@ All operations are pure functions returning a new CardDef:
 | Add corruption implicit | 20% | Gains a special implicit affix |
 | Add implicit + boost | 10% | Implicit + boosted existing affix |
 
+## Critical Pitfall: "Applied at resolution time" Must Mean an Actual Call Site
+
+The "affixes are applied when computing the effective effect values" line above describes the *intended* design — `apply_affixes_to_effects(card: &CardDef) -> Vec<CardEffect>` composes the base effects with affix/implicit bonuses correctly and is unit-tested for it. But for a full implementation pass, that function shipped `#[allow(dead_code)]` because **the battle bridge never called it** — both card-play paths in `battle_scene.rs` read `card.effects.clone()` directly, bypassing the affix layer entirely. Crafted cards spent gold, updated their `affixes` vec, and displayed the new affix text correctly, but hit/healed/shielded for exactly the base (un-modified) values in actual combat.
+
+This is the resolution-time composition pattern's biggest risk: because the base `CardEffect`s and the affix-modified `CardEffect`s have the identical type, it's trivially easy for a call site to use the wrong one and still compile, still pass unit tests (which test `apply_affixes_to_effects` directly), and show no visible symptom outside of "the number in combat doesn't match the number in the crafting UI."
+
+**Mitigation:** Treat `apply_affixes_to_effects` (or whatever function performs the composition) as the *only* legal way to read a card's effects for gameplay purposes — never `card.effects` directly — everywhere except pure display/description code (range/target lookups, which affixes don't change, are fine to read from `card.effects` directly). Grep for `.effects.clone()` and `.effects.iter()` at bridge call sites whenever the affix system changes, and add an integration test that plays a crafted card and asserts the boosted value landed. See @wiki/concepts/untested-ui-orchestration-p0s (third occurrence) for the full failure writeup and fix.
+
 ## When to Use
 - Card games with a crafting or loot system
 - Games where cards need runtime modification without mutating base definitions
@@ -72,3 +92,4 @@ All operations are pure functions returning a new CardDef:
 ## Related
 - @wiki/specs/combat-affix-crafting-system
 - @wiki/patterns/effects-first-card-model
+- @wiki/concepts/untested-ui-orchestration-p0s

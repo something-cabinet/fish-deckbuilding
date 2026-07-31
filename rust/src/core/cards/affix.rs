@@ -242,7 +242,6 @@ pub fn corrupt(card: &CardDef, seed: u64) -> (CardDef, CorruptOutcome) {
     (new_card, outcome)
 }
 
-#[allow(dead_code)]
 pub fn apply_affixes_to_effects(card: &CardDef) -> Vec<CardEffect> {
     card.effects.iter().enumerate().map(|(i, ce)| {
         let mut dmg = 0;

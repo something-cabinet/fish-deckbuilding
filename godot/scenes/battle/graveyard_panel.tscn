@@ -70,7 +70,8 @@ text = "Enemy Graveyard"
 
 [node name="GYScroll" type="ScrollContainer" parent="." unique_id=1341257082]
 layout_mode = 0
+offset_left = 10.0
 offset_top = 56.0
-offset_right = 1250.0
-offset_bottom = 580.0
+offset_right = 390.0
+offset_bottom = 524.0
 horizontal_scroll_mode = 0

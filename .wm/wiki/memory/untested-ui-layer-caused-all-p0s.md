@@ -5,4 +5,4 @@ tags: [failure, testing]
 status: active
 ---
 
-7 P0 bugs across 3 Oracle reviews — ALL in untested BattleHUD.svelte. Zero bugs in tested pure function layer. Root cause: no integration tests for UI wiring. Full entry: @wiki/concepts/untested-ui-orchestration-p0s
+All P0 bugs across three occurrences (roguelite, tactical RPG, godot-rust bridge) lived in the untested UI/bridge wiring layer, never the well-tested pure function core. Third occurrence: a fully unit-tested pure function (`apply_affixes_to_effects`) was never called by the bridge, so crafted card bonuses had no gameplay effect — masked by `#[allow(dead_code)]`. When you see that attribute on a `pub fn` in core/, grep its call sites before trusting the feature works. Full reference: @wiki/concepts/untested-ui-orchestration-p0s

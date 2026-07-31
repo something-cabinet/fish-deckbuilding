@@ -1,6 +1,20 @@
 ---
 title: Combat Affix & Crafting System
 type: spec
+tags:
+- game-design
+- combat
+- affix
+- crafting
+- cards
+status: implemented
+relates_to:
+  - {type: references, target: wiki:tasks:crafting-ui-actions}
+---
+
+---
+title: Combat Affix & Crafting System
+type: spec
 status: implemented
 tags:
 - game-design
@@ -161,6 +175,8 @@ Implemented in commit `9e70ee6`:
 | AC-9: Deterministic seeds | ✅ | Same seed + same card = same result |
 
 Open items tracked separately: corrupted visual indicators (FR-6b), character unique cards (D4/FR-7), infinite loop prevention (FR-9).
+
+**2026-07-31 follow-up fix — FR-2 was not actually satisfied in battle.** `apply_affixes_to_effects()` correctly composed affix bonuses into effective card effects and was unit-tested, but the battle bridge (`battle_scene.rs`) played cards via `card.effects.clone()` directly, bypassing the affix layer entirely. Crafted cards spent gold and displayed updated affix text, but had zero actual gameplay effect. Fixed by routing both card-play call sites through `apply_affixes_to_effects(&card)`. See @wiki/concepts/untested-ui-orchestration-p0s (third occurrence) and @wiki/patterns/affix-based-effect-composition (Critical Pitfall section) for the full writeup. This also surfaced two smaller UI bugs in the same session, documented at @wiki/patterns/overworld-node-action-refresh: stale map redraw after entering an Enchanter/Gambler node, and a gold-label desync between the HUD and the crafting panel header after a purchase.
 
 - [ ] **OQ-1: Gold costs** — What are the specific gold costs for each crafting operation? (No existing economy to balance against; costs can be placeholder values like 50/100/200 for reroll/add-slot/corrupt)
 - [ ] **OQ-2: Character classes** — What additional characters exist beyond Guppy? (Greenfield — needs design work)

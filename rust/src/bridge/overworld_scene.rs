@@ -10,7 +10,7 @@ use godot::prelude::*;
 
 use crate::core::cards::Rarity;
 use crate::core::{
-    overworld::{NodeType, OverworldNode, RunState, create_zone_1},
+    overworld::{CardLocation, NodeType, OverworldNode, RunState, create_zone_1},
     cards::all_starter_cards,
 };
 use super::game_state;
@@ -35,6 +35,14 @@ impl CraftingMode {
         match self {
             CraftingMode::Enchanter => "Add Slot",
             CraftingMode::Gambler => "Reroll",
+            CraftingMode::Corrupt => "Corrupt",
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        match self {
+            CraftingMode::Enchanter => "Enchanter",
+            CraftingMode::Gambler => "Gambler",
             CraftingMode::Corrupt => "Corrupt",
         }
     }
@@ -111,7 +119,9 @@ impl INode2D for OverworldScene {
             let local_pos = Vector2::new(pos.x - grid_origin.x, pos.y - grid_origin.y);
             if let Some(idx) = self.index_from_grid_pos(local_pos) {
                 self.selected_card_idx = idx as i32;
+                self.hovered_crafting_slot = None;
                 self.show_card_detail(idx);
+                self.populate_grid();
                 self.sync_crafting_ui();
                 return;
             }
@@ -171,6 +181,8 @@ impl OverworldScene {
 
         let accept_btn = self.base().get_node_as::<Button>("UI/CraftingPanel/ResultSection/AcceptButton");
         accept_btn.signals().pressed().connect_other(self_gd, OverworldScene::on_accept_result);
+
+        self.build_legend();
     }
 
     fn start_run(&mut self) {
@@ -241,35 +253,127 @@ impl OverworldScene {
                         || node.connections.contains(&self.nodes[self.hero_node_idx as usize].id)));
 
             let is_cleared = run.defeated_nodes.contains(&node.id);
+            let is_boss = node.node_type == NodeType::Boss;
+            let size = if is_boss { 68.0 } else { 60.0 };
 
             let mut panel = Panel::new_alloc();
             panel.set_name(&format!("MapNodePanel_{}", i));
-            panel.set_position(Vector2::new(nx - 30.0, ny - 30.0));
-            panel.set_size(Vector2::new(60.0, 60.0));
+            panel.set_position(Vector2::new(nx - size / 2.0, ny - size / 2.0));
+            panel.set_size(Vector2::new(size, size));
             let mut style = StyleBoxFlat::new_gd();
-            let color = if is_cleared { rgb(0x2a, 0x5a, 0x7a) }
-                       else if is_accessible { rgb(0x4f, 0xd1, 0xc5) }
-                       else { rgb(0x1e, 0x3a, 0x4c) };
-            style.set_bg_color(color);
-            style.set_corner_radius_all(30);
+
+            let base_color = node_type_color(node.node_type);
+            if is_cleared {
+                style.set_bg_color(desaturate(base_color, 0.35));
+                style.set_border_width_all(2);
+                style.set_border_color(rgb(0x3f, 0x6f, 0x5a));
+            } else if is_accessible {
+                style.set_bg_color(base_color);
+                style.set_border_width_all(4);
+                style.set_border_color(rgb(0x4f, 0xd1, 0xc5));
+            } else {
+                style.set_bg_color(desaturate(base_color, 0.55));
+                style.set_border_width_all(1);
+                style.set_border_color(rgb(0x1e, 0x3a, 0x4c));
+            }
+            style.set_corner_radius_all(if is_boss { 12 } else { (size / 2.0) as i32 });
             panel.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
             container.add_child(&panel);
 
             let mut label = Label::new_alloc();
-            label.set_position(Vector2::new(nx - 28.0, ny + 12.0));
-            label.set_size(Vector2::new(56.0, 20.0));
-            label.set_text(match node.node_type {
-                NodeType::Battle => "B",
-                NodeType::Boss => "!",
-                NodeType::Rest => "+",
-                NodeType::Shop => "$",
-                NodeType::Enchanter => "E",
-                NodeType::Gambler => "?",
-            });
+            label.set_position(Vector2::new(nx - size / 2.0, ny - 14.0));
+            label.set_size(Vector2::new(size, 28.0));
+            label.set_text(node_type_icon(node.node_type));
             label.set_horizontal_alignment(godot::global::HorizontalAlignment::CENTER);
-            label.add_theme_color_override("font_color", rgb(0x0b, 0x1a, 0x24));
+            label.set_vertical_alignment(godot::global::VerticalAlignment::CENTER);
+            label.add_theme_font_size_override("font_size", 22);
+            label.add_theme_color_override(
+                "font_color",
+                if is_cleared || !is_accessible { rgb(0xc8, 0xc8, 0xc8) } else { rgb(0x0b, 0x1a, 0x24) },
+            );
             container.add_child(&label);
+
+            if is_cleared {
+                let mut badge_bg = Panel::new_alloc();
+                badge_bg.set_position(Vector2::new(nx + size / 2.0 - 12.0, ny - size / 2.0 - 10.0));
+                badge_bg.set_size(Vector2::new(20.0, 20.0));
+                let mut badge_style = StyleBoxFlat::new_gd();
+                badge_style.set_bg_color(rgb(0x2f, 0x8f, 0x5a));
+                badge_style.set_corner_radius_all(10);
+                badge_bg.add_theme_stylebox_override("panel", &badge_style.upcast::<StyleBox>());
+                container.add_child(&badge_bg);
+
+                let mut badge = Label::new_alloc();
+                badge.set_position(Vector2::new(nx + size / 2.0 - 12.0, ny - size / 2.0 - 12.0));
+                badge.set_size(Vector2::new(20.0, 20.0));
+                badge.set_text("OK");
+                badge.set_horizontal_alignment(godot::global::HorizontalAlignment::CENTER);
+                badge.add_theme_font_size_override("font_size", 9);
+                badge.add_theme_color_override("font_color", rgb(0xe8, 0xff, 0xf0));
+                container.add_child(&badge);
+            }
+
+            let mut caption = Label::new_alloc();
+            caption.set_position(Vector2::new(nx - 45.0, ny + size / 2.0 + 4.0));
+            caption.set_size(Vector2::new(90.0, 16.0));
+            caption.set_text(node_type_name(node.node_type));
+            caption.set_horizontal_alignment(godot::global::HorizontalAlignment::CENTER);
+            caption.add_theme_font_size_override("font_size", 11);
+            caption.add_theme_color_override(
+                "font_color",
+                if is_accessible && !is_cleared { rgb(0x4f, 0xd1, 0xc5) } else { rgb(0x5a, 0x6a, 0x78) },
+            );
+            container.add_child(&caption);
         }
+    }
+
+    fn build_legend(&self) {
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let mut legend = VBoxContainer::new_alloc();
+        legend.set_name("Legend");
+        // Sits clear of CraftingPanel (x: 190-1090) so it never overlaps
+        // panel controls like the close button, whether the panel is open or not.
+        legend.set_position(Vector2::new(1100.0, 20.0));
+        legend.set_size(Vector2::new(170.0, 200.0));
+        legend.add_theme_constant_override("separation", 4);
+
+        let types = [
+            NodeType::Battle,
+            NodeType::Boss,
+            NodeType::Rest,
+            NodeType::Shop,
+            NodeType::Enchanter,
+            NodeType::Gambler,
+        ];
+        for t in types {
+            let mut row = HBoxContainer::new_alloc();
+            row.add_theme_constant_override("separation", 8);
+
+            let mut swatch = Panel::new_alloc();
+            swatch.set_custom_minimum_size(Vector2::new(22.0, 22.0));
+            let mut style = StyleBoxFlat::new_gd();
+            style.set_bg_color(node_type_color(t));
+            style.set_corner_radius_all(if t == NodeType::Boss { 5 } else { 11 });
+            swatch.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
+            row.add_child(&swatch);
+
+            let mut icon = Label::new_alloc();
+            icon.set_custom_minimum_size(Vector2::new(16.0, 22.0));
+            icon.set_text(node_type_icon(t));
+            icon.set_horizontal_alignment(godot::global::HorizontalAlignment::CENTER);
+            icon.add_theme_color_override("font_color", rgb(0x0b, 0x1a, 0x24));
+            row.add_child(&icon);
+
+            let mut name = Label::new_alloc();
+            name.set_text(node_type_name(t));
+            name.add_theme_color_override("font_color", rgb(0xc8, 0xd8, 0xe0));
+            row.add_child(&name);
+
+            legend.add_child(&row);
+        }
+
+        let mut container = ui;
+        container.add_child(&legend);
     }
 
     fn draw_hero(&self, ui: &Gd<CanvasLayer>) {
@@ -381,6 +485,7 @@ impl OverworldScene {
             slot.set_mouse_filter(MouseFilter::PASS);
 
             let can_use = self.can_craft_on_card(card);
+            let is_selected = self.selected_card_idx == i as i32;
             let mut style = StyleBoxFlat::new_gd();
             if can_use {
                 style.set_bg_color(rarity_color(card.rarity));
@@ -388,7 +493,10 @@ impl OverworldScene {
                 style.set_bg_color(rgb(0x1e, 0x3a, 0x4c));
             }
             style.set_corner_radius_all(4);
-            if card.corrupted {
+            if is_selected {
+                style.set_border_color(rgb(0x4f, 0xd1, 0xc5));
+                style.set_border_width_all(3);
+            } else if card.corrupted {
                 style.set_border_color(rgb(0xcc, 0x1a, 0x1a));
                 style.set_border_width_all(2);
             }
@@ -407,9 +515,9 @@ impl OverworldScene {
             let mut row = HBoxContainer::new_alloc();
             row.set_mouse_filter(MouseFilter::IGNORE);
             let mut cost_label = Label::new_alloc();
-            cost_label.set_text(&format!("{}g", card.cost));
+            cost_label.set_text(&format!("Mana {}", card.cost));
             cost_label.set_mouse_filter(MouseFilter::IGNORE);
-            cost_label.add_theme_color_override("font_color", rgb(0xf4, 0xc4, 0x30));
+            cost_label.add_theme_color_override("font_color", rgb(0x60, 0xa5, 0xfa));
             row.add_child(&cost_label);
 
             let mut affix_label = Label::new_alloc();
@@ -461,27 +569,57 @@ impl OverworldScene {
 
     fn sync_crafting_ui(&self) {
         let Some(run) = self.run.as_ref() else { return };
+        let mode_color = crafting_mode_color(self.crafting_mode);
+        let can_afford = run.gold >= self.crafting_mode.cost();
 
-        let mut gold_display = self.base().get_node_as::<Label>("UI/CraftingPanel/Header/GoldDisplay");
-        gold_display.set_text(&format!("Gold: {}", run.gold));
+        let mut title = self.base().get_node_as::<Label>("UI/CraftingPanel/Header/Title");
+        title.set_text(&format!("Crafting - {}", self.crafting_mode.name()));
+        title.add_theme_color_override("font_color", lighten(mode_color, 0.35));
 
         let mut cost_label = self.base().get_node_as::<Label>("UI/CraftingPanel/ActionSection/CostLabel");
         cost_label.set_text(&format!("Cost: {}g", self.crafting_mode.cost()));
+        cost_label.add_theme_color_override(
+            "font_color",
+            if can_afford { rgb(0xf4, 0xc4, 0x30) } else { rgb(0xcc, 0x5a, 0x3a) },
+        );
 
         let mut action_btn = self.base().get_node_as::<Button>("UI/CraftingPanel/ActionSection/ActionButton");
         action_btn.set_text(self.crafting_mode.action_label());
-        let can_afford = run.gold >= self.crafting_mode.cost();
-        action_btn.set_disabled(!can_afford || self.selected_card_idx < 0 || self.showing_stash);
+        action_btn.set_disabled(!can_afford || self.selected_card_idx < 0);
+        let mut action_style = StyleBoxFlat::new_gd();
+        action_style.set_bg_color(if can_afford { mode_color } else { rgb(0x2a, 0x2a, 0x2a) });
+        action_style.set_corner_radius_all(4);
+        action_btn.add_theme_stylebox_override("normal", &action_style.upcast::<StyleBox>());
 
         let mut warning = self.base().get_node_as::<Label>("UI/CraftingPanel/ActionSection/WarningLabel");
         warning.set_visible(self.crafting_mode == CraftingMode::Corrupt);
 
-        let mut enchanter_tab = self.base().get_node_as::<Button>("UI/CraftingPanel/ModeTabs/EnchanterTab");
-        let mut gambler_tab = self.base().get_node_as::<Button>("UI/CraftingPanel/ModeTabs/GamblerTab");
-        let mut corrupt_tab = self.base().get_node_as::<Button>("UI/CraftingPanel/ModeTabs/CorruptTab");
-        enchanter_tab.set_pressed(self.crafting_mode == CraftingMode::Enchanter);
-        gambler_tab.set_pressed(self.crafting_mode == CraftingMode::Gambler);
-        corrupt_tab.set_pressed(self.crafting_mode == CraftingMode::Corrupt);
+        let tabs = [
+            ("UI/CraftingPanel/ModeTabs/EnchanterTab", CraftingMode::Enchanter),
+            ("UI/CraftingPanel/ModeTabs/GamblerTab", CraftingMode::Gambler),
+            ("UI/CraftingPanel/ModeTabs/CorruptTab", CraftingMode::Corrupt),
+        ];
+        for (path, mode) in tabs {
+            let mut tab = self.base().get_node_as::<Button>(path);
+            let active = self.crafting_mode == mode;
+            tab.set_pressed(active);
+            let make_style = || {
+                let mut style = StyleBoxFlat::new_gd();
+                style.set_bg_color(if active { crafting_mode_color(mode) } else { rgb(0x16, 0x2a, 0x38) });
+                style.set_corner_radius_all(4);
+                if active {
+                    style.set_border_width_all(2);
+                    style.set_border_color(rgb(0x4f, 0xd1, 0xc5));
+                }
+                style
+            };
+            tab.add_theme_stylebox_override("normal", &make_style().upcast::<StyleBox>());
+            tab.add_theme_stylebox_override("pressed", &make_style().upcast::<StyleBox>());
+            tab.add_theme_color_override(
+                "font_color",
+                if active { rgb(0xf5, 0xf5, 0xf5) } else { rgb(0x8a, 0x9a, 0xaa) },
+            );
+        }
     }
 
     fn show_card_detail(&self, card_idx: usize) {
@@ -496,7 +634,7 @@ impl OverworldScene {
         name_label.set_text(&card.name);
 
         let mut cost_label = self.base().get_node_as::<Label>("UI/CraftingPanel/CardDetail/CostLabel");
-        cost_label.set_text(&format!("Cost: {}g", card.cost));
+        cost_label.set_text(&format!("Mana: {}", card.cost));
 
         let mut effects_label = self.base().get_node_as::<Label>("UI/CraftingPanel/CardDetail/EffectsLabel");
         let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
@@ -536,7 +674,6 @@ impl OverworldScene {
 
     #[func]
     fn on_action(&mut self) {
-        if self.showing_stash { return; }
         let Some(run) = self.run.as_ref() else { return };
         let idx = self.selected_card_idx;
         if idx < 0 { return; }
@@ -553,13 +690,19 @@ impl OverworldScene {
         };
         message.set_text(&msg);
         confirm.set_visible(true);
+
+        let mut confirm_btn = self.base().get_node_as::<Button>("UI/CraftingPanel/ConfirmDialog/ConfirmButton");
+        let mut style = StyleBoxFlat::new_gd();
+        style.set_bg_color(crafting_mode_color(self.crafting_mode));
+        style.set_corner_radius_all(4);
+        confirm_btn.add_theme_stylebox_override("normal", &style.upcast::<StyleBox>());
     }
 
     #[func]
     fn on_confirm(&mut self) {
-        if self.showing_stash { return; }
         let idx = self.selected_card_idx;
         if idx < 0 { return; }
+        let location = if self.showing_stash { CardLocation::Stash } else { CardLocation::Deck };
         let Some(run) = self.run.as_mut() else { return };
         let cards = if self.showing_stash { &run.stash } else { &run.combat_deck };
         let Some(original) = cards.get(idx as usize) else { return };
@@ -570,13 +713,13 @@ impl OverworldScene {
 
         let result = match self.crafting_mode {
             CraftingMode::Enchanter => {
-                run.enchanter_add_slot(idx as usize, seed).cloned()
+                run.enchanter_add_slot(location, idx as usize, seed).cloned()
             }
             CraftingMode::Gambler => {
-                run.gambler_reroll_affix(idx as usize, seed).cloned()
+                run.gambler_reroll_affix(location, idx as usize, seed).cloned()
             }
             CraftingMode::Corrupt => {
-                run.corrupt_card(idx as usize, seed).cloned()
+                run.corrupt_card(location, idx as usize, seed).cloned()
             }
         };
 
@@ -587,6 +730,15 @@ impl OverworldScene {
         if let Some(run) = self.run.as_ref() {
             super::save_manager::save_run_state(run);
         }
+
+        // Gold was just spent — keep the HUD label and the in-panel label
+        // (and the action button's afford-check) in sync immediately,
+        // rather than waiting for the next map refresh or grid repopulate.
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        if let Some(run) = self.run.as_ref() {
+            self.update_hud(&ui, run);
+        }
+        self.sync_crafting_ui();
 
         let mut confirm = self.base().get_node_as::<Panel>("UI/CraftingPanel/ConfirmDialog");
         confirm.set_visible(false);
@@ -665,6 +817,25 @@ impl OverworldScene {
             while after.get_child_count() > 0 {
                 if let Some(mut c) = after.get_child(0) { after.remove_child(&c); c.queue_free(); }
             }
+
+            let border_color = if self.crafting_mode == CraftingMode::Corrupt {
+                match self.run.as_ref().and_then(|r| r.last_corrupt_outcome) {
+                    Some(crate::core::cards::affix::CorruptOutcome::Boost)
+                    | Some(crate::core::cards::affix::CorruptOutcome::AddImplicitAndBoost) => rgb(0x4f, 0xbf, 0x4f),
+                    Some(crate::core::cards::affix::CorruptOutcome::Weaken) => rgb(0xcc, 0x1a, 0x1a),
+                    Some(crate::core::cards::affix::CorruptOutcome::AddImplicit) => rgb(0x7f, 0x4f, 0xbf),
+                    _ => rgb(0x5a, 0x6a, 0x78),
+                }
+            } else {
+                rgb(0x4f, 0xbf, 0x4f)
+            };
+            let mut after_style = StyleBoxFlat::new_gd();
+            after_style.set_bg_color(rgb(0x0f, 0x21, 0x2d));
+            after_style.set_corner_radius_all(4);
+            after_style.set_border_width_all(3);
+            after_style.set_border_color(border_color);
+            after.add_theme_stylebox_override("panel", &after_style.upcast::<StyleBox>());
+
             let mut vbox = VBoxContainer::new_alloc();
             vbox.add_theme_constant_override("separation", 2);
 
@@ -882,6 +1053,64 @@ impl OverworldScene {
 }
 
 fn rgb(r: u8, g: u8, b: u8) -> Color { Color::from_rgb(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0) }
+
+fn lighten(color: Color, factor: f32) -> Color {
+    Color::from_rgb(
+        color.r + (1.0 - color.r) * factor,
+        color.g + (1.0 - color.g) * factor,
+        color.b + (1.0 - color.b) * factor,
+    )
+}
+
+fn desaturate(color: Color, factor: f32) -> Color {
+    let gray = color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+    Color::from_rgb(
+        color.r + (gray - color.r) * factor,
+        color.g + (gray - color.g) * factor,
+        color.b + (gray - color.b) * factor,
+    )
+}
+
+fn node_type_color(t: NodeType) -> Color {
+    match t {
+        NodeType::Battle => rgb(0xb0, 0x3a, 0x3a),
+        NodeType::Boss => rgb(0x8a, 0x1a, 0x2a),
+        NodeType::Rest => rgb(0x3a, 0x8a, 0x4a),
+        NodeType::Shop => rgb(0xc9, 0x9a, 0x2e),
+        NodeType::Enchanter => rgb(0x7a, 0x4a, 0xb0),
+        NodeType::Gambler => rgb(0x3a, 0x6a, 0xb0),
+    }
+}
+
+fn node_type_icon(t: NodeType) -> &'static str {
+    match t {
+        NodeType::Battle => "B",
+        NodeType::Boss => "!",
+        NodeType::Rest => "+",
+        NodeType::Shop => "$",
+        NodeType::Enchanter => "E",
+        NodeType::Gambler => "?",
+    }
+}
+
+fn crafting_mode_color(m: CraftingMode) -> Color {
+    match m {
+        CraftingMode::Enchanter => rgb(0x7a, 0x4a, 0xb0),
+        CraftingMode::Gambler => rgb(0x3a, 0x6a, 0xb0),
+        CraftingMode::Corrupt => rgb(0xb0, 0x2a, 0x2a),
+    }
+}
+
+fn node_type_name(t: NodeType) -> &'static str {
+    match t {
+        NodeType::Battle => "Battle",
+        NodeType::Boss => "Boss",
+        NodeType::Rest => "Rest",
+        NodeType::Shop => "Shop",
+        NodeType::Enchanter => "Enchanter",
+        NodeType::Gambler => "Gambler",
+    }
+}
 
 fn rarity_color(rarity: Rarity) -> Color {
     match rarity {

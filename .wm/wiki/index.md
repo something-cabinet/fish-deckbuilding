@@ -46,6 +46,7 @@ type: reference
 - [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
 - [duelyst offset list affect pattern](wiki/patterns/duelyst-offset-list-affect-pattern.md) — *draft*
+- [dynamic ui hover tween](wiki/patterns/dynamic-ui-hover-tween.md) — *draft*
 - [effects first card model](wiki/patterns/effects-first-card-model.md) — *draft*
 - [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
 - [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
@@ -76,6 +77,7 @@ type: reference
 
 ## memorys
 
+- [Session 2026-07-31 Crafting/Save/Hover](wiki/concepts/session-2026-07-31-crafting-save-hover.md) — *active*
 - [Affix-Based Effect Composition Pattern](wiki/memory/affix-based-effect-composition.md) — *active*
 - [Bridge-Engine Deadlock Pattern](wiki/memory/bridge-engine-deadlock-pattern.md) — *active*
 - [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
@@ -180,6 +182,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 150
-- **Edges:** 165
+- **Nodes:** 152
+- **Edges:** 177
 
