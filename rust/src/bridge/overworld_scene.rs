@@ -1,6 +1,9 @@
+use godot::classes::control::MouseFilter;
+use godot::classes::tween::{EaseType, TransitionType};
 use godot::classes::{
-    Button, CanvasLayer, GridContainer, HBoxContainer, INode2D, InputEvent, InputEventMouseButton,
-    Label, Line2D, Node2D, Panel, StyleBox, StyleBoxFlat, VBoxContainer,
+    Button, CanvasLayer, GridContainer, HBoxContainer, INode2D, InputEvent,
+    InputEventMouseButton, InputEventMouseMotion, Label, Line2D, Node2D, Panel, StyleBox,
+    StyleBoxFlat, VBoxContainer,
 };
 use godot::global::MouseButton;
 use godot::prelude::*;
@@ -52,6 +55,9 @@ pub struct OverworldScene {
     crafting_seed: u64,
     result_original: Option<crate::core::cards::CardDef>,
     result_modified: Option<crate::core::cards::CardDef>,
+    hovered_crafting_slot: Option<usize>,
+    hovered_slot_base_y: f32,
+    hovered_map_node: Option<usize>,
     base: Base<Node2D>,
 }
 
@@ -70,6 +76,9 @@ impl INode2D for OverworldScene {
             crafting_seed: 0,
             result_original: None,
             result_modified: None,
+            hovered_crafting_slot: None,
+            hovered_slot_base_y: 0.0,
+            hovered_map_node: None,
             base,
         }
     }
@@ -82,13 +91,35 @@ impl INode2D for OverworldScene {
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
+        if let Ok(motion) = event.clone().try_cast::<InputEventMouseMotion>() {
+            let panel = self.base().get_node_as::<Panel>("UI/CraftingPanel");
+            if !panel.is_visible_in_tree() {
+                self.update_map_hover(motion.get_position());
+            }
+            return;
+        }
+
         let Ok(mouse) = event.try_cast::<InputEventMouseButton>() else { return };
         self.debug_clicks += 1;
         if !mouse.is_pressed() || mouse.get_button_index() != MouseButton::LEFT { return; }
         let pos = mouse.get_position();
+
+        let panel = self.base().get_node_as::<Panel>("UI/CraftingPanel");
+        if panel.is_visible_in_tree() {
+            let grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Scroll/Grid");
+            let grid_origin = grid.get_global_rect().position;
+            let local_pos = Vector2::new(pos.x - grid_origin.x, pos.y - grid_origin.y);
+            if let Some(idx) = self.index_from_grid_pos(local_pos) {
+                self.selected_card_idx = idx as i32;
+                self.show_card_detail(idx);
+                self.sync_crafting_ui();
+                return;
+            }
+            return;
+        }
+
         let screen_x = pos.x as i32;
         let screen_y = pos.y as i32;
-
         for (i, node) in self.nodes.iter().enumerate() {
             let nx = 200 + node.grid_x * 150;
             let ny = 80 + node.grid_y * 90;
@@ -200,7 +231,7 @@ impl OverworldScene {
 
     fn draw_nodes(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
         let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
-        for node in &self.nodes {
+        for (i, node) in self.nodes.iter().enumerate() {
             let nx = (200 + node.grid_x * 150) as f32;
             let ny = (80 + node.grid_y * 90) as f32;
 
@@ -212,6 +243,7 @@ impl OverworldScene {
             let is_cleared = run.defeated_nodes.contains(&node.id);
 
             let mut panel = Panel::new_alloc();
+            panel.set_name(&format!("MapNodePanel_{}", i));
             panel.set_position(Vector2::new(nx - 30.0, ny - 30.0));
             panel.set_size(Vector2::new(60.0, 60.0));
             let mut style = StyleBoxFlat::new_gd();
@@ -306,9 +338,11 @@ impl OverworldScene {
                 godot_print!("[Overworld] Opening shop");
             }
             NodeType::Enchanter => {
+                self.refresh();
                 self.open_crafting(CraftingMode::Enchanter);
             }
             NodeType::Gambler => {
+                self.refresh();
                 self.open_crafting(CraftingMode::Gambler);
             }
         }
@@ -320,6 +354,8 @@ impl OverworldScene {
         self.selected_card_idx = -1;
         self.showing_stash = false;
         self.crafting_seed += 1;
+        self.hovered_crafting_slot = None;
+        self.hovered_map_node = None;
 
         let mut panel = self.base().get_node_as::<Panel>("UI/CraftingPanel");
         panel.set_visible(true);
@@ -342,6 +378,7 @@ impl OverworldScene {
             let mut slot = Panel::new_alloc();
             slot.set_name(&format!("CardSlot_{}", i));
             slot.set_custom_minimum_size(Vector2::new(180.0, 70.0));
+            slot.set_mouse_filter(MouseFilter::PASS);
 
             let can_use = self.can_craft_on_card(card);
             let mut style = StyleBoxFlat::new_gd();
@@ -359,20 +396,25 @@ impl OverworldScene {
 
             let mut vbox = VBoxContainer::new_alloc();
             vbox.add_theme_constant_override("separation", 2);
+            vbox.set_mouse_filter(MouseFilter::IGNORE);
 
             let mut name_label = Label::new_alloc();
-            name_label.set_text(card.name);
+            name_label.set_text(&card.name);
+            name_label.set_mouse_filter(MouseFilter::IGNORE);
             name_label.add_theme_color_override("font_color", if can_use { rgb(0xe8, 0xe8, 0xe8) } else { rgb(0x6a, 0x7a, 0x8a) });
             vbox.add_child(&name_label);
 
             let mut row = HBoxContainer::new_alloc();
+            row.set_mouse_filter(MouseFilter::IGNORE);
             let mut cost_label = Label::new_alloc();
             cost_label.set_text(&format!("{}g", card.cost));
+            cost_label.set_mouse_filter(MouseFilter::IGNORE);
             cost_label.add_theme_color_override("font_color", rgb(0xf4, 0xc4, 0x30));
             row.add_child(&cost_label);
 
             let mut affix_label = Label::new_alloc();
             affix_label.set_text(&format!("{} affix", card.affixes.len()));
+            affix_label.set_mouse_filter(MouseFilter::IGNORE);
             affix_label.add_theme_color_override("font_color", if can_use { rgb(0x99, 0xcc, 0xff) } else { rgb(0x6a, 0x7a, 0x8a) });
             row.add_child(&affix_label);
 
@@ -381,6 +423,7 @@ impl OverworldScene {
             if card.corrupted {
                 let mut corr_label = Label::new_alloc();
                 corr_label.set_text("CORRUPTED");
+                corr_label.set_mouse_filter(MouseFilter::IGNORE);
                 corr_label.add_theme_color_override("font_color", rgb(0xcc, 0x1a, 0x1a));
                 vbox.add_child(&corr_label);
             }
@@ -388,6 +431,7 @@ impl OverworldScene {
             if !can_use {
                 let mut reason = Label::new_alloc();
                 reason.set_text(self.ineligibility_reason(card));
+                reason.set_mouse_filter(MouseFilter::IGNORE);
                 reason.add_theme_color_override("font_color", rgb(0x8a, 0x4a, 0x4a));
                 vbox.add_child(&reason);
             }
@@ -411,7 +455,7 @@ impl OverworldScene {
         match self.crafting_mode {
             CraftingMode::Enchanter => "Max affixes",
             CraftingMode::Gambler => "No affixes",
-            CraftingMode::Corrupt => "",
+            CraftingMode::Corrupt => unreachable!(),
         }
     }
 
@@ -427,7 +471,7 @@ impl OverworldScene {
         let mut action_btn = self.base().get_node_as::<Button>("UI/CraftingPanel/ActionSection/ActionButton");
         action_btn.set_text(self.crafting_mode.action_label());
         let can_afford = run.gold >= self.crafting_mode.cost();
-        action_btn.set_disabled(!can_afford || self.selected_card_idx < 0);
+        action_btn.set_disabled(!can_afford || self.selected_card_idx < 0 || self.showing_stash);
 
         let mut warning = self.base().get_node_as::<Label>("UI/CraftingPanel/ActionSection/WarningLabel");
         warning.set_visible(self.crafting_mode == CraftingMode::Corrupt);
@@ -449,7 +493,7 @@ impl OverworldScene {
         detail.set_visible(true);
 
         let mut name_label = self.base().get_node_as::<Label>("UI/CraftingPanel/CardDetail/NameLabel");
-        name_label.set_text(card.name);
+        name_label.set_text(&card.name);
 
         let mut cost_label = self.base().get_node_as::<Label>("UI/CraftingPanel/CardDetail/CostLabel");
         cost_label.set_text(&format!("Cost: {}g", card.cost));
@@ -461,7 +505,7 @@ impl OverworldScene {
         for ai in 0..4 {
             let mut affix_node = self.base().get_node_as::<Label>(&format!("UI/CraftingPanel/CardDetail/AffixList/Affix_{}", ai));
             if let Some(affix) = card.affixes.get(ai) {
-                affix_node.set_text(affix.description);
+                affix_node.set_text(&affix.description);
                 affix_node.set_visible(true);
             } else {
                 affix_node.set_visible(false);
@@ -470,7 +514,7 @@ impl OverworldScene {
 
         let mut implicit = self.base().get_node_as::<Label>("UI/CraftingPanel/CardDetail/ImplicitAffix");
         if let Some(ref imp) = card.implicit_affix {
-            implicit.set_text(imp.description);
+            implicit.set_text(&imp.description);
             implicit.set_visible(true);
         } else {
             implicit.set_visible(false);
@@ -483,6 +527,7 @@ impl OverworldScene {
     fn set_mode(&mut self, mode: CraftingMode) {
         self.crafting_mode = mode;
         self.selected_card_idx = -1;
+        self.hovered_crafting_slot = None;
         let mut detail = self.base().get_node_as::<Panel>("UI/CraftingPanel/CardDetail");
         detail.set_visible(false);
         self.populate_grid();
@@ -491,10 +536,10 @@ impl OverworldScene {
 
     #[func]
     fn on_action(&mut self) {
+        if self.showing_stash { return; }
         let Some(run) = self.run.as_ref() else { return };
         let idx = self.selected_card_idx;
         if idx < 0 { return; }
-        if run.gold < self.crafting_mode.cost() { return; }
 
         let cards = if self.showing_stash { &run.stash } else { &run.combat_deck };
         let Some(card) = cards.get(idx as usize) else { return };
@@ -512,6 +557,7 @@ impl OverworldScene {
 
     #[func]
     fn on_confirm(&mut self) {
+        if self.showing_stash { return; }
         let idx = self.selected_card_idx;
         if idx < 0 { return; }
         let Some(run) = self.run.as_mut() else { return };
@@ -536,6 +582,10 @@ impl OverworldScene {
 
         if let Some(modified) = result {
             self.result_modified = Some(modified);
+        }
+
+        if let Some(run) = self.run.as_ref() {
+            super::save_manager::save_run_state(run);
         }
 
         let mut confirm = self.base().get_node_as::<Panel>("UI/CraftingPanel/ConfirmDialog");
@@ -596,13 +646,13 @@ impl OverworldScene {
             vbox.add_theme_constant_override("separation", 2);
 
             let mut name = Label::new_alloc();
-            name.set_text(original.name);
+            name.set_text(&original.name);
             name.add_theme_color_override("font_color", rgb(0xe8, 0xe8, 0xe8));
             vbox.add_child(&name);
 
             for a in &original.affixes {
                 let mut aff = Label::new_alloc();
-                aff.set_text(a.description);
+                aff.set_text(&a.description);
                 aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
                 vbox.add_child(&aff);
             }
@@ -619,13 +669,13 @@ impl OverworldScene {
             vbox.add_theme_constant_override("separation", 2);
 
             let mut name = Label::new_alloc();
-            name.set_text(modified.name);
+            name.set_text(&modified.name);
             name.add_theme_color_override("font_color", rgb(0xe8, 0xe8, 0xe8));
             vbox.add_child(&name);
 
             for a in &modified.affixes {
                 let mut aff = Label::new_alloc();
-                aff.set_text(a.description);
+                aff.set_text(&a.description);
                 aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
                 vbox.add_child(&aff);
             }
@@ -652,6 +702,7 @@ impl OverworldScene {
         self.result_original = None;
         self.result_modified = None;
         self.selected_card_idx = -1;
+        self.hovered_crafting_slot = None;
         let mut result = self.base().get_node_as::<Panel>("UI/CraftingPanel/ResultSection");
         result.set_visible(false);
         let mut detail = self.base().get_node_as::<Panel>("UI/CraftingPanel/CardDetail");
@@ -662,6 +713,7 @@ impl OverworldScene {
 
     #[func]
     fn on_close_crafting(&mut self) {
+        self.hovered_crafting_slot = None;
         let mut panel = self.base().get_node_as::<Panel>("UI/CraftingPanel");
         panel.set_visible(false);
         let mut detail = self.base().get_node_as::<Panel>("UI/CraftingPanel/CardDetail");
@@ -691,6 +743,7 @@ impl OverworldScene {
     fn on_deck_toggle(&mut self) {
         self.showing_stash = false;
         self.selected_card_idx = -1;
+        self.hovered_crafting_slot = None;
         let mut detail = self.base().get_node_as::<Panel>("UI/CraftingPanel/CardDetail");
         detail.set_visible(false);
         self.populate_grid();
@@ -701,29 +754,124 @@ impl OverworldScene {
     fn on_stash_toggle(&mut self) {
         self.showing_stash = true;
         self.selected_card_idx = -1;
+        self.hovered_crafting_slot = None;
         let mut detail = self.base().get_node_as::<Panel>("UI/CraftingPanel/CardDetail");
         detail.set_visible(false);
         self.populate_grid();
         self.sync_crafting_ui();
     }
 
-    #[func]
-    fn on_grid_gui_input(&mut self, event: Gd<InputEvent>) {
-        let Ok(mouse) = event.try_cast::<InputEventMouseButton>() else { return };
-        if !mouse.is_pressed() || mouse.get_button_index() != MouseButton::LEFT { return; }
-        let pos = mouse.get_position();
-        let col = (pos.x as i32) / 190;
-        let row = (pos.y as i32) / 90;
-        let idx = (row * 3 + col) as usize;
+    fn index_from_grid_pos(&self, pos: Vector2) -> Option<usize> {
+        let grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Scroll/Grid");
         let cards = if self.showing_stash {
             self.run.as_ref().map(|r| r.stash.len()).unwrap_or(0)
         } else {
             self.run.as_ref().map(|r| r.combat_deck.len()).unwrap_or(0)
         };
-        if idx < cards {
-            self.selected_card_idx = idx as i32;
-            self.show_card_detail(idx);
-            self.sync_crafting_ui();
+        for i in 0..grid.get_child_count().min(cards as i32) {
+            let Some(slot) = grid.get_child(i).and_then(|c| c.try_cast::<Panel>().ok()) else { continue };
+            let rect = slot.get_rect();
+            if pos.x >= rect.position.x && pos.x <= rect.position.x + rect.size.x
+                && pos.y >= rect.position.y && pos.y <= rect.position.y + rect.size.y
+            {
+                return Some(i as usize);
+            }
+        }
+        None
+    }
+
+    fn update_map_hover(&mut self, global_pos: Vector2) {
+        let screen_x = global_pos.x as i32;
+        let screen_y = global_pos.y as i32;
+        let mut new_hover: Option<usize> = None;
+        if let Some(run) = self.run.as_ref() {
+            if self.hero_node_idx >= 0 && (self.hero_node_idx as usize) < self.nodes.len() {
+                let current = &self.nodes[self.hero_node_idx as usize];
+                for (i, node) in self.nodes.iter().enumerate() {
+                    let nx = 200 + node.grid_x * 150;
+                    let ny = 80 + node.grid_y * 90;
+                    if (screen_x - nx).abs() < 40 && (screen_y - ny).abs() < 40
+                        && current.connections.contains(&node.id)
+                        && !run.defeated_nodes.contains(&node.id)
+                    {
+                        new_hover = Some(i);
+                        break;
+                    }
+                }
+            }
+        }
+        if new_hover == self.hovered_map_node { return; }
+
+        let ui = self.base().get_node_as::<CanvasLayer>("UI");
+        let container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
+
+        if let Some(prev) = self.hovered_map_node {
+            let name = format!("MapNodePanel_{}", prev);
+            for i in 0..container.get_child_count() {
+                let Some(mut child) = container.get_child(i) else { continue };
+                if child.get_name().to_string() == name {
+                    let mut tween = child.create_tween();
+                    tween.set_trans(TransitionType::QUINT);
+                    tween.set_ease(EaseType::OUT);
+                    tween.tween_property(&child, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.15);
+                    break;
+                }
+            }
+        }
+
+        self.hovered_map_node = new_hover;
+
+        if let Some(idx) = new_hover {
+            let name = format!("MapNodePanel_{}", idx);
+            for i in 0..container.get_child_count() {
+                let Some(mut child) = container.get_child(i) else { continue };
+                if child.get_name().to_string() == name {
+                    let mut tween = child.create_tween();
+                    tween.set_trans(TransitionType::QUINT);
+                    tween.set_ease(EaseType::OUT);
+                    tween.tween_property(&child, "scale", &Vector2::new(1.2, 1.2).to_variant(), 0.15);
+                    break;
+                }
+            }
+        }
+    }
+
+    fn update_crafting_hover(&mut self, new_hover: Option<usize>) {
+        let grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Scroll/Grid");
+
+        if let Some(prev) = self.hovered_crafting_slot {
+            if let Some(mut slot) = grid.get_child(prev as i32).and_then(|c| c.try_cast::<Panel>().ok()) {
+                let mut tween = slot.create_tween();
+                tween.set_trans(TransitionType::QUINT);
+                tween.set_ease(EaseType::OUT);
+                tween.set_parallel();
+                tween.tween_property(&slot, "scale", &Vector2::new(1.0, 1.0).to_variant(), 0.15);
+                tween.tween_property(&slot, "position", &Vector2::new(slot.get_position().x, self.hovered_slot_base_y).to_variant(), 0.15);
+            }
+        }
+
+        self.hovered_crafting_slot = new_hover;
+
+        if let Some(idx) = new_hover {
+            if let Some(mut slot) = grid.get_child(idx as i32).and_then(|c| c.try_cast::<Panel>().ok()) {
+                self.hovered_slot_base_y = slot.get_position().y;
+                let mut tween = slot.create_tween();
+                tween.set_trans(TransitionType::QUINT);
+                tween.set_ease(EaseType::OUT);
+                tween.set_parallel();
+                tween.tween_property(&slot, "scale", &Vector2::new(1.05, 1.05).to_variant(), 0.15);
+                tween.tween_property(&slot, "position", &Vector2::new(slot.get_position().x, self.hovered_slot_base_y - 10.0).to_variant(), 0.15);
+            }
+        }
+    }
+
+    #[func]
+    fn on_grid_gui_input(&mut self, event: Gd<InputEvent>) {
+        if let Ok(motion) = event.try_cast::<InputEventMouseMotion>() {
+            let new_hover = self.index_from_grid_pos(motion.get_position());
+            if new_hover != self.hovered_crafting_slot {
+                self.update_crafting_hover(new_hover);
+            }
         }
     }
 

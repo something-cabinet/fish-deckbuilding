@@ -133,8 +133,8 @@ mod tests {
         ];
         let mut d = Deck::new(cards.clone());
         d.shuffle(42);
-        let order_before: Vec<&str> = cards.iter().map(|c| c.id).collect();
-        let order_after: Vec<&str> = d.cards.iter().map(|c| c.id).collect();
+        let order_before: Vec<String> = cards.iter().map(|c| c.id.clone()).collect();
+        let order_after: Vec<String> = d.cards.iter().map(|c| c.id.clone()).collect();
         assert_ne!(order_before, order_after);
     }
 
@@ -148,8 +148,8 @@ mod tests {
         let mut d2 = Deck::new(cards.clone());
         d1.shuffle(42);
         d2.shuffle(42);
-        let order1: Vec<&str> = d1.cards.iter().map(|c| c.id).collect();
-        let order2: Vec<&str> = d2.cards.iter().map(|c| c.id).collect();
+        let order1: Vec<String> = d1.cards.iter().map(|c| c.id.clone()).collect();
+        let order2: Vec<String> = d2.cards.iter().map(|c| c.id.clone()).collect();
         assert_eq!(order1, order2);
     }
 

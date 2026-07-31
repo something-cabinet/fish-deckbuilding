@@ -65,7 +65,7 @@ offset_right = 120.0
 offset_bottom = 100.0
 text = "Deck"
 
-[node name="CraftingPanel" type="Panel" parent="UI"]
+[node name="CraftingPanel" type="Panel" parent="UI" unique_id=1355002723]
 visible = false
 offset_left = 190.0
 offset_top = 60.0
@@ -73,114 +73,120 @@ offset_right = 1090.0
 offset_bottom = 660.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_crafting_bg")
 
-[node name="Header" type="Panel" parent="UI/CraftingPanel"]
-offset_left = 0.0
-offset_top = 0.0
+[node name="Header" type="Panel" parent="UI/CraftingPanel" unique_id=1477884422]
+layout_mode = 0
 offset_right = 900.0
 offset_bottom = 40.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
-[node name="Title" type="Label" parent="UI/CraftingPanel/Header"]
+[node name="Title" type="Label" parent="UI/CraftingPanel/Header" unique_id=1744825692]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 150.0
 offset_bottom = 30.0
-text = "Crafting"
 theme_override_colors/font_color = Color(0.31, 0.82, 0.77, 1)
+text = "Crafting"
 
-[node name="GoldDisplay" type="Label" parent="UI/CraftingPanel/Header"]
+[node name="GoldDisplay" type="Label" parent="UI/CraftingPanel/Header" unique_id=157787637]
+layout_mode = 0
 offset_left = 700.0
 offset_top = 10.0
 offset_right = 850.0
 offset_bottom = 30.0
-text = "Gold: 150"
 theme_override_colors/font_color = Color(0.957, 0.769, 0.188, 1)
+text = "Gold: 150"
 horizontal_alignment = 2
 
-[node name="CloseButton" type="Button" parent="UI/CraftingPanel/Header"]
+[node name="CloseButton" type="Button" parent="UI/CraftingPanel/Header" unique_id=1788331503]
+layout_mode = 0
 offset_left = 860.0
 offset_top = 5.0
 offset_right = 895.0
 offset_bottom = 35.0
 text = "X"
 
-[node name="ModeTabs" type="HBoxContainer" parent="UI/CraftingPanel"]
+[node name="ModeTabs" type="HBoxContainer" parent="UI/CraftingPanel" unique_id=710218488]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 45.0
 offset_right = 400.0
 offset_bottom = 75.0
 
-[node name="EnchanterTab" type="Button" parent="UI/CraftingPanel/ModeTabs"]
+[node name="EnchanterTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=979793895]
 custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
 text = "Enchanter"
 
-[node name="GamblerTab" type="Button" parent="UI/CraftingPanel/ModeTabs"]
+[node name="GamblerTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=1693950886]
 custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
 text = "Gambler"
 
-[node name="CorruptTab" type="Button" parent="UI/CraftingPanel/ModeTabs"]
+[node name="CorruptTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=346129957]
 custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
 text = "Corrupt"
 
-[node name="CardBrowser" type="Panel" parent="UI/CraftingPanel"]
+[node name="CardBrowser" type="Panel" parent="UI/CraftingPanel" unique_id=533137519]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 80.0
 offset_right = 590.0
 offset_bottom = 500.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
 
-[node name="DeckStashToggle" type="HBoxContainer" parent="UI/CraftingPanel/CardBrowser"]
+[node name="DeckStashToggle" type="HBoxContainer" parent="UI/CraftingPanel/CardBrowser" unique_id=556383555]
+layout_mode = 0
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 200.0
 offset_bottom = 30.0
 
-[node name="DeckButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle"]
+[node name="DeckButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle" unique_id=1345819385]
 custom_minimum_size = Vector2(80, 25)
+layout_mode = 2
+toggle_mode = true
 text = "Deck"
-button_pressed = true
-toggle_mode = true
 
-[node name="StashButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle"]
+[node name="StashButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle" unique_id=1723183827]
 custom_minimum_size = Vector2(80, 25)
-text = "Stash"
+layout_mode = 2
 toggle_mode = true
+text = "Stash"
 
-[node name="Scroll" type="ScrollContainer" parent="UI/CraftingPanel/CardBrowser"]
-offset_left = 0.0
+[node name="Scroll" type="ScrollContainer" parent="UI/CraftingPanel/CardBrowser" unique_id=1368801324]
+layout_mode = 0
 offset_top = 36.0
 offset_right = 580.0
 offset_bottom = 420.0
 
-[node name="Grid" type="GridContainer" parent="UI/CraftingPanel/CardBrowser/Scroll"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 580.0
-offset_bottom = 0.0
+[node name="Grid" type="GridContainer" parent="UI/CraftingPanel/CardBrowser/Scroll" unique_id=415096152]
+layout_mode = 2
 columns = 3
 
-[node name="CardDetail" parent="UI/CraftingPanel" instance=ExtResource("2")]
+[node name="CardDetail" parent="UI/CraftingPanel" unique_id=2061215296 instance=ExtResource("2")]
 visible = false
+layout_mode = 0
 offset_left = 600.0
 offset_top = 80.0
 offset_right = 890.0
 offset_bottom = 420.0
 
-[node name="ActionSection" parent="UI/CraftingPanel" instance=ExtResource("3")]
+[node name="ActionSection" parent="UI/CraftingPanel" unique_id=1401104063 instance=ExtResource("3")]
+layout_mode = 0
 offset_left = 600.0
 offset_top = 430.0
 offset_right = 890.0
 offset_bottom = 500.0
 
-[node name="ResultSection" parent="UI/CraftingPanel" instance=ExtResource("4")]
-visible = false
-offset_left = 0.0
-offset_top = 0.0
+[node name="ResultSection" parent="UI/CraftingPanel" unique_id=724156493 instance=ExtResource("4")]
+layout_mode = 0
 offset_right = 900.0
 offset_bottom = 600.0
 
-[node name="ConfirmDialog" parent="UI/CraftingPanel" instance=ExtResource("5")]
-visible = false
+[node name="ConfirmDialog" parent="UI/CraftingPanel" unique_id=976261775 instance=ExtResource("5")]
+layout_mode = 0
 offset_left = 200.0
 offset_top = 200.0
 offset_right = 700.0

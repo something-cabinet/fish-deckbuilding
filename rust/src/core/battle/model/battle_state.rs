@@ -188,7 +188,7 @@ mod tests {
     fn replace_card_swaps_hand_card() {
         let mut s = BattleState::new();
         let before = s.hand.len();
-        let old_id = s.hand.cards[0].id;
+        let old_id = s.hand.cards[0].id.clone();
         assert!(s.replace_card(0));
         assert_eq!(s.hand.len(), before);
         assert!(s.replace_used);

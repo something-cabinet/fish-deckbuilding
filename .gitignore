@@ -36,3 +36,4 @@ godot-tools/
 # BEGIN deepwork
 .slim/deepwork/
 # END deepwork
+godot/save_*.json

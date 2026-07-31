@@ -14,6 +14,8 @@ tags:
 
 Enhance the combat system with Diablo-style affix lines on cards, a stash system for deck management between fights, NPC crafting mechanics (reroll, add slot, corrupt), and character-specific unique cards. Inspired by Inkbound and Path of Exile.
 
+> **Note:** Per the approved card-crafting-ui spec, Enchanter = add slot (100g), Gambler = reroll affix (50g). This was swapped from the original draft via commit `c5d8644`.
+
 ## Locked Decisions
 
 - D1: **Rarity-based affix slots** — Common (0), Uncommon (1), Rare (2), Legendary (3). Affixes either enhance the card's base effect (stats) or add new effects.
@@ -29,8 +31,8 @@ Enhance the combat system with Diablo-style affix lines on cards, a stash system
 - FR-1: Cards have a base effect plus 0-3 affix slots determined by rarity
 - FR-2: Affixes can enhance the base effect (stat bonuses) or add new effects
 - FR-3: Players manage a 10-card combat deck + 30-card stash, swappable between encounters
-- FR-4: Enchanter NPC allows rerolling a single affix on a card for gold
-- FR-5: Gambler NPC allows adding a random affix slot to a card below max slots
+- FR-4: Enchanter NPC allows adding a random affix slot to a card below max slots for gold
+- FR-5: Gambler NPC allows rerolling a single affix on a card for gold
 - FR-6: Corrupt mechanic (Vaal-style) — applies a random outcome from a weighted pool on use:
 
   | Outcome | Weight | Effect |
@@ -77,11 +79,11 @@ Enhance the combat system with Diablo-style affix lines on cards, a stash system
 **Then** they can freely move cards between the 10-slot combat deck and 30-slot stash
 **Then** the updated combat deck is saved for the next encounter
 
-### Scenario 2: Enchanter Reroll
+### Scenario 2: Gambler Reroll
 **Given** the player has a Rare card with 2 affixes
-**When** they visit the Enchanter and pay gold to reroll the first affix
-**Then** the first affix is replaced with a new random affix (semi-constrained)
-**Then** the second affix remains unchanged
+**When** they visit the Gambler and pay gold to reroll a random affix
+**Then** one random affix is replaced with a new random affix (semi-constrained)
+**Then** the remaining affix remains unchanged
 
 ### Scenario 3: Corrupt Card — Boost Outcome
 **Given** the player has a Rare card with "+3 ATK" and "+2 DEF" affixes
@@ -149,8 +151,8 @@ Implemented in commit `9e70ee6`:
 | AC-1: Affix slots by rarity | ✅ | `Rarity::max_affixes()` — Common 0, Uncommon 1, Rare 2, Legendary 3 |
 | AC-2: 80/20 type distribution | ✅ | `generate_affixes()` — 80% in-type, 20% off-type |
 | AC-3: Deck/stash swapping | ✅ | Pre-existing (`swap_deck_stash`) |
-| AC-4: Enchanter reroll | ✅ | `enchanter_reroll()` — 50g cost |
-| AC-5: Gambler add slot | ✅ | `gambler_add_slot()` — 100g cost |
+| AC-4: Enchanter add slot | ✅ | `enchanter_add_slot()` — 100g cost |
+| AC-5: Gambler reroll affix | ✅ | `gambler_reroll_affix()` — 50g cost |
 | AC-6: Corrupted visual | ❌ | Not implemented |
 | AC-6a: Implicit affixes | ✅ | 3 corruption-only implicits |
 | AC-6b: Weighted outcomes | ✅ | 6 outcomes with correct weights |

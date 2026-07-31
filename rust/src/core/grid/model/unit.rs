@@ -1,13 +1,14 @@
+use serde::{Deserialize, Serialize};
 use crate::core::cards::Effect;
 use crate::core::constants;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Faction {
     Hero,
     Enemy,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum Range {
     #[default]
     Melee,

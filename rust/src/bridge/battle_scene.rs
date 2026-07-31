@@ -547,7 +547,7 @@ impl BattleScene {
         let mut cost_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipCost");
         let mut desc_label = self.base().get_node_as::<Label>("UI/CardTooltip/TooltipDesc");
 
-        name_label.set_text(card.name);
+        name_label.set_text(&card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
         let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
         let range_str = card.effects.first().map(|e| match e.range {
@@ -980,7 +980,7 @@ impl BattleScene {
                 let mut nl = Label::new_alloc();
                 nl.set_position(Vector2::new(4.0, 2.0));
                 nl.set_size(Vector2::new(120.0, 18.0));
-                nl.set_text(card.name);
+                nl.set_text(&card.name);
                 nl.add_theme_color_override("font_color", rgb(0xd6, 0xe8, 0xef));
                 nl.add_theme_font_size_override("font_size", 10);
                 entry.add_child(&nl);
@@ -1026,7 +1026,7 @@ impl BattleScene {
         let mut cost_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupCost");
         let mut effects_label = self.base().get_node_as::<Label>("UI/EnemyCardPopup/PopupEffects");
 
-        name_label.set_text(card.name);
+        name_label.set_text(&card.name);
         cost_label.set_text(&format!("Cost: {}", card.cost));
         let desc: Vec<String> = card.effects.iter().map(|e| effect_to_string(&e.effect)).collect();
         effects_label.set_text(&desc.join("\n"));
@@ -1326,7 +1326,7 @@ impl BattleScene {
             if i < state.hand.len() {
                 let card = &state.hand.cards[i];
                 let can_play = state.mana >= card.cost && state.phase == Phase::PlayerTurn;
-                name_label.set_text(card.name);
+                name_label.set_text(&card.name);
                 cost_label.set_text(&format!("{}", card.cost));
                 let effect_strs: Vec<String> = card.effects.iter().map(|e| format!("{:?}", e.effect)).collect();
                 effects_label.set_text(&effect_strs.join(", "));

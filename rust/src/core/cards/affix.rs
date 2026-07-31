@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use crate::core::cards::{CardDef, Effect, Rarity, CardEffect};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AffixType {
     Offense,
     Defense,
@@ -18,10 +19,10 @@ impl Rarity {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Affix {
     pub affix_type: AffixType,
-    pub description: &'static str,
+    pub description: String,
     pub target_effect_idx: usize,
     pub damage_bonus: i32,
     pub heal_bonus: i32,
@@ -31,18 +32,19 @@ pub struct Affix {
 
 pub fn affix_pool() -> Vec<Affix> {
     vec![
-        Affix { affix_type: AffixType::Offense, description: "+3 ATK", target_effect_idx: 0, damage_bonus: 3, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Offense, description: "+5 ATK", target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Offense, description: "+2 ATK", target_effect_idx: 0, damage_bonus: 2, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Defense, description: "+4 Shield", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 4, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Defense, description: "+6 Shield", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 6, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Defense, description: "+2 Shield", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 2, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Utility, description: "+3 Heal", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 3, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Utility, description: "+5 Heal", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 5, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Utility, description: "+2 Draw", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 0, draw_bonus: 2 },
+        Affix { affix_type: AffixType::Offense, description: "+3 ATK".into(), target_effect_idx: 0, damage_bonus: 3, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Offense, description: "+5 ATK".into(), target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Offense, description: "+2 ATK".into(), target_effect_idx: 0, damage_bonus: 2, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Defense, description: "+4 Shield".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 4, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Defense, description: "+6 Shield".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 6, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Defense, description: "+2 Shield".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 2, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Utility, description: "+3 Heal".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 3, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Utility, description: "+5 Heal".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 5, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Utility, description: "+2 Draw".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 0, draw_bonus: 2 },
     ]
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SeededRng {
     state: u64,
 }
@@ -113,7 +115,7 @@ pub fn generate_affixes(card: &CardDef, seed: u64) -> Vec<Affix> {
 
 pub fn gambler_reroll_affix(card: &CardDef, seed: u64) -> CardDef {
     let mut new_card = card.clone();
-    if new_card.affixes.is_empty() { return new_card; }
+    if new_card.corrupted || new_card.affixes.is_empty() { return new_card; }
 
     let mut rng = SeededRng::new(seed);
     let mut pool = affix_pool();
@@ -132,7 +134,7 @@ pub fn gambler_reroll_affix(card: &CardDef, seed: u64) -> CardDef {
 
 pub fn enchanter_add_slot(card: &CardDef, seed: u64) -> CardDef {
     let mut new_card = card.clone();
-    if new_card.affixes.len() >= new_card.rarity.max_affixes() { return new_card; }
+    if new_card.corrupted || new_card.affixes.len() >= new_card.rarity.max_affixes() { return new_card; }
 
     let mut rng = SeededRng::new(seed);
     let mut pool = affix_pool();
@@ -148,8 +150,7 @@ pub fn enchanter_add_slot(card: &CardDef, seed: u64) -> CardDef {
     new_card
 }
 
-#[allow(dead_code)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CorruptOutcome {
     NoChange,
     Boost,
@@ -159,16 +160,14 @@ pub enum CorruptOutcome {
     AddImplicitAndBoost,
 }
 
-#[allow(dead_code)]
 fn implicit_affix_pool() -> Vec<Affix> {
     vec![
-        Affix { affix_type: AffixType::Utility, description: "Cannot be blocked", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Offense, description: "Double strike", target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
-        Affix { affix_type: AffixType::Utility, description: "Siphon", target_effect_idx: 0, damage_bonus: 0, heal_bonus: 3, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Utility, description: "Cannot be blocked".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Offense, description: "Double strike".into(), target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+        Affix { affix_type: AffixType::Utility, description: "Siphon".into(), target_effect_idx: 0, damage_bonus: 0, heal_bonus: 3, shield_bonus: 0, draw_bonus: 0 },
     ]
 }
 
-#[allow(dead_code)]
 pub fn corrupt(card: &CardDef, seed: u64) -> (CardDef, CorruptOutcome) {
     let mut new_card = card.clone();
     new_card.corrupted = true;
@@ -295,7 +294,7 @@ mod tests {
 
     fn test_card_with_affixes() -> CardDef {
         test_card().with_affixes(vec![
-            Affix { affix_type: AffixType::Offense, description: "+5 ATK", target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
+            Affix { affix_type: AffixType::Offense, description: "+5 ATK".into(), target_effect_idx: 0, damage_bonus: 5, heal_bonus: 0, shield_bonus: 0, draw_bonus: 0 },
         ])
     }
 
@@ -336,7 +335,7 @@ mod tests {
     #[test]
     fn gambler_reroll_affix_replaces_affix() {
         let card = test_card_with_affixes();
-        let original_desc = card.affixes[0].description;
+        let original_desc = card.affixes[0].description.clone();
         let result = gambler_reroll_affix(&card, 99);
         assert_eq!(result.affixes.len(), 1);
         assert_ne!(result.affixes[0].description, original_desc);
@@ -443,5 +442,19 @@ mod tests {
             Effect::Damage(v) => assert_eq!(*v, 8),
             _ => panic!("Expected Damage"),
         }
+    }
+
+    #[test]
+    fn gambler_reroll_skips_corrupted() {
+        let card = test_card_with_affixes().with_corrupted(true);
+        let result = gambler_reroll_affix(&card, 42);
+        assert_eq!(result, card);
+    }
+
+    #[test]
+    fn enchanter_add_slot_skips_corrupted() {
+        let card = test_card_with_affixes().with_corrupted(true);
+        let result = enchanter_add_slot(&card, 42);
+        assert_eq!(result, card);
     }
 }

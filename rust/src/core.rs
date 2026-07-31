@@ -4,3 +4,4 @@ pub mod combat;
 pub mod battle;
 pub mod cards;
 pub mod overworld;
+pub mod save;

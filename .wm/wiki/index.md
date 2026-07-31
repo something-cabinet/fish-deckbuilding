@@ -9,6 +9,7 @@ type: reference
 
 ## concepts
 
+- [absolute positioning panel children gdext](wiki/concepts/absolute-positioning-panel-children-gdext.md) — *draft*
 - [cascade panic type assumption godot](wiki/concepts/cascade-panic-type-assumption-godot.md) — *draft*
 - [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
 - [clippy rejects unused reserved code](wiki/concepts/clippy-rejects-unused-reserved-code.md) — *draft*
@@ -40,6 +41,7 @@ type: reference
 - [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
 - [affix based effect composition](wiki/patterns/affix-based-effect-composition.md) — *draft*
 - [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
+- [container based card slot layout](wiki/patterns/container-based-card-slot-layout.md) — *draft*
 - [critical patterns](wiki/patterns/critical-patterns.md) — *draft*
 - [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
@@ -47,6 +49,7 @@ type: reference
 - [effects first card model](wiki/patterns/effects-first-card-model.md) — *draft*
 - [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
 - [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
+- [overworld node action refresh](wiki/patterns/overworld-node-action-refresh.md) — *draft*
 - [return value bridge sync](wiki/patterns/return-value-bridge-sync.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
@@ -131,7 +134,7 @@ type: reference
 ## specs
 
 - [Battle UI/UX Upgrades](wiki/specs/battle-ui-ux-upgrades.md) — *approved*
-- [Card Crafting UI](wiki/specs/card-crafting-ui.md) — *draft*
+- [Card Crafting UI](wiki/specs/card-crafting-ui.md) — *approved*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Card System — In-Battle Hand, Deck, and Play](wiki/specs/card-system-in-battle-deck.md) — *approved*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
@@ -159,6 +162,9 @@ type: reference
 - [Card visual states and hover interactions (Godot StyleBox/theming)](wiki/tasks/card-visual-states-and-hover-interactions-godot-styleboxtheming.md) — *todo*
 - [Clean legacy fields, phase literals, dead code — Rust core](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--rust-core.md) — *todo*
 - [Combat feedback animations (Godot Tween/AnimationPlayer)](wiki/tasks/combat-feedback-animations-godot-tweenanimationplayer.md) — *todo*
+- [Implement crafting actions — mode actions, confirmation, result, accept/close](wiki/tasks/crafting-ui-actions.md) — *done*
+- [Implement crafting Rust bridge — open, card browser, detail view](wiki/tasks/crafting-ui-bridge-plumbing.md) — *done*
+- [Add CraftingPanel node tree to overworld.tscn](wiki/tasks/crafting-ui-scene-nodes.md) — *done*
 - [Deck/discard pile visualization (Godot)](wiki/tasks/deckdiscard-pile-visualization-godot.md) — *todo*
 - [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
 - [Dialogue system — wire dialogue scene into campaign flow (Godot)](wiki/tasks/dialogue-system--wire-dialogue-scene-into-campaign-flow-godot.md) — *todo*
@@ -174,6 +180,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 144
-- **Edges:** 153
+- **Nodes:** 150
+- **Edges:** 165
 
