@@ -1,0 +1,21 @@
+{
+  "entity_id": "specs/tscn-ui-declaration",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-07-30T15:04:13.992Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "approved"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

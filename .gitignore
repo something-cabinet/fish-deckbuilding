@@ -1,33 +1,31 @@
-# Rust build artifacts
-rust/target/
-
-# Godot editor artifacts
-godot/.godot/
-godot/web/
-godot/*.pck
-godot/*.html
+# Node
+node_modules/
+dist/
+*.local
 
 # Environment files
 .env
+.env.*
 
 # OS files
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
 
 # Generated files
 *.slim
 wm-cli
 wm-cli.exe
 
-# Godot auto-generated UID files (regenerated on project open)
-*.gdextension.uid
-
-# Build tools
-emsdk/
-
 # Playtest screenshots
 playtest-*.png
-godot-tools/
-*.log
 
 # BEGIN oh-my-opencode-slim clonedeps
 .slim/clonedeps/repos/
@@ -36,4 +34,3 @@ godot-tools/
 # BEGIN deepwork
 .slim/deepwork/
 # END deepwork
-godot/save_*.json

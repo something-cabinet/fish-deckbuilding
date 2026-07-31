@@ -24,7 +24,7 @@ Promoted learnings from completed work. Read this at the start of every session 
 
 All P0 bugs across THREE occurrences (roguelite, tactical RPG, and the godot-rust bridge layer) lived in the untested UI/bridge wiring layer. The pure function layer had 0 bugs across 79-194 tests each time. Root cause: no integration tests for the orchestrator/bridge code that connects game logic to UI. The project's own NFR-2 was written to prevent this, but the pattern still recurred — twice via deleted test suites, once via a pure function (`apply_affixes_to_effects`) that was fully unit-tested but never actually called from the bridge (`#[allow(dead_code)]` masked it).
 
-**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. NEVER delete orchestrator tests without replacement. UI components should be thin — call tested controllers. **When you see `#[allow(dead_code)]` on a `pub fn` in `core/`, grep its call sites before trusting that the feature it implements actually works in-game** — a green unit test suite proves nothing about whether the bridge ever calls the function.
+**What to do differently:** Write integration tests that script a full battle cycle (draw → play → defend → victory/death). Test the orchestration, not just the leaf functions. NEVER delete orchestrator tests without replacement. UI components should be thin — call tested controllers. **When you see `#[allow(dead_code)]` on a `pub fn` in `core/`, grep its call sites before trusting that the feature it implements actually works in-game** — a green unit test suite proves nothing about whether the bridge ever calls the function. JS analog: bridge orchestration tests (boot fan-out, click routing, drag, keyboard) must run with a mocked renderer — a mocked-renderer suite passing while the real boot fails is the same trap, invisible without a browser smoke pass.
 
 **Full entry:** @wiki/concepts/untested-ui-orchestration-p0s
 
@@ -122,7 +122,7 @@ The `actions-rust-lang/setup-rust-toolchain@v1` action exports `RUSTFLAGS=-D war
 
 One `valid_targets()` function in the pure core is called by the bridge overlay, click validation, AI, and engine. The same code determines which tiles are valid and validates the player's click. No drift between "what the UI shows" and "what the engine accepts" — the exact failure mode behind every P0 in this project's history. The three-layer bridge deadlock (2026-07-30 repeat of the untested orchestration pattern) was fixed by this architecture.
 
-**What to do differently:** Any time a UI action requires validation, put the validation logic in a pure core function that both the overlay renderer and the action handler call. Never let the bridge implement its own targeting/rules logic. Integration-test the full click path (select → move → attack) through the bridge's own test helpers.
+**What to do differently:** Any time a UI action requires validation, put the validation logic in a pure core function that both the overlay renderer and the action handler call. Never let the bridge implement its own targeting/rules logic. Integration-test the full click path (select → move → attack) through the bridge's own test helpers. JS analog implemented: `cardTargeting`/`validCardTargets` in the TS engine, consumed by snapshot, renderer highlights, and playCard validation.
 
 **Full entry:** @wiki/patterns/valid-targets-single-source-of-truth
 
@@ -145,7 +145,7 @@ When a scene grows too large, extract self-contained node branches into their ow
 ## 2026-07-31 — Container-Based Layout for Dynamically-Created UI in gdext
 
 **Category:** pattern
-**Source:** @wiki/patterns/container-based-card-slot-layout
+**Source:** @wiki/patterns:container-based-card-slot-layout
 **Tags:** [godot, ui, gdext, layout]
 
 When creating card slots, inventory items, or list entries dynamically via Rust gdext, use `VBoxContainer`/`HBoxContainer` inside a `Panel` instead of `set_position`/`set_size` absolute positioning. Absolute positioning on Labels inside Panels that are children of a `GridContainer` causes text overlap because the container layout pass overrides child positions. Container-based layout avoids this entirely.
@@ -167,3 +167,31 @@ In a Rust/gdext bridge scene, `set_text()` calls do not auto-bind to a data sour
 **What to do differently:** After any bridge method that mutates shared state (`RunState`, hero position, etc.), explicitly call every sync/refresh function that touches a UI element displaying that state — don't rely on the next unrelated redraw to catch it up. When a value is shown in more than one place (HUD + panel header), resync both at the same call site as the mutation.
 
 **Full entry:** @wiki/patterns/overworld-node-action-refresh
+
+---
+
+## 2026-08-01 — Svelte 5 One-Shot Imperative Init: Callback Prop, Not $bindable/$effect
+
+**Category:** pattern
+**Source:** @wiki/patterns:svelte5-one-shot-imperative-init-callback
+**Tags:** [svelte5, runes, pixijs, boot]
+
+Mounting a one-shot imperative subsystem (PixiJS app, game bridge) through `$state` element ref + `$bindable` prop + `$effect` causes a re-render feedback loop — the effect re-runs every render, spawning a fresh subsystem and duplicate window listeners each cycle (`effect_update_depth_exceeded` at boot, UI half-working: state renders but input listeners never attach). Cost ~90 min to diagnose; invisible to 124 green unit tests (mocked renderers pass while real boot fails).
+
+**What to do differently:** Child exposes the host via an `onCanvasReady` callback prop fired once; parent creates the subsystem with a one-shot `if (bridge) return` guard. Subscribe BEFORE start() so the initial synchronous snapshot reaches subscribers; try/catch renderer sync so `addEventListener` always attaches. A browser smoke pass is the only way to catch this class.
+
+**Full entry:** @wiki/patterns/svelte5-one-shot-imperative-init-callback · failure story: @wiki/concepts/svelte5-bindable-boot-loop-failure
+
+---
+
+## 2026-08-01 — Fixer-Lane Silent No-Ops: Verify Disk, Don't Trust "Completed"
+
+**Category:** failure
+**Source:** @wiki/concepts:fixer-lane-silent-noops-empty-results
+**Tags:** [delegation, process, fixer]
+
+The fixer subagent returned `state: completed` with EMPTY result messages and ZERO files written three times in one session (large multi-file implementation tasks silently no-op'd; a 1-file probe succeeded, proving the lane itself worked). Trusting the "completed" status without verifying disk output delayed the engine implementation by ~2 hours before pivoting to orchestrator-direct.
+
+**What to do differently:** After any writer-specialist dispatch, verify disk state (ls/git status) for expected files — never trust the result message alone. Keep delegated tasks bounded (one module, one concern); tiny tasks are the probe. Have an explicit orchestrator-direct fallback when a lane returns empty twice. Don't reissue the unchanged task.
+
+**Full entry:** @wiki/concepts/fixer-lane-silent-noops-empty-results

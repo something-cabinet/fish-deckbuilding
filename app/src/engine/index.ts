@@ -1,0 +1,11 @@
+export * from './contract';
+export { createBattleController, BattleController, UNIT_TEMPLATES } from './controller';
+export type { BattleOptions } from './controller';
+export { buildDeck, CARD_DEFS, sellValue, cardTargeting, resolveActions } from './cards';
+export type { TargetingCtx, ResolveCtx, ResolveOutcome } from './cards';
+export { resolveAttack, attackDamage, applyDamage } from './combat';
+export type { AttackOutcome, DamageResult } from './combat';
+export { moveCells, shortestPath, adjacent, chebyshev, inBounds } from './grid';
+export { decideEnemyAction } from './ai';
+export type { AiDecision, AiCtx } from './ai';
+export { canAfford, debtInterest, clockDamage, totalInterestDue } from './economy';

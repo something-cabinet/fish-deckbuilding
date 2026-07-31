@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:tdd",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,26 @@
           "field": "content",
           "old_value": "# TDD — Test-First for Everything\n\n**Red-Green-Refactor** applies to ALL implementation:\n\n1. **RED** — Write a failing test that defines the expected behavior\n2. **GREEN** — Write the minimum code to make it pass\n3. **REFACTOR** — Clean up while tests stay green\n\nNo implementation code is written without a test first. This includes combat logic, state transitions, card effects, enemy AI, and any other game code. UI components (Svelte) are excluded — they call tested pure functions.\n\n```bash\nnpm test       # run all tests\nnpm run test:watch  # watch mode\n```\n\nTests live in `src/game/combat/__tests__/` and run in ~400ms.",
           "new_value": "---\ntitle: TDD — Test-First for Everything\ntype: rule\nstatus: draft\ntags: [rule, testing]\ncategory: process\nrationale: Test-first catches design issues early, creates a safety net for refactoring, and ensures code is testable by construction. Red-Green-Refactor is the standard.\n---\n\n# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-07-31T18:07:05.210Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "active"
+        },
+        {
+          "field": "content",
+          "old_value": "---\r\ntitle: TDD — Test-First for Everything\r\ntype: rule\r\nstatus: draft\r\ntags: [rule, testing]\r\ncategory: process\r\nrationale: Test-first catches design issues early, creates a safety net for refactoring, and ensures code is testable by construction. Red-Green-Refactor is the standard.\r\n---\r\n\r\n# TDD — Test-First for Everything\r\n\r\nRed-Green-Refactor applies to ALL implementation.",
+          "new_value": "# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n\n## Red-Green-Refactor\n\n1. **RED** — Write a failing test for the next behavior first. Run it; watch it fail for the right reason (assertion, not compile error). Never skip this.\n2. **GREEN** — Write the minimal implementation that makes the test pass. No extra features, no speculative code.\n3. **REFACTOR** — Clean up the code under the safety net of the now-passing tests. Duplication, naming, structure. Tests stay green after every refactor step.\n\n## Rules\n\n- Test first, always — no implementation without a failing test (`npx vitest run` / `cargo test`).\n- One behavior per test; name tests by behavior, not implementation.\n- Orchestration/integration layers get tests too — untested bridge wiring is where every P0 in this project's history lived (see wiki:core:critical-patterns). Never delete orchestrator tests without replacement.\n- Compiler-driven where possible: types/enums/Result catch rule violations before tests run.\n- Run the full suite before considering work complete.\n"
         }
       ],
       "path": "",

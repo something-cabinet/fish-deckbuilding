@@ -13,6 +13,7 @@ type: reference
 - [cascade panic type assumption godot](wiki/concepts/cascade-panic-type-assumption-godot.md) — *draft*
 - [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
 - [clippy rejects unused reserved code](wiki/concepts/clippy-rejects-unused-reserved-code.md) — *draft*
+- [fixer lane silent noops empty results](wiki/concepts/fixer-lane-silent-noops-empty-results.md) — *draft*
 - [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
 - [gdext scene node type mismatch](wiki/concepts/gdext-scene-node-type-mismatch.md) — *draft*
 - [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
@@ -21,6 +22,7 @@ type: reference
 - [rustflags env overrides config toml](wiki/concepts/rustflags-env-overrides-config-toml.md) — *draft*
 - [stale animation snapshot gdext](wiki/concepts/stale-animation-snapshot-gdext.md) — *draft*
 - [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
+- [svelte5 bindable boot loop failure](wiki/concepts/svelte5-bindable-boot-loop-failure.md) — *draft*
 - [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
 - [attack focused exhaustion](wiki/decisions/attack-focused-exhaustion.md) — *draft*
@@ -30,7 +32,9 @@ type: reference
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
 - [fab style action card type](wiki/decisions/fab-style-action-card-type.md) — *draft*
 - [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
+- [js is the real platform](wiki/decisions/js-is-the-real-platform.md) — *draft*
 - [move export refs to sub scene scripts](wiki/decisions/move-export-refs-to-sub-scene-scripts.md) — *draft*
+- [no summon unique card effects](wiki/decisions/no-summon-unique-card-effects.md) — *draft*
 - [pure function affix operations](wiki/decisions/pure-function-affix-operations.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [rust gdext bridge over gdscript](wiki/decisions/rust-gdext-bridge-over-gdscript.md) — *draft*
@@ -55,8 +59,10 @@ type: reference
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
 - [scene branch extraction](wiki/patterns/scene-branch-extraction.md) — *draft*
+- [snapshot diff orchestration seam](wiki/patterns/snapshot-diff-orchestration-seam.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
+- [svelte5 one shot imperative init callback](wiki/patterns/svelte5-one-shot-imperative-init-callback.md) — *draft*
 - [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [valid targets single source of truth](wiki/patterns/valid-targets-single-source-of-truth.md) — *draft*
@@ -84,12 +90,14 @@ type: reference
 - [Clippy CI Dead Code](wiki/memory/clippy-ci-dead-code.md) — *draft*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
 - [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
+- [Designer model cost — terra over sol past 256K](wiki/memory/designer-model-cost-terra-over-sol-past-256k.md) — *active*
 - [Domain-Driven Barrel Structure](wiki/memory/domain-driven-barrel-structure.md) — *active*
 - [Duelyst-Accurate Move-Attack Ordering](wiki/memory/duelyst-accurate-move-attack-ordering.md) — *active*
 - [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
 - [Effects-First Card Model](wiki/memory/effects-first-card-model.md) — *draft*
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
+- [Fixer lane silent no-ops — verify disk, bound tasks](wiki/memory/fixer-lane-silent-no-ops-verify-disk-bound-tasks.md) — *active*
 - [gdext 0.5.4 API gotchas](wiki/memory/gdext-0-5-4-api-gotchas.md) — *active*
 - [gdext hot-reload signal reconnection](wiki/memory/gdext-hot-reload-pattern.md) — *active*
 - [gdext scene node type must match custom class](wiki/memory/gdext-scene-node-type-must-match-custom-class.md) — *active*
@@ -98,8 +106,10 @@ type: reference
 - [Godot Migration Analysis — Stay on Web Stack](wiki/memory/godot-migration-analysis-stay-on-web-stack.md) — *archived*
 - [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [Godot web deploy pipeline](wiki/memory/godot-web-deploy-pipeline.md) — *active*
+- [Kenney assets for JS prototyping](wiki/memory/kenney-assets-for-js-prototyping.md) — *active*
 - [Move Export Refs to Sub-Scene Scripts](wiki/memory/move-export-refs-to-sub-scene-scripts.md) — *active*
 - [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
+- [Overworld Node Action Refresh / Multi-Display State Sync](wiki/memory/overworld-node-action-refresh-multi-display-state-sync.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 - [Return-Value Bridge Sync Pattern](wiki/memory/return-value-bridge-sync.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
@@ -107,8 +117,11 @@ type: reference
 - [Scene Branch Extraction Pattern](wiki/memory/scene-branch-extraction-pattern.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
 - [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
+- [Snapshot-diff orchestration seam](wiki/memory/snapshot-diff-orchestration-seam.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Stale Animation Snapshot in gdext Bridge](wiki/memory/stale-animation-snapshot-gdext.md) — *active*
+- [Svelte 5 $bindable boot-loop — use onCanvasReady callback](wiki/memory/svelte-5-bindable-boot-loop-use-oncanvasready-callback.md) — *active*
+- [Svelte 5 one-shot init — callback prop pattern](wiki/memory/svelte-5-one-shot-init-callback-prop-pattern.md) — *active*
 - [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
 - [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
@@ -131,7 +144,7 @@ type: reference
 - [Rust Anti-Patterns](wiki/rules/rust-anti-patterns.md) — *active*
 - [Spec Before Any Action](wiki/rules/spec-before-action.md) — *active*
 - [Spec-Driven Development](wiki/rules/spec-driven-development.md) — *draft*
-- [TDD — Test-First for Everything](wiki/rules/tdd.md) — *draft*
+- [TDD — Test-First for Everything](wiki/rules/tdd.md) — *active*
 
 ## specs
 
@@ -149,10 +162,12 @@ type: reference
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
 - [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
 - [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *draft*
+- [JS Combat Vertical Slice (VU-Meter Desk)](wiki/specs/js-combat-vertical-slice.md) — *approved*
 - [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
+- [Battle & Overworld UI — Declare in .tscn](wiki/specs/tscn-ui-declaration.md) — *draft*
 - [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *draft*
 - [UI Panels from Rust Bridge to tscn](wiki/specs/ui-panels-to-tscn.md) — *approved*
 - [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
@@ -174,6 +189,7 @@ type: reference
 - [Godot Battle 07 - Hot-Reload Fixes & Parity](wiki/tasks/godot-battle-07-hot-reload-fixes.md) — *done*
 - [Godot Theme resource system for consistent UI styling](wiki/tasks/godot-theme-resource-system-for-consistent-ui-styling.md) — *todo*
 - [Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace](wiki/tasks/grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace.md) — *done*
+- [Implement correct UI theme — Guppy's mafia underworld escape story](wiki/tasks/implement-correct-ui-theme--guppys-mafia-underworld-escape-story.md) — *todo*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
 - [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
@@ -182,6 +198,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 152
-- **Edges:** 177
+- **Nodes:** 168
+- **Edges:** 232
 
