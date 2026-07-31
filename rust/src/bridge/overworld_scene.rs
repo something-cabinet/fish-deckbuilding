@@ -1,6 +1,6 @@
 use godot::classes::{
-    Button, CanvasLayer, GridContainer, INode2D, InputEvent, InputEventMouseButton, Label,
-    Line2D, Node2D, Panel, StyleBox, StyleBoxFlat,
+    Button, CanvasLayer, GridContainer, HBoxContainer, INode2D, InputEvent, InputEventMouseButton,
+    Label, Line2D, Node2D, Panel, StyleBox, StyleBoxFlat, VBoxContainer,
 };
 use godot::global::MouseButton;
 use godot::prelude::*;
@@ -126,7 +126,7 @@ impl OverworldScene {
         let stash_toggle = self.base().get_node_as::<Button>("UI/CraftingPanel/CardBrowser/DeckStashToggle/StashButton");
         stash_toggle.signals().pressed().connect_other(self_gd, OverworldScene::on_stash_toggle);
 
-        let grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Grid");
+        let grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Scroll/Grid");
         grid.signals().gui_input().connect_other(self_gd, OverworldScene::on_grid_gui_input);
 
         let action_btn = self.base().get_node_as::<Button>("UI/CraftingPanel/ActionSection/ActionButton");
@@ -329,7 +329,7 @@ impl OverworldScene {
 
     fn populate_grid(&self) {
         let Some(run) = self.run.as_ref() else { return };
-        let mut grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Grid");
+        let mut grid = self.base().get_node_as::<GridContainer>("UI/CraftingPanel/CardBrowser/Scroll/Grid");
         while grid.get_child_count() > 0 {
             if let Some(mut child) = grid.get_child(0) {
                 grid.remove_child(&child);
@@ -341,7 +341,7 @@ impl OverworldScene {
         for (i, card) in cards.iter().enumerate() {
             let mut slot = Panel::new_alloc();
             slot.set_name(&format!("CardSlot_{}", i));
-            slot.set_size(Vector2::new(180.0, 80.0));
+            slot.set_custom_minimum_size(Vector2::new(180.0, 70.0));
 
             let can_use = self.can_craft_on_card(card);
             let mut style = StyleBoxFlat::new_gd();
@@ -357,45 +357,42 @@ impl OverworldScene {
             }
             slot.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
 
+            let mut vbox = VBoxContainer::new_alloc();
+            vbox.add_theme_constant_override("separation", 2);
+
             let mut name_label = Label::new_alloc();
-            name_label.set_position(Vector2::new(5.0, 3.0));
-            name_label.set_size(Vector2::new(170.0, 20.0));
             name_label.set_text(card.name);
             name_label.add_theme_color_override("font_color", if can_use { rgb(0xe8, 0xe8, 0xe8) } else { rgb(0x6a, 0x7a, 0x8a) });
-            slot.add_child(&name_label);
+            vbox.add_child(&name_label);
 
+            let mut row = HBoxContainer::new_alloc();
             let mut cost_label = Label::new_alloc();
-            cost_label.set_position(Vector2::new(5.0, 25.0));
-            cost_label.set_size(Vector2::new(50.0, 18.0));
             cost_label.set_text(&format!("{}g", card.cost));
             cost_label.add_theme_color_override("font_color", rgb(0xf4, 0xc4, 0x30));
-            slot.add_child(&cost_label);
+            row.add_child(&cost_label);
 
             let mut affix_label = Label::new_alloc();
-            affix_label.set_position(Vector2::new(60.0, 25.0));
-            affix_label.set_size(Vector2::new(120.0, 18.0));
             affix_label.set_text(&format!("{} affix", card.affixes.len()));
             affix_label.add_theme_color_override("font_color", if can_use { rgb(0x99, 0xcc, 0xff) } else { rgb(0x6a, 0x7a, 0x8a) });
-            slot.add_child(&affix_label);
+            row.add_child(&affix_label);
+
+            vbox.add_child(&row);
 
             if card.corrupted {
                 let mut corr_label = Label::new_alloc();
-                corr_label.set_position(Vector2::new(5.0, 45.0));
-                corr_label.set_size(Vector2::new(170.0, 18.0));
                 corr_label.set_text("CORRUPTED");
                 corr_label.add_theme_color_override("font_color", rgb(0xcc, 0x1a, 0x1a));
-                slot.add_child(&corr_label);
+                vbox.add_child(&corr_label);
             }
 
             if !can_use {
                 let mut reason = Label::new_alloc();
-                reason.set_position(Vector2::new(5.0, 60.0));
-                reason.set_size(Vector2::new(170.0, 18.0));
                 reason.set_text(self.ineligibility_reason(card));
                 reason.add_theme_color_override("font_color", rgb(0x8a, 0x4a, 0x4a));
-                slot.add_child(&reason);
+                vbox.add_child(&reason);
             }
 
+            slot.add_child(&vbox);
             grid.add_child(&slot);
         }
     }
@@ -595,24 +592,22 @@ impl OverworldScene {
             while before.get_child_count() > 0 {
                 if let Some(mut c) = before.get_child(0) { before.remove_child(&c); c.queue_free(); }
             }
+            let mut vbox = VBoxContainer::new_alloc();
+            vbox.add_theme_constant_override("separation", 2);
+
             let mut name = Label::new_alloc();
-            name.set_position(Vector2::new(5.0, 5.0));
-            name.set_size(Vector2::new(280.0, 20.0));
             name.set_text(original.name);
             name.add_theme_color_override("font_color", rgb(0xe8, 0xe8, 0xe8));
-            before.add_child(&name);
+            vbox.add_child(&name);
 
-            let mut affix_text = String::new();
             for a in &original.affixes {
-                affix_text.push_str(a.description);
-                affix_text.push('\n');
+                let mut aff = Label::new_alloc();
+                aff.set_text(a.description);
+                aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
+                vbox.add_child(&aff);
             }
-            let mut aff = Label::new_alloc();
-            aff.set_position(Vector2::new(5.0, 30.0));
-            aff.set_size(Vector2::new(280.0, 200.0));
-            aff.set_text(&affix_text);
-            aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
-            before.add_child(&aff);
+
+            before.add_child(&vbox);
         }
 
         if let Some(ref modified) = self.result_modified {
@@ -620,29 +615,29 @@ impl OverworldScene {
             while after.get_child_count() > 0 {
                 if let Some(mut c) = after.get_child(0) { after.remove_child(&c); c.queue_free(); }
             }
+            let mut vbox = VBoxContainer::new_alloc();
+            vbox.add_theme_constant_override("separation", 2);
+
             let mut name = Label::new_alloc();
-            name.set_position(Vector2::new(5.0, 5.0));
-            name.set_size(Vector2::new(280.0, 20.0));
             name.set_text(modified.name);
             name.add_theme_color_override("font_color", rgb(0xe8, 0xe8, 0xe8));
-            after.add_child(&name);
+            vbox.add_child(&name);
 
-            let mut affix_text = String::new();
             for a in &modified.affixes {
-                affix_text.push_str(a.description);
-                affix_text.push('\n');
+                let mut aff = Label::new_alloc();
+                aff.set_text(a.description);
+                aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
+                vbox.add_child(&aff);
             }
+
             if let Some(ref imp) = modified.implicit_affix {
-                affix_text.push_str("-- ");
-                affix_text.push_str(imp.description);
-                affix_text.push('\n');
+                let mut aff = Label::new_alloc();
+                aff.set_text(&format!("-- {}", imp.description));
+                aff.add_theme_color_override("font_color", rgb(0x7f, 0x4f, 0xbf));
+                vbox.add_child(&aff);
             }
-            let mut aff = Label::new_alloc();
-            aff.set_position(Vector2::new(5.0, 30.0));
-            aff.set_size(Vector2::new(280.0, 200.0));
-            aff.set_text(&affix_text);
-            aff.add_theme_color_override("font_color", rgb(0x99, 0xcc, 0xff));
-            after.add_child(&aff);
+
+            after.add_child(&vbox);
         }
     }
 

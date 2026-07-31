@@ -8,7 +8,7 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: deploy
+  group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -103,7 +103,7 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Finish GitHub deployment
-        if: always() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && steps.deployment.outcome == 'success'
         uses: bobheadxi/deployments@v1
         with:
           step: finish

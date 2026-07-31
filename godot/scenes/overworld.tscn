@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://dofw0wfqef0e6"]
 
 [ext_resource type="Script" uid="uid://d14i30fy2teg1" path="res://scenes/overworld_ui.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_card_detail.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_action_section.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_result_section.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_confirm_dialog.tscn" id="5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_crafting_bg"]
 bg_color = Color(0.043, 0.102, 0.141, 1)
@@ -16,32 +20,6 @@ corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_bg"]
 bg_color = Color(0.059, 0.129, 0.176, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_confirm_bg"]
-bg_color = Color(0.02, 0.05, 0.08, 0.95)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_result_bg"]
-bg_color = Color(0.02, 0.05, 0.08, 0.95)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_corrupted_border"]
-bg_color = Color(0.043, 0.102, 0.141, 1)
-border_color = Color(0.8, 0.1, 0.1, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -144,15 +122,16 @@ text = "Gambler"
 custom_minimum_size = Vector2(120, 30)
 text = "Corrupt"
 
-[node name="CardBrowser" type="ScrollContainer" parent="UI/CraftingPanel"]
+[node name="CardBrowser" type="Panel" parent="UI/CraftingPanel"]
 offset_left = 10.0
 offset_top = 80.0
 offset_right = 590.0
 offset_bottom = 500.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
 
 [node name="DeckStashToggle" type="HBoxContainer" parent="UI/CraftingPanel/CardBrowser"]
-offset_left = 0.0
-offset_top = 0.0
+offset_left = 4.0
+offset_top = 4.0
 offset_right = 200.0
 offset_bottom = 30.0
 
@@ -167,170 +146,42 @@ custom_minimum_size = Vector2(80, 25)
 text = "Stash"
 toggle_mode = true
 
-[node name="Grid" type="GridContainer" parent="UI/CraftingPanel/CardBrowser"]
+[node name="Scroll" type="ScrollContainer" parent="UI/CraftingPanel/CardBrowser"]
 offset_left = 0.0
-offset_top = 35.0
+offset_top = 36.0
 offset_right = 580.0
 offset_bottom = 420.0
+
+[node name="Grid" type="GridContainer" parent="UI/CraftingPanel/CardBrowser/Scroll"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 580.0
+offset_bottom = 0.0
 columns = 3
 
-[node name="CardDetail" type="Panel" parent="UI/CraftingPanel"]
+[node name="CardDetail" parent="UI/CraftingPanel" instance=ExtResource("2")]
 visible = false
 offset_left = 600.0
 offset_top = 80.0
 offset_right = 890.0
 offset_bottom = 420.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
 
-[node name="NameLabel" type="Label" parent="UI/CraftingPanel/CardDetail"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 280.0
-offset_bottom = 30.0
-theme_override_colors/font_color = Color(0.31, 0.82, 0.77, 1)
-
-[node name="CostLabel" type="Label" parent="UI/CraftingPanel/CardDetail"]
-offset_left = 10.0
-offset_top = 35.0
-offset_right = 280.0
-offset_bottom = 55.0
-theme_override_colors/font_color = Color(0.957, 0.769, 0.188, 1)
-
-[node name="EffectsLabel" type="Label" parent="UI/CraftingPanel/CardDetail"]
-offset_left = 10.0
-offset_top = 60.0
-offset_right = 280.0
-offset_bottom = 80.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-
-[node name="AffixList" type="VBoxContainer" parent="UI/CraftingPanel/CardDetail"]
-offset_left = 10.0
-offset_top = 85.0
-offset_right = 280.0
-offset_bottom = 200.0
-
-[node name="Affix_0" type="Label" parent="UI/CraftingPanel/CardDetail/AffixList"]
-theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
-
-[node name="Affix_1" type="Label" parent="UI/CraftingPanel/CardDetail/AffixList"]
-theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
-
-[node name="Affix_2" type="Label" parent="UI/CraftingPanel/CardDetail/AffixList"]
-theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
-
-[node name="Affix_3" type="Label" parent="UI/CraftingPanel/CardDetail/AffixList"]
-theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
-
-[node name="ImplicitAffix" type="Label" parent="UI/CraftingPanel/CardDetail"]
-visible = false
-offset_left = 10.0
-offset_top = 205.0
-offset_right = 280.0
-offset_bottom = 225.0
-theme_override_colors/font_color = Color(0.7, 0.4, 0.9, 1)
-
-[node name="CorruptedBanner" type="Label" parent="UI/CraftingPanel/CardDetail"]
-visible = false
-offset_left = 10.0
-offset_top = 230.0
-offset_right = 280.0
-offset_bottom = 250.0
-text = "CORRUPTED"
-theme_override_colors/font_color = Color(0.8, 0.1, 0.1, 1)
-
-[node name="ActionSection" type="Panel" parent="UI/CraftingPanel"]
+[node name="ActionSection" parent="UI/CraftingPanel" instance=ExtResource("3")]
 offset_left = 600.0
 offset_top = 430.0
 offset_right = 890.0
 offset_bottom = 500.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
 
-[node name="CostLabel" type="Label" parent="UI/CraftingPanel/ActionSection"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 280.0
-offset_bottom = 30.0
-text = "Cost: 100g"
-theme_override_colors/font_color = Color(0.957, 0.769, 0.188, 1)
-
-[node name="WarningLabel" type="Label" parent="UI/CraftingPanel/ActionSection"]
-visible = false
-offset_left = 10.0
-offset_top = 35.0
-offset_right = 280.0
-offset_bottom = 55.0
-text = "Warning: This action is permanent"
-theme_override_colors/font_color = Color(0.8, 0.3, 0.3, 1)
-
-[node name="ActionButton" type="Button" parent="UI/CraftingPanel/ActionSection"]
-offset_left = 10.0
-offset_top = 60.0
-offset_right = 280.0
-offset_bottom = 85.0
-text = "Action"
-
-[node name="ResultSection" type="Panel" parent="UI/CraftingPanel"]
+[node name="ResultSection" parent="UI/CraftingPanel" instance=ExtResource("4")]
 visible = false
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 900.0
 offset_bottom = 600.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_result_bg")
 
-[node name="OutcomeLabel" type="Label" parent="UI/CraftingPanel/ResultSection"]
-offset_left = 350.0
-offset_top = 20.0
-offset_right = 550.0
-offset_bottom = 50.0
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.31, 0.82, 0.77, 1)
-
-[node name="BeforeCard" type="Panel" parent="UI/CraftingPanel/ResultSection"]
-offset_left = 100.0
-offset_top = 70.0
-offset_right = 400.0
-offset_bottom = 350.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
-
-[node name="AfterCard" type="Panel" parent="UI/CraftingPanel/ResultSection"]
-offset_left = 500.0
-offset_top = 70.0
-offset_right = 800.0
-offset_bottom = 350.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
-
-[node name="AcceptButton" type="Button" parent="UI/CraftingPanel/ResultSection"]
-offset_left = 380.0
-offset_top = 400.0
-offset_right = 520.0
-offset_bottom = 440.0
-text = "Accept"
-
-[node name="ConfirmDialog" type="Panel" parent="UI/CraftingPanel"]
+[node name="ConfirmDialog" parent="UI/CraftingPanel" instance=ExtResource("5")]
 visible = false
 offset_left = 200.0
 offset_top = 200.0
 offset_right = 700.0
 offset_bottom = 400.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_confirm_bg")
-
-[node name="Message" type="Label" parent="UI/CraftingPanel/ConfirmDialog"]
-offset_left = 20.0
-offset_top = 30.0
-offset_right = 480.0
-offset_bottom = 100.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-
-[node name="ConfirmButton" type="Button" parent="UI/CraftingPanel/ConfirmDialog"]
-offset_left = 120.0
-offset_top = 140.0
-offset_right = 220.0
-offset_bottom = 170.0
-text = "Confirm"
-
-[node name="CancelButton" type="Button" parent="UI/CraftingPanel/ConfirmDialog"]
-offset_left = 240.0
-offset_top = 140.0
-offset_right = 340.0
-offset_bottom = 170.0
-text = "Cancel"
