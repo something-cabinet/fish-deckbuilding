@@ -42,7 +42,7 @@ pub struct RunState {
 impl RunState {
     pub fn new(hp: i32, max_hp: i32, starter_collection: Vec<CardDef>) -> Self {
         let mut state = Self {
-            gold: 0,
+            gold: 100000,
             hp,
             max_hp,
             card_collection: starter_collection,
