@@ -169,16 +169,26 @@ impl RunState {
     }
 }
 
+/// `grid_x` increases left-to-right (progression through the map); `grid_y` is
+/// vertical spread of parallel paths. The overworld scene renders nodes in that
+/// orientation so the run travels horizontally across the screen.
 pub fn create_zone_1() -> Vec<OverworldNode> {
     vec![
-        OverworldNode { id: "start".into(), node_type: NodeType::Rest, connections: vec!["battle_1a".into(), "battle_1b".into(), "gambler_1".into()], grid_x: 2, grid_y: 0 },
-        OverworldNode { id: "gambler_1".into(), node_type: NodeType::Gambler, connections: vec!["enchanter_1".into()], grid_x: 2, grid_y: 1 },
-        OverworldNode { id: "battle_1a".into(), node_type: NodeType::Battle, connections: vec!["shop_1".into()], grid_x: 0, grid_y: 2 },
-        OverworldNode { id: "battle_1b".into(), node_type: NodeType::Battle, connections: vec!["rest_1".into()], grid_x: 4, grid_y: 2 },
-        OverworldNode { id: "enchanter_1".into(), node_type: NodeType::Enchanter, connections: vec!["shop_1".into(), "rest_1".into()], grid_x: 2, grid_y: 3 },
-        OverworldNode { id: "shop_1".into(), node_type: NodeType::Shop, connections: vec!["boss_1".into()], grid_x: 0, grid_y: 4 },
+        OverworldNode { id: "start".into(), node_type: NodeType::Rest, connections: vec!["battle_1a".into(), "battle_1b".into(), "gambler_1".into()], grid_x: 0, grid_y: 2 },
+        OverworldNode { id: "gambler_1".into(), node_type: NodeType::Gambler, connections: vec!["enchanter_1".into()], grid_x: 1, grid_y: 2 },
+        OverworldNode { id: "battle_1a".into(), node_type: NodeType::Battle, connections: vec!["shop_1".into()], grid_x: 2, grid_y: 0 },
+        OverworldNode { id: "battle_1b".into(), node_type: NodeType::Battle, connections: vec!["rest_1".into()], grid_x: 2, grid_y: 4 },
+        OverworldNode { id: "enchanter_1".into(), node_type: NodeType::Enchanter, connections: vec!["shop_1".into(), "rest_1".into()], grid_x: 3, grid_y: 2 },
+        OverworldNode { id: "shop_1".into(), node_type: NodeType::Shop, connections: vec!["boss_1".into()], grid_x: 4, grid_y: 0 },
         OverworldNode { id: "rest_1".into(), node_type: NodeType::Rest, connections: vec!["boss_1".into()], grid_x: 4, grid_y: 4 },
-        OverworldNode { id: "boss_1".into(), node_type: NodeType::Boss, connections: vec!["zone_2_gate".into()], grid_x: 2, grid_y: 6 },
+        OverworldNode { id: "boss_1".into(), node_type: NodeType::Boss, connections: vec!["gate_2".into()], grid_x: 6, grid_y: 2 },
+        OverworldNode { id: "gate_2".into(), node_type: NodeType::Rest, connections: vec!["battle_2a".into(), "battle_2b".into()], grid_x: 7, grid_y: 2 },
+        OverworldNode { id: "battle_2a".into(), node_type: NodeType::Battle, connections: vec!["enchanter_2".into()], grid_x: 8, grid_y: 0 },
+        OverworldNode { id: "battle_2b".into(), node_type: NodeType::Battle, connections: vec!["gambler_2".into()], grid_x: 8, grid_y: 4 },
+        OverworldNode { id: "enchanter_2".into(), node_type: NodeType::Enchanter, connections: vec!["shop_2".into()], grid_x: 9, grid_y: 1 },
+        OverworldNode { id: "gambler_2".into(), node_type: NodeType::Gambler, connections: vec!["shop_2".into()], grid_x: 9, grid_y: 3 },
+        OverworldNode { id: "shop_2".into(), node_type: NodeType::Shop, connections: vec!["boss_2".into()], grid_x: 10, grid_y: 2 },
+        OverworldNode { id: "boss_2".into(), node_type: NodeType::Boss, connections: vec![], grid_x: 11, grid_y: 2 },
     ]
 }
 
@@ -230,9 +240,9 @@ mod tests {
     }
 
     #[test]
-    fn zone_1_has_8_nodes() {
+    fn zone_1_has_15_nodes() {
         let zone = create_zone_1();
-        assert_eq!(zone.len(), 8);
+        assert_eq!(zone.len(), 15);
     }
 
     #[test]

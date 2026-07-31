@@ -66,8 +66,15 @@ pub struct OverworldScene {
     hovered_crafting_slot: Option<usize>,
     hovered_slot_base_y: f32,
     hovered_map_node: Option<usize>,
+    map_scroll_x: f32,
     base: Base<Node2D>,
 }
+
+const MAP_ORIGIN_X: f32 = 150.0;
+const MAP_ORIGIN_Y: f32 = 160.0;
+const MAP_COL_SPACING: f32 = 150.0;
+const MAP_ROW_SPACING: f32 = 100.0;
+const VIEWPORT_WIDTH: f32 = 1280.0;
 
 #[godot_api]
 impl INode2D for OverworldScene {
@@ -87,6 +94,7 @@ impl INode2D for OverworldScene {
             hovered_crafting_slot: None,
             hovered_slot_base_y: 0.0,
             hovered_map_node: None,
+            map_scroll_x: 0.0,
             base,
         }
     }
@@ -128,12 +136,9 @@ impl INode2D for OverworldScene {
             return;
         }
 
-        let screen_x = pos.x as i32;
-        let screen_y = pos.y as i32;
-        for (i, node) in self.nodes.iter().enumerate() {
-            let nx = 200 + node.grid_x * 150;
-            let ny = 80 + node.grid_y * 90;
-            if (screen_x - nx).abs() < 40 && (screen_y - ny).abs() < 40 {
+        for i in 0..self.nodes.len() {
+            let (nx, ny) = self.node_screen_pos(&self.nodes[i]);
+            if (pos.x - nx).abs() < 40.0 && (pos.y - ny).abs() < 40.0 {
                 self.on_node_click(i);
                 return;
             }
@@ -194,11 +199,16 @@ impl OverworldScene {
             self.run = Some(RunState::new(30, 30, starter));
         }
         self.nodes = create_zone_1();
-        self.hero_node_idx = 0;
+        self.hero_node_idx = self.run.as_ref()
+            .and_then(|r| r.current_node.as_ref())
+            .and_then(|id| self.nodes.iter().position(|n| &n.id == id))
+            .map(|i| i as i32)
+            .unwrap_or(0);
         self.refresh();
     }
 
-    fn refresh(&self) {
+    fn refresh(&mut self) {
+        self.update_map_scroll();
         self.clear_map();
         let run = match self.run.as_ref() { Some(r) => r, None => return };
         let ui = self.base().get_node_as::<CanvasLayer>("UI");
@@ -206,6 +216,27 @@ impl OverworldScene {
         self.draw_nodes(&ui, run);
         self.draw_hero(&ui);
         self.update_hud(&ui, run);
+    }
+
+    /// Node's on-screen position, in the horizontally-scrolling map space.
+    fn node_screen_pos(&self, node: &OverworldNode) -> (f32, f32) {
+        let x = MAP_ORIGIN_X + node.grid_x as f32 * MAP_COL_SPACING + self.map_scroll_x;
+        let y = MAP_ORIGIN_Y + node.grid_y as f32 * MAP_ROW_SPACING;
+        (x, y)
+    }
+
+    /// Keeps the hero roughly centered horizontally as the map extends further
+    /// right than the viewport, without scrolling past either edge.
+    fn update_map_scroll(&mut self) {
+        let max_x = self.nodes.iter().map(|n| n.grid_x).max().unwrap_or(0) as f32 * MAP_COL_SPACING;
+        let min_scroll = (VIEWPORT_WIDTH - MAP_ORIGIN_X - max_x - 100.0).min(0.0);
+        let hero_local_x = if self.hero_node_idx >= 0 && (self.hero_node_idx as usize) < self.nodes.len() {
+            MAP_ORIGIN_X + self.nodes[self.hero_node_idx as usize].grid_x as f32 * MAP_COL_SPACING
+        } else {
+            MAP_ORIGIN_X
+        };
+        let target = VIEWPORT_WIDTH / 2.0 - hero_local_x;
+        self.map_scroll_x = target.clamp(min_scroll, 0.0);
     }
 
     fn clear_map(&self) {
@@ -224,14 +255,12 @@ impl OverworldScene {
         for node in &self.nodes {
             for conn in &node.connections {
                 if let Some(target) = self.nodes.iter().find(|n| &n.id == conn) {
-                    let x1 = 200 + node.grid_x * 150;
-                    let y1 = 80 + node.grid_y * 90;
-                    let x2 = 200 + target.grid_x * 150;
-                    let y2 = 80 + target.grid_y * 90;
+                    let (x1, y1) = self.node_screen_pos(node);
+                    let (x2, y2) = self.node_screen_pos(target);
                     let mut line = Line2D::new_alloc();
                     let mut points = PackedVector2Array::new();
-                    points.push(Vector2::new(x1 as f32, y1 as f32));
-                    points.push(Vector2::new(x2 as f32, y2 as f32));
+                    points.push(Vector2::new(x1, y1));
+                    points.push(Vector2::new(x2, y2));
                     line.set_points(&points);
                     line.set_width(2.0);
                     line.set_default_color(rgb(0x3a, 0x6e, 0x8a));
@@ -244,8 +273,7 @@ impl OverworldScene {
     fn draw_nodes(&self, ui: &Gd<CanvasLayer>, run: &RunState) {
         let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
         for (i, node) in self.nodes.iter().enumerate() {
-            let nx = (200 + node.grid_x * 150) as f32;
-            let ny = (80 + node.grid_y * 90) as f32;
+            let (nx, ny) = self.node_screen_pos(node);
 
             let is_accessible = node.id == "start"
                 || (self.hero_node_idx >= 0
@@ -379,8 +407,7 @@ impl OverworldScene {
     fn draw_hero(&self, ui: &Gd<CanvasLayer>) {
         if self.hero_node_idx < 0 || self.hero_node_idx >= self.nodes.len() as i32 { return; }
         let node = &self.nodes[self.hero_node_idx as usize];
-        let nx = (200 + node.grid_x * 150) as f32;
-        let ny = (80 + node.grid_y * 90) as f32;
+        let (nx, ny) = self.node_screen_pos(node);
         let mut container: Gd<Node2D> = ui.get("map_container").try_to().expect("map_container missing");
 
         let mut panel = Panel::new_alloc();
@@ -423,6 +450,7 @@ impl OverworldScene {
         if run.defeated_nodes.contains(&node.id) { return; }
 
         self.hero_node_idx = idx as i32;
+        run.current_node = Some(node.id.clone());
         match node.node_type {
             NodeType::Battle | NodeType::Boss => {
                 godot_print!("[Overworld] Starting battle at {}", node.id);
@@ -952,16 +980,13 @@ impl OverworldScene {
     }
 
     fn update_map_hover(&mut self, global_pos: Vector2) {
-        let screen_x = global_pos.x as i32;
-        let screen_y = global_pos.y as i32;
         let mut new_hover: Option<usize> = None;
         if let Some(run) = self.run.as_ref() {
             if self.hero_node_idx >= 0 && (self.hero_node_idx as usize) < self.nodes.len() {
                 let current = &self.nodes[self.hero_node_idx as usize];
                 for (i, node) in self.nodes.iter().enumerate() {
-                    let nx = 200 + node.grid_x * 150;
-                    let ny = 80 + node.grid_y * 90;
-                    if (screen_x - nx).abs() < 40 && (screen_y - ny).abs() < 40
+                    let (nx, ny) = self.node_screen_pos(node);
+                    if (global_pos.x - nx).abs() < 40.0 && (global_pos.y - ny).abs() < 40.0
                         && current.connections.contains(&node.id)
                         && !run.defeated_nodes.contains(&node.id)
                     {
