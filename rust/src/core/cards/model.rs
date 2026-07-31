@@ -1,4 +1,8 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+use serde::{Deserialize, Serialize};
+use crate::core::grid::Range;
+use crate::core::cards::targeting::TargetFilter;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -7,13 +11,13 @@ pub enum Rarity {
     Legendary,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BuffType {
     Blind,
     Strengthen,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Effect {
     Damage(i32),
     Heal(i32),
@@ -22,10 +26,7 @@ pub enum Effect {
     ApplyBuff(BuffType, i32),
 }
 
-use crate::core::grid::Range;
-use crate::core::cards::targeting::TargetFilter;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CardEffect {
     pub effect: Effect,
     pub range: Range,
@@ -33,10 +34,10 @@ pub struct CardEffect {
     pub affect_pattern: Vec<(i32, i32)>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CardDef {
-    pub id: &'static str,
-    pub name: &'static str,
+    pub id: String,
+    pub name: String,
     pub cost: i32,
     pub effects: Vec<CardEffect>,
     pub rarity: Rarity,
@@ -47,13 +48,13 @@ pub struct CardDef {
 
 impl CardDef {
     pub fn new(
-        id: &'static str,
-        name: &'static str,
+        id: impl Into<String>,
+        name: impl Into<String>,
         cost: i32,
         effects: Vec<CardEffect>,
         rarity: Rarity,
     ) -> Self {
-        Self { id, name, cost, effects, rarity, affixes: Vec::new(), corrupted: false, implicit_affix: None }
+        Self { id: id.into(), name: name.into(), cost, effects, rarity, affixes: Vec::new(), corrupted: false, implicit_affix: None }
     }
 
     #[allow(dead_code)]

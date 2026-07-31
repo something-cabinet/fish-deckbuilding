@@ -1,8 +1,8 @@
+use serde::{Deserialize, Serialize};
 use crate::core::cards::model::CardEffect;
 use crate::core::grid::{Faction, GridState, Range};
 
-/// Filters for choosing valid targets on the grid.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TargetFilter {
     EnemyUnit,
     AllyUnit,

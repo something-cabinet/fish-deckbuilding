@@ -14,21 +14,22 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="CardTooltip" type="Panel" unique_id=952743360 node_paths=PackedStringArray("name_label", "cost_label", "desc_label")]
+[node name="CardTooltip" type="Panel" unique_id=952743360 node_paths=PackedStringArray("name_label", "cost_label", "desc_label", "affix_label")]
 visible = false
-offset_right = 200.0
-offset_bottom = 100.0
+offset_right = 210.0
+offset_bottom = 150.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_tooltip")
 script = ExtResource("1")
 name_label = NodePath("TooltipName")
 cost_label = NodePath("TooltipCost")
 desc_label = NodePath("TooltipDesc")
+affix_label = NodePath("TooltipAffixes")
 
 [node name="TooltipName" type="Label" parent="." unique_id=301618844]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
-offset_right = 190.0
+offset_right = 200.0
 offset_bottom = 32.0
 theme_override_colors/font_color = Color(0.839, 0.91, 0.937, 1)
 theme_override_font_sizes/font_size = 14
@@ -37,7 +38,7 @@ theme_override_font_sizes/font_size = 14
 layout_mode = 0
 offset_left = 10.0
 offset_top = 32.0
-offset_right = 190.0
+offset_right = 200.0
 offset_bottom = 50.0
 theme_override_colors/font_color = Color(0.376, 0.647, 0.98, 1)
 theme_override_font_sizes/font_size = 12
@@ -46,8 +47,18 @@ theme_override_font_sizes/font_size = 12
 layout_mode = 0
 offset_left = 10.0
 offset_top = 52.0
-offset_right = 190.0
-offset_bottom = 112.0
+offset_right = 200.0
+offset_bottom = 96.0
 theme_override_colors/font_color = Color(0.557, 0.706, 0.769, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 2
+
+[node name="TooltipAffixes" type="Label" parent="." unique_id=158411385]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 98.0
+offset_right = 200.0
+offset_bottom = 146.0
+theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 11
 autowrap_mode = 2

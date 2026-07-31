@@ -1,68 +1,68 @@
 [gd_scene format=3 uid="uid://bfdcvek17s27y"]
 
-[ext_resource type="Script" uid="uid://b5q3q2qhv3m2" path="res://scenes/battle/mana_crystals.gd" id="1"]
+[ext_resource type="Script" uid="uid://cw4xpno53dnhf" path="res://scenes/battle/mana_crystals.gd" id="1"]
 
-[node name="ManaCrystals" type="Control"]
+[node name="ManaCrystals" type="Control" unique_id=1687141810]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 1000.0
 offset_top = 50.0
 script = ExtResource("1")
 
-[node name="Crystal_0" type="Panel" parent="."]
+[node name="Crystal_0" type="Panel" parent="." unique_id=809376561]
 layout_mode = 0
 offset_right = 18.0
 offset_bottom = 26.0
 
-[node name="Crystal_1" type="Panel" parent="."]
+[node name="Crystal_1" type="Panel" parent="." unique_id=1573008273]
 layout_mode = 0
 offset_left = 22.0
 offset_right = 40.0
 offset_bottom = 26.0
 
-[node name="Crystal_2" type="Panel" parent="."]
+[node name="Crystal_2" type="Panel" parent="." unique_id=2095547487]
 layout_mode = 0
 offset_left = 44.0
 offset_right = 62.0
 offset_bottom = 26.0
 
-[node name="Crystal_3" type="Panel" parent="."]
+[node name="Crystal_3" type="Panel" parent="." unique_id=2132991114]
 layout_mode = 0
 offset_left = 66.0
 offset_right = 84.0
 offset_bottom = 26.0
 
-[node name="Crystal_4" type="Panel" parent="."]
+[node name="Crystal_4" type="Panel" parent="." unique_id=856070872]
 layout_mode = 0
 offset_left = 88.0
 offset_right = 106.0
 offset_bottom = 26.0
 
-[node name="Crystal_5" type="Panel" parent="."]
+[node name="Crystal_5" type="Panel" parent="." unique_id=197115692]
 layout_mode = 0
 offset_left = 110.0
 offset_right = 128.0
 offset_bottom = 26.0
 
-[node name="Crystal_6" type="Panel" parent="."]
+[node name="Crystal_6" type="Panel" parent="." unique_id=770423223]
 layout_mode = 0
 offset_left = 132.0
 offset_right = 150.0
 offset_bottom = 26.0
 
-[node name="Crystal_7" type="Panel" parent="."]
+[node name="Crystal_7" type="Panel" parent="." unique_id=2038563517]
 layout_mode = 0
 offset_left = 154.0
 offset_right = 172.0
 offset_bottom = 26.0
 
-[node name="Crystal_8" type="Panel" parent="."]
+[node name="Crystal_8" type="Panel" parent="." unique_id=1337649508]
 layout_mode = 0
 offset_left = 176.0
 offset_right = 194.0
 offset_bottom = 26.0
 
-[node name="Crystal_9" type="Panel" parent="."]
+[node name="Crystal_9" type="Panel" parent="." unique_id=1395616649]
 layout_mode = 0
 offset_left = 198.0
 offset_right = 216.0

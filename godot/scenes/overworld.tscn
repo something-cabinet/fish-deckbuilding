@@ -1,6 +1,29 @@
 [gd_scene format=3 uid="uid://dofw0wfqef0e6"]
 
 [ext_resource type="Script" uid="uid://d14i30fy2teg1" path="res://scenes/overworld_ui.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_card_detail.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_action_section.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_result_section.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/crafting_confirm_dialog.tscn" id="5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_crafting_bg"]
+bg_color = Color(0.043, 0.102, 0.141, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
+bg_color = Color(0.059, 0.129, 0.176, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_bg"]
+bg_color = Color(0.059, 0.129, 0.176, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="OverworldScene" type="OverworldScene" unique_id=51701325]
 
@@ -41,3 +64,120 @@ offset_top = 70.0
 offset_right = 120.0
 offset_bottom = 100.0
 text = "Deck"
+
+[node name="CraftingPanel" type="Panel" parent="UI" unique_id=1355002723]
+visible = false
+offset_left = 190.0
+offset_top = 60.0
+offset_right = 1090.0
+offset_bottom = 660.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_crafting_bg")
+
+[node name="Header" type="Panel" parent="UI/CraftingPanel" unique_id=1477884422]
+layout_mode = 0
+offset_right = 900.0
+offset_bottom = 40.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="Title" type="Label" parent="UI/CraftingPanel/Header" unique_id=1744825692]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 400.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(0.31, 0.82, 0.77, 1)
+text = "Crafting"
+
+[node name="CloseButton" type="Button" parent="UI/CraftingPanel/Header" unique_id=1788331503]
+layout_mode = 0
+offset_left = 860.0
+offset_top = 5.0
+offset_right = 895.0
+offset_bottom = 35.0
+text = "X"
+
+[node name="ModeTabs" type="HBoxContainer" parent="UI/CraftingPanel" unique_id=710218488]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 45.0
+offset_right = 400.0
+offset_bottom = 75.0
+
+[node name="EnchanterTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=979793895]
+custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
+text = "Enchanter"
+
+[node name="GamblerTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=1693950886]
+custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
+text = "Gambler"
+
+[node name="CorruptTab" type="Button" parent="UI/CraftingPanel/ModeTabs" unique_id=346129957]
+custom_minimum_size = Vector2(120, 30)
+layout_mode = 2
+text = "Corrupt"
+
+[node name="CardBrowser" type="Panel" parent="UI/CraftingPanel" unique_id=533137519]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 80.0
+offset_right = 590.0
+offset_bottom = 500.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_bg")
+
+[node name="DeckStashToggle" type="HBoxContainer" parent="UI/CraftingPanel/CardBrowser" unique_id=556383555]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 200.0
+offset_bottom = 30.0
+
+[node name="DeckButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle" unique_id=1345819385]
+custom_minimum_size = Vector2(80, 25)
+layout_mode = 2
+toggle_mode = true
+text = "Deck"
+
+[node name="StashButton" type="Button" parent="UI/CraftingPanel/CardBrowser/DeckStashToggle" unique_id=1723183827]
+custom_minimum_size = Vector2(80, 25)
+layout_mode = 2
+toggle_mode = true
+text = "Stash"
+
+[node name="Scroll" type="ScrollContainer" parent="UI/CraftingPanel/CardBrowser" unique_id=1368801324]
+layout_mode = 0
+offset_top = 36.0
+offset_right = 580.0
+offset_bottom = 420.0
+
+[node name="Grid" type="GridContainer" parent="UI/CraftingPanel/CardBrowser/Scroll" unique_id=415096152]
+layout_mode = 2
+columns = 3
+
+[node name="CardDetail" parent="UI/CraftingPanel" unique_id=2061215296 instance=ExtResource("2")]
+visible = false
+layout_mode = 0
+offset_left = 600.0
+offset_top = 80.0
+offset_right = 890.0
+offset_bottom = 420.0
+
+[node name="ActionSection" parent="UI/CraftingPanel" unique_id=1401104063 instance=ExtResource("3")]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 430.0
+offset_right = 890.0
+offset_bottom = 500.0
+
+[node name="ResultSection" parent="UI/CraftingPanel" unique_id=724156493 instance=ExtResource("4")]
+layout_mode = 0
+offset_right = 900.0
+offset_bottom = 600.0
+
+[node name="ConfirmDialog" parent="UI/CraftingPanel" unique_id=976261775 instance=ExtResource("5")]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 200.0
+offset_right = 700.0
+offset_bottom = 400.0

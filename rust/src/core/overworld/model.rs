@@ -1,7 +1,15 @@
+use serde::{Deserialize, Serialize};
 use crate::core::cards::affix;
+use crate::core::cards::affix::CorruptOutcome;
 use crate::core::cards::CardDef;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CardLocation {
+    Deck,
+    Stash,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NodeType {
     Battle,
     Boss,
@@ -13,7 +21,7 @@ pub enum NodeType {
     Gambler,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OverworldNode {
     pub id: String,
     pub node_type: NodeType,
@@ -22,7 +30,7 @@ pub struct OverworldNode {
     pub grid_y: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RunState {
     pub gold: i32,
     pub hp: i32,
@@ -35,12 +43,13 @@ pub struct RunState {
     #[allow(dead_code)]
     pub unlocked_zones: Vec<String>,
     pub defeated_nodes: Vec<String>,
+    pub last_corrupt_outcome: Option<CorruptOutcome>,
 }
 
 impl RunState {
     pub fn new(hp: i32, max_hp: i32, starter_collection: Vec<CardDef>) -> Self {
         let mut state = Self {
-            gold: 0,
+            gold: 100000,
             hp,
             max_hp,
             card_collection: starter_collection,
@@ -49,6 +58,7 @@ impl RunState {
             current_node: None,
             unlocked_zones: vec!["zone_1".to_string()],
             defeated_nodes: Vec::new(),
+            last_corrupt_outcome: None,
         };
         state.reset_combat_deck();
         state
@@ -78,7 +88,6 @@ impl RunState {
         self.gold += amount;
     }
 
-    #[allow(dead_code)]
     pub fn spend_gold(&mut self, amount: i32) -> bool {
         if self.gold >= amount {
             self.gold -= amount;
@@ -113,37 +122,50 @@ impl RunState {
         }
     }
 
-    pub fn enchanter_reroll(&mut self, deck_idx: usize, affix_idx: usize, seed: u64) -> Option<&CardDef> {
-        if self.gold < 50 { return None; }
-        if deck_idx >= self.combat_deck.len() { return None; }
-        if affix_idx >= self.combat_deck[deck_idx].affixes.len() { return None; }
-        self.gold -= 50;
-        let card = self.combat_deck[deck_idx].clone();
-        let new_card = affix::enchanter_reroll(&card, affix_idx, seed);
-        self.combat_deck[deck_idx] = new_card;
-        Some(&self.combat_deck[deck_idx])
+    fn cards(&self, location: CardLocation) -> &Vec<CardDef> {
+        match location {
+            CardLocation::Deck => &self.combat_deck,
+            CardLocation::Stash => &self.stash,
+        }
     }
 
-    pub fn gambler_add_slot(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
-        if self.gold < 100 { return None; }
-        if deck_idx >= self.combat_deck.len() { return None; }
-        if self.combat_deck[deck_idx].affixes.len() >= self.combat_deck[deck_idx].rarity.max_affixes() { return None; }
-        self.gold -= 100;
-        let card = self.combat_deck[deck_idx].clone();
-        let new_card = affix::gambler_add_slot(&card, seed);
-        self.combat_deck[deck_idx] = new_card;
-        Some(&self.combat_deck[deck_idx])
+    fn cards_mut(&mut self, location: CardLocation) -> &mut Vec<CardDef> {
+        match location {
+            CardLocation::Deck => &mut self.combat_deck,
+            CardLocation::Stash => &mut self.stash,
+        }
     }
 
-    #[allow(dead_code)]
-    pub fn corrupt_card(&mut self, deck_idx: usize, seed: u64) -> Option<&CardDef> {
-        if self.gold < 200 { return None; }
-        if deck_idx >= self.combat_deck.len() { return None; }
-        self.gold -= 200;
-        let card = self.combat_deck[deck_idx].clone();
-        let (new_card, _) = affix::corrupt(&card, seed);
-        self.combat_deck[deck_idx] = new_card;
-        Some(&self.combat_deck[deck_idx])
+    pub fn gambler_reroll_affix(&mut self, location: CardLocation, idx: usize, seed: u64) -> Option<&CardDef> {
+        if idx >= self.cards(location).len() { return None; }
+        if self.cards(location)[idx].corrupted || self.cards(location)[idx].affixes.is_empty() { return None; }
+        if !self.spend_gold(50) { return None; }
+        let card = self.cards(location)[idx].clone();
+        let new_card = affix::gambler_reroll_affix(&card, seed);
+        self.cards_mut(location)[idx] = new_card;
+        Some(&self.cards(location)[idx])
+    }
+
+    pub fn enchanter_add_slot(&mut self, location: CardLocation, idx: usize, seed: u64) -> Option<&CardDef> {
+        if idx >= self.cards(location).len() { return None; }
+        if self.cards(location)[idx].corrupted { return None; }
+        if self.cards(location)[idx].affixes.len() >= self.cards(location)[idx].rarity.max_affixes() { return None; }
+        if !self.spend_gold(100) { return None; }
+        let card = self.cards(location)[idx].clone();
+        let new_card = affix::enchanter_add_slot(&card, seed);
+        self.cards_mut(location)[idx] = new_card;
+        Some(&self.cards(location)[idx])
+    }
+
+    pub fn corrupt_card(&mut self, location: CardLocation, idx: usize, seed: u64) -> Option<&CardDef> {
+        if idx >= self.cards(location).len() { return None; }
+        if self.cards(location)[idx].corrupted { return None; }
+        if !self.spend_gold(200) { return None; }
+        let card = self.cards(location)[idx].clone();
+        let (new_card, outcome) = affix::corrupt(&card, seed);
+        self.last_corrupt_outcome = Some(outcome);
+        self.cards_mut(location)[idx] = new_card;
+        Some(&self.cards(location)[idx])
     }
 }
 
@@ -170,9 +192,9 @@ mod tests {
     }
 
     #[test]
-    fn run_state_starts_with_gold_0() {
+    fn run_state_starts_with_gold() {
         let s = RunState::new(30, 30, vec![]);
-        assert_eq!(s.gold, 0);
+        assert_eq!(s.gold, 100000);
     }
 
     #[test]
@@ -186,13 +208,13 @@ mod tests {
     fn add_gold_increases() {
         let mut s = RunState::new(30, 30, vec![]);
         s.add_gold(50);
-        assert_eq!(s.gold, 50);
+        assert_eq!(s.gold, 100050);
     }
 
     #[test]
     fn spend_gold_returns_false_if_insufficient() {
         let mut s = RunState::new(30, 30, vec![]);
-        assert!(!s.spend_gold(10));
+        assert!(!s.spend_gold(100001));
     }
 
     #[test]
@@ -223,5 +245,54 @@ mod tests {
     fn zone_1_has_gambler() {
         let zone = create_zone_1();
         assert!(zone.iter().any(|n| n.id == "gambler_1"));
+    }
+
+    #[test]
+    fn gambler_reroll_returns_none_on_corrupted() {
+        let mut s = RunState::new(30, 30, vec![
+            dummy_card("a").with_corrupted(true),
+        ]);
+        s.reset_combat_deck();
+        s.gold = 100;
+        assert!(s.gambler_reroll_affix(CardLocation::Deck, 0, 42).is_none());
+    }
+
+    #[test]
+    fn enchanter_add_slot_returns_none_on_corrupted() {
+        let mut s = RunState::new(30, 30, vec![
+            CardDef::new("a", "A", 1, vec![], Rarity::Uncommon).with_corrupted(true),
+        ]);
+        s.reset_combat_deck();
+        s.gold = 100;
+        assert!(s.enchanter_add_slot(CardLocation::Deck, 0, 42).is_none());
+    }
+
+    #[test]
+    fn corrupt_card_returns_none_on_already_corrupted() {
+        let mut s = RunState::new(30, 30, vec![
+            dummy_card("a").with_corrupted(true),
+        ]);
+        s.reset_combat_deck();
+        s.gold = 200;
+        assert!(s.corrupt_card(CardLocation::Deck, 0, 42).is_none());
+    }
+
+    #[test]
+    fn enchanter_add_slot_works_on_stash_card() {
+        let mut s = RunState::new(30, 30, vec![]);
+        s.stash.push(CardDef::new("a", "A", 1, vec![], Rarity::Uncommon));
+        let result = s.enchanter_add_slot(CardLocation::Stash, 0, 42);
+        assert!(result.is_some());
+        assert_eq!(s.stash[0].affixes.len(), 1);
+        assert_eq!(s.combat_deck.len(), 0);
+    }
+
+    #[test]
+    fn crafting_on_stash_does_not_touch_deck() {
+        let mut s = RunState::new(30, 30, vec![dummy_card("a")]);
+        s.reset_combat_deck();
+        s.stash.push(CardDef::new("b", "B", 1, vec![], Rarity::Uncommon));
+        s.enchanter_add_slot(CardLocation::Stash, 0, 42);
+        assert_eq!(s.combat_deck[0].affixes.len(), 0);
     }
 }
