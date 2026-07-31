@@ -5,8 +5,11 @@ Guppy the Debtor fights through an underwater city in this tactical RPG. Built w
 ## Quick Start
 
 ```bash
-npm i -g @something-cabinet/wm-cli # Install wm-cli - the memory layer
+# Install wm-cli - the memory layer
+npm i -g @something-cabinet/wm-cli
+```
 
+```bash
 cd rust
 cargo build                    # compile Rust extension
 cargo test                     # 52 tests, no Godot needed
