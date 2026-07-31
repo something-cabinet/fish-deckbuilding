@@ -20,7 +20,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 ## Locked Decisions
 
 - D1: **Shared panel with three modes** — Enchanter (add slot), Gambler (reroll affix), Corrupt are tabs within one `CraftingPanel`. Not separate NPCs or standalone screens.
-- D2: **Click affix to select for reroll** — In Gambler mode, the player clicks on an affix line in the card detail view to choose which affix to reroll.
+- D2: **Random affix for reroll** — In Gambler mode, the reroll picks a random affix from the card. The player does not choose which affix to reroll.
 - D3: **Grid layout for card browser** — Combat deck cards displayed in a 2-3 column grid of small card panels showing name, cost, rarity, and affix summary.
 - D4: **Side-by-side before/after comparison** — After a crafting operation, the result is shown alongside the original card with an Accept button to confirm.
 - D5: **Stash toggle** — Card browser has a button to switch between combat deck and stash view.
@@ -43,7 +43,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
   - Already corrupted (any mode) — corrupted cards cannot be modified further
 - FR-8: Clicking a card in the grid opens the card detail view showing: full name, cost, effects, all affixes with values, implicit affix (if corrupted), corrupted red border
 - FR-9: **Enchanter mode** — Action button "Add Slot" (cost shown). Disabled if card has max affixes or is corrupted.
-- FR-10: **Gambler mode** — Each affix in the detail view is clickable. Click an affix to select it for reroll, then "Reroll" button appears. Disabled if no affixes or card is corrupted.
+- FR-10: **Gambler mode** — "Reroll" button picks a random affix from the card and replaces it with a new one. Disabled if no affixes or card is corrupted.
 - FR-11: **Corrupt mode** — "Corrupt" button with warning text about risk. Disabled if card is already corrupted.
 - FR-12: All three operations show a confirmation prompt before executing, with the cost and a brief description of the action
 - FR-13: After operation, result display shows the original card (left) and modified card (right) side-by-side with an "Accept" button
@@ -70,7 +70,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 - [ ] AC-6: Ineligible cards are grayed out with a reason tooltip
 - [ ] AC-7: Clicking a card opens the detail view showing full card info and affixes
 - [ ] AC-8: Enchanter mode: clicking "Add Slot" adds a random affix, deducts gold
-- [ ] AC-9: Gambler mode: clicking an affix selects it, clicking "Reroll" replaces it, deducts gold
+- [ ] AC-9: Gambler mode: clicking "Reroll" replaces a random affix, deducts gold
 - [ ] AC-10: Corrupt mode: clicking "Corrupt" shows a confirmation, then applies corruption, deducts gold
 - [ ] AC-11: Confirmation prompt appears for all three operations before executing
 - [ ] AC-12: Result display shows before/after side-by-side with Accept button
@@ -100,12 +100,10 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 **Given** the player has a Rare card with 2 affixes in their combat deck, and 50+ gold
 **When** they click the Gambler node
 **Then** the panel opens in Gambler mode
-**When** they click the card, then click one of the 2 affixes in the detail view
-**Then** the affix highlights as selected
-**When** they click "Reroll"
-**Then** a confirmation prompt shows the cost and which affix will be rerolled
+**When** they click the card and click "Reroll"
+**Then** a confirmation prompt shows the cost and that a random affix will be rerolled
 **When** they confirm
-**Then** the selected affix is replaced with a new random one, gold decreases by 50
+**Then** one random affix is replaced with a new one, gold decreases by 50
 **Then** the result shows the before/after card side-by-side
 
 ### Scenario 3: Corrupt — Boost Outcome
@@ -175,7 +173,7 @@ UI/CraftingPanel (Panel, hidden by default)
 │   ├── CardDetail/CostLabel
 │   ├── CardDetail/EffectsLabel
 │   ├── CardDetail/AffixList (VBoxContainer)
-│   │   ├── AffixList/Affix_0 (Button, clickable in Gambler mode)
+│   │   ├── AffixList/Affix_0 (Label)
 │   │   ├── AffixList/Affix_1
 │   │   ├── AffixList/Affix_2
 │   │   └── AffixList/Affix_3
@@ -202,8 +200,8 @@ UI/CraftingPanel (Panel, hidden by default)
 - `open_crafting(mode)` populates the card browser from `run.combat_deck`, shows the panel
 - `sync_crafting_ui()` updates all labels, affix lists, and button states
 - `on_card_click(idx)` selects a card, populates the detail view
-- `on_affix_click(idx)` (Gambler mode) selects an affix for reroll
 - `on_action()` shows the confirmation dialog
+- `on_confirm()` calls the appropriate `RunState` method, shows the result
 - `on_confirm()` calls the appropriate `RunState` method, shows the result
 - `on_accept()` applies the result to RunState, refreshes the browser
 - `on_close()` hides the panel, re-enables map interaction
@@ -224,7 +222,7 @@ UI/CraftingPanel (Panel, hidden by default)
 | Operation | RunState method | Cost | Signature |
 |-----------|----------------|------|-----------|
 | Add slot | `enchanter_add_slot(deck_idx, seed)` | 100g | `(usize, u64) -> Option<&CardDef>` |
-| Reroll affix | `gambler_reroll_affix(deck_idx, affix_idx, seed)` | 50g | `(usize, usize, u64) -> Option<&CardDef>` |
+| Reroll affix | `gambler_reroll_affix(deck_idx, seed)` | 50g | `(usize, u64) -> Option<&CardDef>` |
 | Corrupt | `corrupt_card(deck_idx, seed)` | 200g | `(usize, u64) -> Option<&CardDef>` |
 
 ## Open Questions

@@ -111,9 +111,9 @@ pub fn generate_affixes(card: &CardDef, seed: u64) -> Vec<Affix> {
     result
 }
 
-pub fn gambler_reroll_affix(card: &CardDef, affix_idx: usize, seed: u64) -> CardDef {
+pub fn gambler_reroll_affix(card: &CardDef, seed: u64) -> CardDef {
     let mut new_card = card.clone();
-    if affix_idx >= new_card.affixes.len() { return new_card; }
+    if new_card.affixes.is_empty() { return new_card; }
 
     let mut rng = SeededRng::new(seed);
     let mut pool = affix_pool();
@@ -125,6 +125,7 @@ pub fn gambler_reroll_affix(card: &CardDef, affix_idx: usize, seed: u64) -> Card
     shuffle_pool(&mut rng, &mut pool);
     if pool.is_empty() { return new_card; }
 
+    let affix_idx = rng.range(new_card.affixes.len());
     new_card.affixes[affix_idx] = generate_one_affix(card, &mut rng, &mut pool);
     new_card
 }
@@ -336,7 +337,7 @@ mod tests {
     fn gambler_reroll_affix_replaces_affix() {
         let card = test_card_with_affixes();
         let original_desc = card.affixes[0].description;
-        let result = gambler_reroll_affix(&card, 0, 99);
+        let result = gambler_reroll_affix(&card, 99);
         assert_eq!(result.affixes.len(), 1);
         assert_ne!(result.affixes[0].description, original_desc);
     }

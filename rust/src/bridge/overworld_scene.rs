@@ -242,7 +242,7 @@ impl OverworldScene {
             }
             NodeType::Gambler => {
                 godot_print!("[Overworld] Opening gambler");
-                if let Some(card) = run.gambler_reroll_affix(0, 0, 42) {
+                if let Some(card) = run.gambler_reroll_affix(0, 42) {
                     godot_print!("[Overworld] Rerolled affix on: {}", card.name);
                 }
                 run.defeated_nodes.push(node.id.clone());
