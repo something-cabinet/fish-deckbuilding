@@ -16,7 +16,7 @@ The registry register belongs only to story-facing material. A **balloon** marks
 | `--ground-void`, `--ground-deep`, `--ground-asphalt`, `--ground-wet` | Layered wet-dark tactical ground. |
 | `--panel-ink`, `--panel-steel` | Dense panel surfaces and raised steel. |
 | `--steel`, `--steel-light` | Borders, secondary labels, and non-semantic metal marks. |
-| `--ivory`, `--ivory-muted`, `--ink` | Record surfaces, readable text, and dark foreground. |
+| `--ivory`, `--ivory-muted`, `--ivory-deep`, `--ink` | Record surfaces, readable text, card-face gradient stop, and dark foreground. |
 | `--move`, `--move-light` | Neon cyan: movement only. |
 | `--action`, `--action-light` | Neon amber: attack, playable, and active transport only. |
 | `--signal-red`, `--signal-red-light` | Damage, debt, defeat, and foreclosure only. |
@@ -49,10 +49,20 @@ The deleted VT323 and Silkscreen files are **not re-bundled** for P1. The system
 | Board | Center cell | Dedicated 9×5 Pixi canvas, never covered by DOM zones. |
 | Piles | Lower-left named corner | Fixed deck/discard stacks with counts. |
 | Bulletin | Right named corner | Last six engine-owned log lines. |
-| Hand | Bottom-center strip | Count and P1 card-name chips; P3 becomes the fan. |
+| Hand | Bottom-center strip | Flat upright card row (no fan) with per-card SELL foot strip. |
 | End turn | Bottom-right of the hand | Persistent turn transport. |
 
 **Zones never move:** the desktop grid has named fixed cells; at narrower widths those cells reflow into a reading order, but no cell overlays the board. The board is constrained by its own 9:5 aspect container with `min(52vh, 490px)` sizing and a `100%` width ceiling, so it remains entirely visible at the 1280×950 acceptance target and below.
+
+## Hand-card pattern (extracted, reusable)
+
+The hand card is the surface's record unit — reuse its grammar for any card-like element (pile popovers, future deck view), not just the hand.
+
+- **Anatomy:** index badge (top-left, amber circle), cost tier strip (top edge: steel = 1, move-cyan = 2, action-amber = 3+), cost badge (top-right, ivory circle with amber ring), type tag, name (display face, uppercase), effect text (readout face, muted). Fixed corners = fixed mental model (FAB).
+- **States:** playable = amber border; armed = amber-light border + 2px amber glow; unplayable = desaturated/dimmed (saturate 0.35, brightness 0.82). Color always pairs with position — never color alone.
+- **Hover (quiet):** 16px lift + border/shadow emphasis, 140ms ease-out, no scale, no fan rotation. The click target must never leave the cursor — geometry changes that move the pointer away from the card are banned.
+- **SELL affordance:** always-visible full-width foot strip (min-height 1.6rem hit target), ink panel, muted text brightening on hover. Never opacity-0-until-hover; never a floating corner chip overlapping card content.
+- **Tokens:** card face uses `--ivory` → `--ivory-deep` gradient; borders `--steel`/`--action`/`--action-light`; text `--ink`/`--panel-steel`; foot strip `--panel-ink` + `--line-quiet`.
 
 ## Motion thesis
 

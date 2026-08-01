@@ -44,21 +44,10 @@
     }
   }
 
-  // Arc geometry: n cards fanned across ~90° (18° step), radius 1.2× card width,
-  // rotating around the bottom-center pivot so cards stand on the hand baseline.
-  const CARD_W = 'clamp(7.4rem, 11vw, 9.5rem)';
-  const STEP = 18;
-  const RADIUS_F = 1.2;
-
-  function fanStyle(index: number, count: number): string {
-    const mid = (count - 1) / 2;
-    const theta = (index - mid) * STEP;
-    const rad = (theta * Math.PI) / 180;
-    const r = RADIUS_F * 100; // relative to card width via em-less px on 100px unit
-    const x = Math.sin(rad) * r * 1.1;
-    const y = -Math.cos(rad) * r * 0.32;
-    return `transform: translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${theta.toFixed(1)}deg);`;
-  }
+  // Flat hand row (fan removed 2026-08-01): cards sit upright in a straight
+  // line, aligned on their bottom edge. Hover = quiet 16px lift + border/shadow
+  // emphasis — nothing rotated, so the lift never fights geometry and the
+  // click target stays under the cursor.
 </script>
 
 <section class="hand-rack" aria-label={`Hand: ${snapshot?.hand.length ?? 0} cards`}>
@@ -66,12 +55,7 @@
     {@const def = cardDef(card.cardUid)}
     {@const playable = (snapshot?.mana ?? 0) >= def.cost}
     {@const armed = snapshot?.activeCardUid === card.uid}
-    <div
-      class="hand-card"
-      class:armed
-      class:playable
-      style={fanStyle(i, snapshot?.hand.length ?? 0)}
-    >
+    <div class="hand-card" class:armed class:playable>
       <button
         type="button"
         class="hand-card-main"
@@ -90,7 +74,7 @@
       <button
         type="button"
         class="hand-card-sell"
-        aria-label={`Sell ${def.name}`}
+        aria-label={`Sell ${def.name} for 1 gold`}
         onclick={() => onSellCard(card.uid)}
       >
         SELL
@@ -108,7 +92,7 @@
     transform: translateX(-50%);
     display: flex;
     align-items: flex-end;
-    gap: clamp(0.15rem, 0.4vw, 0.4rem);
+    gap: clamp(0.3rem, 0.6vw, 0.6rem);
     padding: 1.1rem clamp(0.4rem, 1vw, 1.2rem) 0.4rem;
     pointer-events: none;
   }
@@ -117,10 +101,13 @@
     position: relative;
     flex: 0 0 var(--card-w);
     width: var(--card-w);
-    transform-origin: 50% 90%;
-    transition: transform 180ms ease-out, filter 180ms ease-out, opacity 180ms ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: transform 140ms ease-out, filter 140ms ease-out, opacity 140ms ease-out;
     pointer-events: auto;
   }
+  .hand-card:hover { z-index: 5; transform: translateY(-16px); }
   .hand-card-main {
     position: relative;
     width: 100%;
@@ -132,17 +119,18 @@
     align-items: start;
     padding: 0.5rem;
     color: var(--ink);
-    background: linear-gradient(150deg, var(--ivory), #c8d2c4);
+    background: linear-gradient(150deg, var(--ivory), var(--ivory-deep));
     border: 1px solid var(--steel);
     border-radius: var(--radius-tight);
     box-shadow: var(--shadow-panel);
     text-align: left;
     cursor: grab;
+    transition: border-color 120ms ease-out, box-shadow 120ms ease-out, filter 120ms ease-out;
   }
   .hand-card.playable .hand-card-main { border-color: var(--action); }
   .hand-card.armed .hand-card-main { border-color: var(--action-light); box-shadow: 0 0 0 2px var(--action), var(--shadow-panel); }
   .hand-card:not(.playable) .hand-card-main { filter: saturate(0.35) brightness(0.82); }
-  .hand-card:hover .hand-card-main { transform: translateY(-100px) scale(1.2); box-shadow: 0 14px 26px rgb(0 0 0 / 0.4); z-index: 5; }
+  .hand-card:hover .hand-card-main { border-color: var(--action-light); box-shadow: 0 10px 18px rgb(0 0 0 / 0.35); }
   .card-index {
     grid-row: 1 / 3;
     display: grid;
@@ -196,24 +184,26 @@
     color: var(--panel-steel);
     font: 0.62rem/1.3 var(--font-readout);
   }
+  /* Sell: always visible, full-width foot strip — findable and hittable. */
   .hand-card-sell {
-    position: absolute;
-    top: 0.35rem;
-    right: 0.35rem;
-    padding: 0.12rem 0.35rem;
+    width: 100%;
+    min-height: 1.6rem;
+    padding: 0.2rem 0.5rem;
     color: var(--ivory-muted);
     background: var(--panel-ink);
-    border: 1px solid var(--steel);
+    border: 1px solid var(--line-quiet);
     border-radius: var(--radius-tight);
-    font: 700 0.55rem var(--font-readout);
-    letter-spacing: 0.06em;
-    opacity: 0;
-    transition: opacity 120ms ease-out;
+    font: 700 0.6rem var(--font-readout);
+    letter-spacing: 0.08em;
+    transition: color 120ms ease-out, background 120ms ease-out, border-color 120ms ease-out;
   }
-  .hand-card:hover .hand-card-sell { opacity: 1; }
+  .hand-card-sell:hover { color: var(--ivory); background: var(--panel-steel); border-color: var(--steel); }
   .hand-rack-empty { color: var(--ivory-muted); font: italic 0.75rem var(--font-readout); }
   @media (max-width: 520px) {
     .hand-rack { inset: auto 0.4rem 0.4rem; transform: none; gap: 0.2rem; }
     .hand-card-main { min-height: 3.4rem; }
+    .hand-card-sell { min-height: 1.4rem; }
   }
 </style>
+
+

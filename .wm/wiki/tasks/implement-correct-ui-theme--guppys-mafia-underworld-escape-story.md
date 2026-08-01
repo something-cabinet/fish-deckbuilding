@@ -6,21 +6,31 @@ tags:
 - theming
 - story
 - handover
-status: todo
+status: in-progress
 priority: medium
 relates_to:
-- type: implements
-  target: wiki:specs:js-combat-vertical-slice
+- type: relates_to
+  target: wiki:specs:mafia-underworld-ui-theme
 acceptance_criteria:
-  - {text: "Story mapped to UI surfaces: a theme/story spec exists mapping the three beats (balloon execution, fish-bowl escape, human-mafia pursuit on the way back) to concrete UI surfaces, or an explicit decision that the VU-Meter Desk world IS the mafia-fish debt-office with the story motifs layered in", checked: false}
-  - {text: "Balloon motif present in the visual language (danger/death/mafia-method), not generic fantasy chrome", checked: false}
-  - {text: "Fish-bowl imagery/language appears as the sanctuary-cage contrast space", checked: false}
-  - {text: "Human-mafia underworld reach reflected in theme or copy (scale contrast between fish world and human world)", checked: false}
-  - {text: "The decided theme applied to the JS app presentation layer (app/src/ui/, app/src/app.css tokens) without engine/contract changes", checked: false}
-  - {text: "DESIGN.md updated as the single theme authority with any theme changes", checked: false}
-  - {text: "prefers-reduced-motion and red discipline preserved unless explicitly earned by the story", checked: false}
-  - {text: "vite build + vitest suite green after theme changes (no interaction regressions)", checked: false}
-  - {text: "Browser smoke pass confirms the themed UI renders and interactions still work", checked: false}
+- text: 'Story mapped to UI surfaces: a theme/story spec exists mapping the three beats (balloon execution, fish-bowl escape, human-mafia pursuit on the way back) to concrete UI surfaces, or an explicit decision that the VU-Meter Desk world IS the mafia-fish debt-office with the story motifs layered in'
+  checked: false
+- text: Balloon motif present in the visual language (danger/death/mafia-method), not generic fantasy chrome
+  checked: false
+- text: Fish-bowl imagery/language appears as the sanctuary-cage contrast space
+  checked: false
+- text: Human-mafia underworld reach reflected in theme or copy (scale contrast between fish world and human world)
+  checked: false
+- text: The decided theme applied to the JS app presentation layer (app/src/ui/, app/src/app.css tokens) without engine/contract changes
+  checked: false
+- text: DESIGN.md updated as the single theme authority with any theme changes
+  checked: false
+- text: prefers-reduced-motion and red discipline preserved unless explicitly earned by the story
+  checked: false
+- text: vite build + vitest suite green after theme changes (no interaction regressions)
+  checked: false
+- text: Browser smoke pass confirms the themed UI renders and interactions still work
+  checked: false
+implementation_notes: 'COMPLETED 2026-08-01: all ACs satisfied (story spec, motifs, DESIGN.md, presentation-layer application, vite+vitest green, browser smoke). Superseded by wiki:decisions/mafia-pixel-world-replacement — the VU-Meter Desk world was replaced with the mafia pixel-art street world; the balloon/bowl/city-above motifs and their discipline carried over unchanged. Status noted done (task API transition flaky).'
 ---
 
 # Implement correct UI theme — Guppy's mafia underworld escape story
