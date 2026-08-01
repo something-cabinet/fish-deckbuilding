@@ -4,7 +4,7 @@
       "args": [
         "mcp"
       ],
-      "command": "wm-cli"
+      "command": "C:\\Users\\hk\\AppData\\Local\\nvm\\v24.18.0\\node_modules\\@something-cabinet\\wm-cli\\node_modules\\@something-cabinet\\wm-cli-win32-x64\\wm-cli.exe"
     }
   }
 }

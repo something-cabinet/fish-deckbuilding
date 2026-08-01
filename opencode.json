@@ -1,17 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["godot-prompter@git+https://github.com/jame581/GodotPrompter.git"],
   "instructions": [
     "./OPENCODE.md"
   ],
   "mcp": {
     "wm": {
       "command": [
-        "wm-cli",
+        "C:\\Users\\hk\\AppData\\Local\\nvm\\v24.18.0\\node_modules\\@something-cabinet\\wm-cli\\node_modules\\@something-cabinet\\wm-cli-win32-x64\\wm-cli.exe",
         "mcp"
       ],
       "enabled": true,
       "type": "local"
     }
-  }
+  },
+  "plugin": [
+    "godot-prompter@git+https://github.com/jame581/GodotPrompter.git"
+  ]
 }
