@@ -1,24 +1,184 @@
 <script lang="ts">
-  import type { GameSnapshot, Phase, PlayResult } from '../engine/contract';
-  import CoinMeter from './CoinMeter.svelte'; import HandRack from './HandRack.svelte'; import EndTurnTransport from './EndTurnTransport.svelte'; import InterestGauge from './InterestGauge.svelte'; import LogPanel from './LogPanel.svelte'; import HintStrip from './HintStrip.svelte'; import DebugOverlay from './DebugOverlay.svelte'; import PilePanel from './PilePanel.svelte'; import HoverPanel from './HoverPanel.svelte'; import UnitStrip from './UnitStrip.svelte';
-  import type { HoverContent } from './HoverPanel.svelte';
-  type Pile = 'deck' | 'discard' | 'sell';
-  type Props = { snapshot: GameSnapshot; hintVisible: boolean; debugVisible: boolean; hoverContent: HoverContent | null; dropResult?: PlayResult | null; onCanvasReady?: (el: HTMLDivElement) => void; onPick: (uid: string | null) => void; onSell: (uid: string) => void; onHover: (uid: string | null) => void; onEndTurn: () => void; onDismissHint: () => void; onRestart: () => void };
-  let { snapshot, hintVisible, debugVisible, hoverContent, dropResult = null, onCanvasReady, onPick, onSell, onHover, onEndTurn, onDismissHint, onRestart }: Props = $props();
-  let host = $state<HTMLDivElement | null>(null); let expanded = $state<Pile | null>(null);
-  // Fire the canvas-host callback once the patch field mounts (one-shot bridge
-  // creation lives in App; this avoids the $bindable/bind:this re-render loop)
-  $effect(() => { if (host) onCanvasReady?.(host); });
-  const isOver = $derived(snapshot.winner !== null);
-  const winnerCopy = $derived(snapshot.winner === 'player' ? 'ACCOUNT SETTLED' : 'FORECLOSURE');
-  const phaseEnabled = $derived(snapshot.phase === 'player' && !isOver);
+  // Composition root: static zone geography (FR-1/D4) — board center, named
+  // fixed cells around it; zones never move or overlap the board. The Pixi
+  // canvas mounts into the board zone (P2 renderer); HandRack + EndTurnTransport
+  // are fixed-positioned siblings rendered by App.svelte.
+  import '../app.css';
+  import type { GameSnapshot } from '../engine/contract';
+  import InterestGauge from './InterestGauge.svelte';
+  import LogPanel from './LogPanel.svelte';
+  import PilePanel from './PilePanel.svelte';
+
+  let {
+    snapshot,
+    onCanvasReady = () => {},
+    onRestart = () => {},
+  }: {
+    snapshot: GameSnapshot | null;
+    onCanvasReady?: (host: HTMLElement) => void;
+    onRestart?: () => void;
+  } = $props();
+
+  let canvasHost: HTMLDivElement;
+
+  $effect(() => {
+    const host = canvasHost;
+    if (host) onCanvasReady(host);
+  });
 </script>
-<main class="desk-frame" aria-label="VU-Meter Desk battle console"><div class="desk-grain"></div><div class="frame-title"><span class="master-lamp" class:win={snapshot.winner === 'player'} class:loss={snapshot.winner === 'enemy'}></span><h1>GUPPY <em>THE DEBTOR</em></h1><p>DEBT DEPARTMENT / BATTLE CONSOLE</p></div><aside class="zone coin-zone"><CoinMeter coins={snapshot.coins} creditLimit={-5} /></aside><section class="patch-field" aria-label="Patch field reserved for battle canvas"><div class="field-label"><span>PATCH FIELD / 09 × 05</span><span>{snapshot.phase === 'player' ? 'OPERATOR LIVE' : 'AUTOMATED RESPONSE'}</span></div><div class="canvas-host" bind:this={host}><div class="canvas-placeholder"><span>PIXEL FIELD ROUTING PENDING</span><div class="patch-grid"></div></div></div><div class="unit-reference">{#each snapshot.units as unit (unit.uid)}<UnitStrip {unit} />{/each}</div></section><aside class="zone interest-zone"><InterestGauge turn={snapshot.turn} interestDue={snapshot.interestDue} winner={snapshot.winner} /></aside><aside class="zone log-zone"><LogPanel log={snapshot.log} /></aside><aside class="zone pile-zone"><PilePanel deckCount={snapshot.deck.length} discardCount={snapshot.discard.length} sellCount={snapshot.sellPile.length} deck={snapshot.deck} discard={snapshot.discard} sellPile={snapshot.sellPile} {expanded} onExpand={(pile) => expanded = pile} /></aside><aside class="zone hint-zone"><HintStrip visible={hintVisible} onDismiss={onDismissHint} /></aside><section class="hand-zone"><HandRack hand={snapshot.hand} coins={snapshot.coins} activeCardUid={snapshot.activeCardUid} {dropResult} {onPick} {onSell} {onHover} /></section><aside class="zone transport-zone"><EndTurnTransport phase={snapshot.phase as Phase} enabled={phaseEnabled} onPress={onEndTurn} /></aside><div class="hover-layer"><HoverPanel content={hoverContent} position="right" /></div><DebugOverlay snapshot={snapshot} visible={debugVisible} />{#if isOver}<section class="end-state" class:victory={snapshot.winner === 'player'}><div class="outcome-lamp"></div><h2>{winnerCopy}</h2><p>{snapshot.winner === 'player' ? 'MASTER CHANNEL CLEAR. GUARD THE LEDGER.' : 'DEBT PRESSURE EXCEEDED OPERATING LIMIT.'}</p><button onclick={onRestart}>RESTART BATTLE</button></section>{/if}</main>
+
+<main class="desk-frame" aria-label="Tactical battle desk">
+  <div class="watermark" aria-hidden="true"></div>
+
+  <header class="field-readout" aria-label="Field status">
+    <p class="field-register">FIELD REGISTER</p>
+    <h1>{snapshot?.phase === 'enemy' ? 'THE CITY ABOVE — human division collecting' : 'OPERATOR LIVE'}</h1>
+    <p class="turn-readout">TURN {snapshot?.turn ?? '—'} · {snapshot?.mana ?? 0} MANA</p>
+  </header>
+
+  <InterestGauge {snapshot} />
+  <PilePanel {snapshot} />
+
+  <section class="board-shell" aria-label="Tactical grid board">
+    <div class="board-cap" aria-hidden="true"><span>9 × 5 TACTICAL FIELD</span><i></i><span>LIVE CANVAS</span></div>
+    <div bind:this={canvasHost} class="board-zone" aria-label="Tactical board canvas mount">
+      <div class="board-placeholder" aria-hidden="true"><span>BOARD RENDER RESERVATION</span></div>
+    </div>
+  </section>
+
+  <LogPanel {snapshot} />
+
+  {#if snapshot?.winner || snapshot?.foreclosed}
+    <section class="end-state" class:victory={snapshot.winner === 'player'} role="alert" aria-live="polite">
+      {#if snapshot.foreclosed || snapshot.winner === 'enemy'}
+        <strong>FORECLOSURE</strong><span>BALLOON ORDER SERVED — Guppy the Debtor</span>
+      {:else}
+        <strong>ACCOUNT SETTLED</strong><span>GUPPY REACHES THE BOWL — sanctuary, for now</span>
+      {/if}
+      <button type="button" class="restart" onclick={() => onRestart()}>RESTART</button>
+    </section>
+  {/if}
+</main>
+
 <style>
-  .desk-frame { position: fixed; inset: 0; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 50% 38%, #74503a 0, var(--walnut) 39%, var(--walnut-deep) 100%); pointer-events: none; } .desk-frame::before { content: ''; position: absolute; z-index: -1; inset: 14px; border: 1px solid rgb(223 194 122 / .44); box-shadow: inset 0 0 0 7px rgb(15 10 7 / .34), inset 0 0 0 9px rgb(179 139 71 / .2), var(--shadow-inset); } .desk-frame::after { content: ''; position: absolute; z-index: 9; inset: 0; opacity: .12; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0 3px, rgb(255 255 255 / .22) 4px 5px); animation: var(--scanline); } .desk-grain { position: absolute; inset: 0; z-index: -1; opacity: .25; background: repeating-radial-gradient(ellipse at 15% 30%, transparent 0 2px, rgb(0 0 0 / .28) 3px 4px, transparent 5px 9px); mix-blend-mode: multiply; }
-  .frame-title { position: absolute; top: 31px; left: 50%; transform: translateX(-50%); display: grid; grid-template-columns: 11px auto; column-gap: 8px; color: var(--ivory-0); text-align: center; } .master-lamp { grid-row: span 2; align-self: center; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: var(--lamp-flicker); } .master-lamp.win { background: var(--move); box-shadow: 0 0 9px var(--move); } .master-lamp.loss { background: var(--signal-red); box-shadow: 0 0 9px var(--signal-red); } h1 { font-family: var(--font-display); font-size: clamp(18px, 2.1vw, 29px); letter-spacing: .07em; } h1 em { color: var(--brass-light); font-style: normal; } .frame-title p { grid-column: 2; margin-top: 3px; color: var(--ivory-2); font-size: 8px; letter-spacing: .16em; }
-  .zone { position: absolute; } .coin-zone { left: 34px; top: 16vh; } .interest-zone { top: 31px; right: 39px; } .log-zone { left: 150px; top: 108px; } .pile-zone { left: 150px; bottom: 199px; position: absolute; } .hint-zone { left: 50%; bottom: 208px; transform: translateX(-50%); } .transport-zone { right: 37px; bottom: 35px; } .hand-zone { position: absolute; left: 50%; bottom: 25px; transform: translateX(-50%); }
-  .patch-field { position: absolute; left: 50%; top: 50%; width: min(59vw, 840px); height: min(52vh, 490px); transform: translate(-50%, -44%); padding: 25px 29px 22px; border: 8px solid #302c25; border-radius: 5px; background: linear-gradient(145deg, #73756d, #3e403b); box-shadow: 0 16px 30px rgb(0 0 0 / .4), inset 0 0 0 2px #a9a99c, inset 0 0 0 7px #21231e; } .field-label { position: absolute; top: 7px; left: 12px; right: 12px; display: flex; justify-content: space-between; color: var(--ivory-0); font-size: 8px; letter-spacing: .13em; } .field-label span:last-child { color: var(--brass-light); } .canvas-host { width: 100%; height: 100%; border: 1px solid var(--ink); background: var(--ivory-1); pointer-events: none; overflow: hidden; } .canvas-placeholder { position: relative; display: grid; place-items: center; width: 100%; height: 100%; color: var(--ink-soft); font-size: 9px; letter-spacing: .12em; } .patch-grid { position: absolute; inset: 9%; opacity: .45; background: linear-gradient(90deg, transparent 10.6%, var(--ink-soft) 10.8% 11%, transparent 11.2%), linear-gradient(transparent 19%, var(--ink-soft) 19.3% 19.5%, transparent 19.7%); background-size: 11.11% 100%, 100% 20%; border: 1px solid var(--ink-soft); } .unit-reference { position: absolute; display: flex; flex-wrap: wrap; gap: 6px; right: 18px; top: 35px; width: 142px; }
-  .hover-layer { position: absolute; right: calc(20vw - 30px); top: 54%; z-index: 8; } .end-state { position: absolute; z-index: 15; left: 50%; top: 50%; width: 380px; transform: translate(-50%, -50%); padding: 31px; border: 1px solid var(--steel-light); background: rgb(29 18 13 / .95); color: var(--ivory-0); text-align: center; pointer-events: auto; box-shadow: var(--shadow-lift); } .outcome-lamp { width: 15px; height: 15px; margin: 0 auto 14px; border-radius: 50%; background: var(--signal-red); box-shadow: 0 0 15px var(--signal-red); } .victory .outcome-lamp { background: var(--move); box-shadow: 0 0 15px var(--move); } .end-state h2 { font-family: var(--font-display); letter-spacing: .08em; } .end-state p { margin: 10px auto 19px; color: var(--ivory-2); font-size: 10px; line-height: 1.45; } .end-state button { padding: 9px 12px; border: 1px solid var(--brass); background: var(--brass); color: var(--ink); cursor: pointer; font-size: 10px; font-weight: 700; letter-spacing: .07em; }
-  @media (max-width: 1050px) { .log-zone { left: 120px; } .patch-field { width: 61vw; } .unit-reference { display: none; } .hand-zone { transform: translateX(-50%) scale(.88); transform-origin: bottom center; } }
+  .desk-frame {
+    position: relative;
+    isolation: isolate;
+    min-height: 100svh;
+    padding: clamp(0.75rem, 1.8vw, 1.75rem);
+    display: grid;
+    grid-template-columns: minmax(10.5rem, 0.72fr) minmax(0, 2.35fr) minmax(10.5rem, 0.72fr);
+    grid-template-rows: auto minmax(18rem, 1fr) auto;
+    grid-template-areas:
+      "field field field"
+      "economy board log"
+      "piles . .";
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+    overflow: clip;
+  }
+  .watermark {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.42;
+    background-image:
+      linear-gradient(90deg, transparent 49.7%, rgb(181 255 243 / 0.08) 50%, transparent 50.3%),
+      linear-gradient(0deg, transparent 49.7%, rgb(181 255 243 / 0.06) 50%, transparent 50.3%);
+    background-size: clamp(6rem, 10vw, 11rem) clamp(6rem, 10vw, 11rem);
+    mask-image: radial-gradient(ellipse at center, black, transparent 75%);
+  }
+  .field-readout {
+    grid-area: field;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    min-width: 0;
+    border-bottom: 1px solid var(--line-quiet);
+    padding: 0 0 var(--space-3);
+  }
+  .field-readout p, .field-readout h1 { margin: 0; }
+  .field-register { color: var(--move-light); font: 700 0.68rem/1 var(--font-readout); letter-spacing: 0.1em; white-space: nowrap; }
+  .field-readout h1 { font: 700 clamp(0.9rem, 0.76rem + 0.6vw, 1.25rem)/1.1 var(--font-display); letter-spacing: 0.04em; color: var(--ivory); }
+  .turn-readout { margin-left: auto; color: var(--ivory-muted); font: 700 0.68rem/1 var(--font-readout); letter-spacing: 0.1em; white-space: nowrap; }
+
+  .board-shell { grid-area: board; min-width: 0; min-height: 0; align-self: center; display: grid; gap: var(--space-2); }
+  .board-cap { display: flex; align-items: center; gap: var(--space-2); color: var(--steel-light); font: 700 0.65rem var(--font-readout); letter-spacing: 0.1em; }
+  .board-cap i { height: 1px; flex: 1; background: var(--line-quiet); }
+  .board-zone {
+    position: relative;
+    width: min(100%, calc(min(52vh, 490px) * 1.8));
+    max-height: min(52vh, 490px);
+    aspect-ratio: 9 / 5;
+    justify-self: center;
+    overflow: hidden;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-panel);
+    background: radial-gradient(ellipse at 50% 46%, var(--ground-wet), var(--ground-deep) 70%);
+    box-shadow: var(--shadow-deep), inset 0 0 0 4px rgb(7 16 22 / 0.55);
+  }
+  .board-placeholder {
+    position: absolute;
+    inset: 0.55rem;
+    display: grid;
+    place-items: center;
+    border: 1px dashed rgb(181 255 243 / 0.25);
+    color: rgb(181 255 243 / 0.45);
+    font: 700 0.67rem var(--font-readout);
+    letter-spacing: 0.15em;
+  }
+  .end-state {
+    position: fixed;
+    z-index: 3;
+    inset: auto 50% 4rem auto;
+    transform: translateX(50%);
+    width: min(31rem, calc(100vw - 2rem));
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem 1.25rem;
+    color: var(--ivory);
+    background: var(--panel-ink);
+    border: 1px solid var(--signal-red);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-deep);
+    text-align: center;
+  }
+  .end-state strong { color: var(--signal-red-light); font: 800 1rem var(--font-display); letter-spacing: 0.12em; }
+  .end-state span { font: 0.8rem var(--font-readout); }
+  .end-state.victory { border-color: var(--success); }
+  .end-state.victory strong { color: var(--success); }
+  .restart {
+    justify-self: center;
+    margin-top: 0.4rem;
+    padding: 0.5rem 1.4rem;
+    color: var(--ink);
+    background: var(--action);
+    border: 1px solid var(--action-light);
+    border-radius: var(--radius-tight);
+    font: 800 0.75rem var(--font-display);
+    letter-spacing: 0.08em;
+  }
+  .restart:hover { filter: brightness(1.08); }
+
+  @media (max-width: 800px) {
+    .desk-frame {
+      min-height: 100svh;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: auto auto auto auto auto;
+      grid-template-areas:
+        "field field"
+        "economy piles"
+        "board board"
+        "log log";
+    }
+    .field-readout { flex-wrap: wrap; }
+    .turn-readout { margin-left: 0; }
+  }
+  @media (max-width: 520px) {
+    .desk-frame {
+      grid-template-columns: 1fr;
+      grid-template-areas: "field" "economy" "piles" "board" "log";
+    }
+    .board-zone { width: 100%; }
+  }
 </style>

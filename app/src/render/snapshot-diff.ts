@@ -1,87 +1,74 @@
-import type { Faction, GameSnapshot, GridPos, Phase } from '../engine/contract';
+// Snapshot diffing: pure prev→next deltas for the render layer.
+// P4 consumes `moved` for the walk animation, `hpChanges` for floating numbers,
+// and `added`/`removed` for summon/death handling. Pure TS, no framework deps.
 
-export interface UnitChange {
+import type { GameSnapshot, GridPos } from '../engine/contract';
+
+export interface MovedUnit {
   uid: string;
-  hp: number;
-  maxHp: number;
-  armor: number;
-  debt: number;
-  pos: GridPos;
-  /** True when the unit was not present in the previous snapshot. */
-  added: boolean;
+  from: GridPos;
+  to: GridPos;
 }
 
-export interface DiffResult {
-  units: UnitChange[];
-  /** New coin value, or null when unchanged. */
-  coins: number | null;
-  coinDelta: number;
-  /** Winner transition (from, to), or null when unchanged. */
-  winner: { from: Faction | null; to: Faction | null } | null;
-  /** Turn transition (from, to), or null when unchanged. */
-  turn: { from: number; to: number } | null;
-  phase: { from: Phase; to: Phase } | null;
+export interface HpChange {
+  uid: string;
+  before: number;
+  after: number;
+}
+
+export interface SnapshotDiff {
+  moved: MovedUnit[];
+  hpChanges: HpChange[];
+  added: string[];
+  removed: string[];
 }
 
 /**
- * Pure snapshot diff — the single tested seam between engine snapshots and
- * renderer needle targets (Gate 2 P2 directive: ALL damage visuals drive off
- * this, never off un-emitted card events).
+ * Diff two consecutive snapshots into unit-level deltas.
+ * - `moved`: alive units whose position changed between snapshots.
+ * - `hpChanges`: units whose HP changed, including the killing blow (a unit that
+ *   dies keeps its entry with `after: 0`-ish corpse HP).
+ * - `added`: uids alive in `next` but absent from `prev` (summons).
+ * - `removed`: uids alive in `prev` but not alive in `next` (deaths).
+ * Ordering is deterministic (sorted by uid) for stable tests/P4 consumption.
  */
-export function diffSnapshots(prev: GameSnapshot | null, next: GameSnapshot): DiffResult {
-  const units: UnitChange[] = [];
-  if (prev === null) {
-    for (const u of next.units) {
-      units.push({ uid: u.uid, hp: u.hp, maxHp: u.maxHp, armor: u.armor, debt: u.debt, pos: { ...u.pos }, added: true });
-    }
-  } else {
-    const prevByUid = new Map(prev.units.map((u) => [u.uid, u]));
-    for (const u of next.units) {
-      const p = prevByUid.get(u.uid);
-      units.push({
-        uid: u.uid,
-        hp: u.hp,
-        maxHp: u.maxHp,
-        armor: u.armor,
-        debt: u.debt,
-        pos: { ...u.pos },
-        added: p === undefined,
-      });
+export function diffSnapshots(prev: GameSnapshot, next: GameSnapshot): SnapshotDiff {
+  const prevAlive = new Map<string, { hp: number; pos: GridPos }>();
+  for (const u of prev.units) if (u.alive) prevAlive.set(u.uid, { hp: u.hp, pos: u.pos });
+  const nextAlive = new Map<string, { hp: number; pos: GridPos }>();
+  for (const u of next.units) if (u.alive) nextAlive.set(u.uid, { hp: u.hp, pos: u.pos });
+
+  const all = new Set<string>([...prevAlive.keys(), ...nextAlive.keys()]);
+  const moved: MovedUnit[] = [];
+  const hpChanges: HpChange[] = [];
+  const added: string[] = [];
+  const removed: string[] = [];
+
+  for (const uid of all) {
+    const p = prevAlive.get(uid);
+    const n = nextAlive.get(uid);
+    if (p && n) {
+      if (p.pos.x !== n.pos.x || p.pos.y !== n.pos.y) {
+        moved.push({ uid, from: { ...p.pos }, to: { ...n.pos } });
+      }
+      if (p.hp !== n.hp) {
+        hpChanges.push({ uid, before: p.hp, after: n.hp });
+      }
+    } else if (!p && n) {
+      added.push(uid);
+    } else if (p && !n) {
+      removed.push(uid);
+      // Capture the killing blow so floating numbers still fire for the death hit.
+      const corpse = next.units.find((u) => u.uid === uid);
+      hpChanges.push({ uid, before: p.hp, after: corpse ? corpse.hp : 0 });
     }
   }
 
-  const coinsChanged = prev === null || prev.coins !== next.coins;
-  const winnerChanged = prev === null || prev.winner !== next.winner;
-  const turnChanged = prev === null || prev.turn !== next.turn;
-  const phaseChanged = prev === null || prev.phase !== next.phase;
+  const cmp = (a: string, b: string): number => (a < b ? -1 : 1);
+  moved.sort((a, b) => cmp(a.uid, b.uid));
+  hpChanges.sort((a, b) => cmp(a.uid, b.uid));
+  added.sort(cmp);
+  removed.sort(cmp);
 
-  return {
-    units,
-    coins: coinsChanged ? next.coins : null,
-    coinDelta: prev === null ? next.coins : next.coins - prev.coins,
-    winner: winnerChanged ? { from: prev?.winner ?? null, to: next.winner } : null,
-    turn: turnChanged ? { from: prev?.turn ?? 0, to: next.turn } : null,
-    phase: phaseChanged ? { from: prev?.phase ?? 'player', to: next.phase } : null,
-  };
-}
-
-export interface DamageOccurrence {
-  uid: string;
-  damage: number;
-}
-
-/**
- * Units that LOST hp between two snapshots — the tested trigger for damage
- * visuals (impact bursts, needle slams). Pure: callers must pass the PREVIOUS
- * snapshot, never the current one (desk.ts bug class: assigning lastSnap
- * before diffing). Heals, new units, and unchanged units produce nothing.
- */
-export function damageOccurrences(prev: GameSnapshot | null, next: GameSnapshot): DamageOccurrence[] {
-  if (prev === null) return [];
-  const out: DamageOccurrence[] = [];
-  for (const u of next.units) {
-    const p = prev.units.find((x) => x.uid === u.uid);
-    if (p && u.hp < p.hp) out.push({ uid: u.uid, damage: p.hp - u.hp });
-  }
-  return out;
+  return { moved, hpChanges, added, removed };
 }

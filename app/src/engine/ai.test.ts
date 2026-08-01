@@ -1,103 +1,59 @@
 import { describe, expect, it } from 'vitest';
-import type { GridPos, Unit } from './contract';
-import { decideEnemyAction, takeWithinCost } from './ai';
+import type { Unit } from './contract';
+import { planEnemyTurn } from './ai';
 
-function playerUnit(uid: string, pos: GridPos, hp = 10): Unit {
+function unit(uid: string, team: 'player' | 'enemy', x: number, y: number, hp = 5, attack = 2): Unit {
   return {
-    uid, templateId: 'guppy', name: 'Guppy', faction: 'player',
-    pos, hp, maxHp: hp, attack: 2, movement: 2,
-    armor: 0, debt: 0, isBoss: false, canMove: true, canAttack: true,
+    uid,
+    name: uid,
+    team,
+    pos: { x, y },
+    hp,
+    maxHp: hp,
+    attack,
+    block: 0,
+    moved: false,
+    acted: false,
+    alive: true,
   };
 }
 
-function enemy(uid: string, pos: GridPos, over: Partial<Unit> = {}): Unit {
-  return {
-    uid, templateId: 'hustler', name: 'Hustler', faction: 'enemy',
-    pos, hp: 3, maxHp: 3, attack: 3, movement: 2,
-    armor: 0, debt: 0, isBoss: false, canMove: true, canAttack: true,
-    ...over,
-  };
-}
-
-const occupiedBy = (units: Unit[]) => (p: GridPos) =>
-  units.some((u) => u.pos.x === p.x && u.pos.y === p.y);
-
-describe('decideEnemyAction', () => {
-  it('attacks the adjacent player unit with LOWEST hp', () => {
-    const e = enemy('e1', { x: 5, y: 2 });
-    const p1 = playerUnit('p1', { x: 5, y: 3 }, 10);
-    const p2 = playerUnit('p2', { x: 5, y: 1 }, 4);
-    const d = decideEnemyAction(e, { playerUnits: [p1, p2], occupied: occupiedBy([e, p1, p2]) });
-    expect(d.kind).toBe('attack');
-    if (d.kind === 'attack') expect(d.targetUid).toBe('p2');
-  });
-
-  it('passes when it cannot attack and cannot move', () => {
-    const e = enemy('e1', { x: 8, y: 4 }, { canMove: false });
-    const p = playerUnit('p1', { x: 0, y: 0 });
-    const d = decideEnemyAction(e, { playerUnits: [p], occupied: occupiedBy([e, p]) });
-    expect(d.kind).toBe('pass');
+describe('ai', () => {
+  it('attacks when adjacent to a player unit (lowest HP target)', () => {
+    const hero = unit('guppy', 'player', 3, 2);
+    const e1 = unit('e1', 'enemy', 4, 2, 5);
+    const plan = planEnemyTurn([hero, e1]);
+    expect(plan.attacks).toContainEqual({ unitUid: 'e1', targetUid: 'guppy' });
+    expect(plan.moves).toHaveLength(0);
   });
 
   it('moves toward the nearest player unit when not adjacent', () => {
-    const e = enemy('e1', { x: 7, y: 2 });
-    const p = playerUnit('p1', { x: 5, y: 2 });
-    const d = decideEnemyAction(e, { playerUnits: [p], occupied: occupiedBy([e, p]) });
-    expect(d.kind).toBe('move');
-    if (d.kind === 'move') {
-      expect(d.path.length).toBeGreaterThan(0);
-      expect(d.path[d.path.length - 1]!.x).toBeLessThan(7); // moving left toward player
-      // path must not contain occupied cells
-      for (const step of d.path) {
-        expect(step).not.toEqual(p.pos);
-        expect(step).not.toEqual(e.pos);
-      }
-    }
+    const hero = unit('guppy', 'player', 7, 2);
+    const e1 = unit('e1', 'enemy', 2, 2, 5);
+    const plan = planEnemyTurn([hero, e1]);
+    expect(plan.attacks).toHaveLength(0);
+    expect(plan.moves).toHaveLength(1);
+    const mv = plan.moves[0]!;
+    expect(mv.unitUid).toBe('e1');
+    // The move should reduce distance toward (7,2).
+    const d0 = Math.abs(2 - 7) + Math.abs(2 - 2);
+    const d1 = Math.abs(mv.to.x - 7) + Math.abs(mv.to.y - 2);
+    expect(d1).toBeLessThan(d0);
   });
 
-  it('moves at most its movement points', () => {
-    const e = enemy('e1', { x: 8, y: 4 }, { movement: 2 });
-    const p = playerUnit('p1', { x: 0, y: 0 });
-    const d = decideEnemyAction(e, { playerUnits: [p], occupied: occupiedBy([e, p]) });
-    if (d.kind === 'move') {
-      // orthogonal-only path costs 1/step; with 2 movement points, at most 2 steps
-      expect(d.path.length).toBeLessThanOrEqual(2);
-    }
+  it('no plan when no player units', () => {
+    const e1 = unit('e1', 'enemy', 2, 2);
+    const plan = planEnemyTurn([e1]);
+    expect(plan.moves).toHaveLength(0);
+    expect(plan.attacks).toHaveLength(0);
   });
 
-  it('charges a diagonal first step its real cost of 2', () => {
-    // from (8,4): (7,3) is diagonal (cost 2), (6,3) is orthogonal (cost 1)
-    const path: GridPos[] = [{ x: 7, y: 3 }, { x: 6, y: 3 }];
-    // movement 2 fits ONLY the diagonal step (2 + 1 = 3 > 2)
-    expect(takeWithinCost(path, { x: 8, y: 4 }, 2)).toEqual([{ x: 7, y: 3 }]);
-    // movement 3 fits both
-    expect(takeWithinCost(path, { x: 8, y: 4 }, 3)).toEqual([{ x: 7, y: 3 }, { x: 6, y: 3 }]);
-    // orthogonal-only path fits 2 steps in movement 2
-    const ortho: GridPos[] = [{ x: 7, y: 4 }, { x: 6, y: 4 }];
-    expect(takeWithinCost(ortho, { x: 8, y: 4 }, 2)).toEqual([{ x: 7, y: 4 }, { x: 6, y: 4 }]);
-  });
-
-  it('passes when fully surrounded (no path)', () => {
-    const e = enemy('e1', { x: 4, y: 2 });
-    const blockers: Unit[] = [
-      playerUnit('p1', { x: 4, y: 1 }),
-      playerUnit('p2', { x: 4, y: 3 }),
-      playerUnit('p3', { x: 3, y: 2 }),
-      playerUnit('p4', { x: 5, y: 2 }),
-      playerUnit('p5', { x: 3, y: 1 }),
-      playerUnit('p6', { x: 5, y: 1 }),
-      playerUnit('p7', { x: 3, y: 3 }),
-      playerUnit('p8', { x: 5, y: 3 }),
-    ];
-    const d = decideEnemyAction(e, { playerUnits: blockers, occupied: occupiedBy([e, ...blockers]) });
-    // adjacent enemies exist → attack, not pass
-    expect(d.kind).toBe('attack');
-  });
-
-  it('prefers attack over move even when a move is available', () => {
-    const e = enemy('e1', { x: 5, y: 2 });
-    const p = playerUnit('p1', { x: 6, y: 2 });
-    const d = decideEnemyAction(e, { playerUnits: [p], occupied: occupiedBy([e, p]) });
-    expect(d.kind).toBe('attack');
+  it('enemies do not share destination tiles', () => {
+    const hero = unit('guppy', 'player', 8, 2);
+    const e1 = unit('e1', 'enemy', 2, 1);
+    const e2 = unit('e2', 'enemy', 2, 3);
+    const plan = planEnemyTurn([hero, e1, e2]);
+    const dests = plan.moves.map((m) => `${m.to.x},${m.to.y}`);
+    expect(new Set(dests).size).toBe(dests.length);
   });
 });

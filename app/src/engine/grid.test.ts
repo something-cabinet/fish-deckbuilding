@@ -1,116 +1,83 @@
 import { describe, expect, it } from 'vitest';
-import type { GridPos } from './contract';
 import { GRID_COLS, GRID_ROWS } from './contract';
-import { adjacent, chebyshev, inBounds, moveCells, shortestPath } from './grid';
+import type { GridPos, Unit } from './contract';
+import { attackableTargets, inBounds, isAdjacent, key, moveCost, reachableTiles } from './grid';
 
-const none: (p: GridPos) => boolean = () => false;
+function unit(uid: string, pos: GridPos, team: 'player' | 'enemy' = 'player'): Unit {
+  return {
+    uid,
+    name: uid,
+    team,
+    pos,
+    hp: 10,
+    maxHp: 10,
+    attack: 2,
+    block: 0,
+    moved: false,
+    acted: false,
+    alive: true,
+  };
+}
 
-describe('inBounds', () => {
-  it('accepts cells inside the 9x5 grid', () => {
+describe('grid', () => {
+  it('moveCost: orthogonal 1, diagonal 2, non-adjacent Infinity', () => {
+    expect(moveCost({ x: 0, y: 0 }, { x: 1, y: 0 })).toBe(1);
+    expect(moveCost({ x: 0, y: 0 }, { x: 0, y: 1 })).toBe(1);
+    expect(moveCost({ x: 0, y: 0 }, { x: 1, y: 1 })).toBe(2);
+    expect(moveCost({ x: 0, y: 0 }, { x: 2, y: 0 })).toBe(Infinity);
+  });
+
+  it('inBounds and isAdjacent', () => {
     expect(inBounds({ x: 0, y: 0 })).toBe(true);
-    expect(inBounds({ x: 8, y: 4 })).toBe(true);
-  });
-  it('rejects cells outside the grid', () => {
-    expect(inBounds({ x: -1, y: 0 })).toBe(false);
-    expect(inBounds({ x: 9, y: 0 })).toBe(false);
-    expect(inBounds({ x: 0, y: 5 })).toBe(false);
-  });
-});
-
-describe('adjacent', () => {
-  it('is true for 8-way neighbors', () => {
-    expect(adjacent({ x: 4, y: 2 }, { x: 5, y: 2 })).toBe(true);
-    expect(adjacent({ x: 4, y: 2 }, { x: 5, y: 3 })).toBe(true);
-    expect(adjacent({ x: 4, y: 2 }, { x: 3, y: 1 })).toBe(true);
-  });
-  it('is false for self and distance-2', () => {
-    expect(adjacent({ x: 4, y: 2 }, { x: 4, y: 2 })).toBe(false);
-    expect(adjacent({ x: 4, y: 2 }, { x: 6, y: 2 })).toBe(false);
-  });
-});
-
-describe('chebyshev', () => {
-  it('computes Chebyshev distance', () => {
-    expect(chebyshev({ x: 4, y: 2 }, { x: 6, y: 4 })).toBe(2);
-    expect(chebyshev({ x: 4, y: 2 }, { x: 4, y: 2 })).toBe(0);
-  });
-});
-
-describe('moveCells', () => {
-  const key = (p: GridPos) => `${p.x},${p.y}`;
-  const has = (cells: GridPos[], p: GridPos) => cells.some((c) => c.x === p.x && c.y === p.y);
-
-  it('reaches orthogonal cells within movement points', () => {
-    const cells = moveCells({ x: 4, y: 2 }, 2, none);
-    expect(has(cells, { x: 6, y: 2 })).toBe(true);
-    expect(has(cells, { x: 4, y: 4 })).toBe(true);
-    expect(has(cells, { x: 4, y: 0 })).toBe(true);
-    expect(cells.length).toBe(12); // 2-tile diamond: 1+4+... exact: ortho2 (4) + diag1 (4) + ortho1 (4) = 12
+    expect(inBounds({ x: GRID_COLS, y: 0 })).toBe(false);
+    expect(inBounds({ x: 0, y: GRID_ROWS })).toBe(false);
+    expect(isAdjacent({ x: 1, y: 1 }, { x: 2, y: 2 })).toBe(true);
+    expect(isAdjacent({ x: 1, y: 1 }, { x: 3, y: 1 })).toBe(false);
   });
 
-  it('reaches diagonal cells at distance 1 (cost 2) but not distance 2', () => {
-    const cells = moveCells({ x: 4, y: 2 }, 2, none);
-    expect(has(cells, { x: 5, y: 3 })).toBe(true);
-    expect(has(cells, { x: 6, y: 4 })).toBe(false); // diagonal 2 = cost 4 > 2
+  it('reachableTiles: budget 2 gives orthogonal pairs and diagonals', () => {
+    const tiles = reachableTiles([], { x: 2, y: 2 }, 2);
+    const keys = tiles.map(key).sort();
+    expect(keys).toContain(key({ x: 3, y: 2 })); // 1 ortho
+    expect(keys).toContain(key({ x: 4, y: 2 })); // 2 ortho
+    expect(keys).toContain(key({ x: 3, y: 3 })); // 1 diag (cost 2)
+    expect(keys).toContain(key({ x: 2, y: 4 })); // 2 ortho
+    expect(keys).not.toContain(key({ x: 4, y: 4 })); // 2 diag = 4 > budget → absent
+    expect(keys).not.toContain(key({ x: 2, y: 2 })); // self excluded
   });
 
-  it('does not include the origin', () => {
-    const cells = moveCells({ x: 4, y: 2 }, 2, none);
-    expect(has(cells, { x: 4, y: 2 })).toBe(false);
+  it('reachableTiles: diagonal chain cost accumulates (2 diag steps = 4 > 2)', () => {
+    const tiles = reachableTiles([], { x: 0, y: 0 }, 2);
+    const keys = tiles.map(key);
+    expect(keys).toContain(key({ x: 1, y: 1 }));
+    expect(keys).not.toContain(key({ x: 2, y: 2 }));
   });
 
-  it('excludes occupied cells', () => {
-    const blocked = (p: GridPos) => p.x === 5 && p.y === 2;
-    const cells = moveCells({ x: 4, y: 2 }, 2, blocked);
-    expect(has(cells, { x: 5, y: 2 })).toBe(false);
-    // cells beyond the blocker on the same row are unreachable
-    expect(has(cells, { x: 6, y: 2 })).toBe(false);
+  it('reachableTiles: blocked by living units, excluding self', () => {
+    const blocker = unit('b', { x: 3, y: 2 });
+    const tiles = reachableTiles([blocker], { x: 2, y: 2 }, 2, '');
+    const keys = tiles.map(key);
+    expect(keys).not.toContain(key({ x: 3, y: 2 }));
+    expect(keys).not.toContain(key({ x: 4, y: 2 })); // beyond blocker
+    expect(keys).toContain(key({ x: 2, y: 3 }));
   });
 
-  it('blocks corner-cutting through two occupied orthogonals', () => {
-    const blocked = (p: GridPos) =>
-      (p.x === 5 && p.y === 2) || (p.x === 4 && p.y === 3);
-    const cells = moveCells({ x: 4, y: 2 }, 2, blocked);
-    // diagonal 5,3 requires both 5,2 and 4,3 to be free
-    expect(has(cells, { x: 5, y: 3 })).toBe(false);
+  it('reachableTiles: excludeUid lets own unit tile pass', () => {
+    const self = unit('me', { x: 2, y: 2 });
+    const other = unit('en', { x: 3, y: 2 }, 'enemy');
+    const tiles = reachableTiles([self, other], { x: 2, y: 2 }, 2, self.uid);
+    const keys = tiles.map(key);
+    expect(keys).not.toContain(key({ x: 3, y: 2 })); // other blocks
+    expect(keys).toContain(key({ x: 2, y: 3 }));
   });
 
-  it('never returns out-of-bounds cells', () => {
-    const cells = moveCells({ x: 0, y: 0 }, 2, none);
-    expect(cells.every((c) => c.x >= 0 && c.x < GRID_COLS && c.y >= 0 && c.y < GRID_ROWS)).toBe(true);
-  });
-
-  it('treats the origin as free even if occupied() says otherwise', () => {
-    const blocked = (p: GridPos) => p.x === 4 && p.y === 2; // the origin itself
-    const cells = moveCells({ x: 4, y: 2 }, 2, blocked);
-    expect(cells.length).toBeGreaterThan(0);
-    expect(has(cells, { x: 5, y: 2 })).toBe(true);
-  });
-
-  it('respects movement 0 (no movement points)', () => {
-    const cells = moveCells({ x: 4, y: 2 }, 0, none);
-    expect(cells.length).toBe(0);
-  });
-});
-
-describe('shortestPath', () => {
-  it('returns a path from start to goal respecting diagonal cost', () => {
-    const path = shortestPath({ x: 0, y: 0 }, { x: 2, y: 0 }, none);
-    expect(path).not.toBeNull();
-    expect(path![path!.length - 1]).toEqual({ x: 2, y: 0 });
-    expect(path![0]).toEqual({ x: 1, y: 0 });
-  });
-
-  it('returns null when no path exists', () => {
-    const blocked = (p: GridPos) => p.x === 1; // wall across the grid
-    const path = shortestPath({ x: 0, y: 2 }, { x: 8, y: 2 }, blocked);
-    expect(path).toBeNull();
-  });
-
-  it('routes around blockers', () => {
-    const blocked = (p: GridPos) => p.x === 1 && p.y === 2;
-    const path = shortestPath({ x: 0, y: 2 }, { x: 2, y: 2 }, blocked);
-    expect(path).not.toBeNull();
-    expect(path!.some((c) => c.x === 1 && c.y === 1 || c.x === 1 && c.y === 3)).toBe(true);
+  it('attackableTargets: only adjacent living enemies', () => {
+    const me = unit('me', { x: 2, y: 2 });
+    const near = unit('near', { x: 3, y: 2 }, 'enemy');
+    const far = unit('far', { x: 5, y: 2 }, 'enemy');
+    const dead = { ...unit('dead', { x: 2, y: 3 }, 'enemy'), alive: false };
+    const friend = unit('friend', { x: 3, y: 3 });
+    const targets = attackableTargets([me, near, far, dead, friend], me);
+    expect(targets.map((t) => t.uid)).toEqual(['near']);
   });
 });

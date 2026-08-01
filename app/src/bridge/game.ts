@@ -1,225 +1,250 @@
-import { BattleController } from '../engine/controller';
-import type { EngineController, GameSnapshot, GridPos } from '../engine/contract';
-import { canAfford } from '../engine/economy';
-import { DeskRenderer } from '../render/desk';
-import { damageOccurrences } from '../render/snapshot-diff';
-import { AudioService } from './audio';
-import { game } from './state.svelte';
+// Bridge between the pure engine controller, the PixiJS board renderer, and the
+// DOM-UI lane. Owns ALL player input wiring (P3):
+//   - canvas pointer hits: select / move / attack / card-target / play / deselect
+//   - DOM hand callbacks: arm, sell, drag-to-board
+//   - end-turn + restart callbacks
+//   - window keyboard map (Space end turn, 1–5 arm cards, Esc cancel)
+//
+// D4 / NFR-4 discipline: handlers are fire-and-forget controller calls — no
+// awaits, no timers, no animation gating. The engine validates every action
+// (D9) and rejects anything illegal; the snapshot subscription drives redraws.
 
-/**
- * GameBridge — the single resync fan-out point (Gate 2 M1/Gate 3):
- * - controller.subscribe → one snapshot → Svelte store + DeskRenderer + audio
- * - controller.onEvent → transient flourishes (desk + audio)
- * - cell click: active card → play; own unit → select; valid move → move;
- *   valid attack target → attack; else deselect
- * - drag-to-board: pointerdown on a card + pointerup over the canvas plays it
- *   (HTML5 drag suppresses canvas pointer events, so drops ride on the DOM)
- * - keyboard: Space end turn, Esc deselect, 1-5 pick card, S sell, D debug
- * - Restart (FR-7): fresh controller + desk.reset()
- */
+import type { Controller, GameSnapshot, GridPos } from '../engine/contract';
+import { createDeskRenderer } from '../render';
+import type { DeskRenderer } from '../render';
+
+export interface GameBridgeOptions {
+  controller: Controller;
+  host: HTMLElement;
+}
+
+/** Minimal pointer payload the DOM-UI drag callback must provide (client coords). */
+export interface PointerPayload {
+  clientX: number;
+  clientY: number;
+}
+
 export interface GameBridge {
-  controller: EngineController;
-  desk: DeskRenderer;
-  audio: AudioService;
-  start(): void;
-  restart(): void;
+  mount(): void;
   destroy(): void;
+  getRenderer(): DeskRenderer | null;
+  /** HandRack.onSelectCard — arm a hand card; re-clicking the armed card disarms it. */
+  onSelectCard(uid: string | null): void;
+  /** HandRack.onSellCard — sell a hand card for 1 gold. */
+  onSellCard(uid: string): void;
+  /** HandRack.onCardDragStart — record the card being dragged. */
+  onCardDragStart(uid: string): void;
+  /** HandRack.onCardDragEnd — drop on a valid empty tile plays the card; otherwise just arms it. */
+  onCardDragEnd(uid: string, e: PointerPayload): void;
+  /** EndTurnTransport.onEndTurn — pass the turn. */
+  onEndTurn(): void;
+  /** DeskFrame.onRestart — restart the run. */
+  onRestart(): void;
 }
 
-export function createGameBridge(host: HTMLElement): GameBridge {
-  const audio = new AudioService();
-  const desk = new DeskRenderer();
-  let controller = new BattleController();
-  let lastSnap: GameSnapshot | null = game.snapshot;
-  let unsub: (() => void) | null = null;
-  let unsubEv: (() => void) | null = null;
-  let dragFromCard = false;
-  let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+export function createGameBridge({ controller, host }: GameBridgeOptions): GameBridge {
+  let renderer: DeskRenderer | null = null;
+  let unsubscribe: (() => void) | null = null;
+  let unsubscribeEvents: (() => void) | null = null;
+  let destroyed = false;
+  let dragCandidate: string | null = null;
 
-  const onReduced = (e: MediaQueryListEvent): void => {
-    reduced = e.matches;
-    audio.setReducedMotion(reduced);
-  };
-  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', onReduced);
-  audio.setReducedMotion(reduced);
-
-  const cellClick = (pos: GridPos): void => {
-    const s = controller.getSnapshot();
-    if (s.winner) return;
-
-    // active card → play it at this cell
-    if (s.activeCardUid) {
-      const res = controller.playCard(s.activeCardUid, pos);
-      game.dropResult = res;
-      audio.play(res.ok ? 'play' : 'reject');
-      return;
+  /** Controller may not be started yet; never let that throw through a handler. */
+  function safeSnapshot(): GameSnapshot | null {
+    try {
+      return controller.getSnapshot();
+    } catch {
+      return null;
     }
+  }
 
-    // own unit → select
-    const unitAt = s.units.find((u) => u.pos.x === pos.x && u.pos.y === pos.y);
-    if (unitAt && unitAt.faction === 'player') {
-      controller.selectUnit(unitAt.uid);
-      return;
-    }
+  function onResize(): void {
+    renderer?.handleResize();
+  }
 
-    // selected unit: move or attack
-    if (s.selectedUnitUid) {
-      if (s.validMoves.some((p) => p.x === pos.x && p.y === pos.y)) {
-        controller.moveSelectedTo(pos);
-        return;
+  // ---------------------------------------------------------------- board pointer
+
+  function onPointerDown(e: PointerEvent | MouseEvent): void {
+    if (destroyed || e.button !== 0) return;
+    const r = renderer;
+    const s = safeSnapshot();
+    if (!r || !s || s.phase !== 'player') return;
+    const local = r.clientToLocal(e.clientX, e.clientY);
+    if (!local) return;
+
+    // Units take priority over bare tiles (hover affordance matches).
+    const unitUid = r.unitAtPoint(local.x, local.y);
+    if (unitUid) {
+      const u = s.units.find((x) => x.uid === unitUid);
+      if (!u || !u.alive) return;
+      if (u.team === 'enemy') {
+        // Legal attack (selected friendly): resolve the attack.
+        if (s.validAttackTargets.includes(unitUid)) {
+          controller.attackTarget(unitUid);
+          return;
+        }
+        // Armed unit-target card: engine selectUnit card-target mode targets it.
+        if (s.activeCardUid) {
+          controller.selectUnit(unitUid);
+          controller.playCard(); // engine resolves from the selection; rejects if mismatched
+          return;
+        }
+        return; // no legal action on this enemy
       }
-      const target = s.validAttackTargets.find((uid) => {
-        const u = s.units.find((x) => x.uid === uid);
-        return u && u.pos.x === pos.x && u.pos.y === pos.y;
-      });
-      if (target) {
-        controller.attackTarget(target);
-        return;
-      }
-    }
-
-    controller.selectUnit(null);
-  };
-
-  const onCellClick = (pos: GridPos): void => {
-    cellClick(pos);
-  };
-
-  const onWindowPointerDown = (e: PointerEvent): void => {
-    dragFromCard = (e.target as HTMLElement | null)?.closest('.channel-card') !== null;
-  };
-
-  const onWindowPointerUp = (e: PointerEvent): void => {
-    // drag-to-board: started on a card, released over the canvas
-    if (!dragFromCard) return;
-    dragFromCard = false;
-    const s = controller.getSnapshot();
-    if (!s.activeCardUid || s.winner) return;
-    const rect = host.getBoundingClientRect();
-    const inside =
-      e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
-    if (!inside) return;
-    const cell = desk.screenToCell(e.clientX, e.clientY);
-    if (!cell) return;
-    const res = controller.playCard(s.activeCardUid, cell);
-    game.dropResult = res;
-    audio.play(res.ok ? 'play' : 'reject');
-  };
-
-  const onKey = (e: KeyboardEvent): void => {
-    const s = controller.getSnapshot();
-    if (s.winner) {
-      if (e.key === 'Enter' || e.key === 'r') restart();
+      // Own unit: with an armed card the engine decides card-target vs reselect;
+      // playCard() no-ops when selection was not a card target.
+      controller.selectUnit(unitUid);
+      if (s.activeCardUid) controller.playCard();
       return;
     }
-    if (e.key === ' ' || e.code === 'Space') {
-      e.preventDefault();
-      if (s.phase === 'player') {
-        audio.play('endturn');
-        controller.endTurn();
-      }
+
+    // Tile-level clicks.
+    const tile = r.tileAtPoint(local.x, local.y);
+    if (!tile) return;
+    if (s.validMoves.some((t) => t.x === tile.x && t.y === tile.y)) {
+      controller.moveSelectedTo(tile);
       return;
     }
-    if (e.key === 'Escape') {
-      controller.selectUnit(null);
+    if (
+      s.activeCardUid &&
+      s.activeCardTargets?.some((t) => t.x === tile.x && t.y === tile.y)
+    ) {
+      controller.playCard(tile);
+      return;
+    }
+    controller.selectUnit(null); // empty ground: deselect
+  }
+
+  // --------------------------------------------------------------- DOM hand input
+
+  function onSelectCard(uid: string | null): void {
+    const s = safeSnapshot();
+    if (destroyed || !s) return;
+    if (uid !== null && s.activeCardUid === uid) {
+      controller.setActiveCard(null); // toggle off
+    } else {
+      controller.setActiveCard(uid);
+    }
+  }
+
+  function onSellCard(uid: string): void {
+    if (destroyed) return;
+    controller.sellCard(uid);
+  }
+
+  function onCardDragStart(uid: string): void {
+    if (destroyed) return;
+    dragCandidate = uid;
+  }
+
+  function onCardDragEnd(uid: string, e: PointerPayload): void {
+    if (destroyed) return;
+    if (dragCandidate === uid) dragCandidate = null;
+    const r = renderer;
+    // Arm first — dropping nowhere/illegal falls back to select-card-only.
+    controller.setActiveCard(uid);
+    const s = safeSnapshot();
+    if (!r || !s) return;
+    const local = r.clientToLocal(e.clientX, e.clientY);
+    if (!local) return;
+    const tile = r.tileAtPoint(local.x, local.y);
+    if (!tile) return;
+    if (
+      s.activeCardUid === uid &&
+      s.activeCardTargets?.some((t) => t.x === tile.x && t.y === tile.y)
+    ) {
+      controller.playCard(tile);
+    }
+  }
+
+  // --------------------------------------------------------------------- actions
+
+  function onEndTurn(): void {
+    if (destroyed) return;
+    controller.endTurn();
+  }
+
+  function onRestart(): void {
+    if (destroyed) return;
+    controller.restart();
+  }
+
+  // ------------------------------------------------------------------ keyboard
+
+  function onKeyDown(e: KeyboardEvent): void {
+    if (destroyed) return;
+    const target = e.target as HTMLElement | null;
+    // Never steal keys from form fields (NFR-4: input never blocked).
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    ) {
+      return;
+    }
+    const s = safeSnapshot();
+    if (!s) return;
+
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault(); // stop page scroll; engine ignores non-player phases
+      controller.endTurn();
+      return;
+    }
+    if (e.code === 'Escape' || e.key === 'Escape') {
       controller.setActiveCard(null);
+      controller.selectUnit(null);
       return;
     }
-    if (e.key === 'd' || e.key === 'D') {
-      game.debugVisible = !game.debugVisible;
-      return;
+    if (e.key >= '1' && e.key <= '5') {
+      const card = s.hand[Number(e.key) - 1];
+      if (!card) return;
+      if (s.activeCardUid === card.uid) controller.setActiveCard(null);
+      else controller.setActiveCard(card.uid);
     }
-    if (e.key === 'm' || e.key === 'M') {
-      const next = !audio.isMuted();
-      audio.setMuted(next);
-      game.muted = next;
-      return;
-    }
-    if (s.phase !== 'player') return;
-    if (/^[1-5]$/.test(e.key)) {
-      const idx = Number(e.key) - 1;
-      const card = s.hand[idx];
-      if (card) controller.setActiveCard(s.activeCardUid === card.uid ? null : card.uid);
-      return;
-    }
-    if (e.key === 's' || e.key === 'S') {
-      const active = s.activeCardUid;
-      if (active && s.hand.some((c) => c.uid === active)) {
-        const res = controller.sellCard(active);
-        game.dropResult = res;
-        audio.play('sell');
-      }
-    }
-  };
+  }
 
-  const start = (): void => {
-    void desk.mount(host, { onCellClick }).catch((err) => console.error('[bridge] desk.mount failed:', err));
-    unsub?.();
-    unsubEv?.();
-    // subscribe BEFORE start() — the initial snapshot must reach subscribers
-    unsub = controller.subscribe(handleSnapshot);
-    unsubEv = controller.onEvent((ev) => {
-      desk.applyEvent(ev);
-      if (ev.kind === 'card-sold') audio.play('sell');
-    });
+  // ------------------------------------------------------------------- lifecycle
+
+  function mount(): void {
+    if (destroyed || renderer) return;
+    renderer = createDeskRenderer(host);
+    renderer.mount();
+    unsubscribe = controller.subscribe((snapshot) => renderer?.update(snapshot));
+    // P4: forward transient engine events (attack-resolved, unit-moved, …) so the
+    // renderer can drive staged visuals (block commitment, drama, telegraphs).
+    unsubscribeEvents = controller.subscribeEvents((e) => renderer?.handleEvent(e));
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', onResize);
+      window.addEventListener('keydown', onKeyDown);
+      host.addEventListener('pointerdown', onPointerDown);
+    }
+    seed();
+  }
+
+  /** Seed the board with the current state so it isn't empty before the first action. */
+  function seed(): void {
     try {
-      controller.start();
-    } catch (err) {
-      console.error('[bridge] controller.start() threw:', err);
+      const s = controller.getSnapshot();
+      if (s && typeof s.turn === 'number' && s.turn >= 1) renderer?.update(s);
+    } catch {
+      // Controller not started yet — the start() emit will deliver the first snapshot.
     }
-    window.addEventListener('pointerdown', onWindowPointerDown);
-    window.addEventListener('pointerup', onWindowPointerUp);
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('pointerdown', () => audio.unlock(), { once: true });
-  };
+  }
 
-  const handleSnapshot = (snap: GameSnapshot): void => {
-    game.snapshot = snap;
-    try {
-      desk.applySnapshot(snap);
-    } catch (err) {
-      // A renderer failure must NEVER kill the input wiring — log and carry on.
-      console.error('DeskRenderer.applySnapshot failed:', err);
+  function destroy(): void {
+    if (destroyed) return;
+    destroyed = true;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('keydown', onKeyDown);
     }
-    // audio from diff (Gate 3: impact + coin gain ride the snapshot seam)
-    const dmg = damageOccurrences(lastSnap, snap);
-    if (dmg.length > 0) audio.play('impact');
-    if (lastSnap && snap.coins > lastSnap.coins) audio.play('coin');
-    if (snap.winner && snap.winner !== lastSnap?.winner) {
-      audio.play(snap.winner === 'player' ? 'victory' : 'defeat');
-    }
-    lastSnap = snap;
-  };
+    host.removeEventListener('pointerdown', onPointerDown);
+    unsubscribe?.();
+    unsubscribe = null;
+    unsubscribeEvents?.();
+    unsubscribeEvents = null;
+    renderer?.destroy();
+    renderer = null;
+  }
 
-  const restart = (): void => {
-    game.dropResult = null;
-    controller = new BattleController();
-    desk.reset();
-    unsub?.();
-    unsubEv?.();
-    unsub = controller.subscribe(handleSnapshot);
-    unsubEv = controller.onEvent((ev) => {
-      desk.applyEvent(ev);
-      if (ev.kind === 'card-sold') audio.play('sell');
-    });
-    controller.start();
-  };
-
-  const destroy = (): void => {
-    window.removeEventListener('pointerdown', onWindowPointerDown);
-    window.removeEventListener('pointerup', onWindowPointerUp);
-    window.removeEventListener('keydown', onKey);
-    window.matchMedia('(prefers-reduced-motion: reduce)').removeEventListener('change', onReduced);
-    unsub?.();
-    unsubEv?.();
-    audio.close();
-    desk.destroy();
-  };
-
-  return { controller, desk, audio, start, restart, destroy };
+  return { mount, destroy, getRenderer: () => renderer, onSelectCard, onSellCard, onCardDragStart, onCardDragEnd, onEndTurn, onRestart };
 }
-
-// re-export for the hand's affordability check (single source, Gate 3 P3)
-export { canAfford };
-
-

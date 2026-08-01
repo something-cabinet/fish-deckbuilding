@@ -1,127 +1,76 @@
 import { describe, expect, it } from 'vitest';
 import type { Unit } from './contract';
-import { applyDamage, attackDamage, resolveAttack } from './combat';
+import { applyDamage, canAttack, resolveAttack } from './combat';
 
-function unit(over: Partial<Unit>): Unit {
+function unit(uid: string, hp: number, attack: number, block = 0, pos = { x: 1, y: 1 }): Unit {
   return {
-    uid: 'u1',
-    templateId: 't',
-    name: 'T',
-    faction: 'enemy',
-    pos: { x: 0, y: 0 },
-    hp: 10,
-    maxHp: 10,
-    attack: 2,
-    movement: 2,
-    armor: 0,
-    debt: 0,
-    isBoss: false,
-    canMove: true,
-    canAttack: true,
-    ...over,
+    uid,
+    name: uid,
+    team: uid.startsWith('e') ? 'enemy' : 'player',
+    pos,
+    hp,
+    maxHp: hp,
+    attack,
+    block,
+    moved: false,
+    acted: false,
+    alive: true,
   };
 }
 
-describe('attackDamage', () => {
-  it('is attacker attack + target debt stacks', () => {
-    const a = unit({ attack: 3 });
-    const t = unit({ debt: 2 });
-    expect(attackDamage(a, t)).toBe(5);
+describe('combat', () => {
+  it('applyDamage: block absorbs first, then HP; death clears alive', () => {
+    const u = unit('p1', 10, 2, 3);
+    expect(applyDamage(u, 4)).toBe(1); // 3 absorbed by block
+    expect(u.block).toBe(0);
+    expect(u.hp).toBe(9);
+    expect(u.alive).toBe(true);
   });
 
-  it('is 0 debt by default', () => {
-    const a = unit({ attack: 3 });
-    const t = unit({ debt: 0 });
-    expect(attackDamage(a, t)).toBe(3);
-  });
-});
-
-describe('applyDamage', () => {
-  it('reduces hp', () => {
-    const r = applyDamage({ hp: 10, armor: 0, maxHp: 10 }, 4);
-    expect(r.hp).toBe(6);
-    expect(r.died).toBe(false);
+  it('applyDamage: HP floors at 0 and sets alive false', () => {
+    const u = unit('p1', 2, 2);
+    applyDamage(u, 5);
+    expect(u.hp).toBe(0);
+    expect(u.alive).toBe(false);
   });
 
-  it('armor absorbs before hp', () => {
-    const r = applyDamage({ hp: 10, armor: 3, maxHp: 10 }, 4);
-    expect(r.armor).toBe(0);
-    expect(r.hp).toBe(9);
-    expect(r.died).toBe(false);
+  it('resolveAttack: defender survives → symmetric counterattack', () => {
+    const a = unit('p1', 10, 3);
+    const d = unit('e1', 10, 2);
+    const r = resolveAttack(a, d);
+    expect(r.damageToDefender).toBe(3);
+    expect(r.damageToAttacker).toBe(2); // counter
+    expect(r.defenderDied).toBe(false);
+    expect(r.attackerDied).toBe(false);
   });
 
-  it('armor absorbs fully when large enough', () => {
-    const r = applyDamage({ hp: 10, armor: 5, maxHp: 10 }, 3);
-    expect(r.armor).toBe(2);
-    expect(r.hp).toBe(10);
+  it('resolveAttack: defender dies → no counterattack', () => {
+    const a = unit('p1', 10, 6);
+    const d = unit('e1', 3, 4);
+    const r = resolveAttack(a, d);
+    expect(r.damageToDefender).toBe(6);
+    expect(r.damageToAttacker).toBe(0);
+    expect(r.defenderDied).toBe(true);
+    expect(r.attackerDied).toBe(false);
   });
 
-  it('clamps hp at 0 and reports death', () => {
-    const r = applyDamage({ hp: 2, armor: 0, maxHp: 10 }, 5);
-    expect(r.hp).toBe(0);
-    expect(r.died).toBe(true);
-  });
-});
-
-describe('resolveAttack', () => {
-  it('deals damage including target debt', () => {
-    const attacker = unit({ uid: 'a', attack: 3 });
-    const target = unit({ uid: 't', hp: 10, debt: 1 });
-    const r = resolveAttack(attacker, target, true);
-    expect(r.targetHp).toBe(6); // 3 + 1 debt
-    expect(r.targetDied).toBe(false);
+  it('resolveAttack: attacker dies only if defender survives to counter', () => {
+    const a = unit('p1', 3, 5);
+    const d = unit('e1', 4, 4);
+    const r = resolveAttack(a, d);
+    expect(r.defenderDied).toBe(true);
+    expect(r.damageToAttacker).toBe(0); // dead defender cannot counter
+    expect(r.attackerDied).toBe(false);
   });
 
-  it('counterattacks when target survives adjacent', () => {
-    const attacker = unit({ uid: 'a', hp: 10, attack: 2 });
-    const target = unit({ uid: 't', hp: 10, attack: 2 });
-    const r = resolveAttack(attacker, target, true);
-    expect(r.targetHp).toBe(8);
-    expect(r.attackerHp).toBe(8);
-    expect(r.counterDamage).toBe(2);
-  });
-
-  it('no counterattack when target dies', () => {
-    const attacker = unit({ uid: 'a', attack: 5 });
-    const target = unit({ uid: 't', hp: 2, attack: 3 });
-    const r = resolveAttack(attacker, target, true);
-    expect(r.targetHp).toBe(0);
-    expect(r.targetDied).toBe(true);
-    expect(r.counterDamage).toBeNull();
-    expect(r.attackerHp).toBe(10); // attacker takes nothing
-  });
-
-  it('no counterattack when not adjacent', () => {
-    const attacker = unit({ uid: 'a' });
-    const target = unit({ uid: 't', hp: 10 });
-    const r = resolveAttack(attacker, target, false);
-    expect(r.targetHp).toBe(8);
-    expect(r.counterDamage).toBeNull();
-  });
-
-  it('counterattack can kill the attacker', () => {
-    const attacker = unit({ uid: 'a', hp: 2, attack: 1 });
-    const target = unit({ uid: 't', hp: 10, attack: 5 });
-    const r = resolveAttack(attacker, target, true);
-    expect(r.attackerHp).toBe(0);
-    expect(r.attackerDied).toBe(true);
-  });
-
-  it('counterattack does not chain (attacker never retaliates again)', () => {
-    const attacker = unit({ uid: 'a', hp: 10, attack: 1 });
-    const target = unit({ uid: 't', hp: 10, attack: 1 });
-    const r = resolveAttack(attacker, target, true);
-    // only ONE exchange: both at 9, no second swing
-    expect(r.targetHp).toBe(9);
-    expect(r.attackerHp).toBe(9);
-  });
-
-  it('respects armor on both sides', () => {
-    const attacker = unit({ uid: 'a', hp: 10, attack: 4 });
-    const target = unit({ uid: 't', hp: 10, attack: 4, armor: 2 });
-    const r = resolveAttack(attacker, target, true);
-    expect(r.targetHp).toBe(8); // 4 dmg: 2 armor + 2 hp
-    expect(r.targetArmor).toBe(0);
-    expect(r.attackerHp).toBe(6); // counter 4: attacker has no armor → 10 - 4
+  it('canAttack: requires opposite teams + adjacency + alive', () => {
+    const a = unit('p1', 10, 2, 0, { x: 1, y: 1 });
+    const e = unit('e1', 10, 2, 0, { x: 2, y: 1 });
+    const f = unit('p2', 10, 2, 0, { x: 3, y: 1 });
+    expect(canAttack(a, e)).toBe(true);
+    expect(canAttack(a, f)).toBe(false); // same team
+    const far = { ...e, pos: { x: 5, y: 5 } };
+    expect(canAttack(a, far)).toBe(false); // not adjacent
+    expect(canAttack({ ...a, alive: false }, e)).toBe(false);
   });
 });

@@ -1,127 +1,63 @@
----
-name: Fish Tactical RPG — VU-Meter Desk
-description: The battle is the debt department's broadcast console — ivory meter faces, black scale arcs, ballistic needles, walnut-and-steel desk frame; the arc past zero is the only red.
-colors:
-  ink: "#171914"
-  ink-soft: "#3d4037"
-  ivory-0: "#e8e0cf"
-  ivory-1: "#d9cfbb"
-  ivory-2: "#a89d84"
-  walnut: "#332016"
-  walnut-deep: "#1d120d"
-  walnut-light: "#65402a"
-  steel: "#626660"
-  steel-light: "#a8aaa0"
-  brass: "#b38b47"
-  brass-light: "#dfc27a"
-  amber: "#d69b36"
-  move: "#2f8785"
-  move-light: "#9ed8ce"
-  signal-red: "#b33b2e"
-  signal-red-light: "#f0a394"
-typography:
-  display:
-    fontFamily: "Rockwell, 'Roboto Slab', 'Courier New', serif"
-    fontSize: "clamp(18px, 2.1vw, 29px)"
-    letterSpacing: "0.07em"
-  body:
-    fontFamily: "'IBM Plex Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas, monospace"
-    fontSize: "10px"
-  label:
-    fontFamily: "'IBM Plex Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas, monospace"
-    fontSize: "8px"
-    letterSpacing: "0.13em"
-rounded:
-  sm: "3px"
-  md: "5px"
-  pill: "50px"
-spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "14px"
-  lg: "24px"
-components:
-  transport-armed:
-    backgroundColor: "{colors.amber}"
-    textColor: "{colors.ivory-0}"
-    rounded: "{rounded.sm}"
-  transport-idle:
-    backgroundColor: "#4b211c"
-    textColor: "#d9c6a9"
-    rounded: "{rounded.sm}"
-  channel-card:
-    backgroundColor: "{colors.ivory-0}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sm}"
-  panel:
-    backgroundColor: "{colors.ivory-1}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
----
+# Battle Desk Design System
 
-# Fish Tactical RPG — VU-Meter Desk
+## World
 
-## Overview
+The battle screen is a dark tactical board: wet navy asphalt under a pool of instrument light, with ivory records and steel fittings around the playable field. It plays the Duelyst/StS craft bar straight: the board is the arena, every surrounding region is a stable desk location, and a player can identify capacity, threat, and loss without searching.
 
-The battle is the debt department's broadcast console in the underwater city. The player is an operator metering Guppy's debt; every consequence of play is carried by ballistic needles, never floating text. Warm ivory meter faces behind glass, black scale arcs and ballistic needles as working ink, walnut-and-steel desk frame — and **the arc past zero is the ONLY red**, reserved for damage, debt, and defeat.
+The registry register belongs only to story-facing material. A **balloon** marks death or danger; a **bowl** marks victory or sanctuary; **THE CITY ABOVE** names the human division during enemy phase. Never use those motifs as generic decoration. Engine-owned log lines are always rendered verbatim.
 
-Mode: **Experience** — the player is inside the instrument; the interface recedes behind the desk.
+## Tokens
 
-## Colors
+| Variable | Purpose |
+| --- | --- |
+| `--font-display` | Strong section and control face; system-hosted Trebuchet/Segoe stack. |
+| `--font-work` | General UI copy; system-hosted Segoe/Helvetica stack. |
+| `--font-readout` | Fixed-width counts, ledger data, and keyboard labels. |
+| `--ground-void`, `--ground-deep`, `--ground-asphalt`, `--ground-wet` | Layered wet-dark tactical ground. |
+| `--panel-ink`, `--panel-steel` | Dense panel surfaces and raised steel. |
+| `--steel`, `--steel-light` | Borders, secondary labels, and non-semantic metal marks. |
+| `--ivory`, `--ivory-muted`, `--ink` | Record surfaces, readable text, and dark foreground. |
+| `--move`, `--move-light` | Neon cyan: movement only. |
+| `--action`, `--action-light` | Neon amber: attack, playable, and active transport only. |
+| `--signal-red`, `--signal-red-light` | Damage, debt, defeat, and foreclosure only. |
+| `--balloon` | Alias of `--signal-red`; death/danger motif only. |
+| `--bowl` | Alias of `--move`; victory/sanctuary motif only. |
+| `--success` | Account-settled/support state where it is not a damage/debt story signal. |
+| `--line-quiet`, `--line-strong` | Quiet and active structural rules. |
+| `--shadow-deep`, `--shadow-panel` | Board and panel depth. |
+| `--radius-tight`, `--radius-panel` | Record and zone corner radii. |
+| `--space-1` through `--space-6` | Spacing ladder. |
+| `--focus-ring` | Keyboard-visible cyan focus treatment. |
 
-- **Ivory faces** (`ivory-0/1/2`) — instrument faces, card fronts, meter bodies. The desk's light source.
-- **Walnut** (`walnut`, `walnut-deep`, `walnut-light`) — desk surface and frame; deep browns carry the room.
-- **Steel** (`steel`, `steel-light`) — frames, borders, hardware; neutral structure.
-- **Brass / amber** (`brass`, `brass-light`, `amber`) — focus, armed states, pull/attack affordances, the master channel's trim.
-- **Move-valid green-blue** (`move`, `move-light`) — circular sockets and chevrons for valid movement.
-- **Signal red** (`signal-red`, `signal-red-light`) — the only red in the system. Damage, debt stacks, negative coin zone, defeat, foreclosure, invalid drops.
-- **Ink** (`ink`, `ink-soft`) — text and scale marks on ivory.
+### Font decision
 
-## Typography
+The deleted VT323 and Silkscreen files are **not re-bundled** for P1. The system-hosted display/work/readout stacks keep the canonical board clean and legible at desktop distance, browser zoom, and early responsive breakpoints without reintroducing pixel chrome or a font download. `Trebuchet MS` adds controlled character to labels; Segoe/Helvetica carries reading; Consolas/Liberation Mono makes values feel like a registry readout. This is a deliberate P1 performance and clarity decision, not an unrecorded fallback.
 
-- **Display** — Rockwell-derived slab: titles ("GUPPY THE DEBTOR", "ACCOUNT SETTLED", "FORECLOSURE"). Instrument character, letter-spaced.
-- **Body / labels** — IBM Plex Mono workhorse: meter numerals, card effects, log lines, HUD copy, keyboard hints. 8–12px, generous tracking on labels.
-- Copy is institutional desk language: "Insufficient current", "Open channel required", "Range: adjacent", "Interest due — Guppy pays N", "Boss holds ground".
+### Color grammar
 
-## Layout
+- **Do:** use cyan for a unit's move path and amber for attack/playability; pair all color with a positional or shape cue.
+- **Do:** reserve signal-red for damage, debt, defeat, and foreclosure. `--balloon` is that same established red, never a new red.
+- **Don't:** use red for buttons, warnings unrelated to debt/damage, card rarity, generic emphasis, or decorative lighting.
+- **Don't:** use balloon, bowl, or city-above labels as filler. Their story meaning is fixed.
 
-- Fixed desktop viewport (100dvh, no scroll), `pointer-events: none` on the desk wrapper with `auto` only on interactive elements (hand cards, transport, panels, and the Pixi canvas itself).
-- **Patch field** — 9×5 ivory board centered on walnut; the only world space.
-- **Coin meter** — vertical ballistic needle left edge; +9 top, −5 credit zone below baseline (red).
-- **Hand** — channel-strip rack centered bottom; cards overlap when full, lift on hover.
-- **Transport** — bottom-right keycap; armed amber, red lamp idle.
-- **Interest gauge** — clock + counter upper-right; foreclosure state at turn 15.
-- Log panel left; deck/discard/sell pile registers; hint strip above the hand.
+## Zone geography
 
-## Elevation & Depth
+| Zone | Stable position | Job |
+| --- | --- | --- |
+| Field label | Header rail | Phase identity and current turn/mana. |
+| Economy | Left named corner | Coin, interest, foreclosure deadline. |
+| Board | Center cell | Dedicated 9×5 Pixi canvas, never covered by DOM zones. |
+| Piles | Lower-left named corner | Fixed deck/discard stacks with counts. |
+| Bulletin | Right named corner | Last six engine-owned log lines. |
+| Hand | Bottom-center strip | Count and P1 card-name chips; P3 becomes the fan. |
+| End turn | Bottom-right of the hand | Persistent turn transport. |
 
-- `shadow-lift` — soft 12px ambient drop for floating controls and end-state.
-- `shadow-inset` — inner bevel (top highlight, bottom shade) for recessed meter wells and frames.
-- `needle-spring` cubic-bezier — the ballistic needle/HP-bar transition; overshoot comes from the engine-side BallisticNeedle integrator (view state), stepped under `prefers-reduced-motion`.
-- Lamp flicker + scanline overlays are material life, both disabled under reduced motion.
+**Zones never move:** the desktop grid has named fixed cells; at narrower widths those cells reflow into a reading order, but no cell overlays the board. The board is constrained by its own 9:5 aspect container with `min(52vh, 490px)` sizing and a `100%` width ceiling, so it remains entirely visible at the 1280×950 acceptance target and below.
 
-## Shapes
+## Motion thesis
 
-- Sm rounding (3px) on cards, buttons, meter strips; 5px on panels.
-- Circular tokens for units (fish-eye dot), circular sockets for move-valid, split-rings for attack-valid, jack points for active card targets — geometry carries meaning independent of color (color-blind safe).
+P4 implements the authored motion, all stepped or removed under `prefers-reduced-motion` (the app.css kill-switch plus per-tween `motionEnabled` branches in the renderer). The single focal sequence is the **cinematic enemy turn**: intent telegraphs enter in 650ms (fade + scale), block commitment pulses the shield readout (300ms), damage resolves as floating numbers with a 150ms merge window per unit, and a single hit ≥ 7 triggers one non-stacking 350ms shake with a 2.5% focus zoom. Unit walks tween 300ms/tile with `easeOutCubic` (`cubic-bezier(0.16,1,0.3,1)`); floating numbers rise 34px and fade over 900ms with ±24px jitter; story marks enter in 650ms (defeat balloon descends, victory bowl rises). The timing ladder is 100–150 immediate, 150–300 routine, 300–500 layout/overlay, 500–800 authored entrance; exits are faster. Transient FX are budget-capped at 20 per turn. Input is never blocked: hit-testing reads snapshot positions, never tween state. `prefers-reduced-motion` makes every tween instant (walk snaps, no shake/zoom, no merge animation, marks appear in place).
 
-## Components
+## Accessibility and discipline
 
-- **Channel card** — ivory front, flared cost numeral top-left, pitch dot (red/yellow/blue = coin value 1/2/3), name on the strip, effect as scale arc. Playable sits proud; unplayable dims; active gets an amber outline; sell button brass with coin value.
-- **Transport** — keycap button, punch-down on press, Space-kbd hint.
-- **End state** — desk lamp overlay: green master lamp "ACCOUNT SETTLED" on victory, red "FORECLOSURE" on defeat, Restart button.
-- **Unit strip** — two state lamps (move green-blue, attack amber), name, exact HP/ATK readout, thin HP bar, red Debt badge only when stacks exist.
-- **Hover panel** — pinned inspection card (unit stats or card effect), no pointer events, fades after brief pin.
-
-## Do's and Don'ts
-
-- **Do** carry consequence in the needles: HP loss, coin debt, interest — ballistic motion, never floating damage numbers.
-- **Do** keep red exclusive: only immediate cost, damage, debt, and failure. Move-valid is green-blue; attack-valid is brass/amber; the negative coin zone is red.
-- **Do** render hand, log, meter numerals, and inspection in the Svelte layer; keep the board, units, needles, and highlights in PixiJS.
-- **Don't** use fantasy chrome — no crystals, scrolls, orbs, glossy card art, or floating combat text.
-- **Don't** hardcode colors in scenes: all Control styling references the theme tokens above (single source in `app/src/app.css`).
-- **Don't** add motion that ignores `prefers-reduced-motion` — needles step, particles suppress, scanlines and flicker stop.
-
-## Surface briefs
-
-- Combat surface (approved): `.slim/deepwork/js-combat-slice.md` + `wiki:specs/js-combat-vertical-slice` (approved spec).
+Keyboard focus uses the high-contrast cyan `--focus-ring`; controls are semantic buttons; end-state copy is an assertive live region; background treatment and inline motif marks are hidden from assistive technology. Color is never the sole cue: intent uses glyph + number in P2, cards use fixed placement in P3, and the balloon mark is an inline shape. Keep direct DOM copy concise, preserve log strings exactly, and keep all new visual variables recorded in this document.

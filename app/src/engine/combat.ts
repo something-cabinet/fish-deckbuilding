@@ -1,74 +1,48 @@
+// Combat resolution: attacks with symmetric counterattacks and block absorption.
+
 import type { Unit } from './contract';
+import { isAdjacent } from './grid';
 
-/** Damage an attacker deals to a target: attack + target's debt stacks. */
-export function attackDamage(attacker: Pick<Unit, 'attack'>, target: Pick<Unit, 'debt'>): number {
-  return attacker.attack + target.debt;
-}
-
-export interface DamageResult {
-  hp: number;
-  armor: number;
-  died: boolean;
-}
-
-/** Apply damage: armor absorbs first, then HP; hp clamps at 0. */
-export function applyDamage(
-  unit: Pick<Unit, 'hp' | 'armor' | 'maxHp'>,
-  amount: number,
-): DamageResult {
-  let armor = unit.armor;
-  let remaining = amount;
-  const absorbed = Math.min(armor, remaining);
-  armor -= absorbed;
-  remaining -= absorbed;
-  const hp = Math.max(0, unit.hp - remaining);
-  return { hp, armor, died: hp <= 0 };
-}
-
-export interface AttackOutcome {
-  targetHp: number;
-  targetArmor: number;
-  attackerHp: number;
-  attackerArmor: number;
-  targetDied: boolean;
+export interface CombatResult {
+  damageToDefender: number;
+  damageToAttacker: number;
+  defenderDied: boolean;
   attackerDied: boolean;
-  /** Counterattack damage dealt to the attacker, or null when no counterattack. */
-  counterDamage: number | null;
+}
+
+export function canAttack(attacker: Unit, defender: Unit): boolean {
+  return (
+    attacker.alive &&
+    defender.alive &&
+    attacker.team !== defender.team &&
+    isAdjacent(attacker.pos, defender.pos)
+  );
 }
 
 /**
- * Resolve one base attack with a SYMMETRIC counterattack.
- * - Attacker deals `attack + target.debt` damage.
- * - If the target survives AND is adjacent (Chebyshev 1), it counterattacks
- *   with `target.attack + attacker.debt`.
- * - Counterattack never chains.
- * Pure function — returns results, does not mutate.
+ * Apply `amount` damage to a unit: block absorbs first, then HP. Returns actual
+ * HP damage dealt (post-block).
  */
-export function resolveAttack(
-  attacker: Unit,
-  target: Unit,
-  adjacent: boolean,
-): AttackOutcome {
-  const t = applyDamage(target, attackDamage(attacker, target));
+export function applyDamage(unit: Unit, amount: number): number {
+  const absorbed = Math.min(unit.block, amount);
+  unit.block -= absorbed;
+  const dealt = amount - absorbed;
+  unit.hp = Math.max(0, unit.hp - dealt);
+  if (unit.hp <= 0) unit.alive = false;
+  return dealt;
+}
 
-  let attackerHp = attacker.hp;
-  let attackerArmor = attacker.armor;
-  let counterDamage: number | null = null;
-
-  if (!t.died && adjacent) {
-    counterDamage = attackDamage(target, attacker);
-    const a = applyDamage(attacker, counterDamage);
-    attackerHp = a.hp;
-    attackerArmor = a.armor;
-  }
-
-  return {
-    targetHp: t.hp,
-    targetArmor: t.armor,
-    attackerHp,
-    attackerArmor,
-    targetDied: t.died,
-    attackerDied: attackerHp <= 0,
-    counterDamage,
-  };
+/**
+ * Symmetric counterattack: defender strikes back if it survives (post-block).
+ * Death predictions account for block absorption so shielded units are never
+ * declared dead early and never lose their counterattack.
+ */
+export function resolveAttack(attacker: Unit, defender: Unit): CombatResult {
+  const damageToDefender = Math.max(0, attacker.attack);
+  const throughToDefender = Math.max(0, damageToDefender - defender.block);
+  const defenderDied = defender.hp - throughToDefender <= 0;
+  const damageToAttacker = defenderDied ? 0 : Math.max(0, defender.attack);
+  const throughToAttacker = Math.max(0, damageToAttacker - attacker.block);
+  const attackerDied = attacker.hp - throughToAttacker <= 0;
+  return { damageToDefender, damageToAttacker, defenderDied, attackerDied };
 }

@@ -1,93 +1,76 @@
+// Basic enemy AI: move toward the nearest player unit, attack when adjacent.
+
+import { MOVE_BUDGET } from './contract';
 import type { GridPos, Unit } from './contract';
-import { adjacent, shortestPath } from './grid';
+import { attackableTargets, key, reachableTiles } from './grid';
 
-export type AiDecision =
-  | { kind: 'attack'; targetUid: string }
-  | { kind: 'move'; path: GridPos[] }
-  | { kind: 'pass' };
+export interface AiMove {
+  unitUid: string;
+  to: GridPos;
+}
 
-export interface AiCtx {
-  playerUnits: Unit[];
-  occupied: (p: GridPos) => boolean;
+export interface AiAttack {
+  unitUid: string;
+  targetUid: string;
+}
+
+export interface AiPlan {
+  moves: AiMove[];
+  attacks: AiAttack[];
 }
 
 /**
- * Grid-aware enemy AI (D12):
- * 1. If it can attack and any player unit is adjacent (Chebyshev 1) →
- *    attack the player unit with the LOWEST hp.
- * 2. Else if it can move → move along the shortest path toward the nearest
- *    player unit, up to `unit.movement` points (ortho 1, diag 2).
- * 3. Else pass.
- * Pure function — never mutates.
+ * Greedy plan: each living enemy unit either attacks the lowest-HP adjacent
+ * player unit, or steps toward the nearest player unit (shortest path by
+ * move cost within budget). No card play.
  */
-export function decideEnemyAction(unit: Unit, ctx: AiCtx): AiDecision {
-  if (unit.canAttack) {
-    const adjacentTargets = ctx.playerUnits
-      .filter((p) => p.hp > 0 && adjacent(p.pos, unit.pos))
-      .sort((a, b) => a.hp - b.hp);
-    if (adjacentTargets.length > 0) {
-      return { kind: 'attack', targetUid: adjacentTargets[0]!.uid };
-    }
-  }
+export function planEnemyTurn(units: Unit[]): AiPlan {
+  const enemies = units.filter((u) => u.alive && u.team === 'enemy');
+  const players = units.filter((u) => u.alive && u.team === 'player');
+  const plan: AiPlan = { moves: [], attacks: [] };
+  if (players.length === 0) return plan;
 
-  if (unit.canMove) {
-    let bestPath: GridPos[] | null = null;
-    let bestCost = Infinity;
-    for (const p of ctx.playerUnits) {
-      if (p.hp <= 0) continue;
-      // try every empty cell adjacent to the player unit
-      for (const cell of neighborCells(p.pos)) {
-        if (ctx.occupied(cell) && !(cell.x === unit.pos.x && cell.y === unit.pos.y)) continue;
-        const path = shortestPath(unit.pos, cell, ctx.occupied);
-        if (!path) continue;
-        const cost = pathCost(path, unit.pos);
-        if (cost < bestCost) {
-          bestCost = cost;
-          bestPath = path;
-        }
+  const used = new Set<string>(units.filter((u) => u.alive).map((u) => key(u.pos)));
+
+  for (const e of enemies) {
+    used.delete(key(e.pos)); // own tile is free for stepping (occupied again below)
+    const targets = attackableTargets(units, e).sort((a, b) => a.hp - b.hp);
+    if (targets.length > 0) {
+      plan.attacks.push({ unitUid: e.uid, targetUid: targets[0]!.uid });
+      used.add(key(e.pos));
+      continue;
+    }
+
+    // Nearest player unit by movement cost (path via reachable tiles).
+    const tiles = reachableTiles(units, e.pos, MOVE_BUDGET, e.uid);
+    let best: { tile: GridPos; cost: number } | null = null;
+    for (const tile of tiles) {
+      if (used.has(key(tile))) continue;
+      let minCost = Infinity;
+      for (const p of players) {
+        const c = stepCost(tile, p.pos);
+        if (c < minCost) minCost = c;
+      }
+      if (minCost < Infinity && (best === null || minCost < best.cost)) {
+        best = { tile, cost: minCost };
       }
     }
-    if (bestPath && bestPath.length > 0) {
-      return { kind: 'move', path: takeWithinCost(bestPath, unit.pos, unit.movement) };
+    if (best) {
+      used.add(key(best.tile));
+      plan.moves.push({ unitUid: e.uid, to: best.tile });
+    } else {
+      used.add(key(e.pos));
     }
   }
-
-  return { kind: 'pass' };
+  return plan;
 }
 
-const DIRS: ReadonlyArray<readonly [number, number]> = [
-  [1, 0], [-1, 0], [0, 1], [0, -1],
-  [1, 1], [1, -1], [-1, 1], [-1, -1],
-];
-
-function neighborCells(pos: GridPos): GridPos[] {
-  return DIRS.map(([dx, dy]) => ({ x: pos.x + dx, y: pos.y + dy }));
-}
-
-function pathCost(path: GridPos[], from: GridPos): number {
-  let cost = 0;
-  let prev: GridPos = from;
-  for (const step of path) {
-    cost += step.x !== prev.x && step.y !== prev.y ? 2 : 1;
-    prev = step;
-  }
-  return cost;
-}
-
-/**
- * First steps of the path within the movement budget (ortho 1, diag 2).
- * Exported for direct unit testing of the budget math.
- */
-export function takeWithinCost(path: GridPos[], from: GridPos, movement: number): GridPos[] {
-  const out: GridPos[] = [];
-  let spent = 0;
-  let prev: GridPos = from;
-  for (const step of path) {
-    const cost = step.x !== prev.x && step.y !== prev.y ? 2 : 1;
-    if (spent + cost > movement) break;
-    out.push(step);
-    spent += cost;
-    prev = step;
-  }
-  return out;
+/** Approximate remaining cost from a tile to a target position (chebyshev-scaled). */
+function stepCost(from: GridPos, to: GridPos): number {
+  const dx = Math.abs(from.x - to.x);
+  const dy = Math.abs(from.y - to.y);
+  // Diagonal steps cost 2, orthogonal 1 — approximate via max+min decomposition.
+  const diag = Math.min(dx, dy);
+  const orth = Math.max(dx, dy) - diag;
+  return diag * 2 + orth;
 }

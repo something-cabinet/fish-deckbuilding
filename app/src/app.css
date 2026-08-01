@@ -1,47 +1,49 @@
+/* Tactical board tokens. Canvas P2 mirrors these values through its TOKENS map; see DESIGN.md. */
 :root {
-  --ivory-0: #f4eedf;
-  --ivory-1: #e8e0cf;
-  --ivory-2: #cfc4ad;
-  --ink: #171914;
-  --ink-soft: #3d4037;
-  --walnut: #332016;
-  --walnut-deep: #1d120d;
-  --walnut-light: #65402a;
-  --steel: #626660;
-  --steel-light: #a8aaa0;
-  --brass: #b38b47;
-  --brass-light: #dfc27a;
-  --amber: #d69b36;
-  --move: #2f8785;
-  --move-light: #9ed8ce;
-  --signal-red: #b33b2e;
-  --signal-red-light: #f0a394;
-  --font-work: 'IBM Plex Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas, monospace;
-  --font-display: Rockwell, 'Roboto Slab', 'Courier New', serif;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-7: 3rem;
-  --shadow-lift: 0 12px 26px rgb(14 8 5 / 0.34);
-  --shadow-inset: inset 0 1px 0 rgb(255 250 232 / 0.16), inset 0 -5px 10px rgb(0 0 0 / 0.28);
-  --needle-spring: cubic-bezier(0.18, 0.94, 0.34, 1);
-  --lamp-flicker: lamp-flicker 2.8s steps(2, end) infinite;
-  --scanline: scanline 8s linear infinite;
+  color-scheme: dark;
+  --font-display: "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-work: "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-readout: "Consolas", "Liberation Mono", monospace;
+  --ground-void: #071016;
+  --ground-deep: #0b1922;
+  --ground-asphalt: #102733;
+  --ground-wet: #173743;
+  --panel-ink: #0d1d26;
+  --panel-steel: #1d3945;
+  --steel: #6f9198;
+  --steel-light: #a9c1c2;
+  --ivory: #edf0df;
+  --ivory-muted: #bec8bd;
+  --ink: #071016;
+  --move: #4de4df;
+  --move-light: #b5fff3;
+  --action: #f4b544;
+  --action-light: #ffdda0;
+  --signal-red: #b7373c;
+  --signal-red-light: #f17a72;
+  --balloon: var(--signal-red);
+  --bowl: var(--move);
+  --success: #83c99a;
+  --line-quiet: rgb(169 193 194 / 0.18);
+  --line-strong: rgb(181 255 243 / 0.48);
+  --shadow-deep: 0 18px 46px rgb(0 0 0 / 0.42);
+  --shadow-panel: 0 8px 20px rgb(0 0 0 / 0.3);
+  --radius-tight: 0.35rem;
+  --radius-panel: 0.65rem;
+  --space-1: 0.35rem;
+  --space-2: 0.55rem;
+  --space-3: 0.85rem;
+  --space-4: 1.2rem;
+  --space-5: 1.75rem;
+  --space-6: 2.5rem;
+  --focus-ring: 0 0 0 3px var(--ground-void), 0 0 0 5px var(--move);
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body, #app { width: 100%; height: 100%; overflow: hidden; }
-body { background: var(--walnut-deep); color: var(--ivory-0); font-family: var(--font-work); -webkit-font-smoothing: antialiased; user-select: none; }
-button { font: inherit; }
-button:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 3px; }
-
-@keyframes lamp-flicker { 0%, 87%, 100% { opacity: 1; } 89% { opacity: .62; } 91% { opacity: .92; } }
-@keyframes scanline { from { background-position: 0 0; } to { background-position: 0 120px; } }
-@keyframes card-arrive { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-}
+* { box-sizing: border-box; }
+html, body, #app { min-width: 0; min-height: 100%; margin: 0; }
+body { min-width: 20rem; min-height: 100vh; overflow-x: hidden; background: radial-gradient(circle at 52% 42%, rgb(42 91 101 / 0.38), transparent 34rem), linear-gradient(145deg, var(--ground-void), var(--ground-deep) 48%, #09151d); color: var(--ivory); font-family: var(--font-work); font-size: clamp(0.875rem, 0.82rem + 0.16vw, 1rem); line-height: 1.4; }
+button, input, textarea, select { font: inherit; } button { cursor: pointer; } button:disabled { cursor: not-allowed; }
+::selection { background: var(--move); color: var(--ink); }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+* { scrollbar-color: var(--steel) var(--ground-void); scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 0.7rem; height: 0.7rem; } *::-webkit-scrollbar-track { background: var(--ground-void); } *::-webkit-scrollbar-thumb { background: var(--panel-steel); border: 2px solid var(--ground-void); border-radius: 999px; } *::-webkit-scrollbar-thumb:hover { background: var(--steel); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

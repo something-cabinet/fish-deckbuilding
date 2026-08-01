@@ -1,12 +1,49 @@
 <script lang="ts">
-  import { FORECLOSURE_TURN, INTEREST_START_TURN } from '../engine/contract';
-  import type { Faction } from '../engine/contract';
-  type Props = { turn: number; interestDue: number; winner: Faction | null };
-  let { turn, interestDue, winner }: Props = $props();
-  const foreclosure = $derived(turn >= FORECLOSURE_TURN - 1 && !winner);
-  const live = $derived(turn >= INTEREST_START_TURN);
+  // Economy ledger (FR-9 economy read): coins, interest due, foreclosure
+  // deadline. The foreclosure row carries the balloon glyph — the deadline is
+  // the execution.
+  import type { GameSnapshot } from '../engine/contract';
+
+  let { snapshot }: { snapshot: GameSnapshot | null } = $props();
 </script>
-<section class="interest" class:foreclosure aria-label={`Turn ${turn}, interest due ${interestDue}`}><div class="clock"><span class="hand" style={`--turn:${Math.min(turn, 16)}`}></span><b>{turn}</b></div><div><h2>INTEREST CLOCK</h2><p>{live ? `Interest due — Guppy pays ${interestDue}` : `Interest begins / turn ${INTEREST_START_TURN}`}</p><small>{foreclosure ? 'FORECLOSURE IMMINENT' : `FORECLOSURE / ${FORECLOSURE_TURN}`}</small></div></section>
+
+<aside class="economy-zone zone-panel" aria-label="Economy ledger">
+  <p class="zone-title">LEDGER</p>
+  <dl>
+    <div><dt>COIN</dt><dd>{snapshot?.coins ?? 0}</dd></div>
+    <div><dt>INTEREST DUE</dt><dd>{snapshot?.interestDue ?? 0}</dd></div>
+    <div class:foreclosure={snapshot?.foreclosed}>
+      <dt>FORECLOSURE</dt>
+      <dd class="foreclosure-row">
+        <svg class="balloon-glyph" viewBox="0 0 16 20" aria-hidden="true"><path d="M8 1.5c-3.3 0-5.5 2.8-5.5 6.2 0 3.1 1.9 5.4 4.4 6l-.6 3.3L8 15.8l1.7 1.2-.6-3.3c2.5-.6 4.4-2.9 4.4-6C13.5 4.3 11.3 1.5 8 1.5Z" /></svg>
+        <span>TURN 16</span>
+      </dd>
+    </div>
+  </dl>
+</aside>
+
 <style>
-  .interest { display: flex; align-items: center; gap: 10px; pointer-events: auto; color: var(--ivory-1); } .clock { position: relative; display: grid; place-items: center; width: 58px; height: 58px; border: 2px solid var(--steel-light); border-radius: 50%; background: var(--ivory-1); color: var(--ink); box-shadow: var(--shadow-lift), var(--shadow-inset); } .clock::before { content: ''; position: absolute; inset: 7px; border: 1px solid var(--ink-soft); border-radius: 50%; } .clock b { z-index: 1; font-size: 18px; letter-spacing: -.1em; } .hand { position: absolute; width: 2px; height: 18px; bottom: 28px; background: var(--ink); transform-origin: bottom; transform: rotate(calc(var(--turn) * 22.5deg)); transition: transform 300ms var(--needle-spring); } h2 { font-size: 9px; letter-spacing: .11em; } p { max-width: 165px; margin-top: 4px; color: var(--ivory-0); font-size: 10px; line-height: 1.25; } small { display: block; margin-top: 4px; color: var(--brass-light); font-size: 8px; letter-spacing: .07em; } .foreclosure p, .foreclosure small { color: var(--signal-red-light); }
+  .zone-panel {
+    min-width: 0;
+    background: linear-gradient(150deg, rgb(29 57 69 / 0.88), rgb(13 29 38 / 0.84));
+    border: 1px solid var(--line-quiet);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+  }
+  .zone-title {
+    margin: 0;
+    padding: var(--space-3) var(--space-3) var(--space-2);
+    color: var(--steel-light);
+    font: 700 0.68rem/1 var(--font-readout);
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--line-quiet);
+  }
+  dl { margin: 0; padding: var(--space-2) var(--space-3); }
+  dl div { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); padding: 0.42rem 0; border-bottom: 1px solid rgb(169 193 194 / 0.1); }
+  dl div:last-child { border: 0; }
+  dt { color: var(--ivory-muted); font: 600 0.67rem var(--font-readout); letter-spacing: 0.07em; }
+  dd { margin: 0; color: var(--ivory); font: 700 0.9rem var(--font-readout); }
+  .foreclosure dd, .foreclosure dt { color: var(--signal-red-light); }
+  .foreclosure-row { display: flex; align-items: center; gap: 0.35rem; }
+  .balloon-glyph { width: 0.7rem; fill: currentColor; }
 </style>

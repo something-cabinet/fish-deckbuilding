@@ -1,237 +1,491 @@
 // @vitest-environment jsdom
+//
+// Bridge tests: renderer mount + snapshot forwarding (smoke) AND the full P3
+// input wiring — canvas pointer hits (select/move/attack/card-target/deselect),
+// card arm/sell/drag-to-board, end-turn/restart, and the window keyboard map
+// (Space / 1–5 / Esc). The render module is mocked so the hit-test hooks are
+// stubbed per test; engine rules are asserted through real controller snapshots.
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameSnapshot } from '../engine/contract';
+import { HERO_UID } from '../engine/contract';
+import type { Controller, GameSnapshot, GridPos, Unit } from '../engine/contract';
+import { createController } from '../engine/controller';
+import { cardDef } from '../engine/cards';
 
-// --- hoisted mocks (Gate 4 P0-3: bridge orchestration tests) ---
-const deskMock = vi.hoisted(() => ({
-  mount: vi.fn(async () => {}),
-  applySnapshot: vi.fn(),
-  applyEvent: vi.fn(),
-  reset: vi.fn(),
-  destroy: vi.fn(),
-  screenToCell: vi.fn(() => ({ x: 4, y: 2 })),
-  cellClick: null as null | ((pos: { x: number; y: number }) => void),
-}));
+const h = vi.hoisted(() => {
+  const renderer = {
+    mount: vi.fn(),
+    destroy: vi.fn(),
+    update: vi.fn(),
+    handleEvent: vi.fn(),
+    handleResize: vi.fn(),
+    motionEnabled: true,
+    diff: null,
+    lastPositions: new Map(),
+    clientToLocal: vi.fn(),
+    tileAtPoint: vi.fn(),
+    unitAtPoint: vi.fn(),
+    tileCenter: vi.fn(),
+  };
+  return { renderer, createDeskRenderer: vi.fn(() => renderer) };
+});
 
-const audioMock = vi.hoisted(() => ({
-  play: vi.fn(),
-  unlock: vi.fn(),
-  setMuted: vi.fn(),
-  setReducedMotion: vi.fn(),
-  isMuted: vi.fn(() => false),
-  close: vi.fn(),
-}));
+vi.mock('../render', () => ({ createDeskRenderer: h.createDeskRenderer }));
 
-vi.mock('../render/desk', () => ({
-  DeskRenderer: class {
-    mount = vi.fn(async (_host: HTMLElement, callbacks: { onCellClick: (pos: { x: number; y: number }) => void }) => {
-      deskMock.cellClick = callbacks.onCellClick;
-    });
-    applySnapshot = deskMock.applySnapshot;
-    applyEvent = deskMock.applyEvent;
-    reset = deskMock.reset;
-    destroy = deskMock.destroy;
-    screenToCell = deskMock.screenToCell;
-  },
-}));
-
-vi.mock('./audio', () => ({
-  AudioService: class {
-    play = audioMock.play;
-    unlock = audioMock.unlock;
-    setMuted = audioMock.setMuted;
-    setReducedMotion = audioMock.setReducedMotion;
-    isMuted = audioMock.isMuted;
-    close = audioMock.close;
-  },
-}));
-
-import { game } from './state.svelte';
 import { createGameBridge } from './game';
+import type { GameBridge } from './game';
 
-function makeHost(): HTMLDivElement {
+/** Deterministic RNG for reproducible tests. */
+function seededRng(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+function makeHost(): HTMLElement {
   const host = document.createElement('div');
-  host.style.width = '800px';
-  host.style.height = '600px';
-  Object.defineProperty(host, 'getBoundingClientRect', {
-    value: () => ({ left: 0, top: 0, right: 800, bottom: 600, width: 800, height: 600, x: 0, y: 0 }),
-  });
   document.body.appendChild(host);
   return host;
 }
 
-describe('GameBridge (orchestration — Gate 4 P0-3)', () => {
+function mountBridge(controller: Controller, host: HTMLElement): GameBridge {
+  const bridge = createGameBridge({ controller, host });
+  bridge.mount();
+  return bridge;
+}
+
+/** Stub the renderer hit-test chain for the next pointer event. */
+function stubHits(unitUid: string | null, tile: GridPos | null, client = { x: 10, y: 10 }): void {
+  h.renderer.clientToLocal.mockReturnValue(client);
+  h.renderer.unitAtPoint.mockReturnValue(unitUid);
+  h.renderer.tileAtPoint.mockReturnValue(tile);
+}
+
+function clickBoard(host: HTMLElement, clientX = 50, clientY = 60): void {
+  host.dispatchEvent(new MouseEvent('pointerdown', { clientX, clientY, button: 0, bubbles: true }));
+}
+
+function pressKey(key: string, code?: string, target?: HTMLElement): KeyboardEvent {
+  const ev = new KeyboardEvent('keydown', {
+    key,
+    code: code ?? key,
+    bubbles: true,
+    cancelable: true,
+  });
+  (target ?? window).dispatchEvent(ev);
+  return ev;
+}
+
+function snap(c: Controller): GameSnapshot {
+  return c.getSnapshot();
+}
+
+/** First hand card (start() always deals 5, so this is defined). */
+function firstCard(c: Controller) {
+  return c.getSnapshot().hand[0]!;
+}
+
+/** First hand card is affordable on turn 1 (mana 1). */
+function firstCardAffordable(c: Controller): boolean {
+  return cardDef(firstCard(c).cardUid).cost <= 1;
+}
+
+/**
+ * Scan seeds for one whose (post-start) starting hand satisfies `predicate`.
+ * Deck shuffle is rng-only, so the seed transfers to custom-unit setups.
+ */
+function findSeed(predicate: (c: Controller) => boolean, maxSeeds = 500): number {
+  for (let seed = 1; seed <= maxSeeds; seed++) {
+    const c = createController(seededRng(seed));
+    c.start();
+    if (predicate(c)) return seed;
+  }
+  throw new Error('no matching seed found');
+}
+
+function unit(uid: string, team: Unit['team'], pos: GridPos, hp = 5, attack = 0): Unit {
+  return { uid, name: uid, team, pos, hp, maxHp: hp, attack, block: 0, moved: false, acted: false, alive: true };
+}
+
+describe('createGameBridge', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    game.snapshot = null;
-    game.dropResult = null;
-    game.debugVisible = false;
-    game.hintVisible = true;
-    game.muted = false;
-    deskMock.cellClick = null;
-    document.body.innerHTML = '';
-    // jsdom lacks matchMedia — polyfill used by the bridge's reduced-motion gate
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((q: string) => ({
-        matches: false,
-        media: q,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    });
   });
 
-  it('boot fan-out: start() delivers the initial snapshot (5 hand, 3 units) to desk + state', async () => {
+  // ---------------------------------------------------------------- smoke (P2)
+
+  it('mounts a desk renderer into the host and forwards controller snapshots', () => {
     const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve(); // allow async desk.mount
-    expect(game.snapshot).not.toBeNull();
-    expect(game.snapshot!.hand).toHaveLength(5);
-    expect(game.snapshot!.units).toHaveLength(3);
-    expect(game.snapshot!.phase).toBe('player');
-    expect(deskMock.applySnapshot).toHaveBeenCalledWith(game.snapshot);
+    const controller = createController(() => 0.5);
+    mountBridge(controller, host);
+
+    expect(h.createDeskRenderer).toHaveBeenCalledWith(host);
+    expect(h.renderer.mount).toHaveBeenCalledTimes(1);
+
+    controller.start();
+    expect(h.renderer.update).toHaveBeenCalled();
+    const lastSnapshot = h.renderer.update.mock.lastCall?.[0] as GameSnapshot;
+    expect(lastSnapshot).toBeTruthy();
+    expect(lastSnapshot.turn).toBe(1);
+    expect(lastSnapshot.units.length).toBeGreaterThan(0);
   });
 
-  it('restart() delivers a fresh battle with no stale winner/state', async () => {
+  it('seeds the current snapshot when the controller already started before mount', () => {
     const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    // force a winner through the controller (hero survives; just check restart freshness)
-    bridge.controller.endTurn();
-    bridge.restart();
-    await Promise.resolve();
-    expect(game.snapshot!.turn).toBe(1);
-    expect(game.snapshot!.winner).toBeNull();
-    expect(game.snapshot!.phase).toBe('player');
-    expect(deskMock.reset).toHaveBeenCalled();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+    expect(h.renderer.update).toHaveBeenCalled();
   });
 
-  it('single-subscription discipline: each mutation emits exactly one snapshot to the desk', async () => {
+  it('destroy() unsubscribes and destroys the renderer', () => {
     const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    deskMock.applySnapshot.mockClear();
-    bridge.controller.sellCard(game.snapshot!.hand[0]!.uid);
-    expect(deskMock.applySnapshot).toHaveBeenCalledTimes(1);
-    deskMock.applySnapshot.mockClear();
-    bridge.controller.endTurn();
-    expect(deskMock.applySnapshot).toHaveBeenCalledTimes(1);
-  });
+    const controller = createController(() => 0.5);
+    const bridge = mountBridge(controller, host);
+    controller.start();
+    const countBefore = h.renderer.update.mock.calls.length;
 
-  it('cell click with an active card plays it (no-target card works anywhere)', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    // riptide: targetMode none (in opening hand) — playable at any cell
-    const riptide = game.snapshot!.hand.find((c) => c.defId === 'riptide')!;
-    bridge.controller.setActiveCard(riptide.uid);
-    const coinsBefore = game.snapshot!.coins;
-    deskMock.cellClick!({ x: 4, y: 2 });
-    // riptide: cost 2 → coins -2
-    expect(game.snapshot!.coins).toBe(coinsBefore - 2);
-    expect(game.snapshot!.activeCardUid).toBeNull();
-    expect(game.dropResult?.ok).toBe(true);
-  });
-
-  it('cell click routes move: selected unit moves to a valid cell', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    bridge.controller.selectUnit('guppy');
-    const valid = game.snapshot!.validMoves[0]!;
-    const before = game.snapshot!.units.find((u) => u.uid === 'guppy')!.pos;
-    deskMock.cellClick!(valid);
-    const after = game.snapshot!.units.find((u) => u.uid === 'guppy')!.pos;
-    expect(after).not.toEqual(before);
-  });
-
-  it('drag-to-board: pointerdown on a card + pointerup over the host plays it', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    const riptide = game.snapshot!.hand.find((c) => c.defId === 'riptide')!;
-    bridge.controller.setActiveCard(riptide.uid);
-    const coinsBefore = game.snapshot!.coins;
-
-    const card = document.createElement('div');
-    card.className = 'channel-card';
-    document.body.appendChild(card);
-    card.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }));
-
-    window.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 400, clientY: 300 }));
-    expect(game.snapshot!.coins).toBe(coinsBefore - 2);
-    expect(game.snapshot!.activeCardUid).toBeNull();
-  });
-
-  it('drag release outside the host does not play', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    const riptide = game.snapshot!.hand.find((c) => c.defId === 'riptide')!;
-    bridge.controller.setActiveCard(riptide.uid);
-    const coinsBefore = game.snapshot!.coins;
-
-    const card = document.createElement('div');
-    card.className = 'channel-card';
-    document.body.appendChild(card);
-    card.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }));
-
-    window.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 5000, clientY: 5000 }));
-    expect(game.snapshot!.coins).toBe(coinsBefore);
-    expect(game.snapshot!.activeCardUid).toBe(riptide.uid);
-  });
-
-  it('keyboard: Space ends the turn (player phase only)', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    const turnBefore = game.snapshot!.turn;
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
-    expect(game.snapshot!.turn).toBe(turnBefore + 1);
-    expect(game.snapshot!.phase).toBe('player'); // full cycle completed
-  });
-
-  it('keyboard: digits pick cards, D toggles debug, M toggles mute', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true }));
-    expect(game.snapshot!.activeCardUid).toBe(game.snapshot!.hand[0]!.uid);
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
-    expect(game.debugVisible).toBe(true);
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true }));
-    expect(game.muted).toBe(true);
-    expect(audioMock.setMuted).toHaveBeenCalledWith(true);
-  });
-
-  it('cell click on empty ground deselects', async () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
-    await Promise.resolve();
-    bridge.controller.selectUnit('guppy');
-    expect(game.snapshot!.selectedUnitUid).toBe('guppy');
-    // a far, empty cell — no unit, not a valid move, not an attack target
-    deskMock.cellClick!({ x: 0, y: 4 });
-    expect(game.snapshot!.selectedUnitUid).toBeNull();
-  });
-
-  it('destroy tears down listeners and closes audio', () => {
-    const host = makeHost();
-    const bridge = createGameBridge(host);
-    bridge.start();
     bridge.destroy();
-    expect(deskMock.destroy).toHaveBeenCalled();
-    expect(audioMock.close).toHaveBeenCalled();
+    controller.selectUnit('guppy');
+
+    expect(h.renderer.update.mock.calls.length).toBe(countBefore);
+    expect(h.renderer.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('mount() is idempotent', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    const bridge = mountBridge(controller, host);
+    bridge.mount();
+    expect(h.createDeskRenderer).toHaveBeenCalledTimes(1);
+    expect(h.renderer.mount).toHaveBeenCalledTimes(1);
+  });
+
+  // ----------------------------------------------------------- canvas pointer
+
+  it('click on an own unit selects it', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+    stubHits(HERO_UID, null);
+
+    clickBoard(host);
+
+    expect(snap(controller).selectedUnitUid).toBe(HERO_UID);
+    expect(snap(controller).validMoves.length).toBeGreaterThan(0);
+  });
+
+  it('click on a valid-move tile moves the selected unit', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+
+    controller.selectUnit(HERO_UID);
+    const target = snap(controller).validMoves[0] as GridPos;
+    expect(target).toBeTruthy();
+    stubHits(null, target);
+
+    clickBoard(host);
+
+    expect(snap(controller).units.find((u) => u.uid === HERO_UID)!.pos).toEqual(target);
+  });
+
+  it('click on a valid attack target attacks it (enemy hp drops)', () => {
+    const host = makeHost();
+    const units = [unit(HERO_UID, 'player', { x: 3, y: 2 }, 12, 2), unit('e1', 'enemy', { x: 4, y: 2 }, 5, 0)];
+    const controller = createController(() => 0.5, units);
+    controller.start();
+    mountBridge(controller, host);
+
+    controller.selectUnit(HERO_UID);
+    expect(snap(controller).validAttackTargets).toContain('e1');
+    stubHits('e1', null);
+
+    clickBoard(host);
+
+    expect(snap(controller).units.find((u) => u.uid === 'e1')!.hp).toBe(3);
+  });
+
+  it('click on empty ground deselects', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+
+    controller.selectUnit(HERO_UID);
+    expect(snap(controller).selectedUnitUid).toBe(HERO_UID);
+    // An empty tile that is not a valid move.
+    stubHits(null, { x: 8, y: 4 });
+
+    clickBoard(host);
+
+    expect(snap(controller).selectedUnitUid).toBeNull();
+  });
+
+  it('click on an empty valid tile plays an armed empty-tile card', () => {
+    // Turn 3 (mana 3) so hired-muscle (cost 3) is affordable; enemies placed far
+    // away so the two simulated enemy phases never threaten the hero.
+    const host = makeHost();
+    const farUnits = [
+      unit(HERO_UID, 'player', { x: 1, y: 2 }, 12, 2),
+      unit('boss', 'enemy', { x: 8, y: 0 }, 10, 3),
+      unit('thug-a', 'enemy', { x: 8, y: 2 }, 4, 2),
+      unit('thug-b', 'enemy', { x: 8, y: 4 }, 4, 2),
+    ];
+    const seed = findSeed((c) => {
+      c.endTurn();
+      c.endTurn();
+      const s = c.getSnapshot();
+      return (
+        s.phase === 'player' &&
+        s.winner === null &&
+        s.units.find((u) => u.uid === HERO_UID)?.alive === true &&
+        s.hand.some((card) => card.cardUid === 'hired-muscle')
+      );
+    });
+    const controller = createController(seededRng(seed), farUnits);
+    controller.start();
+    controller.endTurn();
+    controller.endTurn();
+    mountBridge(controller, host);
+
+    const hired = snap(controller).hand.find((card) => card.cardUid === 'hired-muscle')!;
+    expect(snap(controller).mana).toBe(3);
+    controller.setActiveCard(hired.uid);
+    const tile = snap(controller).activeCardTargets![0] as GridPos;
+    stubHits(null, tile);
+
+    clickBoard(host);
+
+    const s = snap(controller);
+    expect(s.hand.some((card) => card.uid === hired.uid)).toBe(false);
+    expect(s.activeCardUid).toBeNull();
+    expect(s.units.some((u) => u.name === 'Muscle')).toBe(true);
+  });
+
+  it('click on a unit while an enemy-unit card is armed targets and plays it', () => {
+    const host = makeHost();
+    const units = [unit(HERO_UID, 'player', { x: 3, y: 2 }, 12, 2), unit('e1', 'enemy', { x: 4, y: 2 }, 5, 0)];
+    const seed = findSeed((c) => c.getSnapshot().hand.some((card) => cardDef(card.cardUid).target === 'enemy-unit' && cardDef(card.cardUid).cost <= 1));
+    const controller = createController(seededRng(seed), units);
+    controller.start();
+    mountBridge(controller, host);
+
+    const bridge = mountBridge(controller, host);
+    const letter = snap(controller).hand.find((card) => cardDef(card.cardUid).uid === 'demand-letter')!;
+    expect(letter).toBeTruthy();
+    bridge.onSelectCard(letter.uid);
+    expect(snap(controller).activeCardUid).toBe(letter.uid);
+    stubHits('e1', null);
+
+    clickBoard(host);
+
+    const s = snap(controller);
+    expect(s.hand.some((card) => card.uid === letter.uid)).toBe(false); // played
+    expect(s.units.find((u) => u.uid === 'e1')!.hp).toBe(3); // 2 damage from demand-letter
+    expect(s.activeCardUid).toBeNull();
+  });
+
+  // ------------------------------------------------------------------ hand input
+
+  it('onSelectCard arms a card; re-selecting the armed card toggles it off', () => {
+    const host = makeHost();
+    const seed = findSeed(firstCardAffordable);
+    const controller = createController(seededRng(seed));
+    controller.start();
+    const bridge = mountBridge(controller, host);
+    const card = snap(controller).hand[0]!;
+
+    bridge.onSelectCard(card.uid);
+    expect(snap(controller).activeCardUid).toBe(card.uid);
+
+    bridge.onSelectCard(card.uid);
+    expect(snap(controller).activeCardUid).toBeNull();
+  });
+
+  it('onSellCard sells the card for 1 gold', () => {
+    const host = makeHost();
+    const seed = findSeed((c) => c.getSnapshot().hand.length === 5);
+    const controller = createController(seededRng(seed));
+    controller.start();
+    const bridge = mountBridge(controller, host);
+    const card = snap(controller).hand[0]!;
+
+    bridge.onSellCard(card.uid);
+
+    const s = snap(controller);
+    expect(s.hand.some((c) => c.uid === card.uid)).toBe(false);
+    expect(s.sellPile.some((c) => c.uid === card.uid)).toBe(true);
+    expect(s.coins).toBe(1);
+  });
+
+  it('drag-to-board: dropping on a valid empty tile plays the armed card', () => {
+    const host = makeHost();
+    const farUnits = [
+      unit(HERO_UID, 'player', { x: 1, y: 2 }, 12, 2),
+      unit('boss', 'enemy', { x: 8, y: 0 }, 10, 3),
+      unit('thug-a', 'enemy', { x: 8, y: 2 }, 4, 2),
+      unit('thug-b', 'enemy', { x: 8, y: 4 }, 4, 2),
+    ];
+    const seed = findSeed((c) => {
+      c.endTurn();
+      c.endTurn();
+      const s = c.getSnapshot();
+      return (
+        s.phase === 'player' &&
+        s.winner === null &&
+        s.units.find((u) => u.uid === HERO_UID)?.alive === true &&
+        s.hand.some((card) => card.cardUid === 'hired-muscle')
+      );
+    });
+    const controller = createController(seededRng(seed), farUnits);
+    controller.start();
+    controller.endTurn();
+    controller.endTurn();
+    const bridge = mountBridge(controller, host);
+
+    const hired = snap(controller).hand.find((card) => card.cardUid === 'hired-muscle')!;
+    bridge.onSelectCard(hired.uid);
+    const tile = snap(controller).activeCardTargets![0] as GridPos;
+    stubHits(null, tile, { x: 100, y: 100 });
+
+    bridge.onCardDragStart(hired.uid);
+    bridge.onCardDragEnd(hired.uid, { clientX: 100, clientY: 100 });
+
+    const s = snap(controller);
+    expect(s.hand.some((card) => card.uid === hired.uid)).toBe(false);
+    expect(s.units.some((u) => u.name === 'Muscle')).toBe(true);
+  });
+
+  it('drag-to-board: dropping on an illegal tile just arms the card', () => {
+    const host = makeHost();
+    const seed = findSeed(firstCardAffordable);
+    const controller = createController(seededRng(seed));
+    controller.start();
+    const bridge = mountBridge(controller, host);
+    const card = snap(controller).hand[0]!;
+    const before = snap(controller).hand.length;
+    stubHits(null, { x: 0, y: 0 });
+
+    bridge.onCardDragStart(card.uid);
+    bridge.onCardDragEnd(card.uid, { clientX: 40, clientY: 50 });
+
+    const s = snap(controller);
+    expect(s.activeCardUid).toBe(card.uid); // armed, not played
+    expect(s.hand.length).toBe(before);
+  });
+
+  // ------------------------------------------------------------- actions
+
+  it('onEndTurn advances the turn and returns to the player phase', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    const bridge = mountBridge(controller, host);
+    expect(snap(controller).turn).toBe(1);
+
+    bridge.onEndTurn();
+
+    const s = snap(controller);
+    expect(s.phase).toBe('player');
+    expect(s.turn).toBe(2);
+    expect(s.mana).toBe(2);
+  });
+
+  it('onRestart resets to a fresh turn-1 snapshot', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    const bridge = mountBridge(controller, host);
+    controller.selectUnit(HERO_UID);
+    controller.endTurn();
+
+    bridge.onRestart();
+
+    const s = snap(controller);
+    expect(s.turn).toBe(1);
+    expect(s.phase).toBe('player');
+    expect(s.selectedUnitUid).toBeNull();
+    expect(s.hand).toHaveLength(5);
+  });
+
+  // ---------------------------------------------------------------- keyboard
+
+  it('Space ends the turn (and prevents default page scroll)', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+
+    const ev = pressKey(' ', 'Space');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(snap(controller).turn).toBe(2);
+  });
+
+  it('Digit keys 1–5 arm the matching hand card; pressing it again disarms', () => {
+    const host = makeHost();
+    const seed = findSeed(firstCardAffordable);
+    const controller = createController(seededRng(seed));
+    controller.start();
+    mountBridge(controller, host);
+    const first = snap(controller).hand[0]!;
+
+    pressKey('1', 'Digit1');
+    expect(snap(controller).activeCardUid).toBe(first.uid);
+
+    pressKey('1', 'Digit1');
+    expect(snap(controller).activeCardUid).toBeNull();
+  });
+
+  it('Escape cancels the armed card and the unit selection', () => {
+    const host = makeHost();
+    const seed = findSeed(firstCardAffordable);
+    const controller = createController(seededRng(seed));
+    controller.start();
+    mountBridge(controller, host);
+    const card = firstCard(controller);
+
+    // Arming a card clears any unit selection (engine semantics), so the two
+    // flags are mutually exclusive — Escape must clear whichever is active.
+    controller.setActiveCard(card.uid);
+    expect(snap(controller).activeCardUid).toBe(card.uid);
+    pressKey('Escape', 'Escape');
+    expect(snap(controller).activeCardUid).toBeNull();
+
+    controller.selectUnit(HERO_UID);
+    expect(snap(controller).selectedUnitUid).toBe(HERO_UID);
+    pressKey('Escape', 'Escape');
+    expect(snap(controller).selectedUnitUid).toBeNull();
+  });
+
+  it('keyboard input inside a form field is ignored (input never blocked)', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    mountBridge(controller, host);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const ev = pressKey(' ', 'Space', input);
+
+    expect(ev.defaultPrevented).toBe(false);
+    expect(snap(controller).turn).toBe(1);
+  });
+
+  it('destroy() removes the window keyboard handlers', () => {
+    const host = makeHost();
+    const controller = createController(() => 0.5);
+    controller.start();
+    const bridge = mountBridge(controller, host);
+
+    bridge.destroy();
+    pressKey(' ', 'Space');
+
+    expect(snap(controller).turn).toBe(1);
   });
 });
