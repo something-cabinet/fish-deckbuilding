@@ -1,73 +1,72 @@
-# Battle Desk Design System
+# Fish Mafia: Ledger Tactics — Design Doc
 
-## World
+## Visual Direction
+Underwater crime-noir. A deep-ocean battlefield lit from above, with a gold-leaf "ledger" HUD framing the action. Restrained, premium, and readable — the mood is a smoky back-room deal at the bottom of the sea.
 
-The battle screen is a dark tactical board: wet navy asphalt under a pool of instrument light, with ivory records and steel fittings around the playable field. It plays the Duelyst/StS craft bar straight: the board is the arena, every surrounding region is a stable desk location, and a player can identify capacity, threat, and loss without searching.
+## Color System
+Forced dark theme (`color-scheme: dark`). Tokens live in `app/globals.css`.
 
-The registry register belongs only to story-facing material. A **balloon** marks death or danger; a **bowl** marks victory or sanctuary; **THE CITY ABOVE** names the human division during enemy phase. Never use those motifs as generic decoration. Engine-owned log lines are always rendered verbatim.
+| Token | Role | Approx |
+|-------|------|--------|
+| `--background` | Deep ocean base | very dark desaturated navy |
+| `--foreground` | Primary text | near-white cool grey |
+| `--primary` / `--gold` | Brand / player accent | warm gold-amber |
+| `--accent` / `--teal` | Secondary highlight | cyan-teal |
+| `--enemy` | Enemy faction | crimson red |
+| `--grid-line` | Board tile edges | translucent cyan |
 
-## Tokens
+- **3–5 core hues:** navy base + cool-grey neutrals, gold primary, teal accent, crimson enemy.
+- No purple/violet. No gradients on primary elements — only two subtle radial background washes on `<body>` for ocean depth.
+- Player = gold; Enemy = crimson. This mapping is consistent across tokens, health bars, roster, and target rings.
 
-| Variable | Purpose |
-| --- | --- |
-| `--font-display` | Strong section and control face; system-hosted Trebuchet/Segoe stack. |
-| `--font-work` | General UI copy; system-hosted Segoe/Helvetica stack. |
-| `--font-readout` | Fixed-width counts, ledger data, and keyboard labels. |
-| `--ground-void`, `--ground-deep`, `--ground-asphalt`, `--ground-wet` | Layered wet-dark tactical ground. |
-| `--panel-ink`, `--panel-steel` | Dense panel surfaces and raised steel. |
-| `--steel`, `--steel-light` | Borders, secondary labels, and non-semantic metal marks. |
-| `--ivory`, `--ivory-muted`, `--ivory-deep`, `--ink` | Record surfaces, readable text, card-face gradient stop, and dark foreground. |
-| `--move`, `--move-light` | Neon cyan: movement only. |
-| `--action`, `--action-light` | Neon amber: attack, playable, and active transport only. |
-| `--signal-red`, `--signal-red-light` | Damage, debt, defeat, and foreclosure only. |
-| `--balloon` | Alias of `--signal-red`; death/danger motif only. |
-| `--bowl` | Alias of `--move`; victory/sanctuary motif only. |
-| `--success` | Account-settled/support state where it is not a damage/debt story signal. |
-| `--line-quiet`, `--line-strong` | Quiet and active structural rules. |
-| `--shadow-deep`, `--shadow-panel` | Board and panel depth. |
-| `--radius-tight`, `--radius-panel` | Record and zone corner radii. |
-| `--space-1` through `--space-6` | Spacing ladder. |
-| `--focus-ring` | Keyboard-visible cyan focus treatment. |
+## Typography
+Two families only:
+- **Oswald** (`--font-display`) — condensed uppercase for headers, HUD labels, card names, stats.
+- **Inter** (`--font-sans`) — body copy, card descriptions, log text.
 
-### Font decision
+Body uses relaxed line-height; titles use `text-balance`/`text-pretty`.
 
-The deleted VT323 and Silkscreen files are **not re-bundled** for P1. The system-hosted display/work/readout stacks keep the canonical board clean and legible at desktop distance, browser zoom, and early responsive breakpoints without reintroducing pixel chrome or a font download. `Trebuchet MS` adds controlled character to labels; Segoe/Helvetica carries reading; Consolas/Liberation Mono makes values feel like a registry readout. This is a deliberate P1 performance and clarity decision, not an unrecorded fallback.
+## Layout
+Mobile-first, flexbox-driven, three horizontal bands:
+1. **Top bar** — hero name/turn, Coin, Interest, Foreclosure meter.
+2. **Main stage** — the board grid (left/center) + side panel (roster "On The Table" + "Bulletin" log).
+3. **Bottom bar** — Mana ring, Draw/Spent piles, the card hand, End Turn.
 
-### Color grammar
+Grid is `9 × 5` tiles rendered with CSS grid; units are absolutely positioned tokens layered above tiles. Everything else uses flexbox and `gap` utilities (no `space-*`, no margin+gap mixing).
 
-- **Do:** use cyan for a unit's move path and amber for attack/playability; pair all color with a positional or shape cue.
-- **Do:** reserve signal-red for damage, debt, defeat, and foreclosure. `--balloon` is that same established red, never a new red.
-- **Don't:** use red for buttons, warnings unrelated to debt/damage, card rarity, generic emphasis, or decorative lighting.
-- **Don't:** use balloon, bowl, or city-above labels as filler. Their story meaning is fixed.
+## Units as Tokens
+Fish are AI-generated painterly portraits presented as **circular tokens**:
+- `object-cover` inside a `rounded-full` disc with a faction-colored `ring` (gold/crimson) and an inner vignette so they read as physical chips.
+- Idle animation: player fish `animate-fm-bob`, enemies `animate-fm-float`.
+- Selected units get a brighter gold ring; damaged units flash `animate-fm-shake`.
+- ATK/HP plates and a health bar sit beneath each token.
 
-## Zone geography
+## Motion & Particles
+- **Canvas particle engine** (`components/game/particle-canvas.tsx`) draws per-effect bursts keyed by each card's `fx` id (`letter`, `phone`, `gavel`, `coin`, `draw`, `heal`, `shock`, `summon`) plus `melee`, `move`, `death`.
+- **Floating combat numbers** rise off targets on hit (`animate-fm-rise`).
+- Keyframes defined as utilities in `globals.css`: `fm-float`, `fm-bob`, `fm-pulse-ring`, `fm-shake`, `fm-rise`, `fm-fade-in`.
 
-| Zone | Stable position | Job |
-| --- | --- | --- |
-| Field label | Header rail | Phase identity and current turn/mana. |
-| Economy | Left named corner | Coin, interest, foreclosure deadline. |
-| Board | Center cell | Dedicated 9×5 Pixi canvas, never covered by DOM zones. |
-| Piles | Lower-left named corner | Fixed deck/discard stacks with counts. |
-| Bulletin | Right named corner | Last six engine-owned log lines. |
-| Hand | Bottom-center strip | Flat upright card row (no fan) with per-card SELL foot strip. |
-| End turn | Bottom-right of the hand | Persistent turn transport. |
+## Cards
+Parchment-style card faces (light card surface against the dark stage) with:
+- Cost pill (top-left), sell value (top-right), colored type tag (Attack/Skill/Summon), lucide icon art, name, description, and a Sell affordance.
+- Interactions: **drag-and-drop** onto a target, or **tap-to-arm** (card lifts with a gold ring + "pick a target" banner) then tap the target. Unplayable cards are desaturated and not-allowed.
 
-**Zones never move:** the desktop grid has named fixed cells; at narrower widths those cells reflow into a reading order, but no cell overlays the board. The board is constrained by its own 9:5 aspect container with `min(52vh, 490px)` sizing and a `100%` width ceiling, so it remains entirely visible at the 1280×950 acceptance target and below.
+## Accessibility
+- Semantic landmarks (`header`, `main`), ARIA labels on interactive controls, `sr-only` helper text.
+- Decorative sprites use empty `alt`.
+- Color is never the sole signal — health bars, numeric plates, and text log reinforce state.
 
-## Hand-card pattern (extracted, reusable)
+## Component Map
+- `app/page.tsx` → `components/game/fish-mafia-game.tsx` (orchestrator; drag/tap, hand, bottom bar)
+- `components/game/board.tsx` — grid, tiles, reachable/target highlights
+- `components/game/unit-token.tsx` — token disc, stats, health
+- `components/game/card.tsx` — card face + interactions
+- `components/game/top-bar.tsx` — HUD top band
+- `components/game/side-panel.tsx` — roster + bulletin log
+- `components/game/result-overlay.tsx` — win/lose screen
+- `components/game/particle-canvas.tsx` — effects layer
+- `hooks/use-fish-mafia.ts` — React state + enemy-turn orchestration
+- `lib/game/{types,data,engine}.ts` — pure game model, content, and rules
 
-The hand card is the surface's record unit — reuse its grammar for any card-like element (pile popovers, future deck view), not just the hand.
-
-- **Anatomy:** index badge (top-left, amber circle), cost tier strip (top edge: steel = 1, move-cyan = 2, action-amber = 3+), cost badge (top-right, ivory circle with amber ring), type tag, name (display face, uppercase), effect text (readout face, muted). Fixed corners = fixed mental model (FAB).
-- **States:** playable = amber border; armed = amber-light border + 2px amber glow; unplayable = desaturated/dimmed (saturate 0.35, brightness 0.82). Color always pairs with position — never color alone.
-- **Hover (quiet):** 16px lift + border/shadow emphasis, 140ms ease-out, no scale, no fan rotation. The click target must never leave the cursor — geometry changes that move the pointer away from the card are banned.
-- **SELL affordance:** always-visible full-width foot strip (min-height 1.6rem hit target), ink panel, muted text brightening on hover. Never opacity-0-until-hover; never a floating corner chip overlapping card content.
-- **Tokens:** card face uses `--ivory` → `--ivory-deep` gradient; borders `--steel`/`--action`/`--action-light`; text `--ink`/`--panel-steel`; foot strip `--panel-ink` + `--line-quiet`.
-
-## Motion thesis
-
-P4 implements the authored motion, all stepped or removed under `prefers-reduced-motion` (the app.css kill-switch plus per-tween `motionEnabled` branches in the renderer). The single focal sequence is the **cinematic enemy turn**: intent telegraphs enter in 650ms (fade + scale), block commitment pulses the shield readout (300ms), damage resolves as floating numbers with a 150ms merge window per unit, and a single hit ≥ 7 triggers one non-stacking 350ms shake with a 2.5% focus zoom. Unit walks tween 300ms/tile with `easeOutCubic` (`cubic-bezier(0.16,1,0.3,1)`); floating numbers rise 34px and fade over 900ms with ±24px jitter; story marks enter in 650ms (defeat balloon descends, victory bowl rises). The timing ladder is 100–150 immediate, 150–300 routine, 300–500 layout/overlay, 500–800 authored entrance; exits are faster. Transient FX are budget-capped at 20 per turn. Input is never blocked: hit-testing reads snapshot positions, never tween state. `prefers-reduced-motion` makes every tween instant (walk snaps, no shake/zoom, no merge animation, marks appear in place).
-
-## Accessibility and discipline
-
-Keyboard focus uses the high-contrast cyan `--focus-ring`; controls are semantic buttons; end-state copy is an assertive live region; background treatment and inline motif marks are hidden from assistive technology. Color is never the sole cue: intent uses glyph + number in P2, cards use fixed placement in P3, and the balloon mark is an inline shape. Keep direct DOM copy concise, preserve log strings exactly, and keep all new visual variables recorded in this document.
+## Hydration Note
+`createInitialState()` is fully deterministic (no `Math.random` during render). Shuffling + the opening draw happen client-side via `startGame()` in a mount `useEffect`, avoiding SSR/client hydration mismatches.
