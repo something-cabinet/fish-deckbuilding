@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Layers, Play, ShoppingCart, Trash2 } from "lucide-react"
+import { Home, Layers, Play, ShoppingCart, Trash2 } from "lucide-react"
+import type { GameSettings } from "./fish-mafia-app"
 import { Board } from "./board"
 import { GameCard } from "./card"
 import { ResultOverlay } from "./result-overlay"
@@ -21,7 +22,12 @@ interface DragState {
   y: number
 }
 
-export function FishMafiaGame() {
+interface GameProps {
+  settings: GameSettings
+  onExit: () => void
+}
+
+export function FishMafiaGame({ settings, onExit }: GameProps) {
   const game = useFishMafia()
   const { state, fx, busy, select, move, attack, cast, sell, buy, endTurn, restart, reachable, targetsFor } = game
 
@@ -284,7 +290,8 @@ export function FishMafiaGame() {
           <Board
             state={state}
             fx={fx}
-            reachable={reachable}
+            reachable={settings.movementHints ? reachable : []}
+            showEffects={settings.visualEffects}
             highlightTiles={highlightTiles}
             highlightUnitIds={highlightUnitIds}
             onCellPointerUp={onCellPointerUp}
@@ -356,6 +363,14 @@ export function FishMafiaGame() {
 
         {/* right cluster: buy + end turn */}
         <div className="flex flex-col items-end gap-2">
+          <button
+            type="button"
+            onClick={onExit}
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            <Home size={13} />
+            Menu
+          </button>
           <button
             type="button"
             onClick={buy}

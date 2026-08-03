@@ -13,6 +13,7 @@ interface Props {
   state: GameState
   fx: FxEvent[]
   reachable: Pos[]
+  showEffects?: boolean
   highlightTiles: Pos[]
   highlightUnitIds: string[]
   onCellPointerUp: (pos: Pos) => void
@@ -25,6 +26,7 @@ export function Board({
   state,
   fx,
   reachable,
+  showEffects = true,
   highlightTiles,
   highlightUnitIds,
   onCellPointerUp,
@@ -119,7 +121,7 @@ export function Board({
               </div>
 
               {/* particle overlay */}
-              <ParticleCanvas fx={fx} />
+              {showEffects && <ParticleCanvas fx={fx} />}
 
               {/* units */}
               {state.units.map((u) => (
@@ -135,7 +137,7 @@ export function Board({
               ))}
 
               {/* floating numbers */}
-              {floaters.map((e) => {
+              {showEffects && floaters.map((e) => {
                 const left = ((e.to!.x + 0.5) / COLS) * 100
                 const top = ((e.to!.y + 0.2) / ROWS) * 100
                 const isHeal = e.kind === "heal"
