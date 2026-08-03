@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Fish, Play, Settings as SettingsIcon, Sparkles, Footprints, X } from "lucide-react"
+import { Fish, Library, Play, PlusCircle, Settings as SettingsIcon, Sparkles, Footprints, X } from "lucide-react"
 import type { GameSettings } from "./fish-mafia-app"
 import { cn } from "@/lib/utils"
 
@@ -9,9 +9,17 @@ interface Props {
   settings: GameSettings
   onChangeSettings: (s: GameSettings) => void
   onStart: () => void
+  onOpenLibrary: () => void
+  onOpenCreate: () => void
 }
 
-export function MenuScreen({ settings, onChangeSettings, onStart }: Props) {
+export function MenuScreen({
+  settings,
+  onChangeSettings,
+  onStart,
+  onOpenLibrary,
+  onOpenCreate,
+}: Props) {
   const [showSettings, setShowSettings] = useState(false)
 
   return (
@@ -50,6 +58,24 @@ export function MenuScreen({ settings, onChangeSettings, onStart }: Props) {
             <Play size={22} />
             Start
           </button>
+          <div className="flex w-64 gap-3">
+            <button
+              type="button"
+              onClick={onOpenLibrary}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gold/40 bg-ocean-deep/50 px-4 py-3 font-display text-sm font-bold uppercase tracking-wider text-gold backdrop-blur-sm transition-colors hover:bg-gold/15"
+            >
+              <Library size={16} />
+              Library
+            </button>
+            <button
+              type="button"
+              onClick={onOpenCreate}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gold/40 bg-ocean-deep/50 px-4 py-3 font-display text-sm font-bold uppercase tracking-wider text-gold backdrop-blur-sm transition-colors hover:bg-gold/15"
+            >
+              <PlusCircle size={16} />
+              Create
+            </button>
+          </div>
           <button
             type="button"
             onClick={() => setShowSettings(true)}
