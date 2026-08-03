@@ -33,9 +33,10 @@ export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, o
       data-drop="unit"
       data-unit-id={unit.id}
       className={cn(
-        "absolute z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center",
+        "group absolute z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center",
         "transition-[left,top] duration-300 ease-out",
         canMove ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
+        isValidTarget && "cursor-pointer",
       )}
       style={{ left: `${left}%`, top: `${top}%`, width: `${100 / COLS}%` }}
       onPointerDown={(e) => canMove && onPointerDown(e, unit)}
@@ -46,9 +47,10 @@ export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, o
       {/* target / select ring */}
       <div
         className={cn(
-          "pointer-events-none absolute left-1/2 top-[46%] aspect-square w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full",
+          "pointer-events-none absolute left-1/2 top-[46%] aspect-square w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150",
           selected && "bg-gold/10 ring-2 ring-gold animate-fm-pulse-ring",
-          isValidTarget && "bg-enemy/15 ring-2 ring-enemy",
+          isValidTarget &&
+            "bg-gold/15 ring-2 ring-gold animate-fm-pulse-ring group-hover:scale-105 group-hover:bg-gold/35 group-hover:ring-[3px]",
         )}
       />
 
@@ -63,9 +65,10 @@ export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, o
       >
         <div
           className={cn(
-            "relative aspect-square w-full overflow-hidden rounded-full ring-2 shadow-[0_5px_10px_rgba(0,0,0,0.55)]",
+            "relative aspect-square w-full overflow-hidden rounded-full ring-2 shadow-[0_5px_10px_rgba(0,0,0,0.55)] transition-all",
             isPlayer ? "ring-gold/70" : "ring-enemy/70",
             selected && "ring-gold",
+            isValidTarget && "ring-gold/80 group-hover:ring-gold group-hover:shadow-[0_0_16px_2px_var(--gold)]",
           )}
           style={{ filter: unit.hp <= 0 ? "grayscale(1)" : undefined }}
         >

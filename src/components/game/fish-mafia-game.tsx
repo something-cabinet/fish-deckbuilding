@@ -1,11 +1,13 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
-import { Layers, Play, ShoppingCart, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Home, Layers, Play, ShoppingCart, Trash2 } from "lucide-react"
+import type { GameSettings } from "./fish-mafia-app"
 import { Board } from "./board"
 import { GameCard } from "./card"
 import { ResultOverlay } from "./result-overlay"
 import { SidePanel } from "./side-panel"
+import { TargetingArrow, type ArrowState } from "./targeting-arrow"
 import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
 import { BUY_COST } from "@/lib/game/engine"
@@ -20,12 +22,18 @@ interface DragState {
   y: number
 }
 
-export function FishMafiaGame() {
+interface GameProps {
+  settings: GameSettings
+  onExit: () => void
+}
+
+export function FishMafiaGame({ settings, onExit }: GameProps) {
   const game = useFishMafia()
   const { state, fx, busy, select, move, attack, cast, sell, buy, endTurn, restart, reachable, targetsFor } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
+  const [arrow, setArrow] = useState<ArrowState | null>(null)
 
   const dragRef = useRef<{
     active: boolean
@@ -47,6 +55,76 @@ export function FishMafiaGame() {
     const t = targetsFor(activeCard)
     return { highlightTiles: t.tiles, highlightUnitIds: t.unitIds }
   }, [activeCard, targetsFor])
+
+  /* ---------- targeting arrow ---------- */
+  // keep latest values readable inside imperative pointer listeners
+  const highlightUnitIdsRef = useRef<string[]>([])
+  const reachableRef = useRef<Pos[]>([])
+  const pendingCardRef = useRef<CardInstance | null>(null)
+  highlightUnitIdsRef.current = highlightUnitIds
+  reachableRef.current = reachable
+  pendingCardRef.current = pendingCard
+
+  const computeArrow = useCallback(
+    (clientX: number, clientY: number) => {
+      const d = dragRef.current
+      const el = document.elementFromPoint(clientX, clientY)
+      const drop = el?.closest("[data-drop]") as HTMLElement | null
+      const dropType = drop?.getAttribute("data-drop")
+
+      const anchorFrom = (sel: string, yFrac: number) => {
+        const node = document.querySelector(sel)
+        if (!node) return null
+        const r = node.getBoundingClientRect()
+        return { x: r.left + r.width / 2, y: r.top + r.height * yFrac }
+      }
+
+      let from: { x: number; y: number } | null = null
+      let valid = false
+
+      if (d?.kind === "unit" && d.unit) {
+        // dragging a fish: arrow doubles as move / attack indicator
+        from = anchorFrom(`[data-unit-id="${d.unit.id}"]`, 0.42)
+        if (dropType === "unit" && drop?.dataset.unitId && drop.dataset.unitId !== d.unit.id) {
+          const tu = state.units.find((u) => u.id === drop.dataset.unitId)
+          valid = !!tu && tu.team === "enemy"
+        } else if (dropType === "tile" && drop) {
+          const tx = Number(drop.dataset.x)
+          const ty = Number(drop.dataset.y)
+          valid = reachableRef.current.some((p) => p.x === tx && p.y === ty)
+        }
+      } else {
+        // arming / dragging a unit-targeted card
+        const card = (d?.kind === "card" ? d.card : undefined) ?? pendingCardRef.current
+        if (!card || card.def.target === "empty-tile" || card.def.target === "self") {
+          setArrow(null)
+          return
+        }
+        from = anchorFrom(`[data-card-uid="${card.uid}"]`, 0.15)
+        if (dropType === "unit" && drop?.dataset.unitId) {
+          valid = highlightUnitIdsRef.current.includes(drop.dataset.unitId)
+        }
+      }
+
+      if (!from) {
+        setArrow(null)
+        return
+      }
+      setArrow({ fromX: from.x, fromY: from.y, toX: clientX, toY: clientY, valid })
+    },
+    [state.units],
+  )
+
+  // track the cursor while a card is armed via click (no active drag)
+  useEffect(() => {
+    if (!pendingCard || pendingCard.def.target === "empty-tile" || pendingCard.def.target === "self") {
+      setArrow(null)
+      return
+    }
+    const onMove = (e: PointerEvent) => computeArrow(e.clientX, e.clientY)
+    window.addEventListener("pointermove", onMove)
+    return () => window.removeEventListener("pointermove", onMove)
+  }, [pendingCard, computeArrow])
 
   /* ---------- drag machinery ---------- */
   const resolveDrop = useCallback(
@@ -84,8 +162,9 @@ export function FishMafiaGame() {
     if (dist > 6) d.moved = true
     if (d.moved) {
       setDrag({ kind: d.kind, card: d.card, unit: d.unit, x: e.clientX, y: e.clientY })
+      computeArrow(e.clientX, e.clientY)
     }
-  }, [])
+  }, [computeArrow])
 
   const onPointerUp = useCallback(
     (e: PointerEvent) => {
@@ -94,6 +173,7 @@ export function FishMafiaGame() {
       window.removeEventListener("pointerup", onPointerUp)
       dragRef.current = null
       setDrag(null)
+      setArrow(null)
       if (!d) return
       if (d.moved) {
         suppressClick.current = true
@@ -210,7 +290,8 @@ export function FishMafiaGame() {
           <Board
             state={state}
             fx={fx}
-            reachable={reachable}
+            reachable={settings.movementHints ? reachable : []}
+            showEffects={settings.visualEffects}
             highlightTiles={highlightTiles}
             highlightUnitIds={highlightUnitIds}
             onCellPointerUp={onCellPointerUp}
@@ -259,23 +340,37 @@ export function FishMafiaGame() {
               Hand empty — end your turn
             </p>
           )}
-          {state.hand.map((card) => (
-            <GameCard
-              key={card.uid}
-              card={card}
-              playable={playerTurn && card.def.cost <= state.mana}
-              dragging={drag?.card?.uid === card.uid}
-              armed={pendingCard?.uid === card.uid}
-              onPointerDown={onCardPointerDown}
-              onTap={onCardTap}
-              onSell={(c) => playerTurn && sell(c.uid)}
-              compact
-            />
-          ))}
+          {state.hand.map((card) => {
+            const isDragged = drag?.kind === "card" && drag.card?.uid === card.uid
+            const isUnitTargetDrag =
+              isDragged && card.def.target !== "empty-tile" && card.def.target !== "self"
+            return (
+              <GameCard
+                key={card.uid}
+                card={card}
+                playable={playerTurn && card.def.cost <= state.mana}
+                // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
+                dragging={isDragged && !isUnitTargetDrag}
+                armed={pendingCard?.uid === card.uid || isUnitTargetDrag}
+                onPointerDown={onCardPointerDown}
+                onTap={onCardTap}
+                onSell={(c) => playerTurn && sell(c.uid)}
+                compact
+              />
+            )
+          })}
         </div>
 
         {/* right cluster: buy + end turn */}
         <div className="flex flex-col items-end gap-2">
+          <button
+            type="button"
+            onClick={onExit}
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            <Home size={13} />
+            Menu
+          </button>
           <button
             type="button"
             onClick={buy}
@@ -314,13 +409,17 @@ export function FishMafiaGame() {
         </div>
       )}
 
-      {/* drag ghost */}
-      {drag && (
-        <div
-          className="pointer-events-none fixed z-[60] -translate-x-1/2 -translate-y-1/2"
-          style={{ left: drag.x, top: drag.y }}
-        >
-          {drag.kind === "card" && drag.card ? (
+      {/* targeting arrow (unit-targeted casts + unit attacks) */}
+      {arrow && <TargetingArrow {...arrow} />}
+
+      {/* drag ghost — only for tile-placed / self cards, which the arrow does not cover */}
+      {drag?.kind === "card" &&
+        drag.card &&
+        (drag.card.def.target === "empty-tile" || drag.card.def.target === "self") && (
+          <div
+            className="pointer-events-none fixed z-[60] -translate-x-1/2 -translate-y-1/2"
+            style={{ left: drag.x, top: drag.y }}
+          >
             <div className="rotate-3 opacity-90 drop-shadow-2xl">
               <GameCard
                 card={drag.card}
@@ -331,15 +430,8 @@ export function FishMafiaGame() {
                 compact
               />
             </div>
-          ) : drag.unit ? (
-            <img
-              src={`/sprites/${drag.unit.kind}.png`}
-              alt=""
-              className="h-16 w-16 object-contain opacity-90 drop-shadow-2xl"
-            />
-          ) : null}
-        </div>
-      )}
+          </div>
+        )}
     </main>
   )
 }
