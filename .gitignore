@@ -21,6 +21,7 @@ Thumbs.db
 
 # Tool config (machine-specific)
 opencode.json
+.mcp.json
 .mco.json
 
 # Logs
