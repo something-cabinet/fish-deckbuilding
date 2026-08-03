@@ -19,6 +19,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Tool config (machine-specific)
+opencode.json
+.mco.json
+
 # Logs
 *.log
 npm-debug.log*

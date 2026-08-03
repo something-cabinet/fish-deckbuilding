@@ -33,7 +33,7 @@ This branch replaces the retired Godot 4 + godot-rust stack (see `main` for that
 ## Quick Start
 
 ```bash
-cd app
+cd src
 npm install
 npm run dev      # dev server (Vite)
 npm test         # Vitest — pure engine unit + integration tests
