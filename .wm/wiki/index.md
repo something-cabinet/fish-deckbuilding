@@ -23,10 +23,12 @@ type: reference
 - [rustflags env overrides config toml](wiki/concepts/rustflags-env-overrides-config-toml.md) — *draft*
 - [Session Learnings: Fish Mafia UI Polish & Architecture (2024)](wiki/concepts/session-learnings-2024.md) — *draft*
 - [stale animation snapshot gdext](wiki/concepts/stale-animation-snapshot-gdext.md) — *draft*
+- [stale mcp index after task updates](wiki/concepts/stale-mcp-index-after-task-updates.md) — *draft*
 - [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
 - [svelte5 bindable boot loop failure](wiki/concepts/svelte5-bindable-boot-loop-failure.md) — *draft*
 - [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
 - [untested ui orchestration p0s](wiki/concepts/untested-ui-orchestration-p0s.md) — *draft*
+- [critical patterns](wiki/core/critical-patterns.md) — *draft*
 - [attack focused exhaustion](wiki/decisions/attack-focused-exhaustion.md) — *draft*
 - [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
 - [dev profile build optimization](wiki/decisions/dev-profile-build-optimization.md) — *draft*
@@ -62,8 +64,10 @@ type: reference
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
 - [scene branch extraction](wiki/patterns/scene-branch-extraction.md) — *draft*
+- [seeded deterministic map generation](wiki/patterns/seeded-deterministic-map-generation.md) — *draft*
 - [snapshot diff orchestration seam](wiki/patterns/snapshot-diff-orchestration-seam.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
+- [stale closure safe derived builders](wiki/patterns/stale-closure-safe-derived-builders.md) — *draft*
 - [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
 - [svelte5 one shot imperative init callback](wiki/patterns/svelte5-one-shot-imperative-init-callback.md) — *draft*
 - [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
@@ -83,7 +87,6 @@ type: reference
 - [agent](wiki/core/agent.md) — *reviewed*
 - [Fish Roguelite Deckbuilding — Architecture](wiki/core/architecture.md) — *draft*
 - [Fish Roguelite Deckbuilding — Conventions](wiki/core/conventions.md) — *draft*
-- [Critical Patterns](wiki/core/critical-patterns.md) — *draft*
 - [Fish Roguelite Deckbuilding — README](wiki/core/readme.md) — *draft*
 - [spec](wiki/core/spec.md) — *reviewed*
 
@@ -127,6 +130,7 @@ type: reference
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Rust CI build optimization](wiki/memory/rust-ci-build-optimization.md) — *active*
 - [Scene Branch Extraction Pattern](wiki/memory/scene-branch-extraction-pattern.md) — *active*
+- [Seeded deterministic procedural map generation (mulberry32 per zone)](wiki/memory/seeded-deterministic-procedural-map-generation-mulberry32-per-zone.md) — *active*
 - [Session 2026-08-01 — FAB/StS research-grounded rebuild (deepwork P0–P5)](wiki/memory/session-2026-08-01-fab-sts-research-grounded-rebuild-deepwork-p0-p5.md) — *active*
 - [Session 2026-08-01 — Mafia Pixel World Replacement & Overdrive](wiki/memory/session-2026-08-01-mafia-pixel-world-replacement-overdrive.md) — *active*
 - [Snapshot-Based State Sync](wiki/memory/snapshot-based-state-sync.md) — *active*
@@ -134,6 +138,8 @@ type: reference
 - [Snapshot-diff orchestration seam](wiki/memory/snapshot-diff-orchestration-seam.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Stale Animation Snapshot in gdext Bridge](wiki/memory/stale-animation-snapshot-gdext.md) — *active*
+- [Stale-closure-safe derived builders in React hooks](wiki/memory/stale-closure-safe-derived-builders-in-react-hooks.md) — *active*
+- [Stale WM MCP index after task create/update — rebuild after writes](wiki/memory/stale-wm-mcp-index-after-task-create-update-rebuild-after-writes.md) — *active*
 - [Svelte 5 $bindable boot-loop — use onCanvasReady callback](wiki/memory/svelte-5-bindable-boot-loop-use-oncanvasready-callback.md) — *active*
 - [Svelte 5 one-shot init — callback prop pattern](wiki/memory/svelte-5-one-shot-init-callback-prop-pattern.md) — *active*
 - [SVG Duplicate Attributes Rejected by Browser](wiki/memory/svg-duplicate-attributes-rejected-by-browser.md) — *active*
@@ -225,6 +231,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 189
-- **Edges:** 259
+- **Nodes:** 195
+- **Edges:** 283
 
