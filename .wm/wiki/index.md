@@ -86,7 +86,7 @@ type: reference
 - [Fish Roguelite Deckbuilding — Architecture](wiki/core/architecture.md) — *reviewed*
 - [Fish Roguelite Deckbuilding — Conventions](wiki/core/conventions.md) — *reviewed*
 - [Critical Patterns](wiki/core/critical-patterns.md) — *draft*
-- [Fish Roguelite Deckbuilding — README](wiki/core/readme.md) — *draft*
+- [Fish Roguelite Deckbuilding — README](wiki/core/readme.md) — *reviewed*
 - [spec](wiki/core/spec.md) — *reviewed*
 
 ## decisions
@@ -130,6 +130,7 @@ type: reference
 - [Return-Value Bridge Sync Pattern](wiki/memory/return-value-bridge-sync.md) — *active*
 - [Svelte 5 $bindable boot-loop — use onCanvasReady callback](wiki/memory/svelte-5-bindable-boot-loop-use-oncanvasready-callback.md) — *active*
 - [Sync Excalibur scene state on screen activation, not just domain events](wiki/memory/sync-excalibur-scene-state-on-screen-activation-not-just-domain-events.md) — *active*
+- [WM SDD task-linking gotchas — rebuild index, block-style edges only](wiki/memory/wm-sdd-task-linking-gotchas-rebuild-index-block-style-edges-only.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [Valid Targets Single Source of Truth](wiki/memory/valid-targets-single-source-of-truth.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
@@ -239,6 +240,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 203
-- **Edges:** 311
+- **Nodes:** 204
+- **Edges:** 317
 
