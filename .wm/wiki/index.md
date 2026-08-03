@@ -119,6 +119,7 @@ type: reference
 - [Kenney assets for JS prototyping](wiki/memory/kenney-assets-for-js-prototyping.md) — *active*
 - [Move Export Refs to Sub-Scene Scripts](wiki/memory/move-export-refs-to-sub-scene-scripts.md) — *active*
 - [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
+- [Overworld map implemented — seeded branching map, save/load, battle integration](wiki/memory/overworld-map-implemented-seeded-branching-map-save-load-battle-integration.md) — *active*
 - [Overworld Node Action Refresh / Multi-Display State Sync](wiki/memory/overworld-node-action-refresh-multi-display-state-sync.md) — *active*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
 - [Repo layout + wiki state (Aug 2026)](wiki/memory/repo-layout-wiki-state-aug-2026.md) — *active*
@@ -185,7 +186,7 @@ type: reference
 - [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *draft*
 - [JS Combat Vertical Slice (VU-Meter Desk)](wiki/specs/js-combat-vertical-slice.md) — *approved*
 - [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
-- [Overworld Map — StS-Style Branching Paths](wiki/specs/overworld-map.md) — *draft*
+- [Overworld Map — StS-Style Branching Paths](wiki/specs/overworld-map.md) — *approved*
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
@@ -197,6 +198,7 @@ type: reference
 
 ## tasks
 
+- [Battle ↔ overworld integration — rewards, boss battles, zone unlock, run end](wiki/tasks/battle--overworld-integration--rewards-boss-battles-zone-unlock-run-end.md) — *done*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
 - [Card visual states and hover interactions (Godot StyleBox/theming)](wiki/tasks/card-visual-states-and-hover-interactions-godot-styleboxtheming.md) — *todo*
 - [Clean legacy fields, phase literals, dead code — Rust core](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--rust-core.md) — *todo*
@@ -213,6 +215,9 @@ type: reference
 - [Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace](wiki/tasks/grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace.md) — *done*
 - [Implement correct UI theme — Guppy's mafia underworld escape story](wiki/tasks/implement-correct-ui-theme--guppys-mafia-underworld-escape-story.md) — *in-progress*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
+- [Overworld engine — types, zone data, seeded map generation, save/load](wiki/tasks/overworld-engine--types-zone-data-seeded-map-generation-saveload.md) — *done*
+- [Overworld map UI — SVG branching map, hero icon, HUD, deck view](wiki/tasks/overworld-map-ui--svg-branching-map-hero-icon-hud-deck-view.md) — *done*
+- [Overworld state hook + save/continue prompt](wiki/tasks/overworld-state-hook--savecontinue-prompt.md) — *done*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
 - [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
 - [Save/Load — Godot ConfigFile/Resource persistence, wire to menu](wiki/tasks/saveload--godot-configfileresource-persistence-wire-to-menu.md) — *todo*
@@ -220,6 +225,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 184
-- **Edges:** 255
+- **Nodes:** 189
+- **Edges:** 259
 

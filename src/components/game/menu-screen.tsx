@@ -9,6 +9,7 @@ interface Props {
   settings: GameSettings
   onChangeSettings: (s: GameSettings) => void
   onStart: () => void
+  onContinue?: () => void
   onOpenLibrary: () => void
   onOpenCreate: () => void
 }
@@ -17,6 +18,7 @@ export function MenuScreen({
   settings,
   onChangeSettings,
   onStart,
+  onContinue,
   onOpenLibrary,
   onOpenCreate,
 }: Props) {
@@ -58,6 +60,16 @@ export function MenuScreen({
             <Play size={22} />
             Start
           </button>
+          {onContinue && (
+            <button
+              type="button"
+              onClick={onContinue}
+              className="flex w-64 items-center justify-center gap-2 rounded-lg border border-gold/40 bg-ocean-deep/50 px-6 py-3 font-display text-base font-bold uppercase tracking-widest text-gold backdrop-blur-sm transition-colors hover:bg-gold/15"
+            >
+              <Play size={18} />
+              Continue
+            </button>
+          )}
           <div className="flex w-64 gap-3">
             <button
               type="button"

@@ -1,0 +1,48 @@
+{
+  "entity_id": "wiki:tasks:overworld-map-ui--svg-branching-map-hero-icon-hud-deck-view",
+  "current_version": 4,
+  "versions": [
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-03T15:11:28.178Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-03T15:11:34.564Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-03T15:12:52.315Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

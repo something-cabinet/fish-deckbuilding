@@ -4,8 +4,17 @@ import { RotateCcw } from "lucide-react"
 import type { GameState } from "@/lib/game/types"
 import { cn } from "@/lib/utils"
 
-export function ResultOverlay({ state, onRestart }: { state: GameState; onRestart: () => void }) {
+export function ResultOverlay({
+  state,
+  onRestart,
+  hidden,
+}: {
+  state: GameState
+  onRestart: () => void
+  hidden?: boolean
+}) {
   if (state.phase !== "won" && state.phase !== "lost") return null
+  if (hidden) return null
   const won = state.phase === "won"
 
   return (

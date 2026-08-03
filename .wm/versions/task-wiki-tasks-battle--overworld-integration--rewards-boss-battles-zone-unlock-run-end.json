@@ -1,0 +1,48 @@
+{
+  "entity_id": "wiki:tasks:battle--overworld-integration--rewards-boss-battles-zone-unlock-run-end",
+  "current_version": 4,
+  "versions": [
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-03T15:11:28.689Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-03T15:11:36.603Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-03T15:12:52.827Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "you"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}
