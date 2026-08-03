@@ -1,5 +1,5 @@
-import { FishMafiaGame } from "@/components/game/fish-mafia-game"
+import { FishMafiaApp } from "@/components/game/fish-mafia-app"
 
 export default function Page() {
-  return <FishMafiaGame />
+  return <FishMafiaApp />
 }

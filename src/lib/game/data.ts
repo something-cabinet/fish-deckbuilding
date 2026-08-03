@@ -130,7 +130,7 @@ export const HERO_DEF: Omit<Unit, "id" | "pos"> = {
   hp: 14,
   maxHp: 14,
   atk: 2,
-  move: 3,
+  move: 2,
   range: 1,
   hasMoved: false,
   hasActed: false,

@@ -1,0 +1,70 @@
+import {
+  Anchor,
+  Banknote,
+  Bomb,
+  Bone,
+  Coins,
+  Crown,
+  Droplet,
+  FileX2,
+  Fish,
+  Flame,
+  Gavel,
+  Gem,
+  Ghost,
+  Hammer,
+  HeartPulse,
+  Lock,
+  Mail,
+  PhoneCall,
+  Shield,
+  Skull,
+  Snowflake,
+  Sparkles,
+  Swords,
+  Syringe,
+  Target,
+  TrendingUp,
+  Waves,
+  Zap,
+  type LucideIcon,
+} from "lucide-react"
+
+/** Single source of truth for card art icons, keyed by lucide icon name. */
+export const CARD_ICONS: Record<string, LucideIcon> = {
+  Mail,
+  PhoneCall,
+  FileX2,
+  Hammer,
+  Coins,
+  TrendingUp,
+  Skull,
+  HeartPulse,
+  Fish,
+  Anchor,
+  Banknote,
+  Bomb,
+  Bone,
+  Crown,
+  Droplet,
+  Flame,
+  Gavel,
+  Gem,
+  Ghost,
+  Lock,
+  Shield,
+  Snowflake,
+  Sparkles,
+  Swords,
+  Syringe,
+  Target,
+  Waves,
+  Zap,
+}
+
+/** Ordered list of selectable icon names for the card creator. */
+export const CARD_ICON_NAMES: string[] = Object.keys(CARD_ICONS)
+
+export function getCardIcon(name: string): LucideIcon {
+  return CARD_ICONS[name] ?? Fish
+}
