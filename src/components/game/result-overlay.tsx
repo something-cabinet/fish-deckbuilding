@@ -1,7 +1,7 @@
 "use client"
 
 import { RotateCcw } from "lucide-react"
-import type { GameState } from "@/lib/game/types"
+import type { GameState } from "@/lib/game/battle"
 import { cn } from "@/lib/utils"
 
 export function ResultOverlay({ state, onRestart }: { state: GameState; onRestart: () => void }) {

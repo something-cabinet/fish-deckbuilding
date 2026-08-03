@@ -1,5 +1,6 @@
-import type { GameState } from "./types"
-import { CommandQueue, executeCommand, type CommandResult, type PlayerCommand } from "./commands"
+import type { GameState } from "../battle"
+import { CommandQueue, executeCommand } from "./commands.service"
+import type { CommandResult, PlayerCommand } from "./commands.service"
 
 /* ------------------------------------------------------------------ */
 /* GameSession — snapshot-based undo/redo history (D10, FR-10/FR-11)   */

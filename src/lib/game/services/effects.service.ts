@@ -1,14 +1,8 @@
-import type {
-  CardDef,
-  CardEffect,
-  FxEvent,
-  GameState,
-  LogEntry,
-  Pos,
-  Unit,
-} from "./types"
-import { GOON_DEF } from "./data"
-import { cellLabel, heroUnit, nid } from "./engine"
+import type { CardDef, CardEffect } from "../cards"
+import type { FxEvent, GameState, LogEntry, Pos } from "../battle"
+import type { Unit } from "../units"
+import { GOON_DEF } from "../data"
+import { cellLabel, heroUnit, nid } from "./engine.service"
 
 /* ------------------------------------------------------------------ */
 /* Custom-effect registry (D11 escape hatch)                           */

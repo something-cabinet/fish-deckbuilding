@@ -10,8 +10,10 @@ import { SidePanel } from "./side-panel"
 import { TargetingArrow, type ArrowState } from "./targeting-arrow"
 import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
-import { BUY_COST } from "@/lib/game/engine"
-import type { CardInstance, Pos, Unit } from "@/lib/game/types"
+import { BUY_COST } from "@/lib/game/services"
+import type { CardInstance } from "@/lib/game/cards"
+import type { Pos } from "@/lib/game/battle"
+import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 interface DragState {

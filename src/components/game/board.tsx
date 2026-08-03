@@ -3,7 +3,8 @@
 import { useMemo } from "react"
 import { ParticleCanvas } from "./particle-canvas"
 import { UnitToken } from "./unit-token"
-import { COLS, ROWS, type FxEvent, type GameState, type Pos, type Unit } from "@/lib/game/types"
+import { COLS, ROWS, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
+import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 const COL_LABELS = Array.from({ length: COLS }, (_, i) => String.fromCharCode(65 + i))

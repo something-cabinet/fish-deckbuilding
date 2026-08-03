@@ -3,18 +3,12 @@ import {
   ENEMY_SPAWNS,
   HERO_DEF,
   STARTER_DECK,
-} from "./data"
-import { resolveCardEffects } from "./effects"
-import {
-  COLS,
-  ROWS,
-  type CardInstance,
-  type FxEvent,
-  type GameState,
-  type LogEntry,
-  type Pos,
-  type Unit,
-} from "./types"
+} from "../data"
+import { resolveCardEffects } from "./effects.service"
+import { COLS, ROWS } from "../battle"
+import type { CardInstance } from "../cards"
+import type { FxEvent, GameState, LogEntry, Pos } from "../battle"
+import type { Unit } from "../units"
 
 let idSeed = 1
 export const nid = (p: string) => `${p}_${idSeed++}`

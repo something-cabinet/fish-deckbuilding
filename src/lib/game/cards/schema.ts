@@ -1,5 +1,6 @@
 import { z } from "zod"
-import type { CardDef, CardEffect } from "../types"
+import type { CardDef } from "./card-def.interface"
+import type { CardEffect } from "./card-effect.model"
 
 /* ------------------------------------------------------------------ */
 /* CardEffect schema — discriminated on "kind"                         */

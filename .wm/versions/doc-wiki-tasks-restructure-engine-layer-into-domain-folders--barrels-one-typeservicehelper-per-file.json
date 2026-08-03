@@ -1,0 +1,58 @@
+{
+  "entity_id": "wiki:tasks:restructure-engine-layer-into-domain-folders--barrels-one-typeservicehelper-per-file",
+  "current_version": 3,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-03T13:43:50.662Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-03T13:49:16.358Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "relates_to",
+          "old_value": null,
+          "new_value": [
+            "wiki:specs:angular-style-file-system"
+          ]
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-03T13:50:10.799Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "relates_to",
+          "old_value": null,
+          "new_value": [
+            {
+              "target": "wiki:specs:angular-style-file-system",
+              "type": "implements"
+            }
+          ]
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

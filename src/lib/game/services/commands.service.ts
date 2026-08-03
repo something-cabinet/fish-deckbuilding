@@ -1,4 +1,4 @@
-import type { FxEvent, GameState, Pos } from "./types"
+import type { FxEvent, GameState, Pos } from "../battle"
 import {
   buyCard,
   castCard,
@@ -6,7 +6,7 @@ import {
   sellCard,
   startEnemyPhase,
   unitAttack,
-} from "./engine"
+} from "./engine.service"
 
 /* ------------------------------------------------------------------ */
 /* Command base (D7, D9)                                               */

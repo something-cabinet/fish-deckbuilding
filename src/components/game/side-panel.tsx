@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { cellLabel } from "@/lib/game/engine"
-import type { GameState, Unit } from "@/lib/game/types"
+import { cellLabel } from "@/lib/game/services"
+import type { GameState } from "@/lib/game/battle"
+import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 interface Props {

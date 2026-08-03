@@ -12,7 +12,7 @@ import {
   TrendingUp,
   type LucideIcon,
 } from "lucide-react"
-import type { CardInstance } from "@/lib/game/types"
+import type { CardInstance } from "@/lib/game/cards"
 import { cn } from "@/lib/utils"
 
 const ICONS: Record<string, LucideIcon> = {

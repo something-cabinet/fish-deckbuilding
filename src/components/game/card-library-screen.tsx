@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react"
 import { ArrowLeft, Library, Plus, Sparkles } from "lucide-react"
-import type { CardDef, CardType } from "@/lib/game/types"
-import { CARD_LIBRARY } from "@/lib/game/data"
+import type { CardDef, CardType } from "@/lib/game/cards"
+import { CARD_LIBRARY } from "@/lib/game"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
 

@@ -6,9 +6,10 @@ import {
   createInitialState,
   posKey,
   startGame,
-} from "@/lib/game/engine"
-import { CARD_LIBRARY } from "@/lib/game/data"
-import type { CardInstance, GameState } from "@/lib/game/types"
+} from "@/lib/game/services"
+import { CARD_LIBRARY } from "@/lib/game"
+import type { CardInstance } from "@/lib/game/cards"
+import type { GameState } from "@/lib/game/battle"
 
 /* ------------------------------------------------------------------ */
 /* helpers                                                             */

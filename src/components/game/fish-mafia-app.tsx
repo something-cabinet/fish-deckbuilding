@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { CardDef } from "@/lib/game/types"
+import type { CardDef } from "@/lib/game/cards"
 import { CardCreateScreen } from "./card-create-screen"
 import { CardLibraryScreen } from "./card-library-screen"
 import { FishMafiaGame } from "./fish-mafia-game"

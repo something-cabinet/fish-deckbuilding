@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest"
-import { CommandQueue, executeCommand } from "@/lib/game/commands"
-import { createInitialState, heroUnit, startGame } from "@/lib/game/engine"
-import { CARD_LIBRARY } from "@/lib/game/data"
-import type { GameState } from "@/lib/game/types"
+import {
+  CommandQueue,
+  createInitialState,
+  executeCommand,
+  heroUnit,
+  startGame,
+} from "@/lib/game/services"
+import { CARD_LIBRARY } from "@/lib/game"
+import type { GameState } from "@/lib/game/battle"
 
 function fresh(): GameState {
   return createInitialState()

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { GameSession } from "@/lib/game/history"
-import { createInitialState, heroUnit } from "@/lib/game/engine"
-import { CARD_LIBRARY } from "@/lib/game/data"
-import type { GameState } from "@/lib/game/types"
+import { createInitialState, GameSession, heroUnit } from "@/lib/game/services"
+import { CARD_LIBRARY } from "@/lib/game"
+import type { GameState } from "@/lib/game/battle"
 
 function fresh(): GameState {
   const s = createInitialState()

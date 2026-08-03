@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { COLS, ROWS, type FxEvent } from "@/lib/game/types"
+import { COLS, ROWS, type FxEvent } from "@/lib/game/battle"
 
 interface Particle {
   x: number

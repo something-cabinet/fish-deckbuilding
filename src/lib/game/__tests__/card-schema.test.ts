@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { CARD_LIBRARY } from "@/lib/game/data"
+import { CARD_LIBRARY } from "@/lib/game"
 import {
   CardDefSchema,
   CardEffectSchema,
   CardPackSchema,
-} from "@/lib/game/cards/schema"
-import type { CardDef, CardEffect } from "@/lib/game/types"
+  type CardDef,
+  type CardEffect,
+} from "@/lib/game/cards"
 
 const EXPECTED_IDS = [
   "demand_letter",

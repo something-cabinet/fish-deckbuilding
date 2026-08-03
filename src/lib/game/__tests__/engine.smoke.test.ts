@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { STARTER_DECK } from "@/lib/game/data"
-import { createInitialState, posKey } from "@/lib/game/engine"
+import { STARTER_DECK } from "@/lib/game"
+import { createInitialState, posKey } from "@/lib/game/services"
 
 describe("engine smoke", () => {
   it("createInitialState returns a fresh game at turn 1 in the player phase", () => {

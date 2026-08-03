@@ -1,6 +1,7 @@
 "use client"
 
-import { COLS, ROWS, type Unit } from "@/lib/game/types"
+import { COLS, ROWS } from "@/lib/game/battle"
+import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 const SPRITES: Record<Unit["kind"], string> = {

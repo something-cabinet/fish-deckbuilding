@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { ArrowLeft, Check, PlusCircle } from "lucide-react"
-import type { CardDef, CardTarget, CardType } from "@/lib/game/types"
-import { CARD_ICON_NAMES, getCardIcon } from "@/lib/game/icons"
+import type { CardDef, CardTarget, CardType } from "@/lib/game/cards"
+import { CARD_ICON_NAMES, getCardIcon } from "@/lib/game/helpers"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
 

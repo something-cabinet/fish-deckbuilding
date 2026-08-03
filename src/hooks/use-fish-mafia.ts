@@ -6,13 +6,14 @@ import {
   beginPlayerTurn,
   cardTargets,
   createInitialState,
+  GameSession,
   planEnemyTurn,
   reachableTiles,
   selectUnit,
   startGame,
-} from "@/lib/game/engine"
-import { GameSession } from "@/lib/game/history"
-import type { CardInstance, FxEvent, GameState, Pos } from "@/lib/game/types"
+} from "@/lib/game/services"
+import type { CardInstance } from "@/lib/game/cards"
+import type { FxEvent, GameState, Pos } from "@/lib/game/battle"
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 

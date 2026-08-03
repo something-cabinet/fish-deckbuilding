@@ -1,4 +1,5 @@
-import type { CardDef, Unit } from "./types"
+import type { CardDef } from "./cards"
+import type { Unit } from "./units"
 import { CardPackSchema } from "./cards/schema"
 import pack01 from "./cards/pack-01-starter.json"
 

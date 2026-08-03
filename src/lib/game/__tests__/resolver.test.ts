@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest"
 import {
+  createInitialState,
   hasCustomEffectHandler,
+  heroUnit,
   registerCustomEffectHandler,
   resolveCardEffects,
-} from "@/lib/game/effects"
-import { createInitialState, heroUnit } from "@/lib/game/engine"
-import { CARD_LIBRARY } from "@/lib/game/data"
-import type { FxEvent, GameState, Unit } from "@/lib/game/types"
+} from "@/lib/game/services"
+import { CARD_LIBRARY } from "@/lib/game"
+import type { FxEvent, GameState } from "@/lib/game/battle"
+import type { Unit } from "@/lib/game/units"
 
 function fresh(): GameState {
   return createInitialState()

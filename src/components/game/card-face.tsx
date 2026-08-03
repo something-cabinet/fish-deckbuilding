@@ -1,8 +1,8 @@
 "use client"
 
 import { Coins } from "lucide-react"
-import type { CardDef } from "@/lib/game/types"
-import { getCardIcon } from "@/lib/game/icons"
+import type { CardDef } from "@/lib/game/cards"
+import { getCardIcon } from "@/lib/game/helpers"
 import { cn } from "@/lib/utils"
 
 const TYPE_STYLES: Record<string, string> = {

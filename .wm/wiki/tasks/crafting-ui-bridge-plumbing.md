@@ -1,17 +1,15 @@
 ---
 title: Implement crafting Rust bridge — open, card browser, detail view
 type: task
+tags:
+- card-crafting-ui
+- rust
+- bridge
 status: done
-tags: [card-crafting-ui, rust, bridge]
 order: 2
-fulfills:
-  - AC-1
-  - AC-2
-  - AC-3
-  - AC-4
-  - AC-5
-  - AC-6
-  - AC-7
-  - AC-16
-  - AC-17
+acceptance_criteria:
+  - {text: "Crafting panel opens from overworld with card browser", checked: false}
+  - {text: "Card detail view shows card stats", checked: false}
+  - {text: "Bridge plumbing connects panel to Rust engine", checked: false}
 ---
+

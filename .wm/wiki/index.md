@@ -59,6 +59,7 @@ type: reference
 - [duelyst accurate move then attack ordering](wiki/decisions/duelyst-accurate-move-then-attack-ordering.md) — *draft*
 - [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
+- [wm sdd task linking gotchas](wiki/concepts/wm-sdd-task-linking-gotchas.md) — *draft*
 - [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
 - [fixer lane silent noops empty results](wiki/concepts/fixer-lane-silent-noops-empty-results.md) — *draft*
 - [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
@@ -82,8 +83,8 @@ type: reference
 ## cores
 
 - [agent](wiki/core/agent.md) — *reviewed*
-- [Fish Roguelite Deckbuilding — Architecture](wiki/core/architecture.md) — *draft*
-- [Fish Roguelite Deckbuilding — Conventions](wiki/core/conventions.md) — *draft*
+- [Fish Roguelite Deckbuilding — Architecture](wiki/core/architecture.md) — *reviewed*
+- [Fish Roguelite Deckbuilding — Conventions](wiki/core/conventions.md) — *reviewed*
 - [Critical Patterns](wiki/core/critical-patterns.md) — *draft*
 - [Fish Roguelite Deckbuilding — README](wiki/core/readme.md) — *draft*
 - [spec](wiki/core/spec.md) — *reviewed*
@@ -118,6 +119,7 @@ type: reference
 - [Unified Range Enum (Melee/Ranged)](wiki/memory/unified-range-enum-melee-ranged.md) — *active*
 - [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
 - [Stale Animation Snapshot in gdext Bridge](wiki/memory/stale-animation-snapshot-gdext.md) — *active*
+- [Angular-style file system convention applied (Aug 2026)](wiki/memory/angular-style-file-system-convention-applied-aug-2026.md) — *active*
 - [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [Overworld Node Action Refresh / Multi-Display State Sync](wiki/memory/overworld-node-action-refresh-multi-display-state-sync.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
@@ -141,6 +143,7 @@ type: reference
 - [Domain-Driven Barrel Structure](wiki/memory/domain-driven-barrel-structure.md) — *active*
 - [Clippy CI Dead Code](wiki/memory/clippy-ci-dead-code.md) — *draft*
 - [Pure Function → ECS Pivot](wiki/memory/pure-function-ecs-pivot.md) — *active*
+- [Component system scan Aug 2026](wiki/memory/component-system-scan-aug-2026.md) — *active*
 - [GDExtension Click Input — Use _input() Over _unhandled_input()](wiki/memory/gdextension-click-input-use-_input-over-_unhandled_input.md) — *active*
 - [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
 - [UI panels migrated from Rust bridge to tscn](wiki/memory/ui-panels-migrated-from-rust-bridge-to-tscn.md) — *active*
@@ -194,6 +197,7 @@ type: reference
 - [Combat Affix & Crafting System](wiki/specs/combat-affix-crafting-system.md) — *draft*
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
 - [Card Effect Registry — Data-Driven Effects with Resolver (Visitor)](wiki/specs/card-effect-registry.md) — *approved*
+- [Angular-Style File System — One Service/Helper/Interface per File](wiki/specs/angular-style-file-system.md) — *approved*
 - [Enemy Card Reveal Animation & Graveyard Viewer](wiki/specs/enemy-card-reveal-graveyard-viewer.md) — *draft*
 - [Battle & Overworld UI — Declare in .tscn](wiki/specs/tscn-ui-declaration.md) — *draft*
 - [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *draft*
@@ -212,9 +216,11 @@ type: reference
 - [Godot Battle 07 - Hot-Reload Fixes & Parity](wiki/tasks/godot-battle-07-hot-reload-fixes.md) — *done*
 - [Migrate cards to JSON packs with zod schema + loader](wiki/tasks/migrate-cards-to-json-packs-with-zod-schema--loader.md) — *in-progress*
 - [Save/Load — Godot ConfigFile/Resource persistence, wire to menu](wiki/tasks/saveload--godot-configfileresource-persistence-wire-to-menu.md) — *todo*
+- [Update stale docs (CONVENTIONS, ARCHITECTURE, DESIGN.md) to real Next.js/React stack + new file convention](wiki/tasks/update-stale-docs-conventions-architecture-designmd-to-real-nextjsreact-stack--new-file-convention.md) — *done*
 - [Implement effect resolver (exhaustive match + custom registry)](wiki/tasks/implement-effect-resolver-exhaustive-match--custom-registry.md) — *in-progress*
 - [Implement crafting Rust bridge — open, card browser, detail view](wiki/tasks/crafting-ui-bridge-plumbing.md) — *done*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
+- [Restructure engine layer into domain folders + barrels (one type/service/helper per file)](wiki/tasks/restructure-engine-layer-into-domain-folders--barrels-one-typeservicehelper-per-file.md) — *done*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
 - [Clean legacy fields, phase literals, dead code — Rust core](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--rust-core.md) — *todo*
 - [Set up vitest test harness for the engine](wiki/tasks/set-up-vitest-test-harness-for-the-engine.md) — *done*
@@ -233,6 +239,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 197
-- **Edges:** 301
+- **Nodes:** 203
+- **Edges:** 311
 
