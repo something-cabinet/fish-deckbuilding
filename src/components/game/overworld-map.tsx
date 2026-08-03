@@ -162,11 +162,11 @@ export function OverworldMap({
       </div>
 
       {/* map area */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center p-4">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center overflow-x-auto p-4">
         <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="h-full max-h-[540px] w-full max-w-[1000px]"
+          viewBox="0 0 160 100"
+          className="h-full max-h-[540px] w-auto"
+          preserveAspectRatio="xMinYMid meet"
           role="img"
           aria-label={`${curZoneName} overworld map`}
         >
