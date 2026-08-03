@@ -1,10 +1,10 @@
 import {
   CARD_LIBRARY,
   ENEMY_SPAWNS,
-  GOON_DEF,
   HERO_DEF,
   STARTER_DECK,
 } from "./data"
+import { resolveCardEffects } from "./effects"
 import {
   COLS,
   ROWS,
@@ -17,7 +17,7 @@ import {
 } from "./types"
 
 let idSeed = 1
-const nid = (p: string) => `${p}_${idSeed++}`
+export const nid = (p: string) => `${p}_${idSeed++}`
 
 export const BUY_COST = 3
 const HAND_START = 5
@@ -322,80 +322,9 @@ export function castCard(
   s.hand = s.hand.filter((c) => c.uid !== cardUid)
   s.discard = [...s.discard, card]
 
-  const fire = (kind: FxEvent["kind"], to?: Pos) =>
-    fx.push({ id: s.logCounter, kind, from, to })
-
-  switch (card.def.id) {
-    case "demand_letter":
-      fire("letter", tgtUnit!.pos)
-      dealDamage(s, tgtUnit!, 2, fx)
-      log(s, `Demand Letter hits ${tgtUnit!.name} for 2.`, "good")
-      break
-    case "collection_call":
-      fire("phone", tgtUnit!.pos)
-      dealDamage(s, tgtUnit!, 3, fx)
-      log(s, `Collection Call rattles ${tgtUnit!.name} for 3.`, "good")
-      break
-    case "foreclose":
-      fire("gavel", tgtUnit!.pos)
-      dealDamage(s, tgtUnit!, 6, fx)
-      log(s, `Foreclose slams ${tgtUnit!.name} for 6!`, "good")
-      break
-    case "kneecap":
-      fire("shock", tgtUnit!.pos)
-      dealDamage(s, tgtUnit!, 2, fx)
-      tgtUnit!.buffAtk -= 1
-      log(s, `Kneecap hits ${tgtUnit!.name} for 2 and weakens it.`, "good")
-      break
-    case "loan_shark":
-      fire("shock", tgtUnit!.pos)
-      dealDamage(s, tgtUnit!, 4, fx)
-      if (hero) {
-        hero.hp = Math.min(hero.maxHp, hero.hp + 2)
-        fx.push({ id: s.logCounter, kind: "heal", to: { ...hero.pos }, amount: 2 })
-      }
-      log(s, `Loan Shark drains ${tgtUnit!.name} for 4, heals Guppy 2.`, "good")
-      break
-    case "cash_flow":
-      s.coin += 3
-      if (from) fx.push({ id: s.logCounter, kind: "coin", to: from, amount: 3 })
-      log(s, "Cash Flow launders 3 coin.", "gold")
-      break
-    case "market_rate":
-      if (from) fx.push({ id: s.logCounter, kind: "draw", to: from })
-      drawCards(s, 2, fx)
-      log(s, "Market Rate draws 2 cards.", "neutral")
-      break
-    case "hush_money": {
-      const ally = tgtUnit!
-      ally.hp = Math.min(ally.maxHp, ally.hp + 5)
-      fx.push({ id: s.logCounter, kind: "heal", to: { ...ally.pos }, amount: 5 })
-      log(s, `Hush Money patches up ${ally.name} for 5.`, "good")
-      break
-    }
-    case "muscle": {
-      const tile = target.tile!
-      const goon: Unit = {
-        id: nid("goon"),
-        name: GOON_DEF.name,
-        kind: "goon",
-        team: "player",
-        pos: { ...tile },
-        hp: GOON_DEF.hp,
-        maxHp: GOON_DEF.hp,
-        atk: GOON_DEF.atk,
-        move: GOON_DEF.move,
-        range: 1,
-        hasMoved: true,
-        hasActed: true,
-        buffAtk: 0,
-      }
-      s.units = [...s.units, goon]
-      fx.push({ id: s.logCounter, kind: "summon", to: { ...tile } })
-      log(s, `Hired Muscle joins at ${cellLabel(tile)}.`, "good")
-      break
-    }
-  }
+  // delegate effect application to the data-driven resolver (FR-3) — no
+  // switch on card id; effects come from the trusted JSON source.
+  resolveCardEffects(s, card.def, { targetUnit: tgtUnit, tile: target.tile, from }, fx)
 
   cleanupDead(s)
   checkEnd(s)

@@ -1,0 +1,185 @@
+{
+  "cards": [
+    {
+      "id": "demand_letter",
+      "name": "Demand Letter",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "enemy",
+      "desc": "Deal 2 damage to a target enemy.",
+      "icon": "Mail",
+      "fx": "letter",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 2
+        }
+      ],
+      "log": "Demand Letter hits {target} for 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "collection_call",
+      "name": "Collection Call",
+      "type": "attack",
+      "cost": 2,
+      "value": 1,
+      "target": "enemy",
+      "desc": "Deal 3 damage to a target enemy.",
+      "icon": "PhoneCall",
+      "fx": "phone",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 3
+        }
+      ],
+      "log": "Collection Call rattles {target} for 3.",
+      "logTone": "good"
+    },
+    {
+      "id": "foreclose",
+      "name": "Foreclose",
+      "type": "attack",
+      "cost": 4,
+      "value": 2,
+      "target": "enemy",
+      "desc": "Deal 6 damage to a target enemy.",
+      "icon": "FileX2",
+      "fx": "gavel",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 6
+        }
+      ],
+      "log": "Foreclose slams {target} for 6!",
+      "logTone": "good"
+    },
+    {
+      "id": "kneecap",
+      "name": "Kneecap",
+      "type": "attack",
+      "cost": 2,
+      "value": 1,
+      "target": "enemy",
+      "desc": "Deal 2 damage and weaken the target's attack by 1.",
+      "icon": "Hammer",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "buffAtk",
+          "amount": -1
+        }
+      ],
+      "log": "Kneecap hits {target} for 2 and weakens it.",
+      "logTone": "good"
+    },
+    {
+      "id": "cash_flow",
+      "name": "Cash Flow",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "desc": "Launder 3 coin into your pocket.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "gainCoin",
+          "amount": 3
+        }
+      ],
+      "log": "Cash Flow launders 3 coin.",
+      "logTone": "gold"
+    },
+    {
+      "id": "market_rate",
+      "name": "Market Rate",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "desc": "Draw 2 cards.",
+      "icon": "TrendingUp",
+      "fx": "draw",
+      "effects": [
+        {
+          "kind": "drawCards",
+          "amount": 2
+        }
+      ],
+      "log": "Market Rate draws 2 cards.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "loan_shark",
+      "name": "Loan Shark",
+      "type": "attack",
+      "cost": 3,
+      "value": 2,
+      "target": "enemy",
+      "desc": "Deal 4 damage and heal your boss 2 HP.",
+      "icon": "Skull",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 4
+        },
+        {
+          "kind": "heal",
+          "amount": 2,
+          "target": "caster"
+        }
+      ],
+      "log": "Loan Shark drains {target} for 4, heals Guppy 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "hush_money",
+      "name": "Hush Money",
+      "type": "skill",
+      "cost": 2,
+      "value": 2,
+      "target": "ally",
+      "desc": "Restore 5 HP to a friendly fish.",
+      "icon": "HeartPulse",
+      "fx": "heal",
+      "effects": [
+        {
+          "kind": "heal",
+          "amount": 5,
+          "target": "cast-target"
+        }
+      ],
+      "log": "Hush Money patches up {target} for 5.",
+      "logTone": "good"
+    },
+    {
+      "id": "muscle",
+      "name": "Hired Muscle",
+      "type": "summon",
+      "cost": 3,
+      "value": 2,
+      "target": "empty-tile",
+      "desc": "Summon a Goon (5 HP / 2 ATK) on an empty tile.",
+      "icon": "Fish",
+      "fx": "summon",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "goon"
+        }
+      ],
+      "log": "Hired Muscle joins at {tile}.",
+      "logTone": "good"
+    }
+  ]
+}

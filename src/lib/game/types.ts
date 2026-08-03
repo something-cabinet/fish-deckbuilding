@@ -35,6 +35,16 @@ export type CardTarget =
   | "self" // no target, affects hero / global
   | "empty-tile" // an empty tile (summons)
 
+/** A single data-driven effect a card applies at resolution (D1/D5/D11). */
+export type CardEffect =
+  | { kind: "damage"; amount: number }
+  | { kind: "heal"; amount: number; target: "caster" | "cast-target" }
+  | { kind: "drawCards"; amount: number }
+  | { kind: "gainCoin"; amount: number }
+  | { kind: "buffAtk"; amount: number } // signed
+  | { kind: "summon"; unit: "goon" }
+  | { kind: "custom"; handlerId: string } // D11 escape hatch — registered handler
+
 export interface CardDef {
   id: string
   name: string
@@ -47,6 +57,12 @@ export interface CardDef {
   icon: string
   /** visual effect id fired on resolve */
   fx: "letter" | "phone" | "gavel" | "coin" | "draw" | "heal" | "shock" | "summon"
+  /** data-driven effects applied in order by the resolver (FR-1) */
+  effects: CardEffect[]
+  /** resolution log template; {target} = target unit name, {tile} = cell label */
+  log: string
+  /** tone of the resolution log entry */
+  logTone: LogEntry["tone"]
 }
 
 export interface CardInstance {

@@ -46,7 +46,21 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
   const [icon, setIcon] = useState("Swords")
   const [fx, setFx] = useState<CardDef["fx"]>("shock")
 
-  const draft: CardDef = { id: "preview", name, type, cost, value, target, desc, icon, fx }
+  const draft: CardDef = {
+    id: "preview",
+    name,
+    type,
+    cost,
+    value,
+    target,
+    desc,
+    icon,
+    fx,
+    // custom cards are display-only (D3) — no resolvable effects yet
+    effects: [],
+    log: "",
+    logTone: "neutral",
+  }
   const canSave = name.trim().length > 0
 
   function handleSave() {

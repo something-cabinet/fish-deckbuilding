@@ -1,0 +1,20 @@
+{
+  "entity_id": "wiki:tasks:rewire-castcard-to-the-resolver-remove-the-card-id-switch",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-03T10:43:12.730Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

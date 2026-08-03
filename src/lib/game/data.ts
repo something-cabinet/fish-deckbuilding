@@ -1,106 +1,22 @@
 import type { CardDef, Unit } from "./types"
+import { CardPackSchema } from "./cards/schema"
+import pack01 from "./cards/pack-01-starter.json"
 
-export const CARD_LIBRARY: Record<string, CardDef> = {
-  demand_letter: {
-    id: "demand_letter",
-    name: "Demand Letter",
-    type: "attack",
-    cost: 1,
-    value: 1,
-    target: "enemy",
-    desc: "Deal 2 damage to a target enemy.",
-    icon: "Mail",
-    fx: "letter",
-  },
-  collection_call: {
-    id: "collection_call",
-    name: "Collection Call",
-    type: "attack",
-    cost: 2,
-    value: 1,
-    target: "enemy",
-    desc: "Deal 3 damage to a target enemy.",
-    icon: "PhoneCall",
-    fx: "phone",
-  },
-  foreclose: {
-    id: "foreclose",
-    name: "Foreclose",
-    type: "attack",
-    cost: 4,
-    value: 2,
-    target: "enemy",
-    desc: "Deal 6 damage to a target enemy.",
-    icon: "FileX2",
-    fx: "gavel",
-  },
-  kneecap: {
-    id: "kneecap",
-    name: "Kneecap",
-    type: "attack",
-    cost: 2,
-    value: 1,
-    target: "enemy",
-    desc: "Deal 2 damage and weaken the target's attack by 1.",
-    icon: "Hammer",
-    fx: "shock",
-  },
-  cash_flow: {
-    id: "cash_flow",
-    name: "Cash Flow",
-    type: "skill",
-    cost: 1,
-    value: 1,
-    target: "self",
-    desc: "Launder 3 coin into your pocket.",
-    icon: "Coins",
-    fx: "coin",
-  },
-  market_rate: {
-    id: "market_rate",
-    name: "Market Rate",
-    type: "skill",
-    cost: 1,
-    value: 1,
-    target: "self",
-    desc: "Draw 2 cards.",
-    icon: "TrendingUp",
-    fx: "draw",
-  },
-  loan_shark: {
-    id: "loan_shark",
-    name: "Loan Shark",
-    type: "attack",
-    cost: 3,
-    value: 2,
-    target: "enemy",
-    desc: "Deal 4 damage and heal your boss 2 HP.",
-    icon: "Skull",
-    fx: "shock",
-  },
-  hush_money: {
-    id: "hush_money",
-    name: "Hush Money",
-    type: "skill",
-    cost: 2,
-    value: 2,
-    target: "ally",
-    desc: "Restore 5 HP to a friendly fish.",
-    icon: "HeartPulse",
-    fx: "heal",
-  },
-  muscle: {
-    id: "muscle",
-    name: "Hired Muscle",
-    type: "summon",
-    cost: 3,
-    value: 2,
-    target: "empty-tile",
-    desc: "Summon a Goon (5 HP / 2 ATK) on an empty tile.",
-    icon: "Fish",
-    fx: "summon",
-  },
-}
+/**
+ * Card definitions ship as data-driven JSON packs (FR-7/FR-13, NFR-6/NFR-7).
+ * Each pack is validated against the zod schema at module load (AC-4): a
+ * malformed pack throws here rather than silently corrupting the game.
+ * The pack order defines CARD_LIBRARY insertion order.
+ */
+const cardPacks = [pack01]
+
+const parsedCardPacks = cardPacks.map((pack) => CardPackSchema.parse(pack))
+
+export const CARD_LIBRARY: Record<string, CardDef> = Object.fromEntries(
+  parsedCardPacks.flatMap((pack) =>
+    pack.cards.map((card) => [card.id, card] as const),
+  ),
+)
 
 /** The player's starting deck (list of card library ids, may repeat). */
 export const STARTER_DECK: string[] = [
