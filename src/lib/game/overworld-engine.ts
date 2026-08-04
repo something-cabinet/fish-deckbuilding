@@ -26,6 +26,15 @@ function intBetween(rng: () => number, min: number, max: number): number {
   return min + Math.floor(rng() * (max - min + 1))
 }
 
+/** Fisher-Yates shuffle using the seeded rng, returns the same array. */
+function shuffle<T>(rng: () => number, arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
 /* ------------------------------------------------------------------ */
 /* map generation                                                      */
 /* ------------------------------------------------------------------ */
@@ -43,9 +52,9 @@ function nodeTypeFor(rng: () => number, row: number, rows: number): NodeType {
 /**
  * Generate a full zone map deterministically from (zoneDef, seed).
  * Layout: 5-7 rows; row 0 = start (battle), middle rows 2-3 nodes with
- * battle/rest mix, last row = boss. Nodes at row r connect to 1-2 nodes at
- * row r+1 near their column, guaranteeing a connected start→boss path with
- * branches and merges.
+ * battle/rest mix, last row = boss. Edges are assigned as ordered,
+ * non-overlapping windows so connecting lines never cross, while every
+ * node stays reachable from the start and has at least one way forward.
  */
 export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
   const rng = mulberry32(seed * 7919 + zone.index * 104729)
@@ -77,37 +86,39 @@ export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
   const byRow: MapNode[][] = []
   for (const n of nodes) (byRow[n.row] ??= []).push(n)
 
-  // 2) wire edges: each node -> 1-2 nodes in the next row near its column
+  // 2) wire edges with a monotone assignment so paths never cross.
+  // Each node owns a contiguous window of next-row nodes and windows are
+  // ordered left-to-right, which makes every connecting line stay to the
+  // left of the next node's lines. Every next-row node is covered (so the
+  // map stays fully connected) and every node keeps at least one way out.
   for (let r = 0; r < rows - 1; r++) {
     const cur = byRow[r]
     const next = byRow[r + 1]
-    for (const node of cur) {
-      const candidates = next.filter((m) => Math.abs(m.col - node.col) <= 1)
-      const spread = [...next].sort((a, b) => Math.abs(a.col - node.col) - Math.abs(b.col - node.col))
-      const primary = candidates.length ? candidates : spread.slice(0, 1)
-      const chosen = new Set<string>([pick(rng, primary).id])
-      // add a second, more distant target for branching when possible
-      if (rng() < 0.7 && next.length > 1) {
-        const rest = next.filter((m) => !chosen.has(m.id))
-        const from = rest.length ? rest : next.filter((m) => m.id !== [...chosen][0])
-        if (from.length) chosen.add(pick(rng, from).id)
-      }
-      node.edges = [...chosen]
-    }
-  }
+    const m = next.length
+    if (m === 0) continue
 
-  // 3) guarantee every row r+1 node has an incoming edge (connectivity)
-  for (let r = 0; r < rows - 1; r++) {
-    const cur = byRow[r]
-    const next = byRow[r + 1]
-    for (const m of next) {
-      const hasIncoming = cur.some((n) => n.edges.includes(m.id))
-      if (!hasIncoming) {
-        const nearest = [...cur].sort(
-          (a, b) => Math.abs(a.col - m.col) - Math.abs(b.col - m.col),
-        )[0]
-        nearest.edges = [...new Set([...nearest.edges, m.id])]
-      }
+    // distribute (m - 1) "gap" units across cur nodes; node i gets a window
+    // of gaps[i] + 1 next-row nodes. Prefer 1-2 targets (branching) and only
+    // fan out wider when few nodes must cover many (e.g. the start row).
+    const gaps = new Array<number>(cur.length).fill(0)
+    let remaining = m - 1
+    const order = shuffle(rng, [...Array(cur.length).keys()])
+    for (const i of order) {
+      if (remaining === 0) break
+      gaps[i]++
+      remaining--
+    }
+    while (remaining > 0) {
+      gaps[Math.floor(rng() * cur.length)]++
+      remaining--
+    }
+
+    // walk the windows left-to-right and assign edge ids
+    let lo = 0
+    for (let i = 0; i < cur.length; i++) {
+      const hi = lo + gaps[i]
+      cur[i].edges = next.slice(lo, hi + 1).map((n) => n.id)
+      lo = hi
     }
   }
 
