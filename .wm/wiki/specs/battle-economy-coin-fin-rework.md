@@ -110,6 +110,23 @@ Then rename `mana`/`maxMana` → `coin`/`maxCoin` in:
 - tests: `turn.service.spec.ts`, `commands.spec.ts`, `history.spec.ts`,
   `card-parity.spec.ts`, strictmode specs
 
+## Implementation Notes (as-built)
+
+Two simplifications were adopted during implementation and supersede the draft
+wording below:
+
+- **No `maxCoin`/cap.** Because the base is `0` (D7) and Coin comes only from
+  selling and income cards, there is no per-turn cap to store. `maxMana`/`maxCoin`
+  was removed entirely rather than renamed; each turn simply resets `coin` to
+  `COIN_TURN_BASE`. Ignore `maxCoin` references in FR-1/FR-4 below.
+- **Sell value reuses `card.def.value`.** Rather than add a new `sellValue`
+  field, the existing authored `value` field is the per-card sell price, floored
+  at 1 (`max(1, card.def.value)`); starter card `value`s were set equal to their
+  `cost` to satisfy D8. `card.def.cost` is not consulted for selling.
+- **Fin awarded in `cleanupDead`** (units combat service): `+1` per enemy unit
+  removed, then read back to the overworld via `onWin(heroHp, fin)` →
+  `updateHp(hp, fin)`; `createInitialState({ fin })` carries it back in (D11).
+
 ## Requirements
 
 ### Functional

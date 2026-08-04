@@ -32,8 +32,9 @@ describe("CardLibraryScreen", () => {
     act(() => fireEvent.click(screen.getByRole("button", { name: /skill/i })))
     expect(screen.getByText("Cash Flow")).toBeInTheDocument()
     expect(screen.getByText("Hush Money")).toBeInTheDocument()
+    expect(screen.getByText("Shakedown")).toBeInTheDocument()
     expect(screen.queryByText("Demand Letter")).not.toBeInTheDocument()
-    expect(screen.getByText("3 cards")).toBeInTheDocument()
+    expect(screen.getByText("4 cards")).toBeInTheDocument()
 
     act(() => fireEvent.click(screen.getByRole("button", { name: /summon/i })))
     expect(screen.getByText("Hired Muscle")).toBeInTheDocument()

@@ -14,11 +14,11 @@
  * Robustness to randomness:
  * - The opening hand is dealt by a mount effect from a shuffled deck, so we
  *   wait for cards to appear instead of assuming exact contents.
- * - The cast test scans the rendered hand at runtime for the first card whose
- *   displayed cost <= current mana (1). The starter deck is 17 cards with 7
- *   cost-1 cards (Demand Letter x3, Cash Flow x2, Market Rate x2), so the
- *   5-card hand almost always contains one. If not, the test logs a note and
- *   returns early rather than failing.
+ * - Turn 1 starts at 0 Coin (sell-to-play economy), so the cast test first
+ *   sells two cards to bank Coin, then scans the remaining hand for the first
+ *   card whose displayed cost <= current Coin. If the unlucky remainder has
+ *   nothing affordable, the test logs a note and returns early rather than
+ *   failing (the move test remains the StrictMode drain guard).
  *
  * jsdom shims (required by components that render inside the game):
  * - HTMLCanvasElement.getContext("2d") returns null in jsdom (no canvas npm
@@ -49,11 +49,11 @@ async function flushDeal(container: HTMLElement) {
   expect(screen.getByText(/Guppy the Debtor/i)).toBeInTheDocument()
 }
 
-/** Coin value shown in the top bar. */
+/** Coin value shown in the bottom-bar register (via its accessible label). */
 function readCoin(): number {
-  const label = screen.getByText("Coin")
-  const value = label.parentElement?.querySelector(".text-foreground")
-  return value ? Number(value.textContent) : Number.NaN
+  const reg = screen.getByRole("status", { name: /coin available this turn/i })
+  const m = (reg.getAttribute("aria-label") ?? "").match(/^(\d+)/)
+  return m ? Number(m[1]) : Number.NaN
 }
 
 /** "Thug at G2, 4 of 4 health" -> 4 */
@@ -93,36 +93,45 @@ describe("FishMafiaGame under StrictMode (AC-3)", () => {
     })
   })
 
-  it("casts the first affordable card from the dealt hand", async () => {
+  it("casts the first affordable card after banking coin by selling", async () => {
     const { container } = renderGame()
     await flushDeal(container)
 
-    // current mana (starts at 1; nothing spends it in this test before the cast)
-    const mana = Number(
-      screen.getByText("Mana").parentElement?.querySelector(".text-gold")?.textContent ?? 1,
-    )
+    // Sell-to-play economy: turn 1 starts at 0 Coin. Click the in-card "Sell"
+    // button on a couple of cards to bank Coin before anything is castable.
+    const sellButtons = screen.getAllByRole("button", { name: /^sell /i })
+    for (const btn of sellButtons.slice(0, 2)) {
+      act(() => {
+        fireEvent.click(btn)
+      })
+    }
+    await waitFor(() => {
+      expect(readCoin()).toBeGreaterThan(0)
+    })
+    const coin = readCoin()
 
-    // scan the rendered hand for the first card whose displayed cost is affordable
+    // scan the remaining hand for the first card whose displayed cost is affordable
     const cards = Array.from(container.querySelectorAll("[data-card-uid]"))
     const castable = cards.filter((el) => {
       const m = (el.textContent ?? "").match(/^(\d+)/)
-      return m && Number(m[1]) <= mana
+      return m && Number(m[1]) <= coin
     })
 
     if (castable.length === 0) {
-      // Practically impossible (7 of 17 starter cards cost 1), but don't fail
-      // the suite on an unlucky shuffle — the move test above is the guard.
-      console.log("[strictmode] no affordable card in this random hand — skipping cast assertion")
+      // Don't fail the suite on an unlucky shuffle — the move test is the guard.
+      console.log("[strictmode] no affordable card after selling — skipping cast assertion")
       return
     }
 
     const card = castable[0]
     const uid = card.getAttribute("data-card-uid")!
     const text = card.textContent ?? ""
-    const isSelfTarget = /Launder|Draw \d+ card/i.test(text)
+    // self-target cards: coin cards (Cash Flow / Shakedown) and draw (Market Rate)
+    const isCoinCard = /coin/i.test(text)
+    const isSelfTarget = isCoinCard || /Draw \d+ card/i.test(text)
 
     if (isSelfTarget) {
-      // self-target card (Cash Flow / Market Rate): a single click casts it
+      // self-target card: a single click casts it (no enemy target needed)
       const coinBefore = readCoin()
       act(() => {
         fireEvent.click(card)
@@ -133,8 +142,8 @@ describe("FishMafiaGame under StrictMode (AC-3)", () => {
         expect(container.querySelector(`[data-card-uid="${uid}"]`)).toBeNull()
       })
 
-      // coin card -> the top-bar coin value increased
-      if (/Launder/i.test(text)) {
+      // coin-gain cards net positive (gain exceeds cost), so coin rises
+      if (isCoinCard) {
         await waitFor(() => {
           expect(readCoin()).toBeGreaterThan(coinBefore)
         })
