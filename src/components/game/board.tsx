@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ParticleCanvas } from "./particle-canvas"
 import { UnitToken } from "./unit-token"
 import { COLS, ROWS, FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils"
 
 const COL_LABELS = Array.from({ length: COLS }, (_, i) => String.fromCharCode(65 + i))
 const ROW_LABELS = Array.from({ length: ROWS }, (_, i) => `${i + 1}`)
+const BOARD_MAX_WIDTH = 1150
+const COL_LETTERS_HEIGHT = 20
 
 interface Props {
   state: GameState
@@ -35,6 +37,38 @@ export function Board({
   onUnitClick,
   onUnitPointerDown,
 }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [boardWidth, setBoardWidth] = useState<number | null>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const parent = el.parentElement
+    if (!parent) return
+
+    const updateSize = () => {
+      const cs = getComputedStyle(parent)
+      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+      const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+      const availW = Math.max(parent.clientWidth - padX, 100)
+      const availH = Math.max(parent.clientHeight - padY - COL_LETTERS_HEIGHT, 100)
+
+      const aspect = COLS / ROWS
+      let w = Math.min(availW, BOARD_MAX_WIDTH)
+      let h = w / aspect
+      if (h > availH) {
+        h = availH
+        w = h * aspect
+      }
+
+      setBoardWidth(w)
+    }
+
+    updateSize()
+    const observer = new ResizeObserver(updateSize)
+    observer.observe(parent)
+    return () => observer.disconnect()
+  }, [])
   const reachSet = useMemo(() => new Set(reachable.map((p) => `${p.x},${p.y}`)), [reachable])
   const tileSet = useMemo(() => new Set(highlightTiles.map((p) => `${p.x},${p.y}`)), [highlightTiles])
   const unitTargets = useMemo(() => new Set(highlightUnitIds), [highlightUnitIds])
@@ -62,7 +96,14 @@ export function Board({
   )
 
   return (
-    <div className="flex w-full max-w-[1150px] flex-col">
+    <div
+      ref={containerRef}
+      className="flex w-full flex-col"
+      style={{
+        ...(boardWidth != null ? { width: boardWidth, maxWidth: BOARD_MAX_WIDTH } : {}),
+        containerType: "inline-size",
+      }}
+    >
       {/* board frame */}
       <div className="relative rounded-2xl border border-gold/25 bg-ocean-deep/60 p-3 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:p-4">
         <div className="flex gap-1.5 sm:gap-2">

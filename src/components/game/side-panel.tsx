@@ -24,9 +24,9 @@ export function SidePanel({ state, onHoverUnit, onSelectUnit }: Props) {
   }, [state.log.length])
 
   return (
-    <aside className="flex h-full w-full flex-col gap-4 border-l border-gold/20 bg-ocean-deep/50 p-4">
+    <aside className="flex h-full w-full flex-col gap-4 border-l border-gold/20 bg-ocean-deep/50 p-4" style={{ containerType: "inline-size" }}>
       <section>
-        <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-[0.25em] text-gold">On the Table</h2>
+        <h2 className="mb-2 font-display text-[clamp(9px,4cqi,12px)] font-bold uppercase tracking-[0.25em] text-gold">On the Table</h2>
         <ul className="flex flex-col gap-1.5">
           {sorted.map((u) => {
             const isPlayer = u.team === Team.Player
@@ -45,19 +45,19 @@ export function SidePanel({ state, onHoverUnit, onSelectUnit }: Props) {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-display text-xs font-bold uppercase tracking-wide text-foreground">
+                      <span className="truncate font-display text-[clamp(9px,4cqi,12px)] font-bold uppercase tracking-wide text-foreground">
                         {u.name}
                       </span>
-                      <span className="font-display text-[10px] text-muted-foreground">{cellLabel(u.pos)}</span>
+                      <span className="font-display text-[clamp(7px,3cqi,10px)] text-muted-foreground">{cellLabel(u.pos)}</span>
                     </div>
                     <div className="mt-1 flex items-center gap-1.5">
-                      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                      <span className="h-[clamp(4px,2cqi,6px)] flex-1 overflow-hidden rounded-full bg-white/10">
                         <span
                           className={cn("block h-full rounded-full", isPlayer ? "bg-emerald-400" : "bg-enemy")}
                           style={{ width: `${pct}%` }}
                         />
                       </span>
-                      <span className="font-display text-[10px] tabular-nums text-muted-foreground">
+                      <span className="font-display text-[clamp(7px,3cqi,10px)] tabular-nums text-muted-foreground">
                         {u.hp}/{u.maxHp}
                       </span>
                     </div>
@@ -70,14 +70,14 @@ export function SidePanel({ state, onHoverUnit, onSelectUnit }: Props) {
       </section>
 
       <section className="flex min-h-0 flex-1 flex-col">
-        <h2 className="mb-2 font-display text-xs font-bold uppercase tracking-[0.25em] text-gold">Bulletin</h2>
+        <h2 className="mb-2 font-display text-[clamp(9px,4cqi,12px)] font-bold uppercase tracking-[0.25em] text-gold">Bulletin</h2>
         <ol
           ref={logRef}
-          className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1 text-xs leading-snug"
+          className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1 text-[clamp(8px,3.5cqi,12px)] leading-snug"
         >
           {state.log.map((e) => (
             <li key={e.id} className="flex gap-2 animate-fm-fade-in">
-              <span className="mt-[1px] font-display text-[10px] text-muted-foreground/70">{e.turn}</span>
+              <span className="mt-[1px] font-display text-[clamp(6px,2.5cqi,10px)] text-muted-foreground/70">{e.turn}</span>
               <span
                 className={cn(
                   e.tone === "good" && "text-emerald-300",

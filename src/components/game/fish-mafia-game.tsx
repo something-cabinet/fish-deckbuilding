@@ -12,7 +12,7 @@ import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
 import { BUY_COST } from "@/lib/game"
 import { CardTarget, type CardInstance } from "@/lib/game/cards"
-import { Phase, type Pos } from "@/lib/game/battle"
+import { Phase, type Pos, type GameState } from "@/lib/game/battle"
 import { Team, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 import { DragKind } from "./drag-kind.enum"
@@ -27,11 +27,14 @@ interface DragState {
 
 interface GameProps {
   settings: GameSettings
+  initial?: GameState
+  onWin?: (heroHp: number) => void
+  onLose?: (heroHp: number) => void
   onExit: () => void
 }
 
-export function FishMafiaGame({ settings, onExit }: GameProps) {
-  const game = useFishMafia()
+export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: GameProps) {
+  const game = useFishMafia(initial)
   const { state, fx, busy, select, move, attack, cast, sell, buy, endTurn, restart, reachable, targetsFor } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
@@ -50,6 +53,15 @@ export function FishMafiaGame({ settings, onExit }: GameProps) {
   const suppressClick = useRef(false)
 
   const playerTurn = state.phase === Phase.Player && !busy
+
+  // Overworld mode: report the outcome upward instead of showing the local
+  // restart overlay. The parent decides win -> reward, boss unlock, etc.
+  const heroHp = state.units.find((u) => u.id === "hero")?.hp ?? 0
+  useEffect(() => {
+    if (onWin && state.phase === Phase.Won) onWin(heroHp)
+    if (onLose && state.phase === Phase.Lost) onLose(heroHp)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase, onWin, onLose])
 
   /* ---------- highlight sets ---------- */
   const activeCard = drag?.kind === DragKind.Card ? drag.card : pendingCard
@@ -302,7 +314,11 @@ export function FishMafiaGame({ settings, onExit }: GameProps) {
             onUnitClick={onUnitClick}
             onUnitPointerDown={onUnitPointerDown}
           />
-          <ResultOverlay state={state} onRestart={restart} />
+          <ResultOverlay
+            state={state}
+            onRestart={restart}
+            hidden={!!onWin || !!onLose}
+          />
           {busy && (
             <div className="pointer-events-none absolute left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-enemy/40 bg-ocean-deep/90 px-4 py-1.5 font-display text-xs uppercase tracking-widest text-enemy">
               The mob is moving...
@@ -310,13 +326,13 @@ export function FishMafiaGame({ settings, onExit }: GameProps) {
           )}
         </div>
 
-        <div className="hidden w-[300px] shrink-0 lg:block">
+        <div className="w-[180px] shrink-0 sm:w-[220px] md:w-[260px] lg:w-[300px]">
           <SidePanel state={state} onHoverUnit={() => {}} onSelectUnit={(u) => onUnitClick(u)} />
         </div>
       </div>
 
       {/* bottom: hand + controls */}
-      <div className="flex items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
+      <div className="flex shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
         {/* left cluster: mana + piles */}
         <div className="flex items-center gap-3">
           <div

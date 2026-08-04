@@ -1,0 +1,8 @@
+---
+title: Overworld map implemented — seeded branching map, save/load, battle integration
+type: memory
+tags: [overworld, map-generation, seeded-rng, save-load, react, nextjs, state-sync]
+status: active
+---
+
+Implemented the approved overworld-map spec in the JS/React (Next.js) codebase on branch overworld-map. Files: overworld-types.ts, overworld-data.ts (3 zones: Shallows/Midwaters/Depths), overworld-engine.ts (seeded determinist map gen via mulberry32, travel/rest/boss transitions, localStorage save key 'fish-mafia-save'), use-overworld.ts hook (auto-save on every node transition, reward roll/claim, boss unlock), overworld-map.tsx (SVG branching map, hero fish marker, reachable pulse, locked-zone locks, HUD gold/HP/deck), reward-screen.tsx, run-summary.tsx, save-prompt.tsx. Wired fish-mafia-app into menu→overworld→battle screens; engine.createInitialState now accepts BattleOverrides (hero HP/maxHp/deck/enemies) so boss battles build the right lineup; fish-mafia-game accepts initial + onWin/onLose callbacks. Key detail: buildBattleState takes a nodeIdOverride because travel() state lands async — boss lineup would use the old node otherwise. ACs verified headless: map 5-7 rows 2-3 nodes, start→boss connected, deterministic per seed, rest heals 30% (8→12/14), rewards 3 cards deterministic. Must run wm_index rebuild after wm_task create/update to avoid stale MCP index (todo→done transitions failed until rebuilt).

@@ -1,23 +1,31 @@
 import { Phase } from "../enums"
 import type { GameState } from "../models"
 import { makeCard, STARTER_DECK, type CardInstance } from "../../cards"
-import { ENEMY_SPAWNS, HERO_DEF, Team, type Unit } from "../../units"
+import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
 import { HAND_START, shuffle } from "../../deck"
 import { resetIds } from "../../shared"
 
-/**
- * Deterministic initial state used for the very first (server) render.
- * IMPORTANT: contains NO randomness so SSR and the first client render match.
- * The deck stays in starter order and the hand is empty until `startGame` runs
- * on the client after mount.
- */
-export function createInitialState(): GameState {
+export function createInitialState(overrides?: {
+  heroHp?: number
+  heroMaxHp?: number
+  deck?: string[]
+  enemies?: EnemySpawn[]
+}): GameState {
   resetIds()
-  const deck = STARTER_DECK.map(makeCard)
+  const deck = overrides?.deck
+    ? overrides.deck.map(makeCard)
+    : STARTER_DECK.map(makeCard)
   const hand: CardInstance[] = []
 
-  const hero: Unit = { ...HERO_DEF, id: "hero", pos: { x: 1, y: 2 } }
-  const enemies: Unit[] = ENEMY_SPAWNS.map((e, i) => ({
+  const hero: Unit = {
+    ...HERO_DEF,
+    id: "hero",
+    pos: { x: 1, y: 2 },
+    hp: overrides?.heroHp ?? HERO_DEF.hp,
+    maxHp: overrides?.heroMaxHp ?? HERO_DEF.maxHp,
+  }
+  const spawns = overrides?.enemies ?? ENEMY_SPAWNS
+  const enemies: Unit[] = spawns.map((e, i) => ({
     id: `enemy_${i}`,
     name: e.name,
     kind: e.kind,
