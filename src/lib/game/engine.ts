@@ -4,6 +4,7 @@ import {
   GOON_DEF,
   HERO_DEF,
   STARTER_DECK,
+  type EnemySpawn,
 } from "./data"
 import {
   COLS,
@@ -40,19 +41,30 @@ function makeCard(libId: string): CardInstance {
   return { uid: nid("c"), def: CARD_LIBRARY[libId] }
 }
 
+/** Optional overrides for creating a battle from the overworld run. */
+export interface BattleOverrides {
+  heroHp?: number
+  heroMaxHp?: number
+  deck?: string[]
+  enemies?: EnemySpawn[]
+}
+
 /**
  * Deterministic initial state used for the very first (server) render.
  * IMPORTANT: contains NO randomness so SSR and the first client render match.
  * The deck stays in starter order and the hand is empty until `startGame` runs
  * on the client after mount.
  */
-export function createInitialState(): GameState {
+export function createInitialState(overrides?: BattleOverrides): GameState {
   idSeed = 1
-  const deck = STARTER_DECK.map(makeCard)
+  const deck = (overrides?.deck ?? STARTER_DECK).map(makeCard)
   const hand: CardInstance[] = []
 
-  const hero: Unit = { ...HERO_DEF, id: "hero", pos: { x: 1, y: 2 } }
-  const enemies: Unit[] = ENEMY_SPAWNS.map((e, i) => ({
+  const heroHp = overrides?.heroHp ?? HERO_DEF.hp
+  const heroMaxHp = overrides?.heroMaxHp ?? HERO_DEF.maxHp
+  const hero: Unit = { ...HERO_DEF, id: "hero", pos: { x: 1, y: 2 }, hp: heroHp, maxHp: heroMaxHp }
+  const spawns = overrides?.enemies ?? ENEMY_SPAWNS
+  const enemies: Unit[] = spawns.map((e, i) => ({
     id: `enemy_${i}`,
     name: e.name,
     kind: e.kind,

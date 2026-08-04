@@ -1,7 +1,16 @@
 ---
-title: Critical Patterns
-type: core
-tags: [critical]
+---
+
+---
+{}
+relates_to:
+  - {type: part_of, target: wiki:concepts:stale-mcp-index-after-task-updates}
+---
+
+---
+{}
+relates_to:
+  - {type: part_of, target: wiki:patterns:seeded-deterministic-map-generation}
 ---
 
 ---
@@ -195,3 +204,31 @@ The fixer subagent returned `state: completed` with EMPTY result messages and ZE
 **What to do differently:** After any writer-specialist dispatch, verify disk state (ls/git status) for expected files — never trust the result message alone. Keep delegated tasks bounded (one module, one concern); tiny tasks are the probe. Have an explicit orchestrator-direct fallback when a lane returns empty twice. Don't reissue the unchanged task.
 
 **Full entry:** @wiki/concepts/fixer-lane-silent-noops-empty-results
+
+---
+
+## 2026-08-03 — Seeded Deterministic Procedural Generation (mulberry32 per zone)
+
+**Category:** pattern
+**Source:** @wiki/patterns:seeded-deterministic-map-generation
+**Tags:** [procedural, seeded, rng, roguelite]
+
+For any per-run procedural content (StS branching maps, encounter/reward pools) derive EVERYTHING from a seeded PRNG — mulberry32 keyed per zone (`seed*7919 + zoneIndex*104729`). Generate row counts → node types → edges → layout all from the same rng family, then run a connectivity guarantee pass (every next-row node gets an incoming edge) so start→boss is always reachable. Layout from (row, col) counts, not rng, so geometry is stable and SSR/hydration-safe. Save only the seed + small state, regenerate on load.
+
+**What to do differently:** Never call `Math.random()` in render-side map/content code. Keep a tiny seeded PRNG utility; seed it per run and per zone; make map generation a pure function of (zoneDef, seed) so it's unit-testable (`same seed → same map`).
+
+**Full entry:** @wiki/patterns/seeded-deterministic-map-generation
+
+---
+
+## 2026-08-03 — WM MCP Index Lags Task Writes — Rebuild After create/update
+
+**Category:** failure
+**Source:** @wiki/concepts/stale-mcp-index-after-task-updates
+**Tags:** [wm, mcp, tooling, index]
+
+The WM MCP server returns results from a cached in-memory index that lags behind the markdown files it manages. After `wm_task.create`/`update`: `list`/`get` may return NOT_FOUND or a stale status, `todo → done` transitions fail even though the `.md` on disk is correct, and `page.link` can 404 on just-created tasks. The disk file is ground truth; the API is not.
+
+**What to do differently:** After any `wm_task.create`/`update` (or when a get/list looks wrong), run `wm_index_rebuild(skip_embed: true)` and re-get to confirm. Batch create+link so links are retried after a rebuild. Verify ground truth with `grep status/assignee/ac .wm/wiki/tasks/<slug>.md` before trusting a failure.
+
+**Full entry:** @wiki/concepts/stale-mcp-index-after-task-updates

@@ -21,8 +21,8 @@ import type { CardInstance, FxEvent, GameState, Pos } from "@/lib/game/types"
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-export function useFishMafia() {
-  const [state, setState] = useState<GameState>(createInitialState)
+export function useFishMafia(initial?: GameState) {
+  const [state, setState] = useState<GameState>(initial ?? createInitialState)
   const [fx, setFx] = useState<FxEvent[]>([])
   const [busy, setBusy] = useState(false) // enemy turn running / animating
   const fxSeed = useRef(1)
@@ -30,6 +30,8 @@ export function useFishMafia() {
 
   // Shuffle + draw the opening hand only after mount to avoid SSR/client
   // hydration mismatches (the deck order is deterministic on the server).
+  // Overworld battles provide `initial` (deck from the run, empty hand), so
+  // they also go through startGame here to get the opening hand.
   useEffect(() => {
     if (started.current) return
     started.current = true
