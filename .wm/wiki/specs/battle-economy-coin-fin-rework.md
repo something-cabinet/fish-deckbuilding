@@ -1,7 +1,7 @@
 ---
 title: Battle Economy — Coin (Play Resource) + Fin (Upgrade Currency)
 type: spec
-status: draft
+status: locked
 tags:
   - game-design
   - combat
@@ -58,6 +58,20 @@ This spec renames and repurposes both, in a single coordinated change:
 - **D6 — Right-click cancels selection.** A visible hint ("right-click to
   cancel" + icon) appears while a card is selected; right-click (contextmenu)
   clears the selection and any targeting overlay.
+- **D7 — `COIN_TURN_BASE = 0`.** Each turn starts at 0 Coin. Pure sell-to-play;
+  no base income. (locks OQ-1)
+- **D8 — `sellValue = max(1, cost)`.** Selling yields Coin equal to the card's
+  cost, floored at 1, unless the card authors an explicit `sellValue`. (locks OQ-2)
+- **D9 — Coin-income cards.** Add one new starter card **"Shakedown"** (cost 0,
+  `GainCoin 2`) and tag 1–2 existing low-impact starter cards with a small
+  `GainCoin`. This is the only non-sell Coin source. (locks OQ-3)
+- **D10 — Fin reward = `+1` per enemy defeated.** No separate flat victory
+  bonus in this phase. (locks OQ-4)
+- **D11 — Fin is run-scoped.** Fin accumulates across battles within a run and is
+  surfaced to the overworld for a future card-upgrade shop; it is not reset
+  between battles. (locks OQ-5)
+- **D12 — New register component.** Author a lightweight segmented-digit register
+  component for the Coin readout, reusing existing coin iconography/FX. (locks OQ-6)
 
 ## Terminology & Rename Inventory
 
@@ -210,17 +224,11 @@ hidden once nothing is selected.
 
 ## Open Questions
 
-- [ ] OQ-1 `COIN_TURN_BASE` — start each turn at **0** Coin (pure sell-to-play),
-  or a small base like 1? Default proposed: **0**.
-- [ ] OQ-2 `sellValue` formula — flat `1`, `= cost`, or a per-card authored
-  value? Default proposed: `max(1, cost)`.
-- [ ] OQ-3 Which starter cards get `GainCoin`, and how many? Default: add one
-  "Shakedown" (cost 0, GainCoin 2) and tag 1–2 existing low-impact cards.
-- [ ] OQ-4 Fin reward rate — `+1` per enemy defeated, a flat victory bonus, or
-  both? Default proposed: **+1 per enemy defeated**.
-- [ ] OQ-5 Does Fin carry across battles within a run (overworld-level), or is it
-  battle-scoped? Proposed: **run-scoped**, surfaced to the overworld for a future
-  card-upgrade shop.
-- [ ] OQ-6 Register visuals — reuse existing gold/coin FX + `CardFace` cost icon,
-  or author a new segmented-digit register component? Proposed: new lightweight
-  register component, reuse existing coin iconography.
+All resolved and folded into Locked Decisions (2026-08-04):
+
+- [x] OQ-1 → **D7**: `COIN_TURN_BASE = 0`.
+- [x] OQ-2 → **D8**: `sellValue = max(1, cost)`.
+- [x] OQ-3 → **D9**: add "Shakedown" (cost 0, GainCoin 2) + tag 1–2 low-impact starters.
+- [x] OQ-4 → **D10**: Fin `+1` per enemy defeated.
+- [x] OQ-5 → **D11**: Fin is run-scoped, surfaced to the overworld.
+- [x] OQ-6 → **D12**: new lightweight register component, reusing coin iconography.
