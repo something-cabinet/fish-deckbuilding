@@ -323,7 +323,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
           )}
         </div>
 
-        <div className="hidden w-[300px] shrink-0 lg:block">
+        <div className="w-[180px] shrink-0 sm:w-[220px] md:w-[260px] lg:w-[300px]">
           <SidePanel state={state} onHoverUnit={() => {}} onSelectUnit={(u) => onUnitClick(u)} />
         </div>
       </div>
