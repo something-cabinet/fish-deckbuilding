@@ -16,7 +16,7 @@ export function EventScreen({ event, onChoose }: Props) {
   const [picked, setPicked] = useState<EventChoice | null>(null)
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-ocean-deep/92 p-6 backdrop-blur-sm animate-fm-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ocean-deep/95 p-6 backdrop-blur-md animate-fm-fade-in">
       <div className="flex w-full max-w-lg flex-col rounded-2xl border border-teal/30 bg-ocean-deep/95 p-6 shadow-2xl">
         <p className="flex items-center gap-2 font-display text-xs uppercase tracking-[0.4em] text-teal">
           <HelpCircle size={14} />

@@ -45,7 +45,7 @@ export function ShopScreen({
   const uniqueDeck = Array.from(new Set(deck))
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-ocean-deep/92 p-4 backdrop-blur-sm animate-fm-fade-in sm:p-6">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-ocean-deep p-4 animate-fm-fade-in sm:p-6">
       {/* header */}
       <div className="mx-auto flex w-full max-w-4xl items-center justify-between">
         <div>

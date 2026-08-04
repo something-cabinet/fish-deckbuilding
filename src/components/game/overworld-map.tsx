@@ -134,11 +134,12 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
       {/* HUD */}
       <header className="relative z-10 flex items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
         <div className="min-w-[150px]">
-          <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">
-            {curZoneName}
+          <p className="flex items-center gap-1.5 font-display text-sm font-bold uppercase tracking-wider text-gold">
+            <Fish size={14} className="text-gold" />
+            Guppy the Debtor
           </p>
           <p className="font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-            Zone {state.zoneIndex + 1} of 3
+            {curZoneName} · Zone {state.zoneIndex + 1} of 3
           </p>
         </div>
 

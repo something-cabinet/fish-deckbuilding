@@ -1,5 +1,5 @@
 import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
-import { HERO_DEF, type EnemySpawn } from "@/lib/game/units"
+import { HERO_DEF, UnitKind, type EnemySpawn } from "@/lib/game/units"
 import {
   EVENTS,
   FORECLOSURE_CAP,
@@ -375,7 +375,7 @@ export function battleEnemiesForZone(zoneIndex: number, elite = false): EnemySpa
       hp: Math.round(t.hp * scale),
       atk: Math.round(t.atk * scale),
       move: t.move,
-    } as EnemySpawn
+    }
   })
 }
 
@@ -389,7 +389,7 @@ export function bossEnemiesForZone(zoneIndex: number): EnemySpawn[] {
     pool.length > 0
       ? pool.slice(0, 2).map((t, i) => ({
           name: t.name,
-          kind: t.kind as EnemySpawn["kind"],
+          kind: t.kind,
           x: i === 0 ? 6 : 7,
           y: i === 0 ? 1 : 3,
           hp: t.hp,
@@ -399,7 +399,7 @@ export function bossEnemiesForZone(zoneIndex: number): EnemySpawn[] {
       : []
   return [
     ...guards,
-    { name: b.name, kind: "boss", x: 8, y: 2, hp: b.hp, atk: b.atk, move: b.move },
+    { name: b.name, kind: UnitKind.Boss, x: 8, y: 2, hp: b.hp, atk: b.atk, move: b.move },
   ]
 }
 

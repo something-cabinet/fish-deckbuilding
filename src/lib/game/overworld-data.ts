@@ -1,4 +1,5 @@
 import type { NodeType, ZoneDef } from "./overworld-types"
+import { UnitKind } from "./units"
 
 /**
  * Static zone definitions for the overworld. Map *layout* is generated
@@ -17,8 +18,8 @@ export const ZONES: ZoneDef[] = [
     baseRent: 6,
     boss: { name: "Barnacle Brute", hp: 18, atk: 4, move: 1 },
     enemyPool: [
-      { name: "Thug", kind: "thug", hp: 4, atk: 2, move: 2 },
-      { name: "Enforcer", kind: "enforcer", hp: 6, atk: 3, move: 2 },
+      { name: "Thug", kind: UnitKind.Thug, hp: 4, atk: 2, move: 2 },
+      { name: "Enforcer", kind: UnitKind.Enforcer, hp: 6, atk: 3, move: 2 },
     ],
     theme: "shallow",
   },
@@ -33,8 +34,8 @@ export const ZONES: ZoneDef[] = [
     baseRent: 10,
     boss: { name: "The Collection Shark", hp: 26, atk: 5, move: 2 },
     enemyPool: [
-      { name: "Enforcer", kind: "enforcer", hp: 6, atk: 3, move: 2 },
-      { name: "Thug", kind: "thug", hp: 7, atk: 3, move: 2 },
+      { name: "Enforcer", kind: UnitKind.Enforcer, hp: 6, atk: 3, move: 2 },
+      { name: "Thug", kind: UnitKind.Thug, hp: 7, atk: 3, move: 2 },
     ],
     theme: "mid",
   },
@@ -49,8 +50,8 @@ export const ZONES: ZoneDef[] = [
     baseRent: 16,
     boss: { name: "The Forecloser", hp: 34, atk: 6, move: 2 },
     enemyPool: [
-      { name: "Enforcer", kind: "enforcer", hp: 9, atk: 4, move: 2 },
-      { name: "Thug", kind: "thug", hp: 10, atk: 4, move: 2 },
+      { name: "Enforcer", kind: UnitKind.Enforcer, hp: 9, atk: 4, move: 2 },
+      { name: "Thug", kind: UnitKind.Thug, hp: 10, atk: 4, move: 2 },
     ],
     theme: "deep",
   },

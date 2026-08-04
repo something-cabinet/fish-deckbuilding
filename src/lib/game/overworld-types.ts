@@ -1,3 +1,5 @@
+import type { UnitKind } from "./units"
+
 export type ZoneId = "shallows" | "midwaters" | "depths"
 export type NodeType =
   | "battle"
@@ -18,7 +20,7 @@ export interface BossDef {
 /** A single enemy in a zone's standard battle lineup. */
 export interface EnemySpawnTemplate {
   name: string
-  kind: "thug" | "enforcer"
+  kind: UnitKind
   hp: number
   atk: number
   move: number
