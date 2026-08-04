@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { CardDef, GameState } from "@/lib/game/types"
 import type { MapNode } from "@/lib/game/overworld-types"
 import { CardCreateScreen } from "./card-create-screen"
@@ -28,6 +28,8 @@ export const DEFAULT_SETTINGS: GameSettings = {
 type Screen = "menu" | "overworld" | "battle" | "library" | "create"
 
 export function FishMafiaApp() {
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => { setHydrated(true) }, [])
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
   // custom cards authored in the card creator, surfaced in the library
@@ -131,7 +133,7 @@ export function FishMafiaApp() {
         settings={settings}
         onChangeSettings={setSettings}
         onStart={startNewRun}
-        onContinue={overworld.hasSave ? continueRun : undefined}
+        onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
         onOpenLibrary={() => setScreen("library")}
         onOpenCreate={() => setScreen("create")}
       />

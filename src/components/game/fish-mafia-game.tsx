@@ -329,7 +329,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       </div>
 
       {/* bottom: hand + controls */}
-      <div className="flex items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
+      <div className="flex shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
         {/* left cluster: mana + piles */}
         <div className="flex items-center gap-3">
           <div

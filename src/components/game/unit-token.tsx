@@ -86,7 +86,7 @@ export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, o
       {/* stat plate: ATK | HP */}
       <div
         className={cn(
-          "pointer-events-none relative -mt-1 flex items-stretch overflow-hidden rounded-md border text-[10px] font-bold leading-none shadow-md",
+          "pointer-events-none relative -mt-1 flex items-stretch overflow-hidden rounded-md border text-[clamp(5px,1cqi,12px)] font-bold leading-none shadow-md",
           "font-display tracking-wide",
           isPlayer ? "border-gold/60 bg-ocean-deep/90" : "border-enemy/60 bg-ocean-deep/90",
         )}

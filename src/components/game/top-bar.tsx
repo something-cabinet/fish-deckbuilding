@@ -18,7 +18,7 @@ export function TopBar({ state }: { state: GameState }) {
   const danger = state.foreclosure <= 4
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
+    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
       {/* left: identity */}
       <div className="min-w-[160px]">
         <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">Guppy the Debtor</p>
