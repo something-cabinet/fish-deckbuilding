@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "codeceptjs run --steps",
     "test:e2e:headless": "HEADLESS=true codeceptjs run --steps"
   },
@@ -32,6 +33,7 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.10",
     "codeceptjs": "^4.1.0",
     "jsdom": "^30.0.1",
     "playwright": "^1.62.1",
