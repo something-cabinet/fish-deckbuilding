@@ -22,7 +22,6 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom/vitest"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
-import { BUY_COST } from "@/lib/game"
 import { CardTarget } from "@/lib/game/cards"
 import { Phase, type Pos } from "@/lib/game/battle"
 import { Team } from "@/lib/game/units"
@@ -111,18 +110,27 @@ describe("useFishMafia under StrictMode (AC-1: actions commit, AC-2: drain fix)"
     expect(after.hp).toBeLessThan(hpBefore)
   })
 
-  it("cast: pays mana and removes the played card from hand", async () => {
+  it("cast: pays coin and removes the played card from hand", async () => {
     const { result } = setup()
     await flushStartGame()
 
-    // Scan the actual dealt hand for a card we can afford (turn-1 mana is 1).
-    const playable = result.current.state.hand.find(
-      (c) => c.def.cost <= result.current.state.mana,
+    // Turn 1 starts at 0 coin (sell-to-play economy). Bank some by selling a
+    // couple of cards from the top of the hand so a card becomes affordable.
+    for (let i = 0; i < 2; i++) {
+      const s = result.current.state
+      if (s.hand.length <= 1) break
+      act(() => result.current.sell(s.hand[0].uid))
+    }
+
+    // Pick an affordable card that does NOT itself grant coin, so the only
+    // coin delta from casting is the cost paid.
+    const s = result.current.state
+    const playable = s.hand.find(
+      (c) => c.def.cost <= s.coin && !c.def.effects?.some((e) => e.kind === "gainCoin"),
     )
 
     if (!playable) {
-      // Only cost-1 cards are castable at turn 1; the starter deck has 7 of
-      // them, so a 5-card draw virtually always contains one. Skip otherwise.
+      // Unlucky draw — nothing affordable/non-income after selling. Skip.
       return
     }
 
@@ -135,13 +143,13 @@ describe("useFishMafia under StrictMode (AC-1: actions commit, AC-2: drain fix)"
       target = { unitId: targets.unitIds[0] }
     }
 
-    const manaBefore = result.current.state.mana
+    const coinBefore = result.current.state.coin
     const uid = playable.uid
 
     act(() => result.current.cast(uid, target))
 
     const after = result.current.state
-    expect(after.mana).toBe(manaBefore - playable.def.cost)
+    expect(after.coin).toBe(coinBefore - playable.def.cost)
     expect(after.hand.some((c) => c.uid === uid)).toBe(false)
   })
 
@@ -160,33 +168,6 @@ describe("useFishMafia under StrictMode (AC-1: actions commit, AC-2: drain fix)"
     expect(after.coin).toBeGreaterThan(coinBefore)
     expect(after.hand.some((c) => c.uid === uid)).toBe(false)
     expect(after.hand.length).toBe(handBefore - 1)
-  })
-
-  it("buy: spends BUY_COST and draws a card (earns coin by selling first)", async () => {
-    const { result } = setup()
-    await flushStartGame()
-
-    // Turn 1 starts with 0 coin and 5 starter cards (each sells for 1–2).
-    // Sell from the top of the hand until we can afford the buy.
-    let s = result.current.state
-    while (s.coin < BUY_COST && s.hand.length > 0) {
-      act(() => result.current.sell(s.hand[0].uid))
-      s = result.current.state
-    }
-
-    if (s.coin < BUY_COST) {
-      // Cannot afford even after liquidating the whole hand — skip.
-      return
-    }
-
-    const handBefore = s.hand.length
-    const coinBefore = s.coin
-
-    act(() => result.current.buy())
-
-    const after = result.current.state
-    expect(after.coin).toBe(coinBefore - BUY_COST)
-    expect(after.hand.length).toBe(handBefore + 1)
   })
 
   it("endTurn: runs the enemy phase and returns to the player phase (turn advances)", async () => {

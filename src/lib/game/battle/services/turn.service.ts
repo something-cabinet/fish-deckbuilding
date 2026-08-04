@@ -4,6 +4,7 @@ import { cellLabel, clone, heroUnit, log, posKey } from "../../shared"
 import { Team } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
+import { COIN_TURN_BASE } from "../../cards"
 import { inBounds, manhattan } from "./board.service"
 
 export interface EnemyStep {
@@ -144,8 +145,9 @@ export function beginPlayerTurn(state: GameState): GameState {
   s.turn += 1
   s.interest += 1
   s.foreclosure = Math.max(0, s.foreclosure - 1)
-  s.maxMana = Math.min(10, s.maxMana + 1)
-  s.mana = s.maxMana
+  // sell-to-play economy: Coin does not ramp or carry over — each turn starts
+  // fresh at the base and is fueled by selling cards / income cards (spec D7).
+  s.coin = COIN_TURN_BASE
   s.spentCount = 0
   s.phase = Phase.Player
 

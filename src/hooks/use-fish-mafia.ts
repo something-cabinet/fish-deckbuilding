@@ -112,11 +112,6 @@ export function useFishMafia(initial?: GameState) {
     [commit],
   )
 
-  const buy = useCallback(() => {
-    sessionRef.current.enqueue({ kind: "buy" })
-    commit()
-  }, [commit])
-
   /* ---- undo / redo (FR-10, player-phase only — D10) ---- */
 
   const undo = useCallback(() => {
@@ -194,7 +189,6 @@ export function useFishMafia(initial?: GameState) {
     attack,
     cast,
     sell,
-    buy,
     undo,
     redo,
     endTurn,

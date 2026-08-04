@@ -1,6 +1,6 @@
 "use client"
 
-import { Coins, Percent } from "lucide-react"
+import { Gem, Percent } from "lucide-react"
 import { Phase, type GameState } from "@/lib/game/battle"
 import { cn } from "@/lib/utils"
 
@@ -49,7 +49,7 @@ export function TopBar({ state }: { state: GameState }) {
 
       {/* right: resources */}
       <div className="flex min-w-[160px] items-center justify-end gap-5">
-        <Stat label="Coin" value={state.coin} icon={<Coins size={13} className="text-gold" />} />
+        <Stat label="Fin" value={state.fin} icon={<Gem size={13} className="text-teal" />} />
         <Stat label="Interest" value={state.interest} icon={<Percent size={13} className="text-enemy" />} />
         <div className="flex flex-col items-end gap-1">
           <span className="flex items-center gap-1.5 font-display text-[10px] uppercase tracking-widest text-muted-foreground">

@@ -2,31 +2,44 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
+  REMOVE_PRICE,
+  applyEventChoice,
+  buyCard as buyCardEngine,
   clearCurrentNode,
   clearSave,
   createNewRun,
   enemiesForNode,
+  eventForNode,
   generateAllZoneMaps,
   healAtRest,
   isBossNode,
+  isForeclosed,
   isRestNode,
   loadSave,
+  nodeTypeAt,
+  payDebt as payDebtEngine,
   reachableNodes,
+  removeCardFromDeck,
+  rollEliteRewards,
   rollRewards,
+  rollTreasure,
   saveState,
+  shopInventory,
   travelToNode,
   unlockNextZone,
   zoneName,
 } from "@/lib/game/overworld-engine"
 import { createInitialState } from "@/lib/game/battle"
 import type { GameState } from "@/lib/game/battle"
-import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
+import type { MapNode, NodeType, OverworldState } from "@/lib/game/overworld-types"
+
+type RewardKind = "battle" | "elite" | "treasure"
 
 /**
  * Overworld state management: holds the run, derives the seeded zone maps,
  * auto-saves to localStorage on every node transition, and exposes node
- * resolution actions (rest heal, battle win -> reward -> card pick, boss win
- * -> zone unlock).
+ * resolution actions (rest heal, battle/elite/treasure reward, shop
+ * purchases, event choices, debt payment, boss win -> zone unlock).
  */
 export function useOverworld() {
   const [state, setState] = useState<OverworldState | null>(() => loadSave())
@@ -69,27 +82,29 @@ export function useOverworld() {
   }, [])
 
   /**
-   * Resolve a Battle node win: roll the reward options for this node. The
+   * Resolve a Battle / Elite / Treasure node: roll the reward options. The
    * caller shows the reward screen; on pick, `claimReward` commits it.
    */
-  const startReward = useCallback(() => {
-    const s = state
-    if (!s) return
-    setReward(rollRewards(s.seed, s.zoneIndex, s.nodeId))
-  }, [state])
+  const startReward = useCallback(
+    (kind: RewardKind = "battle") => {
+      const s = state
+      if (!s) return
+      const roll =
+        kind === "elite"
+          ? rollEliteRewards
+          : kind === "treasure"
+            ? rollTreasure
+            : rollRewards
+      setReward(roll(s.seed, s.zoneIndex, s.nodeId))
+    },
+    [state],
+  )
 
-  /**
-   * Claim a reward card + gold: add to deck, grey the battle node, save.
-   * Used for normal battle nodes.
-   */
+  /** Claim a reward card + gold: add to deck, grey the node, save. */
   const claimReward = useCallback((cardId: string, gold: number) => {
     setState((s) => {
       if (!s) return s
-      return clearCurrentNode({
-        ...s,
-        deck: [...s.deck, cardId],
-        gold: s.gold + gold,
-      })
+      return clearCurrentNode({ ...s, deck: [...s.deck, cardId], gold: s.gold + gold })
     })
     setReward(null)
   }, [])
@@ -120,16 +135,22 @@ export function useOverworld() {
   )
 
   /**
-   * Write hero HP back into the run after a won battle.
+   * Write hero HP (and optionally the run-scoped Fin earned in battle) back
+   * into the run after a won battle.
    */
-  const updateHp = useCallback((hp: number) => {
-    setState((s) => (s ? { ...s, hp: Math.max(1, Math.min(s.maxHp, hp)) } : s))
+  const updateHp = useCallback((hp: number, fin?: number) => {
+    setState((s) =>
+      s
+        ? {
+            ...s,
+            hp: Math.max(1, Math.min(s.maxHp, hp)),
+            ...(typeof fin === "number" ? { fin } : {}),
+          }
+        : s,
+    )
   }, [])
 
-  /**
-   * Resolve a Boss node win: unlock the next zone, grey the boss node, move
-   * the hero to the next zone's start node, save.
-   */
+  /** Boss node win with no reward pick (final boss): unlock / advance. */
   const claimBossWin = useCallback(() => {
     setState((s) => {
       if (!s) return s
@@ -138,31 +159,67 @@ export function useOverworld() {
       if (nextZone < maps.length) {
         return { ...unlocked, zoneIndex: nextZone, nodeId: "0-0", visited: [] }
       }
-      // final boss defeated -> run complete, keep hero where they are
       return unlocked
     })
     setReward(null)
   }, [maps.length])
+
+  /* --- shop actions --- */
+
+  const buyCard = useCallback((cardId: string, price: number) => {
+    setState((s) => (s ? buyCardEngine(s, cardId, price) : s))
+  }, [])
+
+  const removeCard = useCallback((cardId: string) => {
+    setState((s) => (s ? removeCardFromDeck(s, cardId, REMOVE_PRICE) : s))
+  }, [])
+
+  const payDebt = useCallback((amount: number) => {
+    setState((s) => (s ? payDebtEngine(s, amount) : s))
+  }, [])
+
+  /** Leave a shop: grey the node (ticks interest), save. */
+  const leaveShop = useCallback(() => {
+    setState((s) => (s ? clearCurrentNode(s) : s))
+  }, [])
+
+  /* --- event actions --- */
+
+  const resolveEvent = useCallback(
+    (choice: { gold?: number; hp?: number; debt?: number; card?: string }) => {
+      setState((s) => (s ? applyEventChoice(s, choice) : s))
+    },
+    [],
+  )
 
   /** Loss: return to map at the current node; nothing is lost. */
   const onLoss = useCallback(() => setReward(null), [])
 
   const currentMap: MapNode[] = state ? maps[state.zoneIndex] ?? [] : []
   const reachable: MapNode[] = state ? reachableNodes(currentMap, state) : []
+  const nodeType: NodeType | null = state ? nodeTypeAt(state) : null
+
+  const shop = useMemo(
+    () => (state ? shopInventory(state.seed, state.zoneIndex, state.nodeId) : []),
+    [state?.seed, state?.zoneIndex, state?.nodeId],
+  )
+  const event = useMemo(
+    () => (state ? eventForNode(state.seed, state.zoneIndex, state.nodeId) : null),
+    [state?.seed, state?.zoneIndex, state?.nodeId],
+  )
 
   /** Build the battle GameState for the hero's current node. */
   const buildBattleState = useCallback(
     (nodeIdOverride?: string): GameState | null => {
       const s = state
       if (!s) return null
-      // stale-closure-safe: allow callers to pass the just-clicked node so
-      // boss battles build the right lineup before the travel state lands.
       const eff = nodeIdOverride ? { ...s, nodeId: nodeIdOverride } : s
       return createInitialState({
         heroHp: eff.hp,
         heroMaxHp: eff.maxHp,
         deck: eff.deck,
         enemies: enemiesForNode(eff),
+        fin: eff.fin,
       })
     },
     [state],
@@ -175,6 +232,11 @@ export function useOverworld() {
     currentMap,
     reachable,
     reward,
+    nodeType,
+    shop,
+    event,
+    removePrice: REMOVE_PRICE,
+    foreclosed: state ? isForeclosed(state) : false,
     isBossNode: state ? isBossNode(state) : false,
     isRestNode: state ? isRestNode(state) : false,
     zoneName: state ? zoneName(state.zoneIndex) : "",
@@ -188,6 +250,11 @@ export function useOverworld() {
     claimBossReward,
     claimBossWin,
     updateHp,
+    buyCard,
+    removeCard,
+    payDebt,
+    leaveShop,
+    resolveEvent,
     onLoss,
     buildBattleState,
   }

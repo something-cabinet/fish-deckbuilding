@@ -4,8 +4,7 @@ import { clone, heroUnit, log } from "../shared"
 import { checkEnd, manhattan, reachableTiles } from "../battle/services"
 import { cleanupDead, dealDamage, effAtk } from "../units"
 import { Team } from "../units"
-import { BUY_COST, CardTarget, cardTargets, resolveCardEffects, type CardInstance } from "../cards"
-import { drawCards, HAND_MAX } from "../deck"
+import { CardTarget, cardTargets, resolveCardEffects, type CardInstance } from "../cards"
 
 export function moveUnit(
   state: GameState,
@@ -56,7 +55,7 @@ export function castCard(
   const idx = s.hand.findIndex((c) => c.uid === cardUid)
   if (idx < 0) return { state, fx }
   const card = s.hand[idx]
-  if (card.def.cost > s.mana) return { state, fx }
+  if (card.def.cost > s.coin) return { state, fx }
 
   const hero = heroUnit(s)
   const from = hero ? { ...hero.pos } : undefined
@@ -73,7 +72,7 @@ export function castCard(
   }
 
   // pay + move card to discard
-  s.mana -= card.def.cost
+  s.coin -= card.def.cost
   s.spentCount += 1
   s.hand = s.hand.filter((c) => c.uid !== cardUid)
   s.discard = [...s.discard, card]
@@ -87,28 +86,20 @@ export function castCard(
   return { state: s, fx }
 }
 
+/**
+ * Sell a card from hand for Coin this turn (spec D8: sellValue = max(1, cost),
+ * with `value` acting as the authored per-card override). Selling is the
+ * primary way to fund the turn's plays.
+ */
 export function sellCard(state: GameState, cardUid: string): GameState {
   const s = clone(state)
   const idx = s.hand.findIndex((c) => c.uid === cardUid)
   if (idx < 0 || s.phase !== Phase.Player) return state
   const card = s.hand[idx]
-  const gain = card.def.value + Math.floor(s.interest / 4)
+  const gain = Math.max(1, card.def.value)
   s.coin += gain
   s.hand = s.hand.filter((c) => c.uid !== cardUid)
   s.discard = [...s.discard, card]
   log(s, `Sold ${card.def.name} on the street for ${gain} coin.`, "gold")
   return s
-}
-
-export function buyCard(state: GameState): { state: GameState; fx: FxEvent[] } {
-  const s = clone(state)
-  const fx: FxEvent[] = []
-  if (s.phase !== Phase.Player || s.coin < BUY_COST) return { state, fx }
-  if (s.hand.length >= HAND_MAX) return { state, fx }
-  s.coin -= BUY_COST
-  const hero = heroUnit(s)
-  if (hero) fx.push({ id: s.logCounter, kind: FxKind.Draw, to: { ...hero.pos } })
-  drawCards(s, 1, fx)
-  log(s, `Bought a card from the black market for ${BUY_COST} coin.`, "gold")
-  return { state: s, fx }
 }

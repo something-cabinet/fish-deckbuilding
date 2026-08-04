@@ -1,6 +1,7 @@
 import { FxKind } from "../../battle/enums"
 import type { FxEvent, GameState } from "../../battle/models"
 import { cellLabel, log } from "../../shared"
+import { Team } from "../enums"
 import type { Unit } from "../models"
 
 export function effAtk(u: Unit) {
@@ -17,6 +18,9 @@ export function dealDamage(state: GameState, target: Unit, amount: number, fx: F
 }
 
 export function cleanupDead(state: GameState) {
+  // award persistent Fin per enemy defeated (spec D10) before they leave the board
+  const killed = state.units.filter((u) => u.team === Team.Enemy && u.hp <= 0).length
+  if (killed > 0) state.fin += killed
   // keep dead units out of occupancy but remove from array
   state.units = state.units.filter((u) => u.hp > 0)
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createInitialState, Phase, type FxEvent, type GameState } from "@/lib/game/battle"
+import { COIN_TURN_BASE } from "@/lib/game/cards"
 import { Team } from "@/lib/game/units"
 import {
   EnemyStepKind,
@@ -87,7 +88,7 @@ describe("turn: enemy phase", () => {
 })
 
 describe("turn: beginPlayerTurn", () => {
-  it("increments turn, resets mana and spentCount, draws a card", () => {
+  it("increments turn, resets coin and spentCount, draws a card", () => {
     const s = fresh()
     s.spentCount = 3
     const turnBefore = s.turn
@@ -95,7 +96,7 @@ describe("turn: beginPlayerTurn", () => {
     const next = beginPlayerTurn(s)
     expect(next.turn).toBe(turnBefore + 1)
     expect(next.spentCount).toBe(0)
-    expect(next.mana).toBe(next.maxMana)
+    expect(next.coin).toBe(COIN_TURN_BASE)
     expect(next.hand.length).toBeGreaterThan(handBefore)
     expect(next.phase).toBe(Phase.Player)
   })

@@ -14,10 +14,11 @@ function stateWithHand(count: number) {
 describe("deck: drawCards", () => {
   it("draws cards from the deck into the hand", () => {
     const s = stateWithHand(0)
+    const deckBefore = s.deck.length
     const fx: FxEvent[] = []
     drawCards(s, 2, fx)
     expect(s.hand.length).toBe(2)
-    expect(s.deck.length).toBe(15)
+    expect(s.deck.length).toBe(deckBefore - 2)
   })
 
   it("burns a card when the hand is full", () => {

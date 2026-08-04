@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react"
 import type { CardDef, GameState } from "@/lib/game"
 import type { MapNode } from "@/lib/game/overworld-types"
+import type { EventChoice } from "@/lib/game/overworld-data"
 import { CardCreateScreen } from "./card-create-screen"
 import { CardLibraryScreen } from "./card-library-screen"
+import { EventScreen } from "./event-screen"
 import { FishMafiaGame } from "./fish-mafia-game"
 import { MenuScreen } from "./menu-screen"
 import { OverworldMap } from "./overworld-map"
 import { RewardScreen } from "./reward-screen"
 import { RunSummary } from "./run-summary"
 import { SavePrompt } from "./save-prompt"
+import { ShopScreen } from "./shop-screen"
 import { useOverworld } from "@/hooks/use-overworld"
 
 export interface GameSettings {
@@ -26,10 +29,14 @@ export const DEFAULT_SETTINGS: GameSettings = {
 }
 
 type Screen = "menu" | "overworld" | "battle" | "library" | "create"
+/** an overworld node resolved on the map itself, via an overlay */
+type NodeAction = "shop" | "event" | null
 
 export function FishMafiaApp() {
   const [hydrated, setHydrated] = useState(false)
-  useEffect(() => { setHydrated(true) }, [])
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
   // custom cards authored in the card creator, surfaced in the library
@@ -37,40 +44,51 @@ export function FishMafiaApp() {
   // the battle being played right now (built from the overworld run)
   const [battle, setBattle] = useState<GameState | null>(null)
   const [battleIsBoss, setBattleIsBoss] = useState(false)
+  const [battleIsElite, setBattleIsElite] = useState(false)
   const [pendingBossReward, setPendingBossReward] = useState(false)
+  const [nodeAction, setNodeAction] = useState<NodeAction>(null)
   const [story, setStory] = useState<string | null>(null)
   const [runResult, setRunResult] = useState<"won" | "lost" | null>(null)
+  const [lostReason, setLostReason] = useState<"foreclosure" | "defeat">("defeat")
 
   const overworld = useOverworld()
 
-  const startNewRun = () => {
-    overworld.beginNewRun()
+  const resetRunFlags = () => {
     setBattle(null)
     setBattleIsBoss(false)
+    setBattleIsElite(false)
     setPendingBossReward(false)
+    setNodeAction(null)
     setStory(null)
     setRunResult(null)
+    setLostReason("defeat")
+  }
+
+  const startNewRun = () => {
+    overworld.beginNewRun()
+    resetRunFlags()
     setScreen("overworld")
   }
 
   const continueRun = () => {
     overworld.continueRun()
-    setBattle(null)
-    setBattleIsBoss(false)
-    setPendingBossReward(false)
-    setStory(null)
-    setRunResult(null)
+    resetRunFlags()
     setScreen("overworld")
   }
 
   const backToMenu = () => {
-    setBattle(null)
-    setBattleIsBoss(false)
-    setPendingBossReward(false)
-    setStory(null)
-    setRunResult(null)
+    resetRunFlags()
     setScreen("menu")
   }
+
+  // Foreclosure ends the run: once debt hits the cap while on the map, the
+  // syndicate calls in the ledger no matter where the hero stands.
+  useEffect(() => {
+    if (screen === "overworld" && overworld.foreclosed && !runResult) {
+      setLostReason("foreclosure")
+      setRunResult("lost")
+    }
+  }, [screen, overworld.foreclosed, runResult])
 
   const enterBattle = (nodeId?: string) => {
     const initial = overworld.buildBattleState(nodeId)
@@ -83,18 +101,40 @@ export function FishMafiaApp() {
   const handleNodeClick = (node: MapNode) => {
     // move the hero to the clicked node first (auto-saves)
     overworld.travel(node.id)
-    // Rest nodes resolve immediately on the map
-    if (node.type === "rest") {
-      overworld.heal()
-      return
+
+    switch (node.type) {
+      case "rest":
+        overworld.heal()
+        return
+      case "shop":
+        setNodeAction("shop")
+        return
+      case "event":
+        setNodeAction("event")
+        return
+      case "treasure":
+        // no fight — roll a generous reward pick straight away
+        overworld.startReward("treasure")
+        return
+      case "elite":
+        setBattleIsBoss(false)
+        setBattleIsElite(true)
+        enterBattle(node.id)
+        return
+      case "boss":
+        setBattleIsBoss(true)
+        setBattleIsElite(false)
+        enterBattle(node.id)
+        return
+      default:
+        setBattleIsBoss(false)
+        setBattleIsElite(false)
+        enterBattle(node.id)
     }
-    // Battle / Boss: start combat at the traveled node
-    setBattleIsBoss(node.type === "boss")
-    enterBattle(node.id)
   }
 
-  const handleWin = (heroHp: number) => {
-    overworld.updateHp(heroHp)
+  const handleWin = (heroHp: number, fin: number) => {
+    overworld.updateHp(heroHp, fin)
     if (battleIsBoss) {
       // final zone boss -> run over, show the victory summary
       if (overworld.state?.zoneIndex === 2) {
@@ -106,18 +146,20 @@ export function FishMafiaApp() {
       // roll rewards on the boss node; pick claims card + gold + unlock
       setPendingBossReward(true)
       setStory("The waters part. A new depth beckons...")
-      overworld.startReward()
+      overworld.startReward("elite")
       setScreen("overworld")
       return
     }
     setPendingBossReward(false)
-    overworld.startReward()
+    overworld.startReward(battleIsElite ? "elite" : "battle")
+    setBattleIsElite(false)
     setScreen("overworld")
   }
 
-  const handleLoss = (heroHp: number) => {
+  const handleLoss = () => {
     // Defeat on the final boss ends the run
     if (battleIsBoss && overworld.state?.zoneIndex === 2) {
+      setLostReason("defeat")
       setRunResult("lost")
       setScreen("overworld")
       return
@@ -170,20 +212,45 @@ export function FishMafiaApp() {
           <OverworldMap
             state={s}
             map={overworld.currentMap}
-            maps={overworld.maps}
             reachable={overworld.reachable}
-            activeZone={s.zoneIndex}
-            onZoneSelect={() => {}}
             onNodeClick={handleNodeClick}
             onExit={backToMenu}
           />
         ) : (
-          // no run yet — surface the menu-level prompt
           <SavePrompt hasSave={false} onContinue={() => {}} onNewRun={startNewRun} />
         )}
 
-        {/* post-battle card reward */}
-        {s && overworld.reward && !story && !runResult && (
+        {/* shop overlay */}
+        {s && nodeAction === "shop" && !runResult && (
+          <ShopScreen
+            gold={s.gold}
+            debt={s.debt}
+            deck={s.deck}
+            offers={overworld.shop}
+            removePrice={overworld.removePrice}
+            onBuy={overworld.buyCard}
+            onRemove={overworld.removeCard}
+            onPayDebt={overworld.payDebt}
+            onLeave={() => {
+              overworld.leaveShop()
+              setNodeAction(null)
+            }}
+          />
+        )}
+
+        {/* event overlay */}
+        {s && nodeAction === "event" && overworld.event && !runResult && (
+          <EventScreen
+            event={overworld.event}
+            onChoose={(choice: EventChoice) => {
+              overworld.resolveEvent(choice)
+              setNodeAction(null)
+            }}
+          />
+        )}
+
+        {/* post-battle / treasure card reward */}
+        {s && overworld.reward && !story && !runResult && nodeAction === null && (
           <RewardScreen
             cardIds={overworld.reward.cards}
             gold={overworld.reward.gold}
@@ -204,17 +271,17 @@ export function FishMafiaApp() {
             text={story}
             onDismiss={() => {
               setStory(null)
-              // if a reward was rolled before the story, it shows next frame
             }}
           />
         )}
 
-        {/* run summary (won or lost on the depths boss) */}
+        {/* run summary (won or lost) */}
         {s && runResult && (
           <RunSummary
             outcome={runResult}
             gold={s.gold}
             deckSize={s.deck.length}
+            lostReason={lostReason}
             onNewRun={startNewRun}
           />
         )}

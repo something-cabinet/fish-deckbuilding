@@ -1,5 +1,14 @@
+import type { UnitKind } from "./units"
+
 export type ZoneId = "shallows" | "midwaters" | "depths"
-export type NodeType = "battle" | "rest" | "boss"
+export type NodeType =
+  | "battle"
+  | "elite"
+  | "rest"
+  | "shop"
+  | "event"
+  | "treasure"
+  | "boss"
 
 export interface BossDef {
   name: string
@@ -11,7 +20,7 @@ export interface BossDef {
 /** A single enemy in a zone's standard battle lineup. */
 export interface EnemySpawnTemplate {
   name: string
-  kind: "thug" | "enforcer"
+  kind: UnitKind
   hp: number
   atk: number
   move: number
@@ -30,6 +39,8 @@ export interface ZoneDef {
   boss: BossDef
   /** standard battle lineups drawn from this pool */
   enemyPool: EnemySpawnTemplate[]
+  /** flat rent charged every time a node is cleared in this zone */
+  baseRent: number
   /** css theme name for the map background */
   theme: string
 }
@@ -40,6 +51,12 @@ export interface MapNode {
   row: number
   col: number
   type: NodeType
+  /**
+   * telegraphed threat tier for combat nodes (1-3), 0 for non-combat.
+   * Drives the skull pips shown on the map so the player reads danger
+   * before committing to a path (STS-style intent telegraphing).
+   */
+  threat: number
   /** ids of nodes reachable from this node */
   edges: string[]
   /** normalized 0..100 layout position */
@@ -55,6 +72,18 @@ export interface OverworldState {
   hp: number
   maxHp: number
   gold: number
+  /**
+   * persistent run currency earned by defeating enemies in battle (spec D11).
+   * Carried into each battle and read back out on victory; reserved for a
+   * future card-upgrade shop.
+   */
+  fin: number
+  /**
+   * outstanding debt to the syndicate. Interest accrues every time a node
+   * is cleared; if it reaches the foreclosure cap the run is lost. Gold's
+   * primary sink is paying this down (shops / tribute).
+   */
+  debt: number
   /** card library ids, grows over the run */
   deck: string[]
   /** node refs that have been cleared / used (greyed) */

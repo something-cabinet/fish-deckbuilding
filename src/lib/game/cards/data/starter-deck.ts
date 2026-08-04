@@ -17,4 +17,7 @@ export const STARTER_DECK: string[] = [
   "hush_money",
   "muscle",
   "muscle",
+  "shakedown",
+  "shakedown",
+  "shakedown",
 ]

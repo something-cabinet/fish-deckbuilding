@@ -2,17 +2,24 @@
 
 import { useMemo, useState } from "react"
 import {
+  AlertTriangle,
   Coins,
+  Crown,
   Fish,
+  Gem,
   HeartPulse,
+  HelpCircle,
   Layers,
-  Lock,
+  Scale,
   Shield,
+  ShoppingBag,
   Skull,
   Swords,
   X,
 } from "lucide-react"
-import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
+import type { MapNode, NodeType, OverworldState } from "@/lib/game/overworld-types"
+import { FORECLOSURE_CAP, FORECLOSURE_WARN } from "@/lib/game/overworld-data"
+import { accrueInterest } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
 import { cn } from "@/lib/utils"
 
@@ -20,25 +27,37 @@ interface Props {
   state: OverworldState
   /** current zone's node map */
   map: MapNode[]
-  /** all zone maps (for the zone switcher) */
-  maps: MapNode[][]
   /** nodes reachable from the hero's current node */
   reachable: MapNode[]
-  /** currently selected zone index for the switcher */
-  activeZone: number
-  onZoneSelect: (index: number) => void
   onNodeClick: (node: MapNode) => void
   onExit: () => void
 }
 
-const NODE_STYLES = {
+interface NodeStyle {
+  label: string
+  desc: string
+  ring: string
+  bg: string
+  icon: string
+  Icon: typeof Swords
+}
+
+const NODE_STYLES: Record<NodeType, NodeStyle> = {
   battle: {
     label: "Battle",
-    desc: "Fight for gold & cards",
+    desc: "Standard fight — gold & a card",
     ring: "border-enemy/70",
     bg: "bg-enemy/15",
     icon: "text-enemy",
     Icon: Swords,
+  },
+  elite: {
+    label: "Elite",
+    desc: "Tough fight — richer purse",
+    ring: "border-enemy",
+    bg: "bg-enemy/25",
+    icon: "text-enemy",
+    Icon: Skull,
   },
   rest: {
     label: "Rest",
@@ -48,35 +67,53 @@ const NODE_STYLES = {
     icon: "text-teal",
     Icon: HeartPulse,
   },
+  shop: {
+    label: "Shop",
+    desc: "Spend gold — cards, strikes, tribute",
+    ring: "border-gold/70",
+    bg: "bg-gold/15",
+    icon: "text-gold",
+    Icon: ShoppingBag,
+  },
+  event: {
+    label: "Encounter",
+    desc: "A choice with consequences",
+    ring: "border-teal/70",
+    bg: "bg-teal/10",
+    icon: "text-teal",
+    Icon: HelpCircle,
+  },
+  treasure: {
+    label: "Treasure",
+    desc: "Free gold + a card",
+    ring: "border-gold/80",
+    bg: "bg-gold/15",
+    icon: "text-gold",
+    Icon: Gem,
+  },
   boss: {
     label: "Boss",
-    desc: "Defeat to unlock the next zone",
-    ring: "border-gold/80",
-    bg: "bg-gold/20",
+    desc: "Defeat to descend to the next zone",
+    ring: "border-gold",
+    bg: "bg-gold/25",
     icon: "text-gold",
-    Icon: Skull,
+    Icon: Crown,
   },
-} as const
+}
 
-export function OverworldMap({
-  state,
-  map,
-  maps,
-  reachable,
-  activeZone,
-  onZoneSelect,
-  onNodeClick,
-  onExit,
-}: Props) {
+/** Legend only surfaces the kinds that read as distinct affordances. */
+const LEGEND_ORDER: NodeType[] = ["battle", "elite", "event", "shop", "treasure", "rest", "boss"]
+
+export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Props) {
   const [showDeck, setShowDeck] = useState(false)
 
   const reachableIds = useMemo(() => new Set(reachable.map((n) => n.id)), [reachable])
-  const heroZone = state.zoneIndex
-  const heroNode = heroZone === activeZone ? map.find((n) => n.id === state.nodeId) ?? map[0] : undefined
+  const heroNode = map.find((n) => n.id === state.nodeId) ?? map[0]
   const curZoneName = ZONE_NAMES[state.zoneIndex] ?? `Zone ${state.zoneIndex + 1}`
-  const zoneUnlocked = (i: number) => i < state.unlockedZones
+  const nextInterest = accrueInterest(state)
+  const debtPct = Math.min(1, state.debt / FORECLOSURE_CAP)
+  const debtCritical = debtPct >= FORECLOSURE_WARN
 
-  // edges from every node that has them
   const edges = useMemo(() => {
     const out: { x1: number; y1: number; x2: number; y2: number; active: boolean }[] = []
     const nodeById = new Map(map.map((n) => [n.id, n]))
@@ -84,8 +121,7 @@ export function OverworldMap({
       for (const e of n.edges) {
         const t = nodeById.get(e)
         if (!t) continue
-        const active = heroNode?.id === n.id
-        out.push({ x1: n.x, y1: n.y, x2: t.x, y2: t.y, active })
+        out.push({ x1: n.x, y1: n.y, x2: t.x, y2: t.y, active: heroNode?.id === n.id })
       }
     }
     return out
@@ -93,25 +129,25 @@ export function OverworldMap({
 
   return (
     <main className="relative flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
-      {/* zone-styled backdrop */}
-      <ZoneBackdrop index={activeZone} />
+      <ZoneBackdrop index={state.zoneIndex} />
 
       {/* HUD */}
       <header className="relative z-10 flex items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
-        <div className="min-w-[170px]">
-          <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">
-            {ZONE_NAMES[activeZone] ?? `Zone ${activeZone + 1}`}
+        <div className="min-w-[150px]">
+          <p className="flex items-center gap-1.5 font-display text-sm font-bold uppercase tracking-wider text-gold">
+            <Fish size={14} className="text-gold" />
+            Guppy the Debtor
           </p>
-          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-            {zoneUnlocked(activeZone) ? "Open Waters" : "Locked"}
+          <p className="font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+            {curZoneName} · Zone {state.zoneIndex + 1} of 3
           </p>
         </div>
 
-        <h1 className="hidden font-display text-2xl font-bold uppercase tracking-[0.25em] sm:block">
-          The {ZONE_NAMES[activeZone] ?? "Ledger"} Map
+        <h1 className="hidden font-display text-2xl font-bold uppercase tracking-[0.25em] lg:block">
+          The Ledger Map
         </h1>
 
-        <div className="flex min-w-[170px] items-center justify-end gap-4">
+        <div className="flex min-w-[150px] items-center justify-end gap-4">
           <Stat label="Gold" value={state.gold} icon={<Coins size={13} className="text-gold" />} />
           <Stat
             label="HP"
@@ -136,39 +172,19 @@ export function OverworldMap({
         </div>
       </header>
 
-      {/* zone switcher */}
-      <div className="relative z-10 flex items-center justify-center gap-2 px-4 pt-3">
-        {maps.map((m, i) => {
-          const unlocked = zoneUnlocked(i)
-          const active = i === activeZone
-          return (
-            <button
-              type="button"
-              key={i}
-              disabled={!unlocked}
-              onClick={() => onZoneSelect(i)}
-              title={!unlocked ? "Beat this zone's boss to unlock" : undefined}
-              className={cn(
-                "flex items-center gap-1.5 rounded-full border px-3 py-1 font-display text-[11px] font-bold uppercase tracking-widest transition-colors",
-                active
-                  ? "border-gold bg-gold/20 text-gold"
-                  : unlocked
-                    ? "border-white/15 bg-ocean-deep/50 text-muted-foreground hover:border-gold/40 hover:text-gold"
-                    : "cursor-not-allowed border-white/10 bg-ocean-deep/40 text-muted-foreground/50",
-              )}
-            >
-              {!unlocked && <Lock size={11} />}
-              {ZONE_NAMES[i] ?? `Zone ${i + 1}`}
-            </button>
-          )
-        })}
-      </div>
+      {/* debt ledger — the always-visible pressure gauge */}
+      <LedgerBar
+        debt={state.debt}
+        interest={nextInterest}
+        pct={debtPct}
+        critical={debtCritical}
+      />
 
       {/* map area */}
       <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center overflow-y-auto p-4">
         <svg
           viewBox="0 0 100 100"
-          className="w-full max-w-[800px] h-auto"
+          className="h-auto w-full max-w-[820px]"
           preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={`${curZoneName} overworld map`}
@@ -182,8 +198,8 @@ export function OverworldMap({
               x2={e.x2}
               y2={e.y2}
               stroke={e.active ? "var(--gold)" : "var(--gold-dim)"}
-              strokeOpacity={e.active ? 0.9 : 0.35}
-              strokeWidth={e.active ? 1.2 : 0.7}
+              strokeOpacity={e.active ? 0.9 : 0.28}
+              strokeWidth={e.active ? 1.2 : 0.6}
               strokeDasharray={e.active ? "3 2" : undefined}
             />
           ))}
@@ -194,110 +210,178 @@ export function OverworldMap({
             const { Icon } = style
             const isCurrent = heroNode?.id === n.id
             const isVisited = state.visited.includes(n.id)
-            const isBoss = n.type === "boss"
-
-            // reachable only makes sense on the hero's own zone
-            const displayReach = heroZone === activeZone && !isCurrent && reachableIds.has(n.id)
+            const isReachable = !isCurrent && reachableIds.has(n.id)
+            // dead = neither current, reachable, nor already cleared -> dimmed
+            const isDim = !isCurrent && !isReachable && !isVisited
+            const showThreat = n.threat > 0 && !isVisited
 
             return (
               <g
                 key={n.id}
                 transform={`translate(${n.x}, ${n.y})`}
-                role={displayReach ? "button" : undefined}
-                aria-label={displayReach ? `${style.label} node` : undefined}
-                className={cn(
-                  displayReach && "cursor-pointer",
-                  !displayReach && !isCurrent && "cursor-default",
-                )}
+                role={isReachable ? "button" : undefined}
+                aria-label={isReachable ? `${style.label} node, threat ${n.threat}` : undefined}
+                className={cn(isReachable ? "cursor-pointer" : "cursor-default")}
                 onClick={() => {
-                  if (displayReach) onNodeClick(n)
+                  if (isReachable) onNodeClick(n)
                 }}
               >
-                {/* reachable pulse ring */}
-                {displayReach && (
+                {isReachable && (
                   <circle
-                    r={5.5}
+                    r={5.6}
                     fill="transparent"
                     className="pointer-events-none animate-fm-pulse-ring stroke-gold/70 stroke-[0.9]"
                   />
                 )}
-                {/* hero highlight ring */}
                 {isCurrent && (
                   <circle
                     r={5.8}
                     fill="transparent"
-                    className="stroke-gold stroke-[1.3] animate-fm-pulse-ring"
+                    className="animate-fm-pulse-ring stroke-gold stroke-[1.3]"
                   />
                 )}
+
                 {/* node face */}
                 <circle
                   r={4.2}
                   className={cn(
-                    "transition-colors",
-                    displayReach
-                      ? "fill-ocean-deep stroke-gold stroke-[1]"
-                      : isCurrent
+                    "transition-opacity",
+                    isCurrent
+                      ? "fill-ocean-deep stroke-gold stroke-[1.1]"
+                      : isReachable
                         ? "fill-ocean-deep stroke-gold stroke-[1]"
                         : isVisited
                           ? "fill-white/5 stroke-white/20"
-                          : isBoss
-                            ? "fill-white/15 stroke-gold/60"
-                            : "fill-white/10 stroke-white/30",
+                          : "fill-white/[0.06] stroke-white/20",
                   )}
+                  opacity={isDim ? 0.5 : 1}
                 />
+
                 {/* node icon */}
                 <Icon
-                  x={-2}
-                  y={-2}
-                  width={4}
-                  height={4}
+                  x={-2.1}
+                  y={-2.1}
+                  width={4.2}
+                  height={4.2}
                   className={cn(
-                    isCurrent && "text-gold",
-                    !isCurrent && isVisited && "text-white/30",
-                    !isCurrent && !isVisited && displayReach && style.icon,
-                    !isCurrent && !isVisited && !displayReach && isBoss && "text-gold/70",
-                    !isCurrent && !isVisited && !displayReach && !isBoss && "text-white/40",
+                    isVisited
+                      ? "text-white/25"
+                      : isCurrent || isReachable
+                        ? style.icon
+                        : "text-white/40",
                   )}
+                  opacity={isDim ? 0.6 : 1}
                 />
-                {/* hero fish marker rides on the current node */}
+
+                {/* threat telegraph pips */}
+                {showThreat && (
+                  <ThreatPips threat={n.threat} dim={isDim} elite={n.type === "elite"} />
+                )}
+
                 {isCurrent && <HeroMarker />}
               </g>
             )
           })}
         </svg>
 
-        {/* legend */}
         <MapLegend />
 
-        {/* hero zone status */}
         <p className="mt-3 max-w-md text-center font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">
-          {heroZone === activeZone
-            ? heroNode
-              ? reachable.length
-                ? `${reachable.length} path${reachable.length > 1 ? "s" : ""} reachable — pick your way forward`
-                : "No paths open from here"
-              : "Overworld"
-            : "Viewing another zone"}
+          {reachable.length
+            ? `${reachable.length} path${reachable.length > 1 ? "s" : ""} open — the interest never sleeps`
+            : "No paths open from here"}
         </p>
       </div>
 
-      {/* deck viewer */}
       {showDeck && <DeckModal deck={state.deck} onClose={() => setShowDeck(false)} />}
     </main>
+  )
+}
+
+/** Small skull/dot pips beneath a combat node, telegraphing danger. */
+function ThreatPips({ threat, dim, elite }: { threat: number; dim: boolean; elite: boolean }) {
+  const pips = Array.from({ length: threat })
+  const w = 1.5
+  const gap = 0.6
+  const total = pips.length * w + (pips.length - 1) * gap
+  return (
+    <g opacity={dim ? 0.55 : 1} transform={`translate(${-total / 2}, 5)`}>
+      {pips.map((_, i) => (
+        <circle
+          key={i}
+          cx={i * (w + gap) + w / 2}
+          cy={0}
+          r={w / 2}
+          className={cn(elite ? "fill-enemy" : "fill-enemy/80")}
+        />
+      ))}
+    </g>
+  )
+}
+
+function LedgerBar({
+  debt,
+  interest,
+  pct,
+  critical,
+}: {
+  debt: number
+  interest: number
+  pct: number
+  critical: boolean
+}) {
+  return (
+    <div className="relative z-10 flex items-center justify-center gap-3 px-4 pt-3">
+      <div
+        className={cn(
+          "flex w-full max-w-[820px] items-center gap-3 rounded-lg border px-3 py-2 backdrop-blur-sm transition-colors",
+          critical
+            ? "border-enemy/60 bg-enemy/10"
+            : "border-gold/25 bg-ocean-deep/60",
+        )}
+      >
+        <span
+          className={cn(
+            "flex items-center gap-1.5 font-display text-[11px] font-bold uppercase tracking-widest",
+            critical ? "text-enemy" : "text-gold",
+          )}
+        >
+          {critical ? <AlertTriangle size={14} /> : <Scale size={14} />}
+          Debt
+        </span>
+
+        {/* meter */}
+        <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all",
+              critical ? "bg-enemy animate-fm-pulse-ring" : "bg-gold",
+            )}
+            style={{ width: `${Math.max(3, pct * 100)}%` }}
+          />
+        </div>
+
+        <span
+          className={cn(
+            "min-w-[130px] text-right font-display text-xs font-bold tabular-nums",
+            critical ? "text-enemy" : "text-foreground",
+          )}
+        >
+          {debt} / {FORECLOSURE_CAP}
+          <span className="ml-1.5 font-normal text-muted-foreground">+{interest}/node</span>
+        </span>
+      </div>
+    </div>
   )
 }
 
 function HeroMarker() {
   return (
     <g className="pointer-events-none">
-      {/* soft halo */}
       <circle cx={0} cy={0} r={5.4} className="fill-gold/20" />
-      {/* filled gold badge */}
       <circle cx={0} cy={0} r={3.3} className="fill-gold" />
       <circle cx={0} cy={0} r={3.3} fill="none" className="stroke-ocean-deep stroke-[0.7]" />
-      {/* fish icon */}
       <Fish x={-1.5} y={-1.5} width={3} height={3} className="text-ocean-deep" />
-      {/* you label */}
       <g>
         <rect x={-4.2} y={6.2} width={8.4} height={3.2} rx={1.1} className="fill-ocean-deep" opacity={0.9} />
         <text
@@ -315,27 +399,25 @@ function HeroMarker() {
 function MapLegend() {
   return (
     <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-xl border border-white/10 bg-ocean-deep/60 px-4 py-2.5 backdrop-blur-sm">
-      {Object.values(NODE_STYLES).map(({ label, desc, Icon, ring, bg, icon }) => (
-        <div key={label} className="flex items-center gap-2">
-          <span className={cn("flex h-6 w-6 items-center justify-center rounded-full border", ring, bg)}>
-            <Icon size={13} className={icon} />
-          </span>
-          <span className="flex flex-col leading-tight">
+      {LEGEND_ORDER.map((type) => {
+        const { label, Icon, ring, bg, icon } = NODE_STYLES[type]
+        return (
+          <div key={type} className="flex items-center gap-2">
+            <span className={cn("flex h-6 w-6 items-center justify-center rounded-full border", ring, bg)}>
+              <Icon size={13} className={icon} />
+            </span>
             <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">
               {label}
             </span>
-            <span className="text-[10px] text-muted-foreground">{desc}</span>
-          </span>
-        </div>
-      ))}
-      {/* player marker */}
+          </div>
+        )
+      })}
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-gold bg-gold">
-          <Fish size={13} className="text-ocean-deep" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-enemy/70 bg-enemy/15">
+          <span className="h-1.5 w-1.5 rounded-full bg-enemy" />
         </span>
-        <span className="flex flex-col leading-tight">
-          <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">You</span>
-          <span className="text-[10px] text-muted-foreground">Your current position</span>
+        <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">
+          Threat
         </span>
       </div>
     </div>
@@ -369,12 +451,7 @@ function ZoneBackdrop({ index }: { index: number }) {
     "bg-[radial-gradient(ellipse_at_50%_0%,oklch(0.16_0.05_260/0.7),transparent_70%)]",
   ]
   return (
-    <div
-      className={cn(
-        "pointer-events-none absolute inset-0",
-        zones[index % zones.length],
-      )}
-    />
+    <div className={cn("pointer-events-none absolute inset-0", zones[index % zones.length])} />
   )
 }
 

@@ -22,8 +22,8 @@ function withHand(state: GameState, libIds: string[]): GameState {
     uid: `c_test_${i}`,
     def: CARD_LIBRARY[id],
   }))
-  // grant ample mana so the card under test is castable
-  return { ...state, mana: 10, maxMana: 10, hand }
+  // grant ample coin so the card under test is castable
+  return { ...state, coin: 10, hand }
 }
 
 function cast(
@@ -60,13 +60,13 @@ describe("card parity: demand_letter", () => {
   it("deals 2 damage, pays cost, discards card, logs + fx in order", () => {
     const s = withHand(fresh(), ["demand_letter"])
     const enemy = unitByTeam(s, Team.Enemy)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.demand_letter.cost
 
     const { state, fx } = cast(s, "demand_letter", { unitId: enemy.id })
 
     expect(state).not.toBe(s) // success clones
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     expect(state.spentCount).toBe(1)
     expect(state.hand.some((c) => c.def.id === "demand_letter")).toBe(false)
     expect(state.discard.map((c) => c.def.id)).toContain("demand_letter")
@@ -88,12 +88,12 @@ describe("card parity: collection_call", () => {
   it("deals 3 damage, pays cost, logs + fx", () => {
     const s = withHand(fresh(), ["collection_call"])
     const enemy = unitByTeam(s, Team.Enemy)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.collection_call.cost
 
     const { state, fx } = cast(s, "collection_call", { unitId: enemy.id })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     const after = state.units.find((u) => u.id === enemy.id)!
     expect(after.hp).toBe(enemy.hp - 3)
     expect(fx.map((e) => e.kind)).toEqual([FxKind.Phone, FxKind.Shock])
@@ -109,12 +109,12 @@ describe("card parity: foreclose", () => {
     const s = withHand(fresh(), ["foreclose"])
     // target a survivor (Boss, 16 HP) — a Thug would die to 6 damage
     const enemy = s.units.find((u) => u.kind === UnitKind.Boss)!
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.foreclose.cost
 
     const { state, fx } = cast(s, "foreclose", { unitId: enemy.id })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     const after = state.units.find((u) => u.id === enemy.id)!
     expect(after.hp).toBe(Math.max(0, enemy.hp - 6))
     expect(fx.map((e) => e.kind)).toEqual([FxKind.Gavel, FxKind.Shock])
@@ -142,12 +142,12 @@ describe("card parity: kneecap", () => {
   it("deals 2 damage AND -1 buffAtk, fx order: shock, shock(2)", () => {
     const s = withHand(fresh(), ["kneecap"])
     const enemy = unitByTeam(s, Team.Enemy)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.kneecap.cost
 
     const { state, fx } = cast(s, "kneecap", { unitId: enemy.id })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     const after = state.units.find((u) => u.id === enemy.id)!
     expect(after.hp).toBe(enemy.hp - 2)
     expect(after.buffAtk).toBe(enemy.buffAtk - 1)
@@ -167,12 +167,12 @@ describe("card parity: loan_shark", () => {
     const enemy = s.units.find((u) => u.kind === UnitKind.Enforcer)!
     const h = hero(s)
     const hpHeroBefore = h.hp
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.loan_shark.cost
 
     const { state, fx } = cast(s, "loan_shark", { unitId: enemy.id })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     const after = state.units.find((u) => u.id === enemy.id)!
     expect(after.hp).toBe(enemy.hp - 4)
     const heroAfter = state.units.find((u) => u.id === "hero")!
@@ -199,17 +199,16 @@ describe("card parity: loan_shark", () => {
 })
 
 describe("card parity: cash_flow", () => {
-  it("gains 3 coin, self target, logs + fx", () => {
+  it("nets coin (gain 3 minus cost), self target, logs + fx", () => {
     const s = withHand(fresh(), ["cash_flow"])
     const coinBefore = s.coin
     const h = hero(s)
-    const manaBefore = s.mana
     const cost = CARD_LIBRARY.cash_flow.cost
 
     const { state, fx } = cast(s, "cash_flow")
 
-    expect(state.mana).toBe(manaBefore - cost)
-    expect(state.coin).toBe(coinBefore + 3)
+    // Coin and the old mana are now one resource: pay cost, then gain 3.
+    expect(state.coin).toBe(coinBefore - cost + 3)
     expect(fx.map((e) => e.kind)).toEqual([FxKind.Coin])
     expect(fx[0].amount).toBe(3)
     expect(fx[0].to).toEqual(h.pos)
@@ -224,12 +223,12 @@ describe("card parity: market_rate", () => {
     const handBefore = s.hand.length
     const deckBefore = s.deck.length
     const h = hero(s)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.market_rate.cost
 
     const { state, fx } = cast(s, "market_rate")
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     // the cast card left hand (played), then 2 drawn
     expect(state.hand.length).toBe(handBefore - 1 + 2)
     expect(state.deck.length).toBe(deckBefore - 2)
@@ -246,12 +245,12 @@ describe("card parity: hush_money", () => {
     const h = hero(s) // hero is an ally
     h.hp = Math.max(0, h.maxHp - 7) // wounded
     const hpBefore = h.hp
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.hush_money.cost
 
     const { state, fx } = cast(s, "hush_money", { unitId: h.id })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     const heroAfter = state.units.find((u) => u.id === "hero")!
     expect(heroAfter.hp).toBe(Math.min(h.maxHp, hpBefore + 5))
     expect(fx.map((e) => e.kind)).toEqual([FxKind.Heal])
@@ -267,13 +266,13 @@ describe("card parity: muscle (Hired Muscle)", () => {
   it("summons a Goon (5/2/move2, acted) on an empty tile", () => {
     const s = withHand(fresh(), ["muscle"])
     const empty = { x: 0, y: 0 } // no unit starts there (hero at 1,2)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const cost = CARD_LIBRARY.muscle.cost
     const unitsBefore = s.units.length
 
     const { state, fx } = cast(s, "muscle", { tile: empty })
 
-    expect(state.mana).toBe(manaBefore - cost)
+    expect(state.coin).toBe(coinBefore - cost)
     expect(state.units.length).toBe(unitsBefore + 1)
     const goon = state.units.find((u) => u.kind === UnitKind.Goon)!
     expect(goon.team).toBe(Team.Player)
@@ -300,14 +299,14 @@ describe("card parity: invalid target rejected", () => {
   it("enemy-target card cast at an ally returns unchanged state", () => {
     const s = withHand(fresh(), ["demand_letter"])
     const ally = hero(s)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
     const handBefore = s.hand.length
     const logBefore = s.log.length
 
     const { state, fx } = cast(s, "demand_letter", { unitId: ally.id })
 
     expect(state).toBe(s) // same reference — not cloned
-    expect(state.mana).toBe(manaBefore)
+    expect(state.coin).toBe(coinBefore)
     expect(state.hand.length).toBe(handBefore)
     expect(state.log.length).toBe(logBefore)
     expect(fx).toEqual([])
@@ -316,20 +315,20 @@ describe("card parity: invalid target rejected", () => {
   it("summon cast on an occupied tile returns unchanged state", () => {
     const s = withHand(fresh(), ["muscle"])
     const enemy = unitByTeam(s, Team.Enemy)
-    const manaBefore = s.mana
+    const coinBefore = s.coin
 
     const { state, fx } = cast(s, "muscle", { tile: enemy.pos })
 
     expect(state).toBe(s)
-    expect(state.mana).toBe(manaBefore)
+    expect(state.coin).toBe(coinBefore)
     expect(fx).toEqual([])
   })
 })
 
-describe("card parity: insufficient mana rejected", () => {
-  it("cost above mana returns unchanged state", () => {
+describe("card parity: insufficient coin rejected", () => {
+  it("cost above coin returns unchanged state", () => {
     const s = withHand(fresh(), ["foreclose"]) // cost 4
-    s.mana = 3
+    s.coin = 3
     const enemy = unitByTeam(s, Team.Enemy)
     const handBefore = s.hand.length
     const logBefore = s.log.length
@@ -337,7 +336,7 @@ describe("card parity: insufficient mana rejected", () => {
     const { state, fx } = cast(s, "foreclose", { unitId: enemy.id })
 
     expect(state).toBe(s)
-    expect(state.mana).toBe(3)
+    expect(state.coin).toBe(3)
     expect(state.hand.length).toBe(handBefore)
     expect(state.log.length).toBe(logBefore)
     expect(fx).toEqual([])
@@ -345,13 +344,13 @@ describe("card parity: insufficient mana rejected", () => {
 })
 
 describe("card parity: canCast phase + cost", () => {
-  it("canCast requires player phase and enough mana", () => {
+  it("canCast requires player phase and enough coin", () => {
     const s = withHand(fresh(), ["demand_letter"])
     const card = s.hand[0]
     expect(canCast(s, card)).toBe(true)
-    s.mana = 0
+    s.coin = 0
     expect(canCast(s, card)).toBe(false)
-    s.mana = 1
+    s.coin = 1
     s.phase = Phase.Enemy
     expect(canCast(s, card)).toBe(false)
   })

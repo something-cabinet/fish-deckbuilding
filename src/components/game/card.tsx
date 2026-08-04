@@ -101,6 +101,7 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
       {/* sell footer */}
       <button
         type="button"
+        aria-label={`Sell ${def.name} for ${def.value} coin`}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation()

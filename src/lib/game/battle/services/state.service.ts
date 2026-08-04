@@ -1,6 +1,6 @@
 import { Phase } from "../enums"
 import type { GameState } from "../models"
-import { makeCard, STARTER_DECK, type CardInstance } from "../../cards"
+import { COIN_TURN_BASE, makeCard, STARTER_DECK, type CardInstance } from "../../cards"
 import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
 import { HAND_START, shuffle } from "../../deck"
 import { resetIds } from "../../shared"
@@ -10,6 +10,8 @@ export function createInitialState(overrides?: {
   heroMaxHp?: number
   deck?: string[]
   enemies?: EnemySpawn[]
+  /** run-scoped Fin carried in from the overworld (spec D11) */
+  fin?: number
 }): GameState {
   resetIds()
   const deck = overrides?.deck
@@ -44,9 +46,8 @@ export function createInitialState(overrides?: {
   return {
     turn: 1,
     phase: Phase.Player,
-    mana: 1,
-    maxMana: 1,
-    coin: 0,
+    coin: COIN_TURN_BASE,
+    fin: overrides?.fin ?? 0,
     interest: 0,
     foreclosure: 15,
     foreclosureMax: 15,

@@ -18,6 +18,7 @@ const EXPECTED_IDS = [
   "loan_shark",
   "hush_money",
   "muscle",
+  "shakedown",
 ]
 
 /**
@@ -29,7 +30,7 @@ function parseCardDef(input: unknown): CardDef {
 }
 
 describe("card schema: pack load", () => {
-  it("loads the pack and CARD_LIBRARY has all 9 expected ids", () => {
+  it("loads the pack and CARD_LIBRARY has all 10 expected ids", () => {
     expect(Object.keys(CARD_LIBRARY).sort()).toEqual([...EXPECTED_IDS].sort())
   })
 
