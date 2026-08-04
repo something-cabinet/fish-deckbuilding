@@ -1,5 +1,6 @@
 ---
-implementation_notes: 'SUPERSEDE NOTE (2026-08-01): D1 (VU-Meter Desk world is the debt-office) is superseded by wiki:decisions/mafia-pixel-world-replacement — the world was replaced with a modern mafia-underworld pixel-art street (sprite units, neon-cyan/amber, wet-dark asphalt). The balloon/bowl/city-above motifs and their discipline rules (D2-D8) carry over unchanged into the pixel world (see DESIGN.md).'
+title: mafia-underworld-ui-theme
+type: spec
 ---
 
 ---

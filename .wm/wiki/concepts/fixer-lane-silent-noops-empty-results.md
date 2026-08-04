@@ -1,4 +1,6 @@
 ---
+title: fixer-lane-silent-noops-empty-results
+type: concept
 ---
 
 # Failure: Fixer Lane Silent No-Ops — Empty Results with Zero Files

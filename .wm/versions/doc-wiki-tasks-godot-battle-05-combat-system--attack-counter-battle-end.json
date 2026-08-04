@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:tasks:godot-battle-05-combat-system--attack-counter-battle-end",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-04T07:56:56.546Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "archived"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

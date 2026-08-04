@@ -4,12 +4,6 @@ type: core
 tags: [critical]
 ---
 
----
-title: Critical Patterns
-type: core
-tags: [critical]
----
-
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -195,3 +189,31 @@ The fixer subagent returned `state: completed` with EMPTY result messages and ZE
 **What to do differently:** After any writer-specialist dispatch, verify disk state (ls/git status) for expected files — never trust the result message alone. Keep delegated tasks bounded (one module, one concern); tiny tasks are the probe. Have an explicit orchestrator-direct fallback when a lane returns empty twice. Don't reissue the unchanged task.
 
 **Full entry:** @wiki/concepts/fixer-lane-silent-noops-empty-results
+
+---
+
+## 2026-08-04 — WM Page API Only Persists Whitelisted Frontmatter
+
+**Category:** failure
+**Source:** @wiki/concepts:wm-frontmatter-whitelist-limitation
+**Tags:** [wiki, tooling, wm]
+
+`wm_page.update`/`create` only persist WHITELISTED frontmatter params (title/type/status/tags/id/relates_to). Fields the validator requires — rule `category`/`rationale`, pattern `when_to_use`/`example`, spec `stakeholders`, decision `context`/`options`/`rationale` — cannot be set through the API: they land in the body as a second frontmatter block, and the validator reads the FIRST block only (rule validator). delete+recreate and `wm_lint_fix` don't help. Cost ~30 min across 10+ page updates before the mechanism was identified.
+
+**What to do differently:** Don't burn time "fixing" validator-field warnings on rules/patterns/specs via `wm_page` — they're a tooling gap, not a content problem. Distinguish validator-field warnings (unfixable via API) from real content problems. The WM tooling must expose the fields or the validator must read all frontmatter blocks.
+
+**Full entry:** @wiki/concepts/wm-frontmatter-whitelist-limitation
+
+---
+
+## 2026-08-04 — Render-Test jsdom Gotchas: Split Text, Missing APIs
+
+**Category:** pattern
+**Source:** @wiki/patterns:render-test-jsdom-gotchas
+**Tags:** [testing, vitest, jsdom, react]
+
+`getByText` matches DIRECT text nodes only — split markup (`Fish <span>Mafia</span>`, `Turn <span>{n}</span>`) is unreachable via text regex; use `getByRole("heading", { name })` (accessible name concatenates) or a `textContent` matcher instead. jsdom lacks `document.elementFromPoint`, `ResizeObserver`, canvas `getContext`, `Element.scrollTo` — stub all once in a shared `test-utils.tsx` (ParticleCanvas/SidePanel/targeting code crash without them). Async flows (endTurn) need `vi.useFakeTimers` + `advanceTimersByTimeAsync`. Hit 3+ times this session while building the render-test suite.
+
+**What to do differently:** Centralize the jsdom shims in `src/components/game/test-utils.tsx`; when a render test can't find text, check for split text nodes before suspecting the component; use fake timers for chained async waits.
+
+**Full entry:** @wiki/patterns/render-test-jsdom-gotchas

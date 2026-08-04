@@ -8,8 +8,12 @@ tags:
 status: done
 order: 2
 acceptance_criteria:
-  - {text: "Crafting panel opens from overworld with card browser", checked: false}
-  - {text: "Card detail view shows card stats", checked: false}
-  - {text: "Bridge plumbing connects panel to Rust engine", checked: false}
+- text: Crafting panel opens from overworld with card browser
+  checked: false
+- text: Card detail view shows card stats
+  checked: false
+- text: Bridge plumbing connects panel to Rust engine
+  checked: false
+assignee: orchestrator
 ---
 

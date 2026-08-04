@@ -1,4 +1,13 @@
 ---
+title: godot-battle-01-core-logic-layer--pure-gdscript-classes
+type: task
+status: archived
+assignee: orchestrator
+acceptance_criteria:
+  - {text: "Archived 2026-08-04: dead Godot direction; superseded by Rust core implementation (see superseded_by note)", checked: false}
+---
+
+---
 title: [godot-battle-01] Core logic layer — pure GDScript classes
 type: task
 id: wiki:tasks:godot-battle-01-core-logic-layer--pure-gdscript-classes

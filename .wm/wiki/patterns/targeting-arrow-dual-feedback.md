@@ -1,7 +1,18 @@
 ---
+title: Pattern: Targeting Arrow Dual Feedback
+type: pattern
+tags: [pattern, ui-feedback, game-ui, targeting]
+---
+
+---
 title: "Pattern: Targeting Arrow Dual Feedback"
 type: pattern
 tags: ["pattern", "ui-feedback", "game-ui", "targeting"]
+when_to_use: Turn-based tactics with ranged targeting (click-to-arm or drag-to-board) where two input modes should share one visual language
+example: |
+  const [arrow, setArrow] = useState<ArrowState | null>(null)
+  const computeArrow = useCallback((clientX, clientY) => { ... setArrow({ fromX, fromY, toX: clientX, toY: clientY, valid }) }, [])
+  {arrow && <TargetingArrow {...arrow} />}
 ---
 
 ## Problem

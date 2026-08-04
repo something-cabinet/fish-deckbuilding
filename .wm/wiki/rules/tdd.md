@@ -1,11 +1,18 @@
 ---
 title: TDD — Test-First for Everything
 type: rule
-tags:
-- tdd
-- convention
-- testing
+id: wiki:rules:tdd
 status: active
+tags: [tdd, convention, testing]
+---
+
+---
+title: TDD — Test-First for Everything
+type: rule
+status: active
+tags: [tdd, convention, testing]
+category: process
+rationale: Red-Green-Refactor with test-first prevents regressions and documents behavior. Untested orchestration is where every P0 in this project lived — orchestration layers get tests too.
 ---
 
 # TDD — Test-First for Everything

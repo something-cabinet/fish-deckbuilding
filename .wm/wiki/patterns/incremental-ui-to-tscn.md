@@ -1,11 +1,19 @@
 ---
 title: Incremental UI Migration from Rust Bridge to tscn
 type: pattern
+tags: [pattern, ui, gdext, tscn, godot-rust]
+status: draft
 relates_to:
-- type: references
-  target: wiki:specs:ui-panels-to-tscn
+  - {type: references, target: wiki:specs:ui-panels-to-tscn}
+---
+
+---
+title: Incremental UI Migration from Rust Bridge to tscn
+type: pattern
 status: draft
 tags: [pattern, ui, gdext, tscn, godot-rust]
+when_to_use: godot-rust projects with procedural UI in build_ui methods that want Godot visual editor layout iteration
+example: Extract hand_container.tscn sub-scene with its own GDScript; keep full-path get_node_as calls in the Rust bridge
 ---
 
 ## Problem

@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:no-else-prefer-early-return",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "content",
           "old_value": "## Rule: No `else` — Prefer Early Return\n\nDo not use `else` blocks. Prefer early returns or guard clauses. When `else` can't be eliminated without contortions, extract a function — that means the original was too big.\n\n### Why\n- `else` creates nested scopes that increase cognitive load\n- Early return flattens the happy path to the left margin\n- Guard clauses make preconditions explicit at the top of a function\n- `else` blocks are harder to refactor; extracting the `if` body often requires restructuring\n\n### Preferred patterns\n\n**Early return:**\n```rust\nfn validate(x: Option<i32>) -> Result<(), Error> {\n    let Some(val) = x else { return Err(Error::Missing); };\n    // happy path, unindented\n    Ok(())\n}\n```\n\n**Guard clause:**\n```rust\nfn process(items: &[u8]) -> Vec<u8> {\n    if items.is_empty() {\n        return vec![];\n    }\n    // rest of function\n}\n```\n\n**`match` on enums:**\n```rust\nmatch phase {\n    Phase::PlayerTurn => handle_player(),\n    Phase::EnemyTurn => handle_enemy(),\n    Phase::BattleOver => handle_end(),\n}\n```\n\n**`let ... else` (allowed):**\n```rust\nlet Some(val) = opt else { return None; };\n```\n\n### Forbidden\n```rust\n// ❌ else block\nif condition { do_a(); } else { do_b(); }\n\n// ❌ else-if chains — use match or extract\nif a == 1 { x() } else if a == 2 { y() } else { z() }\n\n// ❌ match on booleans to avoid else — extract function instead\nmatch (a == 0, b == 0) { (true, true) => x, _ => y }\n```\n\n### Enforcement\n```bash\n# Find `} else {` patterns\nrg '}\\s*else\\s*\\{' rust/ -g '*.rs'\n# Find else-if chains\nrg 'else if' rust/ -g '*.rs'\n```",
           "new_value": "---\ntitle: No else — Prefer Early Return\ntype: rule\nstatus: active\ntags: [rule, style]\ncategory: style\nrationale: Early returns reduce nesting and cognitive load. Match expressions in Rust naturally encourage this pattern over if-else chains.\n---\n\n# No else — Prefer Early Return\n\nPrefer early returns over if-else chains.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T08:35:20.304Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\ntitle: No else — Prefer Early Return\ntype: rule\nstatus: active\ntags: [rule, style]\ncategory: style\nrationale: Early returns reduce nesting and cognitive load. Match expressions in Rust naturally encourage this pattern over if-else chains.\n---\n\n# No else — Prefer Early Return\n\nPrefer early returns over if-else chains.",
+          "new_value": "---\ntitle: No else — Prefer Early Return\ntype: rule\nstatus: active\ntags: [rule, code-style, rust, control-flow]\ncategory: style\nrationale: Early returns reduce nesting and cognitive load. Match expressions in Rust naturally encourage this pattern over if-else chains.\n---\n\n# No else — Prefer Early Return\n\nPrefer early returns over if-else chains.\n"
         }
       ],
       "path": "",

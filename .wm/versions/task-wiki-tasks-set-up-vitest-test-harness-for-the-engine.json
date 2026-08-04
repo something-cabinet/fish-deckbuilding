@@ -1,21 +1,7 @@
 {
   "entity_id": "wiki:tasks:set-up-vitest-test-harness-for-the-engine",
-  "current_version": 4,
+  "current_version": 5,
   "versions": [
-    {
-      "id": "v2",
-      "version": 2,
-      "timestamp": "2026-08-03T10:13:25.954Z",
-      "author": null,
-      "changes": [
-        {
-          "field": "status",
-          "old_value": "in-progress",
-          "new_value": "in-progress"
-        }
-      ],
-      "compacted": false
-    },
     {
       "id": "v3",
       "version": 3,
@@ -45,6 +31,20 @@
           "field": "status",
           "old_value": "in-progress",
           "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v5",
+      "version": 5,
+      "timestamp": "2026-08-04T08:34:33.094Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
         }
       ],
       "compacted": false

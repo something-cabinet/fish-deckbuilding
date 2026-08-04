@@ -9,20 +9,16 @@ type: reference
 
 ## concepts
 
-- [godot battle 04 movement system  selection overlay](wiki/tasks/godot-battle-04-movement-system--selection-overlay.md) — *draft*
-- [godot battle 05 combat system  attack counter battle end](wiki/tasks/godot-battle-05-combat-system--attack-counter-battle-end.md) — *draft*
-- [godot battle 03 unit system  placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *draft*
 - [codeceptjs e2e suite  strictmode journey with move  cast](wiki/tasks/codeceptjs-e2e-suite--strictmode-journey-with-move--cast.md) — *draft*
-- [godot battle 06 turn cycle  enemy ai  hud](wiki/tasks/godot-battle-06-turn-cycle--enemy-ai--hud.md) — *draft*
-- [godot battle 02 godot project scaffold  grid rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *draft*
-- [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
 - [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
 - [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
 - [effects first card model](wiki/patterns/effects-first-card-model.md) — *draft*
 - [comment to function extraction](wiki/patterns/comment-to-function-extraction.md) — *draft*
 - [container based card slot layout](wiki/patterns/container-based-card-slot-layout.md) — *draft*
+- [targeting arrow dual feedback](wiki/patterns/targeting-arrow-dual-feedback.md) — *draft*
 - [run combat state split](wiki/patterns/run-combat-state-split.md) — *draft*
 - [snapshot diff orchestration seam](wiki/patterns/snapshot-diff-orchestration-seam.md) — *draft*
+- [card library authoring](wiki/patterns/card-library-authoring.md) — *draft*
 - [svelte derived snapshot before clearing](wiki/patterns/svelte-derived-snapshot-before-clearing.md) — *draft*
 - [three stage targeting pipeline](wiki/patterns/three-stage-targeting-pipeline.md) — *draft*
 - [godot web deploy pipeline](wiki/patterns/godot-web-deploy-pipeline.md) — *draft*
@@ -30,21 +26,19 @@ type: reference
 - [behavior capture parity oracle](wiki/patterns/behavior-capture-parity-oracle.md) — *draft*
 - [duelyst offset list affect pattern](wiki/patterns/duelyst-offset-list-affect-pattern.md) — *draft*
 - [pure setstate updaters external drain](wiki/patterns/pure-setstate-updaters-external-drain.md) — *draft*
-- [critical patterns](wiki/patterns/critical-patterns.md) — *draft*
 - [svelte5 one shot imperative init callback](wiki/patterns/svelte5-one-shot-imperative-init-callback.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
 - [duelyst corner bracket overlay system](wiki/patterns/duelyst-corner-bracket-overlay-system.md) — *draft*
 - [domain barrel structure](wiki/patterns/domain-barrel-structure.md) — *draft*
 - [snapshot state sync](wiki/patterns/snapshot-state-sync.md) — *draft*
 - [scene branch extraction](wiki/patterns/scene-branch-extraction.md) — *draft*
+- [render test jsdom gotchas](wiki/patterns/render-test-jsdom-gotchas.md) — *draft*
 - [return value bridge sync](wiki/patterns/return-value-bridge-sync.md) — *draft*
 - [overworld node action refresh](wiki/patterns/overworld-node-action-refresh.md) — *draft*
 - [valid targets single source of truth](wiki/patterns/valid-targets-single-source-of-truth.md) — *draft*
 - [excalibur scene state sync on activation](wiki/patterns/excalibur-scene-state-sync-on-activation.md) — *draft*
 - [affix based effect composition](wiki/patterns/affix-based-effect-composition.md) — *draft*
 - [dynamic ui hover tween](wiki/patterns/dynamic-ui-hover-tween.md) — *draft*
-- [rust ci caching subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
-- [mafia underworld ui theme](wiki/specs/mafia-underworld-ui-theme.md) — *draft*
 - [fab coin system](wiki/decisions/fab-coin-system.md) — *draft*
 - [godot rust gdext pivot](wiki/decisions/godot-rust-gdext-pivot.md) — *draft*
 - [browser localstorage persistence](wiki/decisions/browser-localstorage-persistence.md) — *draft*
@@ -59,15 +53,15 @@ type: reference
 - [pure function affix operations](wiki/decisions/pure-function-affix-operations.md) — *draft*
 - [attack focused exhaustion](wiki/decisions/attack-focused-exhaustion.md) — *draft*
 - [duelyst accurate move then attack ordering](wiki/decisions/duelyst-accurate-move-then-attack-ordering.md) — *draft*
-- [pure function ecs pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 - [Playtest UI Bug Patterns — SVG, Dialogue, Vite HMR](wiki/concepts/playtest-ui-bug-patterns.md) — *draft*
 - [wm sdd task linking gotchas](wiki/concepts/wm-sdd-task-linking-gotchas.md) — *draft*
 - [gdext scene type mismatch](wiki/concepts/gdext-scene-type-mismatch.md) — *draft*
-- [fixer lane silent noops empty results](wiki/concepts/fixer-lane-silent-noops-empty-results.md) — *draft*
+- [fixer-lane-silent-noops-empty-results](wiki/concepts/fixer-lane-silent-noops-empty-results.md) — *draft*
 - [three layer bridge deadlock](wiki/concepts/three-layer-bridge-deadlock.md) — *draft*
 - [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
 - [Concept: Game Menu Architecture](wiki/concepts/game-menu-architecture.md) — *draft*
 - [stale animation snapshot gdext](wiki/concepts/stale-animation-snapshot-gdext.md) — *draft*
+- [wm frontmatter whitelist limitation](wiki/concepts/wm-frontmatter-whitelist-limitation.md) — *draft*
 - [svelte ui overlay pointer events specificity tie](wiki/concepts/svelte-ui-overlay-pointer-events-specificity-tie.md) — *draft*
 - [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
 - [Session Learnings: Fish Mafia UI Polish & Architecture (2024)](wiki/concepts/session-learnings-2024.md) — *draft*
@@ -94,7 +88,8 @@ type: reference
 
 ## decisions
 
-- [Decision: App Shell Screen Orchestration via State Union](wiki/decisions/app-shell-screen-orchestration.md) — *approved*
+- [app-shell-screen-orchestration](wiki/decisions/app-shell-screen-orchestration.md) — *draft*
+- [pure-function-ecs-pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
 
 ## memorys
 
@@ -120,9 +115,13 @@ type: reference
 - [Session 2026-08-01 — FAB/StS research-grounded rebuild (deepwork P0–P5)](wiki/memory/session-2026-08-01-fab-sts-research-grounded-rebuild-deepwork-p0-p5.md) — *active*
 - [Kenney assets for JS prototyping](wiki/memory/kenney-assets-for-js-prototyping.md) — *active*
 - [Unified Range Enum (Melee/Ranged)](wiki/memory/unified-range-enum-melee-ranged.md) — *active*
+- [Test placement — colocate units, centralize integration, .spec naming (2026-08-04)](wiki/memory/test-placement-colocate-units-centralize-integration-spec-naming-2026-08-04.md) — *active*
 - [Snapshot $derived value before mutating its dependency](wiki/memory/snapshot-derived-value-before-mutating-its-dependency.md) — *active*
+- [Discriminator policy — enum keyword over unions (2026-08-04)](wiki/memory/discriminator-policy-enum-keyword-over-unions-2026-08-04.md) — *active*
 - [Stale Animation Snapshot in gdext Bridge](wiki/memory/stale-animation-snapshot-gdext.md) — *active*
+- [Domain-layered engine restructure (2026-08-04)](wiki/memory/domain-layered-engine-restructure-2026-08-04.md) — *active*
 - [Angular-style file system convention applied (Aug 2026)](wiki/memory/angular-style-file-system-convention-applied-aug-2026.md) — *active*
+- [Engine structure — function-first + enums/constants extraction (2026-08-04)](wiki/memory/engine-structure-function-first-enums-constants-extraction-2026-08-04.md) — *active*
 - [godot-rust gdext bridge pattern](wiki/memory/godot-rust-gdext-bridge-pattern.md) — *active*
 - [Overworld Node Action Refresh / Multi-Display State Sync](wiki/memory/overworld-node-action-refresh-multi-display-state-sync.md) — *active*
 - [TDD Convention — Test First](wiki/memory/tdd-convention-test-first.md) — *active*
@@ -136,6 +135,7 @@ type: reference
 - [WM SDD task-linking gotchas — rebuild index, block-style edges only](wiki/memory/wm-sdd-task-linking-gotchas-rebuild-index-block-style-edges-only.md) — *active*
 - [Untested UI Layer Caused All P0s](wiki/memory/untested-ui-layer-caused-all-p0s.md) — *active*
 - [Valid Targets Single Source of Truth](wiki/memory/valid-targets-single-source-of-truth.md) — *active*
+- [Engine restructure — function-first domains (2026-08-04)](wiki/memory/engine-restructure-function-first-domains-2026-08-04.md) — *active*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
 - [Vite HMR Incompatible with Excalibur Scenes](wiki/memory/vite-hmr-incompatible-with-excalibur-scenes.md) — *active*
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
@@ -153,13 +153,14 @@ type: reference
 - [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
 - [UI panels migrated from Rust bridge to tscn](wiki/memory/ui-panels-migrated-from-rust-bridge-to-tscn.md) — *active*
 - [Overlay pointer-events specificity tie broke map clicks](wiki/memory/overlay-pointer-events-specificity-tie-broke-map-clicks.md) — *active*
+- [Pure setState updaters — drain external queues via stateRef + commit](wiki/memory/pure-setstate-updaters-drain-external-queues-via-stateref-commit.md) — *active*
 - [Session 2026-07-31 Crafting/Save/Hover](wiki/concepts/session-2026-07-31-crafting-save-hover.md) — *active*
 
 ## patterns
 
-- [Pattern: Targeting Arrow Dual Feedback](wiki/patterns/targeting-arrow-dual-feedback.md) — *draft*
-- [Pattern: Card Library and Authoring UI](wiki/patterns/card-library-authoring.md) — *draft*
+- [critical-patterns](wiki/patterns/critical-patterns.md) — *draft*
 - [Incremental UI Migration from Rust Bridge to tscn](wiki/patterns/incremental-ui-to-tscn.md) — *draft*
+- [rust-ci-caching-subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
 
 ## references
 
@@ -180,8 +181,9 @@ type: reference
 ## specs
 
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *superseded*
-- [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *draft*
-- [UI Panels from Rust Bridge to tscn](wiki/specs/ui-panels-to-tscn.md) — *approved*
+- [mafia-underworld-ui-theme](wiki/specs/mafia-underworld-ui-theme.md) — *draft*
+- [Godot Visual Theme & Asset Pipeline](wiki/specs/godot-visual-theme-and-assets.md) — *superseded*
+- [ui-panels-to-tscn](wiki/specs/ui-panels-to-tscn.md) — *superseded*
 - [Battle UI Rebuild — FAB + Slay the Spire Design Language](wiki/specs/battle-ui-fab-sts-rebuild.md) — *approved*
 - [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
 - [Card Crafting UI](wiki/specs/card-crafting-ui.md) — *approved*
@@ -191,13 +193,14 @@ type: reference
 - [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
 - [Zone-Based UI Decomposition for Battle Screen](wiki/specs/zone-based-ui-decomposition.md) — *superseded*
 - [Enemy System — Deck, AI Card Play, and Difficulty](wiki/specs/enemy-system-deck-ai-difficulty.md) — *approved*
-- [Battle UI/UX Upgrades](wiki/specs/battle-ui-ux-upgrades.md) — *approved*
-- [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *approved*
+- [Battle UI/UX Upgrades](wiki/specs/battle-ui-ux-upgrades.md) — *superseded*
+- [Godot Battle Scaffold](wiki/specs/godot-battle-scaffold.md) — *superseded*
 - [Post-Battle & Progression Flow](wiki/specs/post-battle-progression-flow.md) — *approved*
 - [JS Combat Vertical Slice (VU-Meter Desk)](wiki/specs/js-combat-vertical-slice.md) — *approved*
-- [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *draft*
+- [Web Deploy Workflow — Build → Export → Serve](wiki/specs/web-deploy-workflow.md) — *superseded*
 - [Battle UI Polish — Duelyst/Hearthstone Patterns](wiki/specs/battle-ui-polish.md) — *draft*
-- [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *draft*
+- [Domain-Layered Engine Structure (Option B)](wiki/specs/domain-layered-engine-structure.md) — *approved*
+- [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *superseded*
 - [Card Stat Balance Pass — FaB Model](wiki/specs/card-stat-balance.md) — *approved*
 - [Card System — In-Battle Hand, Deck, and Play](wiki/specs/card-system-in-battle-deck.md) — *approved*
 - [Combat Affix & Crafting System](wiki/specs/combat-affix-crafting-system.md) — *draft*
@@ -205,49 +208,55 @@ type: reference
 - [Card Effect Registry — Data-Driven Effects with Resolver (Visitor)](wiki/specs/card-effect-registry.md) — *approved*
 - [Angular-Style File System — One Service/Helper/Interface per File](wiki/specs/angular-style-file-system.md) — *approved*
 - [Enemy Card Reveal Animation & Graveyard Viewer](wiki/specs/enemy-card-reveal-graveyard-viewer.md) — *draft*
-- [Battle & Overworld UI — Declare in .tscn](wiki/specs/tscn-ui-declaration.md) — *draft*
-- [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *draft*
+- [Battle & Overworld UI — Declare in .tscn](wiki/specs/tscn-ui-declaration.md) — *superseded*
+- [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *superseded*
 - [CI Warning Cleanup](wiki/specs/ci-warning-cleanup.md) — *approved*
 
 ## tasks
 
-- [Add generic command base + ordered queue; route all player actions](wiki/tasks/add-generic-command-base--ordered-queue-route-all-player-actions.md) — *in-progress*
-- [Full integration verification — build green, parity, determinism](wiki/tasks/full-integration-verification--build-green-parity-determinism.md) — *in-progress*
-- [Write card-behavior parity tests against current engine (red baseline)](wiki/tasks/write-card-behavior-parity-tests-against-current-engine-red-baseline.md) — *in-progress*
-- [Rewire castCard to the resolver; remove the card-id switch](wiki/tasks/rewire-castcard-to-the-resolver-remove-the-card-id-switch.md) — *in-progress*
+- [Add generic command base + ordered queue; route all player actions](wiki/tasks/add-generic-command-base--ordered-queue-route-all-player-actions.md) — *done*
+- [Full integration verification — build green, parity, determinism](wiki/tasks/full-integration-verification--build-green-parity-determinism.md) — *done*
+- [Write card-behavior parity tests against current engine (red baseline)](wiki/tasks/write-card-behavior-parity-tests-against-current-engine-red-baseline.md) — *done*
+- [Rewire castCard to the resolver; remove the card-id switch](wiki/tasks/rewire-castcard-to-the-resolver-remove-the-card-id-switch.md) — *done*
 - [Combat feedback animations (Godot Tween/AnimationPlayer)](wiki/tasks/combat-feedback-animations-godot-tweenanimationplayer.md) — *todo*
 - [Component render test — FishMafiaGame move + cast via DOM](wiki/tasks/component-render-test--fishmafiagame-move--cast-via-dom.md) — *done*
 - [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
 - [Add render-test + CodeceptJS e2e infrastructure and scripts](wiki/tasks/add-render-test--codeceptjs-e2e-infrastructure-and-scripts.md) — *done*
 - [Implement correct UI theme — Guppy's mafia underworld escape story](wiki/tasks/implement-correct-ui-theme--guppys-mafia-underworld-escape-story.md) — *in-progress*
+- [godot-battle-04-movement-system--selection-overlay](wiki/tasks/godot-battle-04-movement-system--selection-overlay.md) — *archived*
 - [Card visual states and hover interactions (Godot StyleBox/theming)](wiki/tasks/card-visual-states-and-hover-interactions-godot-styleboxtheming.md) — *todo*
 - [Godot Battle 07 - Hot-Reload Fixes & Parity](wiki/tasks/godot-battle-07-hot-reload-fixes.md) — *done*
-- [Migrate cards to JSON packs with zod schema + loader](wiki/tasks/migrate-cards-to-json-packs-with-zod-schema--loader.md) — *in-progress*
+- [godot-battle-05-combat-system--attack-counter-battle-end](wiki/tasks/godot-battle-05-combat-system--attack-counter-battle-end.md) — *archived*
+- [Migrate cards to JSON packs with zod schema + loader](wiki/tasks/migrate-cards-to-json-packs-with-zod-schema--loader.md) — *done*
 - [Save/Load — Godot ConfigFile/Resource persistence, wire to menu](wiki/tasks/saveload--godot-configfileresource-persistence-wire-to-menu.md) — *todo*
 - [Update stale docs (CONVENTIONS, ARCHITECTURE, DESIGN.md) to real Next.js/React stack + new file convention](wiki/tasks/update-stale-docs-conventions-architecture-designmd-to-real-nextjsreact-stack--new-file-convention.md) — *done*
-- [Implement effect resolver (exhaustive match + custom registry)](wiki/tasks/implement-effect-resolver-exhaustive-match--custom-registry.md) — *in-progress*
+- [Implement effect resolver (exhaustive match + custom registry)](wiki/tasks/implement-effect-resolver-exhaustive-match--custom-registry.md) — *done*
+- [godot-battle-03-unit-system--placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *archived*
 - [Implement crafting Rust bridge — open, card browser, detail view](wiki/tasks/crafting-ui-bridge-plumbing.md) — *done*
 - [Card stat balance pass against FaB model](wiki/tasks/card-stat-balance-pass-against-fab-model.md) — *todo*
 - [Restructure engine layer into domain folders + barrels (one type/service/helper per file)](wiki/tasks/restructure-engine-layer-into-domain-folders--barrels-one-typeservicehelper-per-file.md) — *done*
+- [godot-battle-06-turn-cycle--enemy-ai--hud](wiki/tasks/godot-battle-06-turn-cycle--enemy-ai--hud.md) — *archived*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
 - [Clean legacy fields, phase literals, dead code — Rust core](wiki/tasks/clean-legacy-fields-phase-literals-dead-code--rust-core.md) — *todo*
 - [Set up vitest test harness for the engine](wiki/tasks/set-up-vitest-test-harness-for-the-engine.md) — *done*
 - [Post-battle heal, heroMaxHp fix, per-zone encounters, AI strategy pass-through](wiki/tasks/post-battle-heal-heromaxhp-fix-per-zone-encounters-ai-strategy-pass-through.md) — *todo*
+- [godot-battle-02-godot-project-scaffold--grid-rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *archived*
 - [Wire Rust battle/combat core to Godot via gdext bridge with signals](wiki/tasks/wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals.md) — *done*
 - [Deck/discard pile visualization (Godot)](wiki/tasks/deckdiscard-pile-visualization-godot.md) — *todo*
 - [Dialogue system — wire dialogue scene into campaign flow (Godot)](wiki/tasks/dialogue-system--wire-dialogue-scene-into-campaign-flow-godot.md) — *todo*
+- [godot-battle-01-core-logic-layer--pure-gdscript-classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *archived*
 - [Hook StrictMode render test — red-green validated against the command-drain fix](wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix.md) — *done*
 - [Godot Theme resource system for consistent UI styling](wiki/tasks/godot-theme-resource-system-for-consistent-ui-styling.md) — *todo*
 - [Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace](wiki/tasks/grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace.md) — *done*
 - [Add CraftingPanel node tree to overworld.tscn](wiki/tasks/crafting-ui-scene-nodes.md) — *done*
-- [Add snapshot-based undo/redo history with End-Turn commit](wiki/tasks/add-snapshot-based-undoredo-history-with-end-turn-commit.md) — *in-progress*
-- [Add CardEffect union + effects field to types](wiki/tasks/add-cardeffect-union--effects-field-to-types.md) — *in-progress*
+- [Add snapshot-based undo/redo history with End-Turn commit](wiki/tasks/add-snapshot-based-undoredo-history-with-end-turn-commit.md) — *done*
+- [Add CardEffect union + effects field to types](wiki/tasks/add-cardeffect-union--effects-field-to-types.md) — *done*
 - [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
 - [Dynamic hand layout for variable card count (Godot Control nodes)](wiki/tasks/dynamic-hand-layout-for-variable-card-count-godot-control-nodes.md) — *todo*
 - [Implement crafting actions — mode actions, confirmation, result, accept/close](wiki/tasks/crafting-ui-actions.md) — *done*
 
 ## Graph Stats
 
-- **Nodes:** 212
-- **Edges:** 332
+- **Nodes:** 221
+- **Edges:** 357
 

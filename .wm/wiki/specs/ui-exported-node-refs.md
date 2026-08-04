@@ -1,9 +1,14 @@
 ---
 title: UI Exported Node References — GDScript @export for Rust Bridge
 type: spec
-id: wiki:specs:ui-exported-node-refs
-status: draft
-tags: [spec, ui, gdext, rust, gdscript]
+tags:
+- spec
+- ui
+- gdext
+- rust
+- gdscript
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): Godot GDScript @export bridge refs — dead direction.'
 ---
 
 ## Overview

@@ -1,7 +1,14 @@
 ---
 title: Battle & Overworld UI — Declare in .tscn
 type: spec
-tags: [godot, ui, tscn, refactor, theming]
+tags:
+- godot
+- ui
+- tscn
+- refactor
+- theming
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): Godot .tscn UI declaration — dead direction, JS stack replaced it.'
 ---
 
 ---

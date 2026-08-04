@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:tdd",
-  "current_version": 2,
+  "current_version": 3,
   "versions": [
     {
       "id": "v1",
@@ -32,6 +32,21 @@
           "field": "content",
           "old_value": "---\r\ntitle: TDD — Test-First for Everything\r\ntype: rule\r\nstatus: draft\r\ntags: [rule, testing]\r\ncategory: process\r\nrationale: Test-first catches design issues early, creates a safety net for refactoring, and ensures code is testable by construction. Red-Green-Refactor is the standard.\r\n---\r\n\r\n# TDD — Test-First for Everything\r\n\r\nRed-Green-Refactor applies to ALL implementation.",
           "new_value": "# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n\n## Red-Green-Refactor\n\n1. **RED** — Write a failing test for the next behavior first. Run it; watch it fail for the right reason (assertion, not compile error). Never skip this.\n2. **GREEN** — Write the minimal implementation that makes the test pass. No extra features, no speculative code.\n3. **REFACTOR** — Clean up the code under the safety net of the now-passing tests. Duplication, naming, structure. Tests stay green after every refactor step.\n\n## Rules\n\n- Test first, always — no implementation without a failing test (`npx vitest run` / `cargo test`).\n- One behavior per test; name tests by behavior, not implementation.\n- Orchestration/integration layers get tests too — untested bridge wiring is where every P0 in this project's history lived (see wiki:core:critical-patterns). Never delete orchestrator tests without replacement.\n- Compiler-driven where possible: types/enums/Result catch rule violations before tests run.\n- Run the full suite before considering work complete.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-04T08:35:18.363Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n\n## Red-Green-Refactor\n\n1. **RED** — Write a failing test for the next behavior first. Run it; watch it fail for the right reason (assertion, not compile error). Never skip this.\n2. **GREEN** — Write the minimal implementation that makes the test pass. No extra features, no speculative code.\n3. **REFACTOR** — Clean up the code under the safety net of the now-passing tests. Duplication, naming, structure. Tests stay green after every refactor step.\n\n## Rules\n\n- Test first, always — no implementation without a failing test (`npx vitest run` / `cargo test`).\n- One behavior per test; name tests by behavior, not implementation.\n- Orchestration/integration layers get tests too — untested bridge wiring is where every P0 in this project's history lived (see wiki:core:critical-patterns). Never delete orchestrator tests without replacement.\n- Compiler-driven where possible: types/enums/Result catch rule violations before tests run.\n- Run the full suite before considering work complete.",
+          "new_value": "---\ntitle: TDD — Test-First for Everything\ntype: rule\nstatus: active\ntags: [tdd, convention, testing]\ncategory: process\nrationale: Red-Green-Refactor with test-first prevents regressions and documents behavior. Untested orchestration is where every P0 in this project lived — orchestration layers get tests too.\n---\n\n# TDD — Test-First for Everything\n\nRed-Green-Refactor applies to ALL implementation.\n\n## Red-Green-Refactor\n\n1. **RED** — Write a failing test for the next behavior first. Run it; watch it fail for the right reason (assertion, not compile error). Never skip this.\n2. **GREEN** — Write the minimal implementation that makes the test pass. No extra features, no speculative code.\n3. **REFACTOR** — Clean up the code under the safety net of the now-passing tests. Duplication, naming, structure. Tests stay green after every refactor step.\n\n## Rules\n\n- Test first, always — no implementation without a failing test (`npx vitest run` / `cargo test`).\n- One behavior per test; name tests by behavior, not implementation.\n- Orchestration/integration layers get tests too — untested bridge wiring is where every P0 in this project's history lived (see wiki:core:critical-patterns). Never delete orchestrator tests without replacement.\n- Compiler-driven where possible: types/enums/Result catch rule violations before tests run.\n- Run the full suite before considering work complete.\n"
         }
       ],
       "path": "",

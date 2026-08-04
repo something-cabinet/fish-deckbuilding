@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:tasks:godot-battle-06-turn-cycle--enemy-ai--hud",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-04T07:56:57.103Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "archived"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

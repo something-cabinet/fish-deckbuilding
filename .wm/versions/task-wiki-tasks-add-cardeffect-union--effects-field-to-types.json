@@ -1,35 +1,7 @@
 {
   "entity_id": "wiki:tasks:add-cardeffect-union--effects-field-to-types",
-  "current_version": 3,
+  "current_version": 5,
   "versions": [
-    {
-      "id": "v1",
-      "version": 1,
-      "timestamp": "2026-08-03T10:22:47.604Z",
-      "author": null,
-      "changes": [
-        {
-          "field": "status",
-          "old_value": "todo",
-          "new_value": "in-progress"
-        }
-      ],
-      "compacted": false
-    },
-    {
-      "id": "v2",
-      "version": 2,
-      "timestamp": "2026-08-03T10:23:46.514Z",
-      "author": null,
-      "changes": [
-        {
-          "field": "status",
-          "old_value": "in-progress",
-          "new_value": "in-progress"
-        }
-      ],
-      "compacted": false
-    },
     {
       "id": "v3",
       "version": 3,
@@ -40,6 +12,34 @@
           "field": "status",
           "old_value": "in-progress",
           "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-04T07:57:14.236Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v5",
+      "version": 5,
+      "timestamp": "2026-08-04T08:34:34.577Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
         }
       ],
       "compacted": false

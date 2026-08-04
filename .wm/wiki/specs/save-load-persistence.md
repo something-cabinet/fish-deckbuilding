@@ -1,8 +1,14 @@
 ---
 title: Save/Load — Godot ConfigFile/Resource Persistence
 type: spec
-tags: [godot, persistence, save, rust, gdext]
-status: draft
+tags:
+- godot
+- persistence
+- save
+- rust
+- gdext
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): Godot ConfigFile/Resource persistence spec — dead direction; browser localStorage is the locked persistence (wiki:decisions/browser-localstorage-persistence).'
 ---
 
 ## Overview

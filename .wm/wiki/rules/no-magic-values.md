@@ -9,7 +9,7 @@ status: active
 title: No Magic Values — Use Enums and Constants
 type: rule
 status: active
-tags: [rule, code-quality]
+tags: [rule, code-style, rust, quality]
 category: style
 rationale: Magic values make code hard to change and reason about. Enums and named constants make intent clear and prevent inconsistencies.
 ---

@@ -8,8 +8,12 @@ tags:
 status: done
 order: 3
 acceptance_criteria:
-  - {text: "Mode actions select crafting mode", checked: false}
-  - {text: "Confirmation dialog gates destructive actions", checked: false}
-  - {text: "Result shown and accept/close resolves the action", checked: false}
+- text: Mode actions select crafting mode
+  checked: false
+- text: Confirmation dialog gates destructive actions
+  checked: false
+- text: Result shown and accept/close resolves the action
+  checked: false
+assignee: orchestrator
 ---
 

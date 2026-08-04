@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:specs:web-deploy-workflow",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "content",
           "old_value": "## Overview\n\nAutomate the full web deployment pipeline: compile Rust extension, export Godot web player, deploy to Vercel. Currently each step is manual and documented separately.\n\n## Pipeline\n\n```\nbuild-web.sh (Rust → .wasm)\n    → godot --headless --export (wasm + scene → HTML/JS/WASM)\n        → vercel deploy (HTML/JS/WASM → production URL)\n```\n\n## Requirements\n\n- FR-1: Single command builds Rust extension + exports Godot web player\n- FR-2: Web player serves with COOP/COEP headers (threaded WASM)\n- FR-3: CI can run the full pipeline on push to main\n- FR-4: Vercel deploys from `godot/web/` output directory\n- FR-5: Build only runs on Linux (Godot + Emscripten + Rust nightly all available)\n\n## Acceptance Criteria\n\n- [ ] AC-1: `./build-web.sh --export` compiles Rust + runs Godot headless export\n- [ ] AC-2: Godot web export produces `index.html` + `.wasm` + `.pck` in `godot/web/`\n- [ ] AC-3: `npx serve godot/web/ --cors` serves a playable game\n- [ ] AC-4: Vercel deploy serves the game with COOP/COEP headers\n- [ ] AC-5: CI badge shows green for the pipeline\n\n## Resolved Decisions\n\n- Q1: Output goes to `godot/web/` (matches `export_presets.cfg`'s `export_path`).\n- Q2: Vercel deploy is a separate CI job (`.github/workflows/deploy.yml`), not part of `build-web.sh`. Vercel's build container lacks Rust/Godot/Emscripten, so GitHub Actions builds and pushes the prebuilt static output via the Vercel CLI (`vercel deploy --prebuilt`).\n- Q3: `main` only (plus manual `workflow_dispatch`).",
           "new_value": "---\ntitle: Web Deploy Workflow — Build → Export → Serve\ntype: spec\nstatus: draft\ntags: [spec, deploy, web, godot]\nstakeholders: [\"development-team\"]\n---\n\n## Overview\n\nBuild, export, and deploy the Godot web build.\n\n## Stakeholders\n\n- Development team\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T07:57:05.449Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "draft",
+          "new_value": "superseded"
         }
       ],
       "path": "",

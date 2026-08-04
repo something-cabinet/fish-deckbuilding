@@ -1,4 +1,6 @@
 ---
+title: critical-patterns
+type: pattern
 ---
 
 # Critical Patterns

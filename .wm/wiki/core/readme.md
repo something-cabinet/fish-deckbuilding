@@ -1,20 +1,28 @@
 ---
 title: Fish Roguelite Deckbuilding — README
 type: core
+tags: [core, readme]
+status: reviewed
+---
+
+---
+title: Fish Roguelite Deckbuilding — README
+type: core
 status: reviewed
 tags: [core, readme]
 ---
 
 # Fish Mafia: Ledger Tactics
 
-A tactical deckbuilding game about **Guppy the Debtor** — a fish trying to escape the mafia underworld. Grid combat with a mana-costed card hand, built with **Next.js 16 + React 19 + TypeScript + Tailwind v4**. The engine is pure React-free TypeScript in `src/lib/game/` (see wiki:specs:angular-style-file-system for the file convention).
+A tactical deckbuilding game about **Guppy the Debtor** — a fish trying to escape the mafia underworld. Grid combat with a mana-costed card hand, built with **Next.js 16 + React 19 + TypeScript + Tailwind v4**. The engine is pure React-free TypeScript in `src/lib/game/` (see wiki:specs/angular-style-file-system for the file convention).
 
 ## Quick Start
 
 ```bash
 npm install        # install dependencies
 npm run dev        # start the dev server
-npm test           # run the Vitest engine suite (57 tests)
+npm test           # run the Vitest suite (127 tests)
+npm run test:coverage  # run tests + coverage report (threshold gate: 75/75/75/55)
 npm run build      # production build
 ```
 
@@ -30,9 +38,10 @@ npm run build      # production build
 
 - App shell with screen switching: menu / game / card library / card create (`src/components/game/fish-mafia-app.tsx`)
 - Battle UI: board, unit tokens, hand, targeting arrow, particle FX, top bar, side panel, result overlay
-- Pure TS engine in `src/lib/game/` — cards, units, battle state, services (engine/commands/effects/history), zero React dependencies, unit tested via `npm test`
+- Pure TS engine in `src/lib/game/` — cards, units, battle, deck domains + function folders (actions/commands/session), zero React dependencies, unit tested via `npm test`
 - Data-driven card effects with a resolver + custom-effect registry (see wiki:specs:card-effect-registry)
 - Card library + custom card creator (display-only custom cards)
+- Coverage gate: `npm run test:coverage` (v8, owned-code include, thresholds)
 
 ## Key Files
 
@@ -41,18 +50,19 @@ npm run build      # production build
 | `src/app/page.tsx` | Server entry → `FishMafiaApp` |
 | `src/components/game/` | App shell, screens, battle widgets (one component per file) |
 | `src/hooks/use-fish-mafia.ts` | The only UI ↔ engine bridge (state snapshot + actions) |
-| `src/lib/game/cards/` | Card types + JSON packs + zod schema + barrel |
-| `src/lib/game/units/` | Unit types + barrel |
-| `src/lib/game/battle/` | GameState, FxEvent, Phase, Pos + barrel |
-| `src/lib/game/services/` | engine / commands / effects / history services |
-| `src/lib/game/helpers/` | icons helper |
+| `src/lib/game/cards/` | Card types, enums, constants, services, JSON packs + zod schema |
+| `src/lib/game/units/` | Unit types, enums, combat service, defs |
+| `src/lib/game/battle/` | GameState, FxEvent, Phase, board/rules services |
+| `src/lib/game/actions\|commands\|session/` | Player use-cases, command bus, undo/redo |
 | `src/lib/game/data.ts` | CARD_LIBRARY, STARTER_DECK, ENEMY_SPAWNS |
 | `src/lib/game/index.ts` | Root barrel |
 | `wiki:specs:angular-style-file-system` | File system convention |
+| `wiki:specs:domain-layered-engine-structure` | Domain/function-first engine structure |
 | `wiki:specs:card-effect-registry` | Engine command/effect architecture |
 
 ## Full Specs
 
 @wiki/specs/angular-style-file-system (file system convention)
+@wiki/specs/domain-layered-engine-structure (engine structure)
 @wiki/specs/card-effect-registry (engine architecture)
 @wiki/specs/fish-tactical-rpg (game design intent)

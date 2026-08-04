@@ -6,6 +6,9 @@ tags:
 - spec:angular-style-file-system
 status: done
 priority: high
+relates_to:
+- type: implements
+  target: wiki:specs:angular-style-file-system
 acceptance_criteria:
 - text: 'AC-1: src/lib/game/types.ts no longer exists; every top-level type lives in its own suffixed file within a domain folder'
   checked: true
@@ -21,9 +24,7 @@ acceptance_criteria:
   checked: true
 - text: 'AC-7: No new circular imports introduced (grep-verifiable; existing type-only fish-mafia-app ↔ fish-mafia-game cycle documented if it remains)'
   checked: true
-relates_to:
-- type: implements
-  target: wiki:specs:angular-style-file-system
+assignee: orchestrator
 ---
 
 Restructure the engine layer (src/lib/game/) into an Angular-style file system: one top-level type per file with role suffixes (*.interface.ts, *.model.ts, *.service.ts, *.helper.ts, *.constants.ts), organized into domain folders (cards/, units/, battle/, services/, helpers/) each with an index.ts barrel; consumers import from domain barrels only. Retroactive refactor of existing files (types.ts, engine.ts, commands.ts, effects.ts, history.ts, icons.ts) with all imports and tests updated in the same pass; 57 tests + build green is the gate. Verified on disk 2026-08-03: 57/57 tests, npm run build green, tsc --noEmit 0 errors, zero stale @/lib/game/* imports. Type-only fish-mafia-app ↔ fish-mafia-game cycle remains (erased at compile); value cycle engine.service ↔ effects.service preserved.

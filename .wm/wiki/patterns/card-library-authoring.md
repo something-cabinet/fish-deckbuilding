@@ -1,7 +1,15 @@
 ---
+title: Pattern: Card Library and Authoring UI
+type: pattern
+tags: [pattern, ui-patterns, card-games, forms]
+---
+
+---
 title: "Pattern: Card Library and Authoring UI"
 type: pattern
 tags: ["pattern", "ui-patterns", "card-games", "forms"]
+when_to_use: Deck-builders or roguelikes needing a browsable card collection with filtering and/or a card creator with live preview
+example: CardLibraryScreen renders a CardFace grid with type-filter chips; CardCreateScreen keeps local form state and renders CardFace as a live preview
 ---
 
 ## Problem

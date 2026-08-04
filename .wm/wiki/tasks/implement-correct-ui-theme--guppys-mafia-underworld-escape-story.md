@@ -8,6 +8,7 @@ tags:
 - handover
 status: in-progress
 priority: medium
+implementation_notes: 'COMPLETED 2026-08-01: all ACs satisfied (story spec, motifs, DESIGN.md, presentation-layer application, vite+vitest green, browser smoke). Superseded by wiki:decisions/mafia-pixel-world-replacement — the VU-Meter Desk world was replaced with the mafia pixel-art street world; the balloon/bowl/city-above motifs and their discipline carried over unchanged. Status noted done (task API transition flaky).'
 relates_to:
 - type: relates_to
   target: wiki:specs:mafia-underworld-ui-theme
@@ -30,7 +31,7 @@ acceptance_criteria:
   checked: false
 - text: Browser smoke pass confirms the themed UI renders and interactions still work
   checked: false
-implementation_notes: 'COMPLETED 2026-08-01: all ACs satisfied (story spec, motifs, DESIGN.md, presentation-layer application, vite+vitest green, browser smoke). Superseded by wiki:decisions/mafia-pixel-world-replacement — the VU-Meter Desk world was replaced with the mafia pixel-art street world; the balloon/bowl/city-above motifs and their discipline carried over unchanged. Status noted done (task API transition flaky).'
+assignee: orchestrator
 ---
 
 # Implement correct UI theme — Guppy's mafia underworld escape story

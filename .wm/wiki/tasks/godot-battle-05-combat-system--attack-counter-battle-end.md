@@ -1,4 +1,13 @@
 ---
+title: godot-battle-05-combat-system--attack-counter-battle-end
+type: task
+status: archived
+assignee: orchestrator
+acceptance_criteria:
+  - {text: "Archived 2026-08-04: dead Godot direction; superseded by Rust core implementation", checked: false}
+---
+
+---
 title: [godot-battle-05] Combat system — attack, counter, battle end
 type: task
 id: wiki:tasks:godot-battle-05-combat-system--attack-counter-battle-end
