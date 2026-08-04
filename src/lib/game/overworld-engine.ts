@@ -1,6 +1,16 @@
 import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
 import { HERO_DEF, type EnemySpawn } from "@/lib/game/units"
-import { NODE_KIND_WEIGHTS, ZONES } from "./overworld-data"
+import {
+  EVENTS,
+  FORECLOSURE_CAP,
+  INTEREST_RATE,
+  NODE_KIND_WEIGHTS,
+  SHOP_REMOVE_PRICE,
+  START_DEBT,
+  ZONES,
+  shopCardPrice,
+  type EventDef,
+} from "./overworld-data"
 import type { MapNode, NodeType, OverworldState, ZoneDef } from "./overworld-types"
 
 /* ------------------------------------------------------------------ */
@@ -36,31 +46,75 @@ function shuffle<T>(rng: () => number, arr: T[]): T[] {
   return arr
 }
 
+function hashStr(s: string): number {
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h & 0xffffffff
+}
+
 /* ------------------------------------------------------------------ */
 /* map generation                                                      */
 /* ------------------------------------------------------------------ */
 
-function nodeTypeFor(rng: () => number, row: number, rows: number): NodeType {
-  if (row === 0) return "battle"
-  if (row === rows - 1) return "boss"
+/** Weighted bag of filler node kinds for the generic middle rows. */
+function fillerBag(): NodeType[] {
   const bag: NodeType[] = []
   for (const [k, w] of Object.entries(NODE_KIND_WEIGHTS)) {
-    for (let i = 0; i < w; i++) bag.push(k as NodeType)
+    for (let i = 0; i < (w ?? 0); i++) bag.push(k as NodeType)
   }
-  return pick(rng, bag)
+  return bag
+}
+
+/** Telegraphed threat tier for a node (0 = no combat). */
+function threatFor(type: NodeType, zoneIndex: number, nodeId: string): number {
+  if (type === "elite") return 3
+  if (type === "battle") {
+    const base = 1 + (hashStr(nodeId) % 2) // 1..2
+    return Math.min(3, base + (zoneIndex >= 2 ? 1 : 0))
+  }
+  return 0
+}
+
+/**
+ * Assign a node kind to every middle-row node with structural guarantees:
+ * row 1 is always a gentle battle, the row before the boss is an elite
+ * gauntlet, and every zone map is guaranteed at least one shop and one rest
+ * so the economy and healing loops always exist.
+ */
+function assignTypes(byRow: MapNode[][], rows: number, rng: () => number): void {
+  const bag = fillerBag()
+  for (let r = 1; r < rows - 1; r++) {
+    for (const n of byRow[r]) {
+      if (r === 1) n.type = "battle"
+      else if (r === rows - 2) n.type = "elite"
+      else n.type = pick(rng, bag)
+    }
+  }
+
+  const middle = byRow.slice(1, rows - 1).flat()
+  const ensure = (kind: NodeType) => {
+    if (middle.some((n) => n.type === kind)) return
+    // convert a random non-elite, non-forced middle node
+    const candidates = middle.filter((n) => n.type === "battle" || n.type === "event")
+    if (candidates.length) pick(rng, candidates).type = kind
+  }
+  ensure("shop")
+  ensure("rest")
 }
 
 /**
  * Generate a full zone map deterministically from (zoneDef, seed).
- * Layout: 5-7 rows; row 0 = start (battle), middle rows 2-3 nodes with
- * battle/rest mix, last row = boss. Edges are assigned as ordered,
- * non-overlapping windows so connecting lines never cross, while every
- * node stays reachable from the start and has at least one way forward.
+ * Rows vary 2-4 wide so paths genuinely diverge and reconverge (committing
+ * to a branch means giving another up). Edges are ordered, non-overlapping
+ * windows so connecting lines never cross while every node stays reachable
+ * from the start and keeps a way forward.
  */
 export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
   const rng = mulberry32(seed * 7919 + zone.index * 104729)
 
-  // per-row node counts; rows is zone.rows (5-7)
   const rows = zone.rows
   const colCounts: number[] = [1]
   for (let r = 1; r < rows - 1; r++) {
@@ -69,14 +123,14 @@ export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
   colCounts.push(1)
 
   const nodes: MapNode[] = []
-  // 1) create every node with a type and layout position
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < colCounts[r]; c++) {
       nodes.push({
         id: `${r}-${c}`,
         row: r,
         col: c,
-        type: nodeTypeFor(rng, r, rows),
+        type: r === 0 ? "battle" : r === rows - 1 ? "boss" : "battle",
+        threat: 0,
         edges: [],
         x: ((c + 0.5) / colCounts[r]) * 100,
         y: ((r + 0.5) / rows) * 100,
@@ -87,20 +141,17 @@ export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
   const byRow: MapNode[][] = []
   for (const n of nodes) (byRow[n.row] ??= []).push(n)
 
-  // 2) wire edges with a monotone assignment so paths never cross.
-  // Each node owns a contiguous window of next-row nodes and windows are
-  // ordered left-to-right, which makes every connecting line stay to the
-  // left of the next node's lines. Every next-row node is covered (so the
-  // map stays fully connected) and every node keeps at least one way out.
+  // assign node kinds (structural guarantees) then telegraph threat
+  assignTypes(byRow, rows, rng)
+  for (const n of nodes) n.threat = threatFor(n.type, zone.index, n.id)
+
+  // wire edges with a monotone (non-crossing) window assignment
   for (let r = 0; r < rows - 1; r++) {
     const cur = byRow[r]
     const next = byRow[r + 1]
     const m = next.length
     if (m === 0) continue
 
-    // distribute (m - 1) "gap" units across cur nodes; node i gets a window
-    // of gaps[i] + 1 next-row nodes. Prefer 1-2 targets (branching) and only
-    // fan out wider when few nodes must cover many (e.g. the start row).
     const gaps = new Array<number>(cur.length).fill(0)
     let remaining = m - 1
     const order = shuffle(rng, [...Array(cur.length).keys()])
@@ -114,7 +165,6 @@ export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
       remaining--
     }
 
-    // walk the windows left-to-right and assign edge ids
     let lo = 0
     for (let i = 0; i < cur.length; i++) {
       const hi = lo + gaps[i]
@@ -132,7 +182,7 @@ export function generateAllZoneMaps(seed: number): MapNode[][] {
 }
 
 /* ------------------------------------------------------------------ */
-/* state helpers                                                       */
+/* node lookup helpers                                                 */
 /* ------------------------------------------------------------------ */
 
 /** The node the hero currently stands on. */
@@ -148,6 +198,28 @@ export function reachableNodes(map: MapNode[], state: OverworldState): MapNode[]
     .filter((n): n is MapNode => !!n && !state.visited.includes(n.id))
 }
 
+/** The node kind the hero currently stands on (regenerated from seed). */
+export function nodeTypeAt(state: OverworldState): NodeType {
+  const zone = ZONES[state.zoneIndex]
+  if (!zone) return "battle"
+  const map = generateZoneMap(zone, state.seed)
+  return map.find((n) => n.id === state.nodeId)?.type ?? "battle"
+}
+
+/** Whether the hero's current node is a boss node. */
+export function isBossNode(state: OverworldState): boolean {
+  return nodeTypeAt(state) === "boss"
+}
+
+/** Whether the current node resolves to a Rest. */
+export function isRestNode(state: OverworldState): boolean {
+  return nodeTypeAt(state) === "rest"
+}
+
+/* ------------------------------------------------------------------ */
+/* travel + node clearing (with interest accrual)                      */
+/* ------------------------------------------------------------------ */
+
 /**
  * Advance the hero to a node. Pure — returns a new state. The transition is
  * treated as entering the node; the node's action is resolved by the caller.
@@ -156,10 +228,26 @@ export function travelToNode(state: OverworldState, nodeId: string): OverworldSt
   return { ...state, nodeId }
 }
 
-/** Mark the current node cleared (battle won / rest used / boss beaten). */
+/** Interest that would be charged for clearing one more node right now. */
+export function accrueInterest(state: OverworldState): number {
+  const zone = ZONES[state.zoneIndex]
+  const rent = zone?.baseRent ?? 8
+  return Math.max(rent, Math.ceil(state.debt * INTEREST_RATE))
+}
+
+/**
+ * Mark the current node cleared and tick the debt ledger. Every cleared node
+ * is "a day passing", so interest compounds here — the pressure that makes
+ * gold worth spending on the ledger.
+ */
 export function clearCurrentNode(state: OverworldState): OverworldState {
   if (state.visited.includes(state.nodeId)) return state
-  return { ...state, visited: [...state.visited, state.nodeId] }
+  const interest = accrueInterest(state)
+  return {
+    ...state,
+    visited: [...state.visited, state.nodeId],
+    debt: state.debt + interest,
+  }
 }
 
 /** Rest node: heal 30% of max HP, round down (spec: 30% of 14 -> 4). */
@@ -174,6 +262,85 @@ export function unlockNextZone(state: OverworldState): OverworldState {
     ...state,
     unlockedZones: Math.max(state.unlockedZones, state.zoneIndex + 2),
   })
+}
+
+/* ------------------------------------------------------------------ */
+/* debt ledger + foreclosure                                           */
+/* ------------------------------------------------------------------ */
+
+/** Has the syndicate foreclosed? (run-ending) */
+export function isForeclosed(state: OverworldState): boolean {
+  return state.debt >= FORECLOSURE_CAP
+}
+
+/** Pay gold against the debt, 1:1, bounded by gold and outstanding debt. */
+export function payDebt(state: OverworldState, amount: number): OverworldState {
+  const pay = Math.max(0, Math.min(amount, state.gold, state.debt))
+  return { ...state, gold: state.gold - pay, debt: state.debt - pay }
+}
+
+/* ------------------------------------------------------------------ */
+/* shop                                                                */
+/* ------------------------------------------------------------------ */
+
+export interface ShopOffer {
+  cardId: string
+  price: number
+}
+
+/** Seeded card inventory for a shop node (4 distinct offers). */
+export function shopInventory(seed: number, zoneIndex: number, nodeId: string): ShopOffer[] {
+  const rng = mulberry32(seed * 53 + zoneIndex * 197 + hashStr(nodeId))
+  const pool = shuffle(rng, Object.keys(CARD_LIBRARY))
+  return pool.slice(0, Math.min(4, pool.length)).map((cardId) => ({
+    cardId,
+    price: shopCardPrice(CARD_LIBRARY[cardId]?.cost ?? 1),
+  }))
+}
+
+export const REMOVE_PRICE = SHOP_REMOVE_PRICE
+
+/** Buy a card at a shop: deduct gold, add to deck. No-op if unaffordable. */
+export function buyCard(state: OverworldState, cardId: string, price: number): OverworldState {
+  if (state.gold < price) return state
+  return { ...state, gold: state.gold - price, deck: [...state.deck, cardId] }
+}
+
+/** Strike one copy of a card from the deck for a flat fee. */
+export function removeCardFromDeck(
+  state: OverworldState,
+  cardId: string,
+  price: number,
+): OverworldState {
+  if (state.gold < price) return state
+  const i = state.deck.indexOf(cardId)
+  if (i < 0) return state
+  const deck = [...state.deck]
+  deck.splice(i, 1)
+  return { ...state, gold: state.gold - price, deck }
+}
+
+/* ------------------------------------------------------------------ */
+/* events                                                              */
+/* ------------------------------------------------------------------ */
+
+/** Seeded `?` encounter for a node. */
+export function eventForNode(seed: number, zoneIndex: number, nodeId: string): EventDef {
+  const rng = mulberry32(seed * 89 + zoneIndex * 211 + hashStr(nodeId))
+  return pick(rng, EVENTS)
+}
+
+/** Apply an event choice's outcome, then clear the node (ticks interest). */
+export function applyEventChoice(
+  state: OverworldState,
+  choice: { gold?: number; hp?: number; debt?: number; card?: string },
+): OverworldState {
+  let s = { ...state }
+  if (choice.gold) s.gold = Math.max(0, s.gold + choice.gold)
+  if (choice.hp) s.hp = Math.max(1, Math.min(s.maxHp, s.hp + choice.hp))
+  if (choice.debt) s.debt = Math.max(0, s.debt + choice.debt)
+  if (choice.card) s.deck = [...s.deck, choice.card]
+  return clearCurrentNode(s)
 }
 
 export const HERO_MAX_HP = HERO_DEF.maxHp
@@ -192,20 +359,21 @@ const BATTLE_SLOTS: { x: number; y: number }[] = [
 ]
 
 /** Build the enemy lineup for a standard battle in a zone. */
-export function battleEnemiesForZone(zoneIndex: number): EnemySpawn[] {
+export function battleEnemiesForZone(zoneIndex: number, elite = false): EnemySpawn[] {
   const zone = ZONES[zoneIndex]
   if (!zone) return []
   const pool = zone.enemyPool
   if (pool.length === 0) return []
+  const scale = elite ? 1.6 : 1
   return BATTLE_SLOTS.map((slot, i) => {
     const t = pool[i % pool.length]
     return {
-      name: t.name,
+      name: elite ? `Elite ${t.name}` : t.name,
       kind: t.kind,
       x: slot.x,
       y: slot.y,
-      hp: t.hp,
-      atk: t.atk,
+      hp: Math.round(t.hp * scale),
+      atk: Math.round(t.atk * scale),
       move: t.move,
     } as EnemySpawn
   })
@@ -235,29 +403,14 @@ export function bossEnemiesForZone(zoneIndex: number): EnemySpawn[] {
   ]
 }
 
-/** The current zone's battle (or boss) enemy lineup. */
+/** The current node's enemy lineup (boss / elite / standard). */
 export function enemiesForNode(state: OverworldState): EnemySpawn[] {
   const zone = ZONES[state.zoneIndex]
   if (!zone) return []
-  const node = `${state.nodeId}`
-  const isBossRow = node.startsWith(`${zone.rows - 1}-`)
-  return isBossRow ? bossEnemiesForZone(state.zoneIndex) : battleEnemiesForZone(state.zoneIndex)
-}
-
-/** Whether the hero's current node is a boss node. */
-export function isBossNode(state: OverworldState): boolean {
-  const zone = ZONES[state.zoneIndex]
-  if (!zone) return false
-  return state.nodeId.startsWith(`${zone.rows - 1}-`)
-}
-
-/** Whether the current node resolves to a Rest. */
-export function isRestNode(state: OverworldState): boolean {
-  const zone = ZONES[state.zoneIndex]
-  if (!zone) return false
-  const map = generateZoneMap(zone, state.seed)
-  const node = map.find((n) => n.id === state.nodeId)
-  return node?.type === "rest"
+  const type = nodeTypeAt(state)
+  if (type === "boss") return bossEnemiesForZone(state.zoneIndex)
+  if (type === "elite") return battleEnemiesForZone(state.zoneIndex, true)
+  return battleEnemiesForZone(state.zoneIndex, false)
 }
 
 export function zoneName(index: number): string {
@@ -274,11 +427,7 @@ export interface RolledRewards {
 }
 
 /** Roll 3 distinct reward cards + a gold amount from the run seed + node. */
-export function rollRewards(
-  seed: number,
-  zoneIndex: number,
-  nodeId: string,
-): RolledRewards {
+export function rollRewards(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
   const rng = mulberry32(seed * 31 + zoneIndex * 131 + (nodeId ? hashStr(nodeId) : 0))
   const pool = Object.keys(CARD_LIBRARY)
   const cards: string[] = []
@@ -289,16 +438,23 @@ export function rollRewards(
   return { cards, gold: 5 + Math.floor(rng() * 6) + zoneIndex * 3 }
 }
 
-function hashStr(s: string): number {
-  let h = 2166136261
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return h & 0xffffffff
+/** Elite rewards: same card pick, richer gold purse. */
+export function rollEliteRewards(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
+  const base = rollRewards(seed, zoneIndex, nodeId)
+  return { cards: base.cards, gold: base.gold + 15 + zoneIndex * 5 }
 }
 
-export function addRewardToState(state: OverworldState, cardId: string, gold: number): OverworldState {
+/** Treasure rewards: no fight, generous gold + a card pick. */
+export function rollTreasure(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
+  const base = rollRewards(seed, zoneIndex, nodeId)
+  return { cards: base.cards, gold: base.gold * 2 + 20 }
+}
+
+export function addRewardToState(
+  state: OverworldState,
+  cardId: string,
+  gold: number,
+): OverworldState {
   return { ...state, deck: [...state.deck, cardId], gold: state.gold + gold }
 }
 
@@ -306,7 +462,8 @@ export function addRewardToState(state: OverworldState, cardId: string, gold: nu
 /* new run + save / load                                               */
 /* ------------------------------------------------------------------ */
 
-export const SAVE_KEY = "fish-mafia-save"
+// bumped to v2: node-type + debt model changed, old saves are incompatible.
+export const SAVE_KEY = "fish-mafia-save-v2"
 
 export function createNewRun(seed?: number): OverworldState {
   const s = seed ?? Math.floor(Math.random() * 0xffffffff)
@@ -316,6 +473,7 @@ export function createNewRun(seed?: number): OverworldState {
     hp: HERO_MAX_HP,
     maxHp: HERO_MAX_HP,
     gold: 0,
+    debt: START_DEBT,
     deck: [...STARTER_DECK],
     visited: [],
     unlockedZones: 1,
@@ -361,6 +519,7 @@ function isValidSave(s: OverworldState): boolean {
     typeof s.hp === "number" &&
     typeof s.maxHp === "number" &&
     typeof s.gold === "number" &&
+    typeof s.debt === "number" &&
     Array.isArray(s.deck) &&
     Array.isArray(s.visited) &&
     typeof s.unlockedZones === "number" &&
