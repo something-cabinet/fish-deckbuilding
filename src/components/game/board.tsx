@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { ParticleCanvas } from "./particle-canvas"
 import { UnitToken } from "./unit-token"
-import { COLS, ROWS, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
+import { COLS, ROWS, FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
 import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
@@ -42,7 +42,7 @@ export function Board({
   const hitIds = useMemo(() => {
     const s = new Set<string>()
     for (const e of fx) {
-      if ((e.kind === "shock" || e.kind === "melee" || e.kind === "death") && e.to) {
+      if ((e.kind === FxKind.Shock || e.kind === FxKind.Melee || e.kind === FxKind.Death) && e.to) {
         const u = state.units.find((x) => x.pos.x === e.to!.x && x.pos.y === e.to!.y)
         if (u) s.add(u.id)
       }
@@ -56,7 +56,7 @@ export function Board({
         (e) =>
           e.amount != null &&
           e.to != null &&
-          (e.kind === "shock" || e.kind === "melee" || e.kind === "heal" || e.kind === "coin"),
+          (e.kind === FxKind.Shock || e.kind === FxKind.Melee || e.kind === FxKind.Heal || e.kind === FxKind.Coin),
       ),
     [fx],
   )
@@ -141,8 +141,8 @@ export function Board({
               {showEffects && floaters.map((e) => {
                 const left = ((e.to!.x + 0.5) / COLS) * 100
                 const top = ((e.to!.y + 0.2) / ROWS) * 100
-                const isHeal = e.kind === "heal"
-                const isCoin = e.kind === "coin"
+                const isHeal = e.kind === FxKind.Heal
+                const isCoin = e.kind === FxKind.Coin
                 return (
                   <span
                     key={`f${e.id}`}

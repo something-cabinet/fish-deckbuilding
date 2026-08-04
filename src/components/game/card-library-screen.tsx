@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { ArrowLeft, Library, Plus, Sparkles } from "lucide-react"
-import type { CardDef, CardType } from "@/lib/game/cards"
+import { CardType, type CardDef } from "@/lib/game/cards"
 import { CARD_LIBRARY } from "@/lib/game"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
@@ -13,23 +13,24 @@ interface Props {
   onCreate: () => void
 }
 
-type Filter = "all" | CardType
+/** Card filter; null means "All" (no bare literal discriminators). */
+type Filter = CardType | null
 
 const FILTERS: { id: Filter; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "attack", label: "Attack" },
-  { id: "skill", label: "Skill" },
-  { id: "summon", label: "Summon" },
+  { id: null, label: "All" },
+  { id: CardType.Attack, label: "Attack" },
+  { id: CardType.Skill, label: "Skill" },
+  { id: CardType.Summon, label: "Summon" },
 ]
 
 export function CardLibraryScreen({ customCards, onBack, onCreate }: Props) {
-  const [filter, setFilter] = useState<Filter>("all")
+  const [filter, setFilter] = useState<Filter>(null)
 
   const baseCards = useMemo(() => Object.values(CARD_LIBRARY), [])
   const allCards = useMemo(() => [...baseCards, ...customCards], [baseCards, customCards])
   const customIds = useMemo(() => new Set(customCards.map((c) => c.id)), [customCards])
 
-  const visible = filter === "all" ? allCards : allCards.filter((c) => c.type === filter)
+  const visible = filter === null ? allCards : allCards.filter((c) => c.type === filter)
 
   return (
     <main className="flex h-dvh w-full flex-col overflow-hidden bg-ocean-deep text-foreground">

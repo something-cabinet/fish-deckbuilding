@@ -2,18 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
+  EnemyStepKind,
+  Phase,
   applyEnemyStep,
   beginPlayerTurn,
-  cardTargets,
   createInitialState,
-  GameSession,
   planEnemyTurn,
   reachableTiles,
   selectUnit,
   startGame,
-} from "@/lib/game/services"
-import type { CardInstance } from "@/lib/game/cards"
-import type { FxEvent, GameState, Pos } from "@/lib/game/battle"
+  type FxEvent,
+  type GameState,
+  type Pos,
+} from "@/lib/game/battle"
+import { GameSession } from "@/lib/game"
+import { cardTargets, type CardInstance } from "@/lib/game/cards"
+import { Team } from "@/lib/game/units"
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -151,12 +155,12 @@ export function useFishMafia() {
     // apply steps sequentially with animation delays — enemy steps run as
     // commands but never enter the undo stack (D10)
     for (const step of steps) {
-      if (stateRef.current.phase === "won" || stateRef.current.phase === "lost") break
+      if (stateRef.current.phase === Phase.Won || stateRef.current.phase === Phase.Lost) break
       const { state: ns, fx: e } = applyEnemyStep(stateRef.current, step)
       stateRef.current = ns
       setState(ns)
       pushFx(e)
-      await wait(step.kind === "attack" ? 480 : 300)
+      await wait(step.kind === EnemyStepKind.Attack ? 480 : 300)
     }
 
     await wait(250)
@@ -170,7 +174,7 @@ export function useFishMafia() {
   const reachable = useMemo(() => {
     if (!state.selectedUnitId) return [] as Pos[]
     const u = state.units.find((x) => x.id === state.selectedUnitId)
-    if (!u || u.team !== "player" || u.hasMoved || state.phase !== "player") return []
+    if (!u || u.team !== Team.Player || u.hasMoved || state.phase !== Phase.Player) return []
     return reachableTiles(state, state.selectedUnitId)
   }, [state])
 

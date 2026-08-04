@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { ArrowLeft, Check, PlusCircle } from "lucide-react"
-import type { CardDef, CardTarget, CardType } from "@/lib/game/cards"
-import { CARD_ICON_NAMES, getCardIcon } from "@/lib/game/helpers"
+import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import { FxKind } from "@/lib/game/battle"
+import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
 
@@ -12,23 +13,23 @@ interface Props {
   onSave: (def: CardDef) => void
 }
 
-const TYPES: CardType[] = ["attack", "skill", "summon"]
+const TYPES: CardType[] = [CardType.Attack, CardType.Skill, CardType.Summon]
 const TARGETS: { id: CardTarget; label: string }[] = [
-  { id: "enemy", label: "Enemy" },
-  { id: "ally", label: "Ally" },
-  { id: "unit", label: "Any unit" },
-  { id: "self", label: "Self" },
-  { id: "empty-tile", label: "Empty tile" },
+  { id: CardTarget.Enemy, label: "Enemy" },
+  { id: CardTarget.Ally, label: "Ally" },
+  { id: CardTarget.Unit, label: "Any unit" },
+  { id: CardTarget.Self, label: "Self" },
+  { id: CardTarget.EmptyTile, label: "Empty tile" },
 ]
-const FX_OPTIONS: CardDef["fx"][] = [
-  "letter",
-  "phone",
-  "gavel",
-  "coin",
-  "draw",
-  "heal",
-  "shock",
-  "summon",
+const FX_OPTIONS: FxKind[] = [
+  FxKind.Letter,
+  FxKind.Phone,
+  FxKind.Gavel,
+  FxKind.Coin,
+  FxKind.Draw,
+  FxKind.Heal,
+  FxKind.Shock,
+  FxKind.Summon,
 ]
 
 function slugify(name: string) {
@@ -38,13 +39,13 @@ function slugify(name: string) {
 
 export function CardCreateScreen({ onBack, onSave }: Props) {
   const [name, setName] = useState("")
-  const [type, setType] = useState<CardType>("attack")
-  const [target, setTarget] = useState<CardTarget>("enemy")
+  const [type, setType] = useState<CardType>(CardType.Attack)
+  const [target, setTarget] = useState<CardTarget>(CardTarget.Enemy)
   const [cost, setCost] = useState(1)
   const [value, setValue] = useState(1)
   const [desc, setDesc] = useState("")
   const [icon, setIcon] = useState("Swords")
-  const [fx, setFx] = useState<CardDef["fx"]>("shock")
+  const [fx, setFx] = useState<FxKind>(FxKind.Shock)
 
   const draft: CardDef = {
     id: "preview",

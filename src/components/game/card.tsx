@@ -12,7 +12,7 @@ import {
   TrendingUp,
   type LucideIcon,
 } from "lucide-react"
-import type { CardInstance } from "@/lib/game/cards"
+import { CardType, type CardInstance } from "@/lib/game/cards"
 import { cn } from "@/lib/utils"
 
 const ICONS: Record<string, LucideIcon> = {
@@ -27,10 +27,10 @@ const ICONS: Record<string, LucideIcon> = {
   Fish,
 }
 
-const TYPE_STYLES: Record<string, string> = {
-  attack: "bg-enemy text-white",
-  skill: "bg-teal text-ocean-deep",
-  summon: "bg-gold text-ocean-deep",
+const TYPE_STYLES: Record<CardType, string> = {
+  [CardType.Attack]: "bg-enemy text-white",
+  [CardType.Skill]: "bg-teal text-ocean-deep",
+  [CardType.Summon]: "bg-gold text-ocean-deep",
 }
 
 interface Props {
@@ -84,7 +84,7 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
           <Icon
             className={cn(
               "opacity-80",
-              def.type === "attack" ? "text-enemy" : def.type === "skill" ? "text-teal" : "text-gold-dim",
+              def.type === CardType.Attack ? "text-enemy" : def.type === CardType.Skill ? "text-teal" : "text-gold-dim",
             )}
             size={compact ? 34 : 40}
             strokeWidth={1.75}

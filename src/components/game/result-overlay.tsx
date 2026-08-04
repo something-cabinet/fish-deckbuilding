@@ -1,12 +1,12 @@
 "use client"
 
 import { RotateCcw } from "lucide-react"
-import type { GameState } from "@/lib/game/battle"
+import { Phase, type GameState } from "@/lib/game/battle"
 import { cn } from "@/lib/utils"
 
 export function ResultOverlay({ state, onRestart }: { state: GameState; onRestart: () => void }) {
-  if (state.phase !== "won" && state.phase !== "lost") return null
-  const won = state.phase === "won"
+  if (state.phase !== Phase.Won && state.phase !== Phase.Lost) return null
+  const won = state.phase === Phase.Won
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-ocean-deep/85 backdrop-blur-sm animate-fm-fade-in">

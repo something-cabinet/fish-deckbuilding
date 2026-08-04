@@ -1,22 +1,22 @@
 "use client"
 
 import { Coins } from "lucide-react"
-import type { CardDef } from "@/lib/game/cards"
-import { getCardIcon } from "@/lib/game/helpers"
+import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
-const TYPE_STYLES: Record<string, string> = {
-  attack: "bg-enemy text-white",
-  skill: "bg-teal text-ocean-deep",
-  summon: "bg-gold text-ocean-deep",
+const TYPE_STYLES: Record<CardType, string> = {
+  [CardType.Attack]: "bg-enemy text-white",
+  [CardType.Skill]: "bg-teal text-ocean-deep",
+  [CardType.Summon]: "bg-gold text-ocean-deep",
 }
 
-const TARGET_LABELS: Record<string, string> = {
-  enemy: "Enemy",
-  ally: "Ally",
-  unit: "Any unit",
-  self: "Self",
-  "empty-tile": "Empty tile",
+const TARGET_LABELS: Record<CardTarget, string> = {
+  [CardTarget.Enemy]: "Enemy",
+  [CardTarget.Ally]: "Ally",
+  [CardTarget.Unit]: "Any unit",
+  [CardTarget.Self]: "Self",
+  [CardTarget.EmptyTile]: "Empty tile",
 }
 
 interface Props {
@@ -74,9 +74,9 @@ export function CardFace({ def, size = "md", className }: Props) {
           <Icon
             className={cn(
               "opacity-80",
-              def.type === "attack"
+              def.type === CardType.Attack
                 ? "text-enemy"
-                : def.type === "skill"
+                : def.type === CardType.Skill
                   ? "text-teal"
                   : "text-gold-dim",
             )}
