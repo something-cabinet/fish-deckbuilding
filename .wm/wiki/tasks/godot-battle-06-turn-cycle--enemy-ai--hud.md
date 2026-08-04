@@ -1,4 +1,13 @@
 ---
+title: godot-battle-06-turn-cycle--enemy-ai--hud
+type: task
+status: archived
+assignee: orchestrator
+acceptance_criteria:
+  - {text: "Archived 2026-08-04: dead Godot direction; superseded by Rust core implementation", checked: false}
+---
+
+---
 title: [godot-battle-06] Turn cycle + enemy AI + HUD
 type: task
 id: wiki:tasks:godot-battle-06-turn-cycle--enemy-ai--hud

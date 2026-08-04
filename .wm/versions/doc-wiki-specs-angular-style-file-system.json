@@ -1,0 +1,40 @@
+{
+  "entity_id": "wiki:specs:angular-style-file-system",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-03T13:13:43.381Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "draft",
+          "new_value": "approved"
+        },
+        {
+          "field": "tags",
+          "old_value": [
+            "convention",
+            "file-organization",
+            "typescript",
+            "refactor",
+            "barrel"
+          ],
+          "new_value": [
+            "convention",
+            "file-organization",
+            "typescript",
+            "refactor",
+            "barrel",
+            "spec",
+            "approved"
+          ]
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

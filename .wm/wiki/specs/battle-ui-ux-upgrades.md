@@ -1,10 +1,16 @@
 ---
 title: Battle UI/UX Upgrades
 type: spec
-tags: [ui, ux, battle, godot, gdext]
-status: approved
+tags:
+- ui
+- ux
+- battle
+- godot
+- gdext
+status: superseded
 priority: high
 confidence: high
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): Godot/gdext battle UI upgrades (tags: godot, gdext) — dead direction.'
 ---
 
 ---

@@ -9,7 +9,7 @@ status: active
 title: No else — Prefer Early Return
 type: rule
 status: active
-tags: [rule, style]
+tags: [rule, code-style, rust, control-flow]
 category: style
 rationale: Early returns reduce nesting and cognitive load. Match expressions in Rust naturally encourage this pattern over if-else chains.
 ---

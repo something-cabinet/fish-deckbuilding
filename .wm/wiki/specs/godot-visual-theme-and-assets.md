@@ -1,9 +1,14 @@
 ---
 title: Godot Visual Theme & Asset Pipeline
 type: spec
-id: wiki:specs:godot-visual-theme-and-assets
-status: draft
-tags: [godot, ui, theming, assets, design]
+tags:
+- godot
+- ui
+- theming
+- assets
+- design
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): dead Godot-era direction — the game''s real stack is Next.js/React (per README/ARCHITECTURE); Godot pivot investigated and abandoned.'
 ---
 
 ---

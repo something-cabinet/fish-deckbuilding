@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:no-comments-in-code",
-  "current_version": 2,
+  "current_version": 3,
   "versions": [
     {
       "id": "v1",
@@ -27,6 +27,21 @@
           "field": "content",
           "old_value": "## Rule: No Comments in Code — Zero. None.\n\nNo comments. Not implementation comments. Not doc comments (`///`). Not inline annotations. Zero.\n\nIf code needs a comment to be understood, it's badly named or too complex. Fix the naming or split the function.\n\n### What to do instead\n- **Choose descriptive names**: `remaining_move_budget` not `r // remaining budget`\n- **Extract named functions**: `fn validate_transition() { ... }` not `// validate state transition`\n- **Split large functions**: if a function needs a comment to explain a section, that section belongs in its own function with a descriptive name\n- **Use types that document themselves**: `Result<(), AttackError>` says more than `// returns error if attack fails`\n\n### Examples\n\n```rust\n// ❌ BAD — comment explaining what\n// increment counter\ncounter += 1;\n\n// ❌ BAD — comment explaining why, extract instead\n// retry with backoff\nfor i in 0..3 { ... }\n\n// ❌ BAD — doc comment that should be a function name\n/// Validate the state transition\nfn validate() { ... }\n\n// ✅ GOOD — name says it all\nfn validate_transition() -> Result<(), TransitionError> { ... }\n```\n\n### Enforcement\n- A comment in code = a code smell. Flag in review.\n- If you're tempted to write `/// Explanation`, extract a function instead.\n- Exception: Zero. No exceptions.\n\n### Rationale\nComments rot, drift from code, and create false confidence. A function with `validate_transition` as a name is always up to date, always correct, and never lies. A `/// Validates` doc comment can become wrong when the function changes and nobody updates the comment. Named functions also enable unit tests, search, and reuse.",
           "new_value": "---\ntitle: No Comments in Project Code\ntype: rule\nstatus: active\ntags: [rule, code-quality]\ncategory: style\nrationale: Code should be self-documenting through clear naming and structure. Comments become stale and misleading. Use expressive function/type names instead.\n---\n\n# No Comments in Project Code\n\nDo not add comments to project code. Code should be self-documenting.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-04T08:35:12.803Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\ntitle: No Comments in Project Code\ntype: rule\nstatus: active\ntags: [rule, code-quality]\ncategory: style\nrationale: Code should be self-documenting through clear naming and structure. Comments become stale and misleading. Use expressive function/type names instead.\n---\n\n# No Comments in Project Code\n\nDo not add comments to project code. Code should be self-documenting.",
+          "new_value": "---\ntitle: No Comments in Project Code\ntype: rule\nstatus: active\ntags: [rule, code-style, rust, quality]\ncategory: style\nrationale: Code should be self-documenting through clear naming and structure. Comments become stale and misleading. Use expressive function/type names instead.\n---\n\n# No Comments in Project Code\n\nDo not add comments to project code. Code should be self-documenting.\n"
         }
       ],
       "path": "",

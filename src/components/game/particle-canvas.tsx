@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { COLS, ROWS, type FxEvent } from "@/lib/game/types"
+import { COLS, ROWS, FxKind, type FxEvent } from "@/lib/game/battle"
 
 interface Particle {
   x: number
@@ -107,7 +107,7 @@ export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
     const to = e.to ? toPx(e.to.x, e.to.y) : null
     const from = e.from ? toPx(e.from.x, e.from.y) : null
     switch (e.kind) {
-      case "letter": {
+      case FxKind.Letter: {
         if (from && to) {
           projectiles.current.push({
             x: from.x,
@@ -125,14 +125,14 @@ export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
         }
         break
       }
-      case "phone": {
+      case FxKind.Phone: {
         if (to) {
           spawnRings(to.x, to.y, COLORS.teal, 3)
           spawnBurst(to.x, to.y, 16, [COLORS.teal, COLORS.white], { shape: "spark", speed: 4 })
         }
         break
       }
-      case "gavel": {
+      case FxKind.Gavel: {
         if (to) {
           spawnRings(to.x, to.y, COLORS.gold, 2)
           spawnBurst(to.x, to.y, 34, [COLORS.gold, COLORS.goldLight, COLORS.white], {
@@ -144,8 +144,8 @@ export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
         }
         break
       }
-      case "shock":
-      case "melee": {
+      case FxKind.Shock:
+      case FxKind.Melee: {
         if (to) {
           spawnBurst(to.x, to.y, 22, [COLORS.red, COLORS.redDeep, COLORS.white], {
             shape: "spark",
@@ -155,35 +155,38 @@ export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
         }
         break
       }
-      case "coin": {
+      case FxKind.Coin: {
         if (to) spawnBurst(to.x, to.y, 16, [COLORS.gold, COLORS.goldLight], { shape: "dot", gravity: 0.22, speed: 4 })
         break
       }
-      case "heal": {
+      case FxKind.Heal: {
         if (to) spawnBurst(to.x, to.y, 16, [COLORS.green, COLORS.white], { shape: "plus", gravity: -0.05, speed: 2 })
         break
       }
-      case "draw": {
+      case FxKind.Draw: {
         if (to) spawnBurst(to.x, to.y, 14, [COLORS.gold, COLORS.white], { shape: "spark", speed: 3 })
         break
       }
-      case "summon": {
+      case FxKind.Summon: {
         if (to) {
           spawnRings(to.x, to.y, COLORS.teal, 3)
           spawnBurst(to.x, to.y, 22, [COLORS.teal, COLORS.white], { shape: "dot", speed: 4 })
         }
         break
       }
-      case "move": {
+      case FxKind.Move: {
         if (to) spawnBurst(to.x, to.y, 8, ["#9fc7e8", "#ffffff"], { shape: "dot", gravity: -0.04, speed: 1.5, max: 30 })
         break
       }
-      case "death": {
+      case FxKind.Death: {
         if (to) {
           spawnBurst(to.x, to.y, 40, [COLORS.ink, COLORS.redDeep, "#8fb6d8"], { shape: "dot", speed: 5, max: 60 })
           spawnRings(to.x, to.y, "#8fb6d8", 2)
         }
         break
+      }
+      default: {
+        const _exhaustive: never = e.kind
       }
     }
   }

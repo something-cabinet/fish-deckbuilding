@@ -18,8 +18,8 @@ import {
   unlockNextZone,
   zoneName,
 } from "@/lib/game/overworld-engine"
-import { createInitialState } from "@/lib/game/engine"
-import type { GameState } from "@/lib/game/types"
+import { createInitialState } from "@/lib/game/battle"
+import type { GameState } from "@/lib/game/battle"
 import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
 
 /**

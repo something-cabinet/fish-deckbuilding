@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:no-magic-values",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "content",
           "old_value": "## Rule: No Magic Values — Use Enums and Constants\n\nEvery literal string, number, or boolean embedded directly in logic must have a named binding. If the value is one of a closed set, use an enum. If it's a single constant, use `const`.\n\n### Good\n```rust\nconst MAX_RETRIES: u32 = 3;\nconst TILE_SIZE: i32 = 80;\n\nenum Faction { Hero, Enemy }\n```\n\n### Forbidden\n```rust\n// ❌ magic number\nif retries > 3 { ... }\n\n// ❌ magic string\nlet path = \".wm/config.json\";\n\n// ❌ inline literal in comparison\nif status_code == 404 { ... }\n\n// ❌ magic boolean parameter\nprocess(true);\n```\n\n### Exceptions\n- `0` and `1` in index/math contexts (`array[i + 1]`, `counter += 1`)\n- Test assertions where the literal IS the expected value\n- Format strings in `format!`/`println!`",
           "new_value": "---\ntitle: No Magic Values — Use Enums and Constants\ntype: rule\nstatus: active\ntags: [rule, code-quality]\ncategory: style\nrationale: Magic values make code hard to change and reason about. Enums and named constants make intent clear and prevent inconsistencies.\n---\n\n# No Magic Values — Use Enums and Constants\n\nUse enums and named constants instead of raw values.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T08:35:19.024Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\ntitle: No Magic Values — Use Enums and Constants\ntype: rule\nstatus: active\ntags: [rule, code-quality]\ncategory: style\nrationale: Magic values make code hard to change and reason about. Enums and named constants make intent clear and prevent inconsistencies.\n---\n\n# No Magic Values — Use Enums and Constants\n\nUse enums and named constants instead of raw values.",
+          "new_value": "---\ntitle: No Magic Values — Use Enums and Constants\ntype: rule\nstatus: active\ntags: [rule, code-style, rust, quality]\ncategory: style\nrationale: Magic values make code hard to change and reason about. Enums and named constants make intent clear and prevent inconsistencies.\n---\n\n# No Magic Values — Use Enums and Constants\n\nUse enums and named constants instead of raw values.\n"
         }
       ],
       "path": "",

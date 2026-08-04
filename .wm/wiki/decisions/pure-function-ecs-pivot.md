@@ -1,5 +1,6 @@
 ---
-implementation_notes: Updated to reflect actual dual-layer outcome (pure functions + ECS orchestration, not full rewrite).
+title: pure-function-ecs-pivot
+type: decision
 ---
 
 ---

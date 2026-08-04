@@ -2,87 +2,86 @@
 title: Fish Roguelite Deckbuilding — Architecture
 type: core
 tags: [core, architecture]
+status: reviewed
 ---
 
----
-title: Fish Tactical RPG — Architecture
-type: core
-tags: [core, architecture]
----
+# Architecture
 
 ## Stack
 
 | Layer | Technology | Role |
 |-------|-----------|------|
-| Engine | **Godot 4** | Scene tree, rendering (gl_compatibility for web export), input |
-| Scripting/logic | **godot-rust (gdext 0.5)** | Rust cdylib loaded via GDExtension; all game logic, no GDScript except a one-line scene shim |
-| Core domain | **Pure Rust** (`rust/src/core/`) | battle, combat, grid — zero Godot dependencies, unit tested |
-| Bridge | **gdext bridge** (`rust/src/bridge/`) | Connects pure core to Godot nodes/signals; e.g. `battle_scene.rs` |
-| Language | **Rust** | Strict typing, enums for Faction/Phase/Decision, `Result` for fallible ops |
-| Testing | **cargo test** | Unit tests on the pure core (see wiki:specs:godot-battle-scaffold for current count) |
-| Web export | **Godot headless export → static hosting** | See wiki:specs:web-deploy-workflow |
-
-Superseded stack (retired): Excalibur.js + Svelte 5 + TypeScript + Vite + Vitest + localStorage. See wiki:decisions:godot-rust-gdext-pivot for the pivot rationale and wiki:memory:godot-migration-analysis-stay-on-web-stack (archived) for the earlier analysis that was overridden.
+| App | **Next.js 16** | App router, SSR shell, static prerender |
+| UI | **React 19 + Tailwind v4 + shadcn (base-nova)** | Components, screens, styling tokens |
+| State bridge | **`src/hooks/use-fish-mafia.ts`** | UI ↔ engine bridge: state snapshot + FX queue + player actions |
+| Core domain | **Pure TS (`src/lib/game/`)** | cards, units, battle, deck — zero React dependencies, unit tested |
+| Validation | **zod** | Card JSON pack schema; malformed data throws at load |
+| Testing | **Vitest** | Engine unit, resolver, command/history, schema, parity tests (`npm test`) |
 
 ## Architecture Pattern
 
 ```
-Godot 4 scene tree (godot/scenes/battle/battle.tscn)
-  - Node2D grid, instanced tiles
-  - Input handled via _input() (not _unhandled_input(), see wiki:memory:gdextension-click-input-use-_input-over-_unhandled_input)
-        |
-gdext bridge (rust/src/bridge/battle_scene.rs)
-  - #[derive(GodotClass)] node wrapping the pure core
-  - Reads Godot input, calls core services, writes results back to scene state
-        |
-Pure Rust core (rust/src/core/)
-  - battle/  — state machine, phases, results (model + service split)
-  - combat/  — base attack resolution
-  - grid/    — grid state, units, BFS movement/pathfinding
-  - No Godot dependency; testable standalone via `cargo test`
+src/app/page.tsx (server entry)
+  → src/components/game/fish-mafia-app.tsx   # app shell — manual screen switch (enum + switch dispatch)
+      → screens: menu-screen, card-library-screen, card-create-screen, fish-mafia-game
+          fish-mafia-game.tsx  → useFishMafia() hook (src/hooks/use-fish-mafia.ts)
+              → battle widgets via props drilling: board, unit-token, card, card-face,
+                targeting-arrow, particle-canvas, top-bar, side-panel, result-overlay
+                    |
+use-fish-mafia.ts → src/lib/game/ (pure engine, function-first, no React)
+  - actions/    player use-cases: move, attack, cast, sell, buy (orchestrate across domains)
+  - commands/   PlayerCommand + executeCommand + CommandQueue (deterministic action bus)
+  - session/    GameSession — snapshot undo/redo, End-Turn commit
+  - cards/      models (CardDef/CardEffect/...), services (targeting, effects resolver),
+                data (schema, card library, starter deck, JSON packs)
+  - units/      models (Team/UnitKind/Unit), services (combat), data (hero/enemy/goon defs)
+  - battle/     models (GameState/FxEvent/FxKind/Phase/Pos...), services (board/state/turn)
+  - deck/       services (shuffle/drawCards/hand limits)
+  - shared/     helpers (nid, resetIds, log, posKey, cellLabel, heroUnit, clone)
 ```
 
 ## File Structure
 
 ```
-rust/
-├── src/
-│   ├── lib.rs                  # GDExtension entrypoint (on_stage_init/deinit)
-│   ├── bridge/
-│   │   ├── mod.rs
-│   │   └── battle_scene.rs     # gdext node driving the battle scene
-│   └── core/
-│       ├── constants.rs
-│       ├── battle/
-│       │   ├── model/          # battle_state.rs, battle_result.rs, phase.rs
-│       │   ├── service/        # engine.rs
-│       │   └── ai/             # decide.rs
-│       ├── combat/
-│       │   ├── model/          # attack_result.rs, attack_error.rs
-│       │   └── service/        # base_attack.rs
-│       └── grid/
-│           ├── model/          # state.rs, unit.rs
-│           └── service/        # movement.rs
-├── Cargo.toml                  # crate-type = cdylib, godot = "0.5"
-godot/
-├── project.godot
-├── battle.gdextension          # points Godot at the compiled cdylib
-├── scenes/battle/battle.tscn
-└── addons/runtime_test/        # in-editor test/diagnostic plugin
+src/
+├── app/
+│   ├── layout.tsx               # fonts (Inter/Oswald), root layout
+│   ├── page.tsx                 # server entry → FishMafiaApp
+│   └── globals.css              # Tailwind v4 + ocean-theme tokens + fm-* animations
+├── components/
+│   ├── game/                    # screens + battle widgets + card-icons (one per file)
+│   └── ui/button.tsx            # shadcn base-nova Button
+├── hooks/
+│   └── use-fish-mafia.ts        # the only UI ↔ engine bridge
+└── lib/
+    ├── game/
+    │   ├── actions/  commands/  session/          # game use-cases + bus + undo/redo
+    │   ├── cards/{models,services,data}/          # card types, targeting+resolver, library
+    │   ├── units/{models,services,data}/          # unit types, combat, spawns
+    │   ├── battle/{models,services}/              # state types, board/state/turn rules
+    │   ├── deck/services/                         # draw/shuffle
+    │   ├── shared/helpers/                        # pure cross-cutting helpers
+    │   ├── index.ts                               # root barrel
+    │   └── __tests__/                             # Vitest suite
+    └── utils.ts                 # cn() helper (shadcn alias target)
 ```
+
+Layer rule: shared ← units/deck ← cards ← battle ← {actions, commands, session}. Cross-domain value imports may target a runtime-leaf segment (`battle/models`) but never the battle barrel (avoids runtime cycles — D5 of @wiki/specs/domain-layered-engine-structure).
 
 ## Key Architectural Decisions
 
 | Decision | Status | Doc |
 |----------|--------|-----|
-| Pivot from Excalibur.js/Svelte to Godot 4 | Approved | @wiki/decisions/godot-rust-gdext-pivot |
-| Pivot from GDScript to godot-rust (gdext) for all logic | Approved | @wiki/decisions/godot-rust-gdext-pivot |
-| Godot battle scaffold — 6×4 grid, BFS movement, symmetric counterattack | Approved (Phase 1 done) | @wiki/specs/godot-battle-scaffold |
-| Web deploy: Rust → Godot headless export → static host | Draft | @wiki/specs/web-deploy-workflow |
-| Target design: overworld + 9×5 grid combat (Godot/Rust re-target pending) | Approved (design), stale tech refs | @wiki/specs/fish-tactical-rpg |
+| Engine structure — function-first domains (models/services/data per domain + top-level actions/commands/session) | Approved | @wiki/specs/domain-layered-engine-structure |
+| Angular-style file system — one type/service/helper per file + domain barrels | Approved | @wiki/specs/angular-style-file-system |
+| Data-driven card effects with resolver (command pipeline) | Approved | @wiki/specs/card-effect-registry |
+| Snapshot-based undo/redo with End-Turn commit | Approved | @wiki/specs/card-effect-registry (D10) |
+| Cards as JSON packs with zod schema + loader | Approved | @wiki/specs/card-effect-registry (D8) |
 | TDD + SDD workflow | Enforced | @wiki/rules/tdd, @wiki/rules/spec-driven-development |
 
-## Full Spec
+## Full Specs
 
-@wiki/specs/godot-battle-scaffold (current implementation baseline)
-@wiki/specs/fish-tactical-rpg (target game design — tech sections predate the Godot pivot)
+@wiki/specs/domain-layered-engine-structure (structure)
+@wiki/specs/angular-style-file-system (file convention)
+@wiki/specs/card-effect-registry (engine command/effect architecture)
+@wiki/specs/fish-tactical-rpg (game design intent)

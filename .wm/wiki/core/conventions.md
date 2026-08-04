@@ -2,11 +2,13 @@
 title: Fish Roguelite Deckbuilding — Conventions
 type: core
 tags: [core, conventions]
+status: reviewed
 ---
 
 ---
-title: Fish Tactical RPG — Conventions
+title: Fish Roguelite Deckbuilding — Conventions
 type: core
+status: reviewed
 tags: [core, conventions]
 ---
 
@@ -24,31 +26,29 @@ wm-spec
 ```
 @wiki/rules/spec-driven-development
 
-### TDD — Red-Green-Refactor / Compiler-Driven Development
-All game logic starts with a failing test in the pure Rust core. The Rust type system (enums for Faction/Phase/Decision, `Result` for fallible operations) catches rule violations at compile time before tests even run.
-```bash
-cd rust
-cargo test                # run all core tests
-cargo clippy -- -D warnings
-```
-@wiki/rules/tdd
+### TDD — Test-First
+All game logic starts with a failing test (Vitest). The engine is pure React-free TypeScript; `npm test` runs the full suite.
 
 ## Code Conventions
 
-**Game logic (pure Rust)**: lives in `rust/src/core/{battle,combat,grid}/`, split into `model/` (types, no logic) and `service/` (pure functions operating on models). Zero Godot dependencies — testable standalone via `cargo test`.
+**Stack**: Next.js 16 + React 19 + TypeScript, Tailwind v4, shadcn (base-nova style), lucide icons, zod, Vitest.
 
-**gdext bridge**: `rust/src/bridge/` contains `#[derive(GodotClass)]` nodes (e.g. `battle_scene.rs`) that read Godot input/signals, call into the pure core, and write results back to scene state. Godot (scenes, nodes, signals) never appears inside `core/`.
+**Engine (pure TS)**: lives in `src/lib/game/`. Zero React dependencies — testable standalone via `npm test`. Organized **function-first** (see @wiki/specs/domain-layered-engine-structure): each domain (`cards/`, `units/`, `battle/`, `deck/`) owns `models/` (types), `enums/`, `constants/`, `services/` (logic), `data/` (content); game use-cases live in top-level function folders (`actions/`, `commands/`, `session/`); `shared/helpers/` holds pure cross-cutting plumbing. Card definitions live as JSON packs in `src/lib/game/cards/data/`, validated at load by a zod schema that throws loudly on malformed data.
 
-**GDScript**: used for:
-- A minimal shim (`extends BattleScene`) in scene files where required
-- **UI node wiring** — `@export var` declarations on UI scene scripts that expose node references to the Rust bridge. No game logic in these scripts — only exported variable declarations.
-- All real game logic remains in Rust via gdext
+**Angular-style file system** (see @wiki/specs/angular-style-file-system):
+- One top-level type per file
+- Role suffixes: `*.service.ts`, `*.interface.ts`, `*.model.ts`, `*.enum.ts`, `*.constants.ts`, `*.helper.ts`
+- Every folder has an `index.ts` barrel re-exporting all public items
+- Consumers import from the domain/function barrel only — never individual files from outside the domain (exception: cross-domain value imports may target a runtime-leaf segment like `battle/models` when the full barrel would create a runtime cycle — D5 of the engine-structure spec)
+- Discriminated unions (e.g. `CardEffect`) stay together as one conceptual unit per file
 
-**Input handling**: use `_input()`, not `_unhandled_input()`, for click input in gdext nodes — see wiki:memory:gdextension-click-input-use-_input-over-_unhandled_input.
+**Layer discipline**: shared ← units/deck ← cards ← battle ← {actions, commands, session}. `cards/`/`units/`/`deck/`/`actions/`/`commands/`/`session/` may import `battle/models` (runtime-leaf) but never the battle barrel. Type-only imports are always safe (erased at compile).
 
-**Hot reload**: Rust `cargo build` produces a cdylib Godot loads via `battle.gdextension`; signal reconnection on reload has known gotchas — see wiki:memory:gdext-hot-reload-pattern and wiki:tasks:godot-battle-07-hot-reload-fixes.
+**Components**: one component per file — screens and battle widgets in `src/components/game/`, shadcn primitives in `src/components/ui/`. Components never import engine internals directly. Presentation helpers that pull UI libs (e.g. `card-icons.ts` with lucide-react) live in `src/components/game/`, not the engine.
 
-**Testing**: `cargo test` on the pure core. Bridge/scene layer has no automated tests (requires the Godot engine); bridge-layer test helpers (`#[func] test_click`, `debug_state`) exist for manual/in-editor verification.
+**Hook bridge**: `src/hooks/use-fish-mafia.ts` is the only bridge between UI and the engine — it exposes the state snapshot, FX event queue, and player actions; components consume them via props drilling.
+
+**Testing**: `npm test` (Vitest). Unit/component/hook tests are **colocated** next to their code as `*.spec.ts(x)`; only true cross-domain integration suites (`card-parity.spec.ts`, `commands.spec.ts`, `history.spec.ts`) live centralized in `src/lib/game/__tests__/`. Shared jsdom shims live in `src/components/game/test-utils.tsx`. Coverage: `npm run test:coverage` (v8 provider, owned-code include, thresholds lines/stmts/funcs 75 + branches 55 — fails on regression).
 
 ## Wiki Structure
 
@@ -70,11 +70,11 @@ All pages use YAML frontmatter with `type` matching the directory. Pages are lin
 ## Golden Rules
 
 1. **Spec first** — never write code without a spec
-2. **Test first** — never implement without a failing test (`cargo test`)
-3. **Pure core** — domain logic in `rust/src/core/` has zero Godot dependencies
-4. **Bridge is thin** — `rust/src/bridge/` only translates between Godot and the pure core, no game rules
-5. **No GDScript for logic** — GDScript is a shim only; all real logic is Rust via gdext
-6. **Model/service split** — each domain module separates data types (`model/`) from behavior (`service/`)
-7. **Compiler-driven** — prefer enums/`Result` over runtime checks to make illegal states unrepresentable
-
-Note: this file previously described the retired Excalibur.js/Svelte/TypeScript stack (FaB-style `action` card type, run/combat `$state` split, CSS variable theming, Vitest). Those conventions applied to code that no longer exists post-pivot (see wiki:decisions:godot-rust-gdext-pivot); design intent for cards/state may still apply and should be re-targeted at the Rust core when implemented there.
+2. **Test first** — never implement without a failing test
+3. **Pure engine** — domain logic in `src/lib/game/` has zero React dependencies
+4. **Bridge is thin** — `use-fish-mafia.ts` only translates between UI and the engine
+5. **One thing per file** — one top-level type/service/helper per file with role suffixes
+6. **Barrel discipline** — folders re-export via `index.ts`; consumers import from barrels (leaf-segment exception per the engine-structure spec)
+7. **Compiler-driven discriminators** — discriminators are closed types: an `enum` (dispatch via `switch` over members) or a discriminated union (exhaustive match). Dispatch must be exhaustive so the compiler catches unhandled cases — use the `never`-check in a `default`/fallthrough position. No bare string/number literals as discriminators.
+   - **Enum values**: prefer value-less (positional) members. Explicit values are allowed only when the member must equal an external string (JSON pack, zod schema, storage) — document the reason at the declaration (see `CardType`, `CardTarget`, `FxKind`; `Phase`, `Team`, `UnitKind`, `EnemyStepKind` are value-less).
+   - **zod schemas** for enum-backed fields use `z.nativeEnum` so the AC-16 `_Equal` drift guards keep holding.

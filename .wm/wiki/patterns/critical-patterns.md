@@ -1,3 +1,8 @@
+---
+title: critical-patterns
+type: pattern
+---
+
 # Critical Patterns
 
 Promoted learnings from completed work. Read this at the start of every session via `wm-init`. These are lessons that cost the most to learn and save the most by knowing.
@@ -33,3 +38,23 @@ Core functions should return data the bridge needs (Vec<CardDef>, AttackResult, 
 UI panel layout should be defined in `.tscn` scene files, not in Rust `build_ui()` code. The bridge retains sync logic (updating labels, toggling visibility, signal connections). Theme overrides (colors, fonts, StyleBoxFlat) go in the tscn via `theme_override_*` properties. Self-contained panel groups (hand container, graveyard viewer) become sub-scenes instanced into the main scene. This eliminates Rust recompilation for UI tweaks and enables Godot editor visual layout.
 
 **Full entry:** @wiki/specs/ui-panels-to-tscn
+
+## 2026-08-03 WM SDD task-linking gotchas
+
+**Category:** failure
+**Source:** @wiki/tasks/restructure-engine-layer-into-domain-folders--barrels-one-typeservicehelper-per-file
+**Tags:** [wm, sdd, wiki-tooling]
+
+Three traps when linking spec tasks for SDD validation: (1) new wiki pages are invisible to wm_task.list/get and SDD validation until `wm_index_rebuild` runs; (2) `wm_page.link` writes flow-style YAML edges that the graph/validator IGNORE — only block-style `relates_to:\n- type: implements\n  target: wiki:specs/<name>` in task frontmatter registers; (3) passing `relates_to` to `wm_page.update` on task pages prepends broken `{}` frontmatter blocks and corrupts the file. Fix: create tasks via `wm_task.create` with the spec param, verify with `wm_graph.neighbors`, hand-edit block-style frontmatter if missing, then rebuild the index. Cost ~20min; hits every wm-flow/verify run.
+
+**Full entry:** @wiki/concepts/wm-sdd-task-linking-gotchas
+
+## 2026-08-04 React StrictMode double-invoke breaks impure setState updaters
+
+**Category:** failure
+**Source:** @wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix
+**Tags:** [react, strictmode, state-management]
+
+NEVER mutate an external queue/session inside a setState updater — React dev StrictMode double-invokes updaters, so the first (discarded) call consumes the side effect and the action silently no-ops (units/movement/mana/cards/HP all frozen, no errors, tests + Node pass). Fix: keep `stateRef.current = state` in sync each render, drain synchronously OUTSIDE setState, then `setState(ns)` with the concrete value via a `commit()` helper. Route every command action through `commit()`. Browser-only failures require browser verification — render tests under `<StrictMode>` catch it. Cost ~1hr.
+
+**Full entry:** @wiki/concepts/strictmode-double-invoke-impure-updater · @wiki/patterns/pure-setstate-updaters-external-drain

@@ -1,0 +1,34 @@
+{
+  "entity_id": "wiki:tasks:restructure-engine-layer-into-domain-folders--barrels-one-typeservicehelper-per-file",
+  "current_version": 2,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-03T13:43:06.043Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T08:34:32.742Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

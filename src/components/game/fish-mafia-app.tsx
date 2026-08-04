@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { CardDef, GameState } from "@/lib/game/types"
+import type { CardDef, GameState } from "@/lib/game"
 import type { MapNode } from "@/lib/game/overworld-types"
 import { CardCreateScreen } from "./card-create-screen"
 import { CardLibraryScreen } from "./card-library-screen"

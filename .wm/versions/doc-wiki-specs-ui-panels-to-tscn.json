@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:specs:ui-panels-to-tscn",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "status",
           "old_value": "draft",
           "new_value": "approved"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T07:57:05.978Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "approved",
+          "new_value": "superseded"
         }
       ],
       "path": "",

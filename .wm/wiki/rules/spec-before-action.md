@@ -9,7 +9,7 @@ status: active
 title: Spec Before Any Action
 type: rule
 status: active
-tags: [rule, workflow]
+tags: [rule, workflow, sdd]
 category: process
 rationale: Prevents yak-shaving and scope creep. Every task must trace back to a spec or documented decision.
 ---

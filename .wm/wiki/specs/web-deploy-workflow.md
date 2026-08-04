@@ -1,8 +1,13 @@
 ---
 title: Web Deploy Workflow — Build → Export → Serve
 type: spec
-tags: [spec, web, deploy, ci]
-status: draft
+tags:
+- spec
+- web
+- deploy
+- ci
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): Godot web deploy — dead direction.'
 ---
 
 ---

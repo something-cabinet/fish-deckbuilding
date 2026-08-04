@@ -1,18 +1,28 @@
 "use client"
 
 import { Coins, Percent } from "lucide-react"
-import type { GameState } from "@/lib/game/types"
+import { Phase, type GameState } from "@/lib/game/battle"
 import { cn } from "@/lib/utils"
 
+function phaseTitle(phase: Phase): string {
+  switch (phase) {
+    case Phase.Player:
+      return "Your Move"
+    case Phase.Enemy:
+      return "The Mob Moves"
+    case Phase.Won:
+      return "Debt Collected"
+    case Phase.Lost:
+      return "Foreclosed"
+    default: {
+      const _exhaustive: never = phase
+      return ""
+    }
+  }
+}
+
 export function TopBar({ state }: { state: GameState }) {
-  const title =
-    state.phase === "player"
-      ? "Your Move"
-      : state.phase === "enemy"
-        ? "The Mob Moves"
-        : state.phase === "won"
-          ? "Debt Collected"
-          : "Foreclosed"
+  const title = phaseTitle(state.phase)
 
   const pct = (state.foreclosure / state.foreclosureMax) * 100
   const danger = state.foreclosure <= 4
@@ -31,7 +41,7 @@ export function TopBar({ state }: { state: GameState }) {
       <h1
         className={cn(
           "font-display text-2xl font-bold uppercase tracking-[0.25em] transition-colors sm:text-3xl",
-          state.phase === "enemy" ? "text-enemy" : "text-foreground",
+          state.phase === Phase.Enemy ? "text-enemy" : "text-foreground",
         )}
       >
         {title}

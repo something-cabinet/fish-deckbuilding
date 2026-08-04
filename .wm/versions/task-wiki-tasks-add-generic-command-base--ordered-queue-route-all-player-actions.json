@@ -1,0 +1,48 @@
+{
+  "entity_id": "wiki:tasks:add-generic-command-base--ordered-queue-route-all-player-actions",
+  "current_version": 3,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-03T10:43:13.118Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T07:57:15.966Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-04T08:34:28.544Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:rules:spec-before-action",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,21 @@
           "field": "content",
           "old_value": "## Rule: Spec Before Any Action\n\nNo code is written, no fix is applied, no refactor is started until a spec exists that defines the requirements, acceptance criteria, and locked decisions.\n\n### What counts as an action\n- New feature\n- Bug fix (anything beyond a one-line typo)\n- Refactor\n- Cleanup pass\n- CI/lint fix\n- Architecture change\n- Dependency upgrade\n\n### What doesn't need a spec\n- Trivial one-line fixes (typos, obvious compiler errors)\n- `cargo fix` auto-applied suggestions\n- Renaming a local variable\n\n### Process\n1. Write the spec (`wm-spec`) — outline what, why, and the ACs\n2. Get it approved\n3. Implement\n4. Verify ACs are met\n5. Mark the spec done\n\n### Rationale\nA spec forces thinking before doing. It catches wrong assumptions before code is written. The ACs become the test plan. Without a spec, there's no definition of done — just guessing when to stop.\n\n### Related\n- @wiki/rules:spec-driven-development",
           "new_value": "---\ntitle: Spec Before Any Action\ntype: rule\nstatus: active\ntags: [rule, workflow]\ncategory: process\nrationale: Prevents yak-shaving and scope creep. Every task must trace back to a spec or documented decision.\n---\n\n# Spec Before Any Action\n\nEvery task must trace back to a spec or documented decision.\n"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T08:35:19.752Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\ntitle: Spec Before Any Action\ntype: rule\nstatus: active\ntags: [rule, workflow]\ncategory: process\nrationale: Prevents yak-shaving and scope creep. Every task must trace back to a spec or documented decision.\n---\n\n# Spec Before Any Action\n\nEvery task must trace back to a spec or documented decision.",
+          "new_value": "---\ntitle: Spec Before Any Action\ntype: rule\nstatus: active\ntags: [rule, workflow, sdd]\ncategory: process\nrationale: Prevents yak-shaving and scope creep. Every task must trace back to a spec or documented decision.\n---\n\n# Spec Before Any Action\n\nEvery task must trace back to a spec or documented decision.\n"
         }
       ],
       "path": "",

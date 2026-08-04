@@ -1,4 +1,6 @@
 ---
+title: rust-ci-caching-subdirectory
+type: pattern
 ---
 
 ---

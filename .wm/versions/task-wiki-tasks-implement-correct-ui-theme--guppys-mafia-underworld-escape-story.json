@@ -1,6 +1,6 @@
 {
   "entity_id": "wiki:tasks:implement-correct-ui-theme--guppys-mafia-underworld-escape-story",
-  "current_version": 1,
+  "current_version": 2,
   "versions": [
     {
       "id": "v1",
@@ -12,6 +12,20 @@
           "field": "status",
           "old_value": "todo",
           "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-04T08:34:30.818Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
         }
       ],
       "compacted": false

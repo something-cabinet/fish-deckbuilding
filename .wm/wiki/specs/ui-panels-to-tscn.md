@@ -1,17 +1,7 @@
 ---
-title: UI Panels from Rust Bridge to tscn
+title: ui-panels-to-tscn
 type: spec
-tags:
-- spec
-- ui
-- godot-rust
-- gdext
-- architecture
-status: approved
-implementation_notes: |-
-  ### Sub-scene correction (2026-07-31)
-
-  The earlier claim that sub-scenes don't work with godot-rust was incorrect. Sub-scenes DO work when using full absolute paths from the scene root (`self.base().get_node_as::<T>("UI/SubScene/Child")`). The earlier failure was caused by using relative paths on parent nodes. See @wiki/patterns:incremental-ui-to-tscn for the corrected guidance.
+status: superseded
 ---
 
 ## Overview

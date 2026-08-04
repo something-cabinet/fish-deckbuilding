@@ -1,8 +1,14 @@
 ---
 title: Godot Battle Scaffold
 type: spec
-tags: [godot, prototype, battle, ui, approved]
-status: approved
+tags:
+- godot
+- prototype
+- battle
+- ui
+- approved
+status: superseded
+implementation_notes: 'Superseded 2026-08-04 (wm-verify): dead Godot-era direction; superseded by the JS combat slice (battle-ui-fab-sts-rebuild).'
 ---
 
 ---

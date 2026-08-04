@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { cellLabel } from "@/lib/game/engine"
-import type { GameState, Unit } from "@/lib/game/types"
+import { cellLabel } from "@/lib/game/shared"
+import type { GameState } from "@/lib/game/battle"
+import { Team, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 export function SidePanel({ state, onHoverUnit, onSelectUnit }: Props) {
   const logRef = useRef<HTMLOListElement>(null)
   const sorted = [...state.units].sort((a, b) => {
-    if (a.team !== b.team) return a.team === "player" ? -1 : 1
+    if (a.team !== b.team) return a.team === Team.Player ? -1 : 1
     return 0
   })
 
@@ -28,7 +29,7 @@ export function SidePanel({ state, onHoverUnit, onSelectUnit }: Props) {
         <h2 className="mb-2 font-display text-[clamp(9px,4cqi,12px)] font-bold uppercase tracking-[0.25em] text-gold">On the Table</h2>
         <ul className="flex flex-col gap-1.5">
           {sorted.map((u) => {
-            const isPlayer = u.team === "player"
+            const isPlayer = u.team === Team.Player
             const pct = Math.max(0, (u.hp / u.maxHp) * 100)
             return (
               <li key={u.id}>

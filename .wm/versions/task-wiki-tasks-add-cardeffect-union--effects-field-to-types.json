@@ -1,0 +1,48 @@
+{
+  "entity_id": "wiki:tasks:add-cardeffect-union--effects-field-to-types",
+  "current_version": 5,
+  "versions": [
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-03T10:43:11.668Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-04T07:57:14.236Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v5",
+      "version": 5,
+      "timestamp": "2026-08-04T08:34:34.577Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

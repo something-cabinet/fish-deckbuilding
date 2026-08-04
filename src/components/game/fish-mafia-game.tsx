@@ -10,12 +10,15 @@ import { SidePanel } from "./side-panel"
 import { TargetingArrow, type ArrowState } from "./targeting-arrow"
 import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
-import { BUY_COST } from "@/lib/game/engine"
-import type { CardInstance, GameState, Pos, Unit } from "@/lib/game/types"
+import { BUY_COST } from "@/lib/game"
+import { CardTarget, type CardInstance } from "@/lib/game/cards"
+import { Phase, type Pos, type GameState } from "@/lib/game/battle"
+import { Team, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
+import { DragKind } from "./drag-kind.enum"
 
 interface DragState {
-  kind: "card" | "unit"
+  kind: DragKind
   card?: CardInstance
   unit?: Unit
   x: number
@@ -41,7 +44,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   const dragRef = useRef<{
     active: boolean
     moved: boolean
-    kind: "card" | "unit"
+    kind: DragKind
     card?: CardInstance
     unit?: Unit
     startX: number
@@ -49,19 +52,19 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   } | null>(null)
   const suppressClick = useRef(false)
 
-  const playerTurn = state.phase === "player" && !busy
+  const playerTurn = state.phase === Phase.Player && !busy
 
   // Overworld mode: report the outcome upward instead of showing the local
   // restart overlay. The parent decides win -> reward, boss unlock, etc.
   const heroHp = state.units.find((u) => u.id === "hero")?.hp ?? 0
   useEffect(() => {
-    if (onWin && state.phase === "won") onWin(heroHp)
-    if (onLose && state.phase === "lost") onLose(heroHp)
+    if (onWin && state.phase === Phase.Won) onWin(heroHp)
+    if (onLose && state.phase === Phase.Lost) onLose(heroHp)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, onWin, onLose])
 
   /* ---------- highlight sets ---------- */
-  const activeCard = drag?.kind === "card" ? drag.card : pendingCard
+  const activeCard = drag?.kind === DragKind.Card ? drag.card : pendingCard
   const { highlightTiles, highlightUnitIds } = useMemo(() => {
     if (!activeCard) return { highlightTiles: [] as Pos[], highlightUnitIds: [] as string[] }
     const t = targetsFor(activeCard)
@@ -94,12 +97,12 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       let from: { x: number; y: number } | null = null
       let valid = false
 
-      if (d?.kind === "unit" && d.unit) {
+      if (d?.kind === DragKind.Unit && d.unit) {
         // dragging a fish: arrow doubles as move / attack indicator
         from = anchorFrom(`[data-unit-id="${d.unit.id}"]`, 0.42)
         if (dropType === "unit" && drop?.dataset.unitId && drop.dataset.unitId !== d.unit.id) {
           const tu = state.units.find((u) => u.id === drop.dataset.unitId)
-          valid = !!tu && tu.team === "enemy"
+          valid = !!tu && tu.team === Team.Enemy
         } else if (dropType === "tile" && drop) {
           const tx = Number(drop.dataset.x)
           const ty = Number(drop.dataset.y)
@@ -107,8 +110,8 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
         }
       } else {
         // arming / dragging a unit-targeted card
-        const card = (d?.kind === "card" ? d.card : undefined) ?? pendingCardRef.current
-        if (!card || card.def.target === "empty-tile" || card.def.target === "self") {
+        const card = (d?.kind === DragKind.Card ? d.card : undefined) ?? pendingCardRef.current
+        if (!card || card.def.target === CardTarget.EmptyTile || card.def.target === CardTarget.Self) {
           setArrow(null)
           return
         }
@@ -129,7 +132,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
 
   // track the cursor while a card is armed via click (no active drag)
   useEffect(() => {
-    if (!pendingCard || pendingCard.def.target === "empty-tile" || pendingCard.def.target === "self") {
+    if (!pendingCard || pendingCard.def.target === CardTarget.EmptyTile || pendingCard.def.target === CardTarget.Self) {
       setArrow(null)
       return
     }
@@ -146,18 +149,18 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       if (!drop) return
       const type = drop.getAttribute("data-drop")
 
-      if (d.kind === "unit" && d.unit) {
+      if (d.kind === DragKind.Unit && d.unit) {
         if (type === "tile") {
           move(d.unit.id, { x: Number(drop.dataset.x), y: Number(drop.dataset.y) })
         } else if (type === "unit") {
           const targetId = drop.dataset.unitId
           if (targetId) attack(d.unit.id, targetId)
         }
-      } else if (d.kind === "card" && d.card) {
+      } else if (d.kind === DragKind.Card && d.card) {
         const def = d.card.def
-        if (def.target === "self") {
+        if (def.target === CardTarget.Self) {
           cast(d.card.uid, {})
-        } else if (def.target === "empty-tile") {
+        } else if (def.target === CardTarget.EmptyTile) {
           if (type === "tile") cast(d.card.uid, { tile: { x: Number(drop.dataset.x), y: Number(drop.dataset.y) } })
         } else if (type === "unit" && drop.dataset.unitId) {
           cast(d.card.uid, { unitId: drop.dataset.unitId })
@@ -198,7 +201,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   )
 
   const beginDrag = useCallback(
-    (kind: "card" | "unit", e: React.PointerEvent, payload: { card?: CardInstance; unit?: Unit }) => {
+    (kind: DragKind, e: React.PointerEvent, payload: { card?: CardInstance; unit?: Unit }) => {
       dragRef.current = {
         active: true,
         moved: false,
@@ -218,7 +221,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   const onCardPointerDown = useCallback(
     (e: React.PointerEvent, card: CardInstance) => {
       if (!playerTurn || card.def.cost > state.mana) return
-      beginDrag("card", e, { card })
+      beginDrag(DragKind.Card, e, { card })
     },
     [beginDrag, playerTurn, state.mana],
   )
@@ -227,7 +230,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
     (card: CardInstance) => {
       // called via onClick fallback when not dragged
       if (suppressClick.current || !playerTurn || card.def.cost > state.mana) return
-      if (card.def.target === "self") {
+      if (card.def.target === CardTarget.Self) {
         cast(card.uid, {})
         setPendingCard(null)
         return
@@ -244,7 +247,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       if (!playerTurn) return
       setPendingCard(null)
       select(unit.id)
-      beginDrag("unit", e, { unit })
+      beginDrag(DragKind.Unit, e, { unit })
     },
     [beginDrag, playerTurn, select],
   )
@@ -253,17 +256,17 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
     (unit: Unit) => {
       if (suppressClick.current || !playerTurn) return
       // casting a pending card onto a unit
-      if (pendingCard && pendingCard.def.target !== "empty-tile" && pendingCard.def.target !== "self") {
+      if (pendingCard && pendingCard.def.target !== CardTarget.EmptyTile && pendingCard.def.target !== CardTarget.Self) {
         cast(pendingCard.uid, { unitId: unit.id })
         setPendingCard(null)
         return
       }
-      if (unit.team === "player") {
+      if (unit.team === Team.Player) {
         select(unit.id)
       } else {
         // attack with selected player unit if adjacent
         const sel = state.units.find((u) => u.id === state.selectedUnitId)
-        if (sel && sel.team === "player") attack(sel.id, unit.id)
+        if (sel && sel.team === Team.Player) attack(sel.id, unit.id)
       }
     },
     [attack, cast, pendingCard, playerTurn, select, state.selectedUnitId, state.units],
@@ -276,7 +279,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   const onCellClick = useCallback(
     (pos: Pos) => {
       if (suppressClick.current || !playerTurn) return
-      if (pendingCard?.def.target === "empty-tile") {
+      if (pendingCard?.def.target === CardTarget.EmptyTile) {
         cast(pendingCard.uid, { tile: pos })
         setPendingCard(null)
         return
@@ -357,9 +360,9 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
             </p>
           )}
           {state.hand.map((card) => {
-            const isDragged = drag?.kind === "card" && drag.card?.uid === card.uid
+            const isDragged = drag?.kind === DragKind.Card && drag.card?.uid === card.uid
             const isUnitTargetDrag =
-              isDragged && card.def.target !== "empty-tile" && card.def.target !== "self"
+              isDragged && card.def.target !== CardTarget.EmptyTile && card.def.target !== CardTarget.Self
             return (
               <GameCard
                 key={card.uid}
@@ -429,9 +432,9 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       {arrow && <TargetingArrow {...arrow} />}
 
       {/* drag ghost — only for tile-placed / self cards, which the arrow does not cover */}
-      {drag?.kind === "card" &&
+      {drag?.kind === DragKind.Card &&
         drag.card &&
-        (drag.card.def.target === "empty-tile" || drag.card.def.target === "self") && (
+        (drag.card.def.target === CardTarget.EmptyTile || drag.card.def.target === CardTarget.Self) && (
           <div
             className="pointer-events-none fixed z-[60] -translate-x-1/2 -translate-y-1/2"
             style={{ left: drag.x, top: drag.y }}

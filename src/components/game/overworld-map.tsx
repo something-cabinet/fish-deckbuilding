@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react"
 import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
-import { CARD_LIBRARY } from "@/lib/game/data"
+import { CARD_LIBRARY } from "@/lib/game/cards"
 import { cn } from "@/lib/utils"
 
 interface Props {

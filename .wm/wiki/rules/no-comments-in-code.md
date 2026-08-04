@@ -9,7 +9,7 @@ status: active
 title: No Comments in Project Code
 type: rule
 status: active
-tags: [rule, code-quality]
+tags: [rule, code-style, rust, quality]
 category: style
 rationale: Code should be self-documenting through clear naming and structure. Comments become stale and misleading. Use expressive function/type names instead.
 ---

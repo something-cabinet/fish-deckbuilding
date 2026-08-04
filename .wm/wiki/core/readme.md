@@ -2,57 +2,67 @@
 title: Fish Roguelite Deckbuilding — README
 type: core
 tags: [core, readme]
+status: reviewed
 ---
 
 ---
-title: Fish Tactical RPG — README
+title: Fish Roguelite Deckbuilding — README
 type: core
+status: reviewed
 tags: [core, readme]
 ---
 
-# Fish Tactical RPG
+# Fish Mafia: Ledger Tactics
 
-A tactical RPG about **Guppy the Debtor** — a fish trying to pay off debt in an underwater city. Duelyst-style grid combat, built with **Godot 4** + **godot-rust (gdext)**. Engine migrated off Excalibur.js/Svelte — see wiki:decisions:godot-rust-gdext-pivot; that earlier stack is retired.
+A tactical deckbuilding game about **Guppy the Debtor** — a fish trying to escape the mafia underworld. Grid combat with a mana-costed card hand, built with **Next.js 16 + React 19 + TypeScript + Tailwind v4**. The engine is pure React-free TypeScript in `src/lib/game/` (see wiki:specs/angular-style-file-system for the file convention).
 
 ## Quick Start
 
 ```bash
-cd rust && cargo build      # build the gdext cdylib
-cargo test                  # run core Rust tests
-godot4 --path godot/        # open the project (see compile errors in this terminal, not the editor)
+npm install        # install dependencies
+npm run dev        # start the dev server
+npm test           # run the Vitest suite (127 tests)
+npm run test:coverage  # run tests + coverage report (threshold gate: 75/75/75/55)
+npm run build      # production build
 ```
 
 ## Core Gameplay
 
-**Combat:** Duelyst-style grid (6×4 in the current scaffold, 9×5 in the full design). Move via BFS pathfinding (orthogonal cost 1, diagonal cost 2). Attack adjacent enemies (8-way/Chebyshev distance 1) with symmetric counterattack. Turn-based: player turn → enemy AI turn.
+**Combat:** grid-based battle (9×5). Move units, attack adjacent enemies with base attack, and play mana-costed cards from your hand (damage, heal, draw, coin gain, buffs, summons — data-driven effects resolved by `effects.service.ts`). Turn-based: player phase → enemy AI turn, with snapshot-based undo/redo committed at End Turn.
 
-**Hero (Guppy):** HP-based, base attack, active unit on the grid.
+**Hero (Guppy):** HP-based, base attack, active unit on the grid. Debt/coin economy: earn coins in combat, buy/sell cards, foreclosure pressure as a fail state.
 
-**Full design target:** overworld island map (Cross Blitz style) + 9×5 grid combat with mana-costed cards (Attack/Armor/Skill/Summon/Passive), draw/replace system, campaign progression — see wiki:specs:fish-tactical-rpg for the target design (tech references in that spec predate the Godot pivot; read them as "Godot/Rust equivalent").
+**Campaign:** overworld progression between battles, card library, card crafting/creation UI — see wiki:specs:fish-tactical-rpg for the design intent (tech references in that spec predate the current JS stack).
 
 ## Current State (implemented)
 
-- Godot 4 project (`godot/`) with a gdext Rust extension (`rust/`)
-- Pure Rust core (`rust/src/core/`): battle, combat, grid modules — zero Godot dependencies, unit tested via `cargo test`
-- Thin gdext bridge (`rust/src/bridge/`) drives the battle scene
-- 6×4 grid battle scene (Guppy vs Debt Collector) — see wiki:specs:godot-battle-scaffold for locked decisions and acceptance criteria
-- Web export path: build Rust → Godot headless export → serve/deploy — see wiki:specs:web-deploy-workflow
+- App shell with screen switching: menu / game / card library / card create (`src/components/game/fish-mafia-app.tsx`)
+- Battle UI: board, unit tokens, hand, targeting arrow, particle FX, top bar, side panel, result overlay
+- Pure TS engine in `src/lib/game/` — cards, units, battle, deck domains + function folders (actions/commands/session), zero React dependencies, unit tested via `npm test`
+- Data-driven card effects with a resolver + custom-effect registry (see wiki:specs:card-effect-registry)
+- Card library + custom card creator (display-only custom cards)
+- Coverage gate: `npm run test:coverage` (v8, owned-code include, thresholds)
 
 ## Key Files
 
 | Path | Purpose |
 |------|---------|
-| `rust/src/core/battle/` | Battle state machine, phases, results |
-| `rust/src/core/combat/` | Base attack resolution |
-| `rust/src/core/grid/` | Grid state, units, BFS movement |
-| `rust/src/bridge/` | gdext bridge — `battle_scene.rs` connects core to Godot |
-| `rust/src/lib.rs` | GDExtension entrypoint |
-| `godot/scenes/battle/battle.tscn` | Battle scene |
-| `godot/battle.gdextension` | Extension manifest |
-| `wiki:specs:godot-battle-scaffold` | Current implementation spec |
-| `wiki:specs:fish-tactical-rpg` | Target game design spec |
+| `src/app/page.tsx` | Server entry → `FishMafiaApp` |
+| `src/components/game/` | App shell, screens, battle widgets (one component per file) |
+| `src/hooks/use-fish-mafia.ts` | The only UI ↔ engine bridge (state snapshot + actions) |
+| `src/lib/game/cards/` | Card types, enums, constants, services, JSON packs + zod schema |
+| `src/lib/game/units/` | Unit types, enums, combat service, defs |
+| `src/lib/game/battle/` | GameState, FxEvent, Phase, board/rules services |
+| `src/lib/game/actions\|commands\|session/` | Player use-cases, command bus, undo/redo |
+| `src/lib/game/data.ts` | CARD_LIBRARY, STARTER_DECK, ENEMY_SPAWNS |
+| `src/lib/game/index.ts` | Root barrel |
+| `wiki:specs:angular-style-file-system` | File system convention |
+| `wiki:specs:domain-layered-engine-structure` | Domain/function-first engine structure |
+| `wiki:specs:card-effect-registry` | Engine command/effect architecture |
 
-## Full Spec
+## Full Specs
 
-@wiki/specs/godot-battle-scaffold (current implementation)
-@wiki/specs/fish-tactical-rpg (target design)
+@wiki/specs/angular-style-file-system (file system convention)
+@wiki/specs/domain-layered-engine-structure (engine structure)
+@wiki/specs/card-effect-registry (engine architecture)
+@wiki/specs/fish-tactical-rpg (game design intent)

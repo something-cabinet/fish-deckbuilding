@@ -5,6 +5,15 @@ tags: [rule, code-quality, rust]
 status: active
 ---
 
+---
+title: Rust Anti-Patterns
+type: rule
+status: active
+tags: [rule, code-quality, rust]
+category: code-quality
+rationale: These patterns (unwrap, clone, to_string, early collect, allocation, unsafe) cause panics, wasted allocations, and unsoundness. Each has a mechanical enforcement grep so violations are checkable in CI.
+---
+
 ## Rule: Rust Anti-Patterns — Beyond .clone()
 
 Minimize or eliminate the following patterns:

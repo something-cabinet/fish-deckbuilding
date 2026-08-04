@@ -4,7 +4,7 @@
 Underwater crime-noir. A deep-ocean battlefield lit from above, with a gold-leaf "ledger" HUD framing the action. Restrained, premium, and readable — the mood is a smoky back-room deal at the bottom of the sea.
 
 ## Color System
-Forced dark theme (`color-scheme: dark`). Tokens live in `app/globals.css`.
+Forced dark theme (`color-scheme: dark`). Tokens live in `src/app/globals.css`.
 
 | Token | Role | Approx |
 |-------|------|--------|
@@ -42,9 +42,9 @@ Fish are AI-generated painterly portraits presented as **circular tokens**:
 - ATK/HP plates and a health bar sit beneath each token.
 
 ## Motion & Particles
-- **Canvas particle engine** (`components/game/particle-canvas.tsx`) draws per-effect bursts keyed by each card's `fx` id (`letter`, `phone`, `gavel`, `coin`, `draw`, `heal`, `shock`, `summon`) plus `melee`, `move`, `death`.
+- **Canvas particle engine** (`src/components/game/particle-canvas.tsx`) draws per-effect bursts keyed by each card's `fx` id (`letter`, `phone`, `gavel`, `coin`, `draw`, `heal`, `shock`, `summon`) plus `melee`, `move`, `death`.
 - **Floating combat numbers** rise off targets on hit (`animate-fm-rise`).
-- Keyframes defined as utilities in `globals.css`: `fm-float`, `fm-bob`, `fm-pulse-ring`, `fm-shake`, `fm-rise`, `fm-fade-in`.
+- Keyframes defined as utilities in `src/app/globals.css`: `fm-float`, `fm-bob`, `fm-pulse-ring`, `fm-shake`, `fm-rise`, `fm-fade-in`.
 
 ## Cards
 Parchment-style card faces (light card surface against the dark stage) with:
@@ -57,16 +57,23 @@ Parchment-style card faces (light card surface against the dark stage) with:
 - Color is never the sole signal — health bars, numeric plates, and text log reinforce state.
 
 ## Component Map
-- `app/page.tsx` → `components/game/fish-mafia-game.tsx` (orchestrator; drag/tap, hand, bottom bar)
-- `components/game/board.tsx` — grid, tiles, reachable/target highlights
-- `components/game/unit-token.tsx` — token disc, stats, health
-- `components/game/card.tsx` — card face + interactions
-- `components/game/top-bar.tsx` — HUD top band
-- `components/game/side-panel.tsx` — roster + bulletin log
-- `components/game/result-overlay.tsx` — win/lose screen
-- `components/game/particle-canvas.tsx` — effects layer
-- `hooks/use-fish-mafia.ts` — React state + enemy-turn orchestration
-- `lib/game/{types,data,engine}.ts` — pure game model, content, and rules
+- `src/app/page.tsx` (server) → `src/components/game/fish-mafia-app.tsx` — app shell; manual screen switch via early returns on a `Screen` union (`"menu" | "game" | "library" | "create"`), no router; owns `screen`, `settings`, `customCards`, `runKey`; exports `GameSettings` + `DEFAULT_SETTINGS`
+- `src/components/game/menu-screen.tsx` — menu screen
+- `src/components/game/card-library-screen.tsx` — card library screen
+- `src/components/game/card-create-screen.tsx` — card create screen
+- `src/components/game/fish-mafia-game.tsx` — in-game orchestrator (drag/tap, hand, bottom bar); consumes `useFishMafia()`, children receive state via props drilling
+- `src/components/game/board.tsx` — grid, tiles, reachable/target highlights
+- `src/components/game/unit-token.tsx` — token disc, stats, health
+- `src/components/game/card.tsx` — interactive card + interactions
+- `src/components/game/card-face.tsx` — static card face
+- `src/components/game/targeting-arrow.tsx` — targeting arrow
+- `src/components/game/top-bar.tsx` — HUD top band
+- `src/components/game/side-panel.tsx` — roster + bulletin log
+- `src/components/game/result-overlay.tsx` — win/lose screen
+- `src/components/game/particle-canvas.tsx` — effects layer
+- `src/components/ui/button.tsx` — shadcn base-nova Button (currently unused)
+- `src/hooks/use-fish-mafia.ts` — sole bridge to the pure engine; React state + enemy-turn orchestration
+- `src/lib/game/{types,engine,commands,effects,history,data,icons}.ts` — pure game model, content, and rules
 
 ## Hydration Note
 `createInitialState()` is fully deterministic (no `Math.random` during render). Shuffling + the opening draw happen client-side via `startGame()` in a mount `useEffect`, avoiding SSR/client hydration mismatches.

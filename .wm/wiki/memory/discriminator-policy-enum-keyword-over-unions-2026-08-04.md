@@ -1,0 +1,8 @@
+---
+title: Discriminator policy — enum keyword over unions (2026-08-04)
+type: memory
+tags: [engine, typescript, enums, conventions, session]
+status: active
+---
+
+Session 2026-08-04: converted ALL bare string-literal union discriminators to the `enum` keyword per user directive ("we don't use Union"), revising CONVENTIONS golden rule #7. Policy: discriminators are closed types — enum (switch dispatch) or tagged discriminated union (exhaustive match, e.g. CardEffect/PlayerCommand). Dispatch must be exhaustive via `default: { const _exhaustive: never = x }` (compile-error on new member). Enum values: value-less by default (Phase, Team, UnitKind, EnemyStepKind, Screen, DragKind — in-memory only); explicit string values ONLY when the member must equal an external string (CardType/CardTarget/FxKind cross pack-01-starter.json + zod schema) with a why-comment at the declaration. zod uses z.nativeEnum for enum-backed fields so the AC-16 _Equal drift guards still pass (z.enum infers literal unions ≠ nominal enum types). Filter (card library) became `CardType | null` (null = All) instead of a literal-union. KEY LEARNINGS: (a) string enums compare freely with matching string literals in TS (no "no overlap" error) — numeric enums DO error, so tsc only flags numeric-enum comparisons; (b) `expect(x.phase).toBe("player")` still compiles against numeric enums but FAILS at runtime — test value assertions must be updated too; (c) enum member refs need VALUE imports (not `import type`); (d) Team lives in the units domain, not battle — wrong-barrel import was a one-line fix; (e) `z.nativeEnum` is the enum-aware zod API. Verified: tsc 0, 66/66 tests, next build green.

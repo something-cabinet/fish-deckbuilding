@@ -1,0 +1,53 @@
+{
+  "entity_id": "wiki:tasks:set-up-vitest-test-harness-for-the-engine",
+  "current_version": 5,
+  "versions": [
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-03T10:13:42.007Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        },
+        {
+          "field": "implementation_notes",
+          "old_value": null,
+          "new_value": "T1 verified on disk 2026-08-03: vitest.config.ts created (node env, @ alias), src/lib/game/__tests__/engine.smoke.test.ts created, npm test → 3/3 green."
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-03T10:14:33.092Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v5",
+      "version": 5,
+      "timestamp": "2026-08-04T08:34:33.094Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

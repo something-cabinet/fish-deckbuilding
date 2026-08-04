@@ -1,0 +1,48 @@
+{
+  "entity_id": "wiki:tasks:write-card-behavior-parity-tests-against-current-engine-red-baseline",
+  "current_version": 6,
+  "versions": [
+    {
+      "id": "v4",
+      "version": 4,
+      "timestamp": "2026-08-03T10:43:11.317Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v5",
+      "version": 5,
+      "timestamp": "2026-08-04T07:57:14.563Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "compacted": false
+    },
+    {
+      "id": "v6",
+      "version": 6,
+      "timestamp": "2026-08-04T08:34:29.343Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "assignee",
+          "old_value": null,
+          "new_value": "orchestrator"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

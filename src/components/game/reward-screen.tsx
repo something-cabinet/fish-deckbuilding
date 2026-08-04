@@ -2,7 +2,7 @@
 
 import { Coins, Sparkles } from "lucide-react"
 import { CardFace } from "./card-face"
-import { CARD_LIBRARY } from "@/lib/game/data"
+import { CARD_LIBRARY } from "@/lib/game/cards"
 
 interface Props {
   cardIds: string[]

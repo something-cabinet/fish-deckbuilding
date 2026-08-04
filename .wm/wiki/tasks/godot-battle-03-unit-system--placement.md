@@ -1,4 +1,13 @@
 ---
+title: godot-battle-03-unit-system--placement
+type: task
+status: archived
+assignee: orchestrator
+acceptance_criteria:
+  - {text: "Archived 2026-08-04: dead Godot direction; superseded by Rust core implementation", checked: false}
+---
+
+---
 title: [godot-battle-03] Unit system + placement
 type: task
 id: wiki:tasks:godot-battle-03-unit-system--placement

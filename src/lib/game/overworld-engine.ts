@@ -1,4 +1,5 @@
-import { CARD_LIBRARY, HERO_DEF, STARTER_DECK, type EnemySpawn } from "./data"
+import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
+import { HERO_DEF, type EnemySpawn } from "@/lib/game/units"
 import { NODE_KIND_WEIGHTS, ZONES } from "./overworld-data"
 import type { MapNode, NodeType, OverworldState, ZoneDef } from "./overworld-types"
 

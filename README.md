@@ -37,7 +37,12 @@ npm install
 npm run dev       # dev server (Next.js)
 npm run build     # tsc + next build
 npm run lint      # ESLint
+npm test          # unit + render tests (vitest)
+npm run test:e2e  # CodeceptJS e2e against the dev server (headed)
+npm run test:e2e:headless  # CodeceptJS e2e (headless, for CI)
 ```
+
+E2E note: `npm run test:e2e` assumes a dev server running at `http://localhost:3000` (start `npm run dev` first). Render tests (`npm test`) use a per-file jsdom environment; engine tests stay on node.
 
 ## Status
 

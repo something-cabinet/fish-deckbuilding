@@ -1,14 +1,15 @@
 "use client"
 
-import { COLS, ROWS, type Unit } from "@/lib/game/types"
+import { COLS, ROWS } from "@/lib/game/battle"
+import { Team, UnitKind, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
 const SPRITES: Record<Unit["kind"], string> = {
-  hero: "/sprites/hero.png",
-  goon: "/sprites/goon.png",
-  thug: "/sprites/thug.png",
-  enforcer: "/sprites/enforcer.png",
-  boss: "/sprites/boss.png",
+  [UnitKind.Hero]: "/sprites/hero.png",
+  [UnitKind.Goon]: "/sprites/goon.png",
+  [UnitKind.Thug]: "/sprites/thug.png",
+  [UnitKind.Enforcer]: "/sprites/enforcer.png",
+  [UnitKind.Boss]: "/sprites/boss.png",
 }
 
 interface Props {
@@ -23,10 +24,10 @@ interface Props {
 export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, onClick }: Props) {
   const left = ((unit.pos.x + 0.5) / COLS) * 100
   const top = ((unit.pos.y + 0.5) / ROWS) * 100
-  const isPlayer = unit.team === "player"
+  const isPlayer = unit.team === Team.Player
   const canMove = isPlayer && !unit.hasMoved
   const hpPct = Math.max(0, (unit.hp / unit.maxHp) * 100)
-  const isBoss = unit.kind === "boss"
+  const isBoss = unit.kind === UnitKind.Boss
 
   return (
     <div
