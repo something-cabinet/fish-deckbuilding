@@ -34,6 +34,7 @@ interface Props {
 const NODE_STYLES = {
   battle: {
     label: "Battle",
+    desc: "Fight for gold & cards",
     ring: "border-enemy/70",
     bg: "bg-enemy/15",
     icon: "text-enemy",
@@ -41,6 +42,7 @@ const NODE_STYLES = {
   },
   rest: {
     label: "Rest",
+    desc: "Heal 30% of max HP",
     ring: "border-teal/70",
     bg: "bg-teal/15",
     icon: "text-teal",
@@ -48,6 +50,7 @@ const NODE_STYLES = {
   },
   boss: {
     label: "Boss",
+    desc: "Defeat to unlock the next zone",
     ring: "border-gold/80",
     bg: "bg-gold/20",
     icon: "text-gold",
@@ -162,11 +165,11 @@ export function OverworldMap({
       </div>
 
       {/* map area */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center overflow-x-auto p-4">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center overflow-y-auto p-4">
         <svg
-          viewBox="0 0 160 100"
-          className="h-full max-h-[540px] w-auto"
-          preserveAspectRatio="xMinYMid meet"
+          viewBox="0 0 100 100"
+          className="w-full max-w-[800px] h-auto"
+          preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={`${curZoneName} overworld map`}
         >
@@ -180,8 +183,8 @@ export function OverworldMap({
               y2={e.y2}
               stroke={e.active ? "var(--gold)" : "var(--gold-dim)"}
               strokeOpacity={e.active ? 0.9 : 0.35}
-              strokeWidth={e.active ? 0.9 : 0.5}
-              strokeDasharray={e.active ? "2 1.5" : undefined}
+              strokeWidth={e.active ? 1.2 : 0.7}
+              strokeDasharray={e.active ? "3 2" : undefined}
             />
           ))}
 
@@ -213,22 +216,22 @@ export function OverworldMap({
                 {/* reachable pulse ring */}
                 {displayReach && (
                   <circle
-                    r={4.2}
+                    r={5.5}
                     fill="transparent"
-                    className="pointer-events-none animate-fm-pulse-ring stroke-gold/70 stroke-[0.7]"
+                    className="pointer-events-none animate-fm-pulse-ring stroke-gold/70 stroke-[0.9]"
                   />
                 )}
                 {/* hero highlight ring */}
                 {isCurrent && (
                   <circle
-                    r={4.4}
+                    r={5.8}
                     fill="transparent"
-                    className="stroke-gold stroke-[1] animate-fm-pulse-ring"
+                    className="stroke-gold stroke-[1.3] animate-fm-pulse-ring"
                   />
                 )}
                 {/* node face */}
                 <circle
-                  r={3.2}
+                  r={4.2}
                   className={cn(
                     "transition-colors",
                     displayReach
@@ -244,10 +247,10 @@ export function OverworldMap({
                 />
                 {/* node icon */}
                 <Icon
-                  x={-1.55}
-                  y={-1.55}
-                  width={3.1}
-                  height={3.1}
+                  x={-2}
+                  y={-2}
+                  width={4}
+                  height={4}
                   className={cn(
                     isCurrent && "text-gold",
                     !isCurrent && isVisited && "text-white/30",
@@ -262,6 +265,9 @@ export function OverworldMap({
             )
           })}
         </svg>
+
+        {/* legend */}
+        <MapLegend />
 
         {/* hero zone status */}
         <p className="mt-3 max-w-md text-center font-display text-xs uppercase tracking-[0.25em] text-muted-foreground">
@@ -284,9 +290,55 @@ export function OverworldMap({
 function HeroMarker() {
   return (
     <g className="pointer-events-none">
-      <circle cx={0} cy={0} r={2} className="fill-gold/20" />
-      <Fish x={-0.9} y={-0.9} width={1.8} height={1.8} className="text-ocean-deep" />
+      {/* soft halo */}
+      <circle cx={0} cy={0} r={5.4} className="fill-gold/20" />
+      {/* filled gold badge */}
+      <circle cx={0} cy={0} r={3.3} className="fill-gold" />
+      <circle cx={0} cy={0} r={3.3} fill="none" className="stroke-ocean-deep stroke-[0.7]" />
+      {/* fish icon */}
+      <Fish x={-1.5} y={-1.5} width={3} height={3} className="text-ocean-deep" />
+      {/* you label */}
+      <g>
+        <rect x={-4.2} y={6.2} width={8.4} height={3.2} rx={1.1} className="fill-ocean-deep" opacity={0.9} />
+        <text
+          y={8.6}
+          textAnchor="middle"
+          className="fill-gold font-display text-[2.6px] font-bold uppercase tracking-widest"
+        >
+          You
+        </text>
+      </g>
     </g>
+  )
+}
+
+function MapLegend() {
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-xl border border-white/10 bg-ocean-deep/60 px-4 py-2.5 backdrop-blur-sm">
+      {Object.values(NODE_STYLES).map(({ label, desc, Icon, ring, bg, icon }) => (
+        <div key={label} className="flex items-center gap-2">
+          <span className={cn("flex h-6 w-6 items-center justify-center rounded-full border", ring, bg)}>
+            <Icon size={13} className={icon} />
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">
+              {label}
+            </span>
+            <span className="text-[10px] text-muted-foreground">{desc}</span>
+          </span>
+        </div>
+      ))}
+      {/* player marker */}
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-gold bg-gold">
+          <Fish size={13} className="text-ocean-deep" />
+        </span>
+        <span className="flex flex-col leading-tight">
+          <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">You</span>
+          <span className="text-[10px] text-muted-foreground">Your current position</span>
+        </span>
+      </div>
+    </div>
   )
 }
 

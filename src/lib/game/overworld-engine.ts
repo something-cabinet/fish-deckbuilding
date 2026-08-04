@@ -68,8 +68,8 @@ export function generateZoneMap(zone: ZoneDef, seed: number): MapNode[] {
         col: c,
         type: nodeTypeFor(rng, r, rows),
         edges: [],
-        x: ((r + 0.5) / rows) * 100,
-        y: ((c + 0.5) / colCounts[r]) * 100,
+        x: ((c + 0.5) / colCounts[r]) * 100,
+        y: ((r + 0.5) / rows) * 100,
       })
     }
   }

@@ -13,7 +13,7 @@ export const ZONES: ZoneDef[] = [
     name: "The Shallows",
     tagline: "Sun-dappled reef. The rent is due.",
     rows: 6,
-    minNodes: 2,
+    minNodes: 3,
     maxNodes: 3,
     boss: { name: "Barnacle Brute", hp: 18, atk: 4, move: 1 },
     enemyPool: [
@@ -43,7 +43,7 @@ export const ZONES: ZoneDef[] = [
     name: "The Depths",
     tagline: "The ledger's bottom. The boss of bosses.",
     rows: 7,
-    minNodes: 2,
+    minNodes: 3,
     maxNodes: 3,
     boss: { name: "The Forecloser", hp: 34, atk: 6, move: 2 },
     enemyPool: [
