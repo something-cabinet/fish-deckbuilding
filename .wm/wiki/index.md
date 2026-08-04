@@ -12,6 +12,7 @@ type: reference
 - [godot battle 04 movement system  selection overlay](wiki/tasks/godot-battle-04-movement-system--selection-overlay.md) — *draft*
 - [godot battle 05 combat system  attack counter battle end](wiki/tasks/godot-battle-05-combat-system--attack-counter-battle-end.md) — *draft*
 - [godot battle 03 unit system  placement](wiki/tasks/godot-battle-03-unit-system--placement.md) — *draft*
+- [codeceptjs e2e suite  strictmode journey with move  cast](wiki/tasks/codeceptjs-e2e-suite--strictmode-journey-with-move--cast.md) — *draft*
 - [godot battle 06 turn cycle  enemy ai  hud](wiki/tasks/godot-battle-06-turn-cycle--enemy-ai--hud.md) — *draft*
 - [godot battle 02 godot project scaffold  grid rendering](wiki/tasks/godot-battle-02-godot-project-scaffold--grid-rendering.md) — *draft*
 - [godot battle 01 core logic layer  pure gdscript classes](wiki/tasks/godot-battle-01-core-logic-layer--pure-gdscript-classes.md) — *draft*
@@ -28,6 +29,7 @@ type: reference
 - [zone based ui decomposition](wiki/patterns/zone-based-ui-decomposition.md) — *draft*
 - [behavior capture parity oracle](wiki/patterns/behavior-capture-parity-oracle.md) — *draft*
 - [duelyst offset list affect pattern](wiki/patterns/duelyst-offset-list-affect-pattern.md) — *draft*
+- [pure setstate updaters external drain](wiki/patterns/pure-setstate-updaters-external-drain.md) — *draft*
 - [critical patterns](wiki/patterns/critical-patterns.md) — *draft*
 - [svelte5 one shot imperative init callback](wiki/patterns/svelte5-one-shot-imperative-init-callback.md) — *draft*
 - [turn based ecs orchestrator](wiki/patterns/turn-based-ecs-orchestrator.md) — *draft*
@@ -71,6 +73,7 @@ type: reference
 - [Session Learnings: Fish Mafia UI Polish & Architecture (2024)](wiki/concepts/session-learnings-2024.md) — *draft*
 - [gdscript method shadowing builtins](wiki/concepts/gdscript-method-shadowing-builtins.md) — *draft*
 - [rustflags env overrides config toml](wiki/concepts/rustflags-env-overrides-config-toml.md) — *draft*
+- [strictmode double invoke impure updater](wiki/concepts/strictmode-double-invoke-impure-updater.md) — *draft*
 - [svelte5 bindable boot loop failure](wiki/concepts/svelte5-bindable-boot-loop-failure.md) — *draft*
 - [absolute positioning panel children gdext](wiki/concepts/absolute-positioning-panel-children-gdext.md) — *draft*
 - [clippy rejects unused reserved code](wiki/concepts/clippy-rejects-unused-reserved-code.md) — *draft*
@@ -138,6 +141,7 @@ type: reference
 - [Sprite Asset Templates Generated](wiki/memory/sprite-asset-templates-generated.md) — *active*
 - [Designer model cost — terra over sol past 256K](wiki/memory/designer-model-cost-terra-over-sol-past-256k.md) — *active*
 - [GDScript Method Names — Don't Shadow Built-ins](wiki/memory/gdscript-method-names-don-t-shadow-built-ins.md) — *active*
+- [React StrictMode double-invoke breaks impure setState updaters (command drain)](wiki/memory/react-strictmode-double-invoke-breaks-impure-setstate-updaters-command-drain.md) — *active*
 - [Run/Combat State Split Pattern](wiki/memory/run-combat-state-split-pattern.md) — *active*
 - [Duelyst Corner-Bracket Overlay Pattern](wiki/memory/duelyst-corner-bracket-overlay-pattern.md) — *active*
 - [Affix-Based Effect Composition Pattern](wiki/memory/affix-based-effect-composition.md) — *active*
@@ -181,6 +185,7 @@ type: reference
 - [Battle UI Rebuild — FAB + Slay the Spire Design Language](wiki/specs/battle-ui-fab-sts-rebuild.md) — *approved*
 - [Keyword System — Provoke, Ranged, Flying, Dying Wish, Opening Gambit](wiki/specs/keyword-system.md) — *draft*
 - [Card Crafting UI](wiki/specs/card-crafting-ui.md) — *approved*
+- [StrictMode Command Regression Tests — Hook + Component + E2E Coverage](wiki/specs/strictmode-command-regression-tests.md) — *approved*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
 - [Card Type Rework — FaB-Style Action Type](wiki/specs/card-type-rework-action.md) — *approved*
 - [CI Import Conflict Resolution](wiki/specs/ci-import-conflict-resolution.md) — *draft*
@@ -211,7 +216,9 @@ type: reference
 - [Write card-behavior parity tests against current engine (red baseline)](wiki/tasks/write-card-behavior-parity-tests-against-current-engine-red-baseline.md) — *in-progress*
 - [Rewire castCard to the resolver; remove the card-id switch](wiki/tasks/rewire-castcard-to-the-resolver-remove-the-card-id-switch.md) — *in-progress*
 - [Combat feedback animations (Godot Tween/AnimationPlayer)](wiki/tasks/combat-feedback-animations-godot-tweenanimationplayer.md) — *todo*
+- [Component render test — FishMafiaGame move + cast via DOM](wiki/tasks/component-render-test--fishmafiagame-move--cast-via-dom.md) — *done*
 - [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
+- [Add render-test + CodeceptJS e2e infrastructure and scripts](wiki/tasks/add-render-test--codeceptjs-e2e-infrastructure-and-scripts.md) — *done*
 - [Implement correct UI theme — Guppy's mafia underworld escape story](wiki/tasks/implement-correct-ui-theme--guppys-mafia-underworld-escape-story.md) — *in-progress*
 - [Card visual states and hover interactions (Godot StyleBox/theming)](wiki/tasks/card-visual-states-and-hover-interactions-godot-styleboxtheming.md) — *todo*
 - [Godot Battle 07 - Hot-Reload Fixes & Parity](wiki/tasks/godot-battle-07-hot-reload-fixes.md) — *done*
@@ -229,6 +236,7 @@ type: reference
 - [Wire Rust battle/combat core to Godot via gdext bridge with signals](wiki/tasks/wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals.md) — *done*
 - [Deck/discard pile visualization (Godot)](wiki/tasks/deckdiscard-pile-visualization-godot.md) — *todo*
 - [Dialogue system — wire dialogue scene into campaign flow (Godot)](wiki/tasks/dialogue-system--wire-dialogue-scene-into-campaign-flow-godot.md) — *todo*
+- [Hook StrictMode render test — red-green validated against the command-drain fix](wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix.md) — *done*
 - [Godot Theme resource system for consistent UI styling](wiki/tasks/godot-theme-resource-system-for-consistent-ui-styling.md) — *todo*
 - [Grid Battle UI — render 9x5 grid, wire targeting, base attack, move, replace](wiki/tasks/grid-battle-ui--render-9x5-grid-wire-targeting-base-attack-move-replace.md) — *done*
 - [Add CraftingPanel node tree to overworld.tscn](wiki/tasks/crafting-ui-scene-nodes.md) — *done*
@@ -240,6 +248,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 204
-- **Edges:** 317
+- **Nodes:** 212
+- **Edges:** 332
 

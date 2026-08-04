@@ -1,0 +1,20 @@
+{
+  "entity_id": "wiki:tasks:codeceptjs-e2e-suite--strictmode-journey-with-move--cast",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-04T03:07:16.329Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "todo",
+          "new_value": "in-progress"
+        }
+      ],
+      "compacted": false
+    }
+  ]
+}

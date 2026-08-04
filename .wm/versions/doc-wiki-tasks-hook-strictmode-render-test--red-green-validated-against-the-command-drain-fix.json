@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:tasks:hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-04T03:07:48.928Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": "in-progress",
+          "new_value": "done"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

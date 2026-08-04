@@ -26,6 +26,12 @@ export function useFishMafia() {
   // FR-9/FR-10: gestures enqueue commands; the session executes them
   // deterministically with snapshot-based undo/redo (D10).
   const sessionRef = useRef(new GameSession())
+  // Latest committed state, kept outside React so command draining can run
+  // synchronously without impure setState updaters (React StrictMode in dev
+  // double-invokes updater functions — an updater that drains the session
+  // queue would consume the command on the discarded first call and no-op).
+  const stateRef = useRef<GameState>(state)
+  stateRef.current = state
 
   // Shuffle + draw the opening hand only after mount to avoid SSR/client
   // hydration mismatches (the deck order is deterministic on the server).
@@ -45,7 +51,7 @@ export function useFishMafia() {
     }, 1200)
   }, [])
 
-  /** Drain any queued commands against the latest state (deterministic order). */
+  /** Drain any queued commands against the latest committed state (deterministic order). */
   const drain = useCallback(
     (s: GameState): GameState => {
       const { results, state: ns } = sessionRef.current.drain(s)
@@ -54,6 +60,13 @@ export function useFishMafia() {
     },
     [pushFx],
   )
+
+  /** Execute pending commands synchronously, then commit the result to React. */
+  const commit = useCallback(() => {
+    const ns = drain(stateRef.current)
+    stateRef.current = ns
+    setState(ns)
+  }, [drain])
 
   /* ---- player actions (enqueue commands, FR-12) ---- */
 
@@ -64,39 +77,39 @@ export function useFishMafia() {
   const move = useCallback(
     (unitId: string, dest: Pos) => {
       sessionRef.current.enqueue({ kind: "move", unitId, dest })
-      setState(drain)
+      commit()
     },
-    [drain],
+    [commit],
   )
 
   const attack = useCallback(
     (attackerId: string, targetId: string) => {
       sessionRef.current.enqueue({ kind: "attack", attackerId, targetId })
-      setState(drain)
+      commit()
     },
-    [drain],
+    [commit],
   )
 
   const cast = useCallback(
     (cardUid: string, target: { unitId?: string; tile?: Pos }) => {
       sessionRef.current.enqueue({ kind: "playCard", cardUid, target })
-      setState(drain)
+      commit()
     },
-    [drain],
+    [commit],
   )
 
   const sell = useCallback(
     (cardUid: string) => {
       sessionRef.current.enqueue({ kind: "sell", cardUid })
-      setState(drain)
+      commit()
     },
-    [drain],
+    [commit],
   )
 
   const buy = useCallback(() => {
     sessionRef.current.enqueue({ kind: "buy" })
-    setState(drain)
-  }, [drain])
+    commit()
+  }, [commit])
 
   /* ---- undo / redo (FR-10, player-phase only — D10) ---- */
 
@@ -125,13 +138,10 @@ export function useFishMafia() {
   /* ---- turn flow ---- */
 
   const endTurn = useCallback(async () => {
-    let snapshot: GameState | null = null
     sessionRef.current.enqueue({ kind: "endTurn" })
-    setState((s) => {
-      const ns = drain(s) // end turn executes → history commits (D10)
-      snapshot = ns
-      return ns
-    })
+    const snapshot = drain(stateRef.current) // end turn executes → history commits (D10)
+    stateRef.current = snapshot
+    setState(snapshot)
     // let react commit
     await wait(0)
     if (!snapshot) return
@@ -141,25 +151,17 @@ export function useFishMafia() {
     // apply steps sequentially with animation delays — enemy steps run as
     // commands but never enter the undo stack (D10)
     for (const step of steps) {
-      let ended = false
-      await new Promise<void>((resolve) => {
-        setState((s) => {
-          if (s.phase === "won" || s.phase === "lost") {
-            ended = true
-            return s
-          }
-          const { state: ns, fx: e } = applyEnemyStep(s, step)
-          pushFx(e)
-          return ns
-        })
-        resolve()
-      })
-      if (ended) break
+      if (stateRef.current.phase === "won" || stateRef.current.phase === "lost") break
+      const { state: ns, fx: e } = applyEnemyStep(stateRef.current, step)
+      stateRef.current = ns
+      setState(ns)
+      pushFx(e)
       await wait(step.kind === "attack" ? 480 : 300)
     }
 
     await wait(250)
-    setState((s) => beginPlayerTurn(s))
+    stateRef.current = beginPlayerTurn(stateRef.current)
+    setState(stateRef.current)
     setBusy(false)
   }, [drain, pushFx])
 
