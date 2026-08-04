@@ -7,7 +7,7 @@ import { CardTarget } from "../enums"
 import type { CardInstance } from "../models"
 
 export function canCast(state: GameState, card: CardInstance): boolean {
-  return state.phase === Phase.Player && card.def.cost <= state.mana
+  return state.phase === Phase.Player && card.def.cost <= state.coin
 }
 
 function occupied(state: GameState): Set<string> {

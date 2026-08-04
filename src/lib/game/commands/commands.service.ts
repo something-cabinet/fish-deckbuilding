@@ -1,5 +1,5 @@
 import type { FxEvent, GameState, Pos } from "../battle/models"
-import { buyCard, castCard, moveUnit, sellCard, unitAttack } from "../actions/actions.service"
+import { castCard, moveUnit, sellCard, unitAttack } from "../actions/actions.service"
 import { startEnemyPhase } from "../battle/services"
 
 /* ------------------------------------------------------------------ */
@@ -15,7 +15,6 @@ export type PlayerCommand =
   | { kind: "attack"; attackerId: string; targetId: string }
   | { kind: "playCard"; cardUid: string; target: { unitId?: string; tile?: Pos } }
   | { kind: "sell"; cardUid: string }
-  | { kind: "buy" }
   | { kind: "endTurn" }
 
 export interface CommandResult {
@@ -34,8 +33,6 @@ export function executeCommand(state: GameState, cmd: PlayerCommand): CommandRes
       return castCard(state, cmd.cardUid, cmd.target)
     case "sell":
       return { state: sellCard(state, cmd.cardUid), fx: [] }
-    case "buy":
-      return buyCard(state)
     case "endTurn":
       // D10: end turn commits — transitions to the enemy phase; undo history
       // is cleared by the history layer (T8), not here.
