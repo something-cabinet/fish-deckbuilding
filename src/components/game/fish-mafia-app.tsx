@@ -133,8 +133,8 @@ export function FishMafiaApp() {
     }
   }
 
-  const handleWin = (heroHp: number) => {
-    overworld.updateHp(heroHp)
+  const handleWin = (heroHp: number, fin: number) => {
+    overworld.updateHp(heroHp, fin)
     if (battleIsBoss) {
       // final zone boss -> run over, show the victory summary
       if (overworld.state?.zoneIndex === 2) {

@@ -10,12 +10,11 @@ function fresh(): GameState {
   return createInitialState()
 }
 
-/** State with a known hand card and enough mana to cast it. */
+/** State with a known hand card and enough coin to cast it. */
 function castableState(libId: string): GameState {
   const s = fresh()
   s.hand = [{ uid: "c_cmd", def: CARD_LIBRARY[libId] }]
-  s.mana = 10
-  s.maxMana = 10
+  s.coin = 10
   return s
 }
 
@@ -24,7 +23,7 @@ describe("command base: executeCommand", () => {
     const s = castableState("demand_letter")
     const enemy = s.units.find((u) => u.team === Team.Enemy && u.hp > 0)!
     const hpBefore = enemy.hp
-    const manaBefore = s.mana
+    const coinBefore = s.coin
 
     const r = executeCommand(s, {
       kind: "playCard",
@@ -32,7 +31,7 @@ describe("command base: executeCommand", () => {
       target: { unitId: enemy.id },
     })
 
-    expect(r.state.mana).toBe(manaBefore - 1)
+    expect(r.state.coin).toBe(coinBefore - 1)
     const after = r.state.units.find((u) => u.id === enemy.id)!
     expect(after.hp).toBe(hpBefore - 2)
   })
@@ -70,15 +69,13 @@ describe("command base: executeCommand", () => {
     expect(r.state.hand.length).toBe(0)
   })
 
-  it("buy routes through buyCard", () => {
-    const s = fresh()
-    s.coin = 10
+  it("sell routes through sellCard (banks coin, discards the card)", () => {
+    const s = castableState("cash_flow")
+    s.coin = 0
     const handBefore = s.hand.length
-    const deckBefore = s.deck.length
-    const r = executeCommand(s, { kind: "buy" })
-    expect(r.state.hand.length).toBe(handBefore + 1)
-    expect(r.state.deck.length).toBe(deckBefore - 1)
-    expect(r.state.coin).toBe(10 - 3)
+    const r = executeCommand(s, { kind: "sell", cardUid: "c_cmd" })
+    expect(r.state.hand.length).toBe(handBefore - 1)
+    expect(r.state.coin).toBeGreaterThan(0)
   })
 
   it("endTurn transitions to the enemy phase", () => {
@@ -91,14 +88,16 @@ describe("command base: executeCommand", () => {
 
 describe("command queue: deterministic ordered execution (AC-12)", () => {
   it("executes commands in enqueue order", () => {
-    const s = castableState("cash_flow")
+    const s = castableState("cash_flow") // coin 10, hand [cash_flow]
     const q = new CommandQueue()
-    q.enqueue({ kind: "playCard", cardUid: "c_cmd", target: {} }) // +3 coin
-    q.enqueue({ kind: "buy" }) // spends 3 coin, draws 1
+    q.enqueue({ kind: "playCard", cardUid: "c_cmd", target: {} }) // pay 1, gain 3
+    q.enqueue({ kind: "endTurn" }) // then hand over to the enemy phase
 
     const { state } = q.drain(s)
 
-    expect(state.coin).toBe(0 + 3 - 3)
+    // playCard resolved before endTurn: the card left the hand, then phase flipped
+    expect(state.hand.some((c) => c.uid === "c_cmd")).toBe(false)
+    expect(state.phase).toBe(Phase.Enemy)
     expect(q.length).toBe(0)
   })
 
@@ -107,7 +106,7 @@ describe("command queue: deterministic ordered execution (AC-12)", () => {
       const s = castableState("cash_flow")
       const q = new CommandQueue()
       q.enqueue({ kind: "playCard", cardUid: "c_cmd", target: {} })
-      q.enqueue({ kind: "buy" })
+      q.enqueue({ kind: "sell", cardUid: "c_cmd" }) // no-op after play — order still deterministic
       const { state } = q.drain(s)
       return { coin: state.coin, handLen: state.hand.length, deckLen: state.deck.length }
     }
@@ -117,14 +116,14 @@ describe("command queue: deterministic ordered execution (AC-12)", () => {
 
   it("queue snapshot serializes pending commands (logging/replay seam)", () => {
     const q = new CommandQueue()
-    q.enqueue({ kind: "buy" })
+    q.enqueue({ kind: "sell", cardUid: "c_cmd" })
     q.enqueue({ kind: "endTurn" })
-    expect(q.snapshot()).toEqual([{ kind: "buy" }, { kind: "endTurn" }])
+    expect(q.snapshot()).toEqual([{ kind: "sell", cardUid: "c_cmd" }, { kind: "endTurn" }])
   })
 
   it("drain leaves the queue empty", () => {
     const q = new CommandQueue()
-    q.enqueue({ kind: "buy" })
+    q.enqueue({ kind: "endTurn" })
     q.drain(fresh())
     expect(q.length).toBe(0)
   })

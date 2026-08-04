@@ -1,16 +1,16 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Home, Layers, Play, ShoppingCart, Trash2 } from "lucide-react"
+import { Home, Layers, MousePointer2, Play, Trash2 } from "lucide-react"
 import type { GameSettings } from "./fish-mafia-app"
 import { Board } from "./board"
 import { GameCard } from "./card"
+import { CoinRegister } from "./coin-register"
 import { ResultOverlay } from "./result-overlay"
 import { SidePanel } from "./side-panel"
 import { TargetingArrow, type ArrowState } from "./targeting-arrow"
 import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
-import { BUY_COST } from "@/lib/game"
 import { CardTarget, type CardInstance } from "@/lib/game/cards"
 import { Phase, type Pos, type GameState } from "@/lib/game/battle"
 import { Team, type Unit } from "@/lib/game/units"
@@ -28,14 +28,14 @@ interface DragState {
 interface GameProps {
   settings: GameSettings
   initial?: GameState
-  onWin?: (heroHp: number) => void
+  onWin?: (heroHp: number, fin: number) => void
   onLose?: (heroHp: number) => void
   onExit: () => void
 }
 
 export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: GameProps) {
   const game = useFishMafia(initial)
-  const { state, fx, busy, select, move, attack, cast, sell, buy, endTurn, restart, reachable, targetsFor } = game
+  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
@@ -58,7 +58,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   // restart overlay. The parent decides win -> reward, boss unlock, etc.
   const heroHp = state.units.find((u) => u.id === "hero")?.hp ?? 0
   useEffect(() => {
-    if (onWin && state.phase === Phase.Won) onWin(heroHp)
+    if (onWin && state.phase === Phase.Won) onWin(heroHp, state.fin)
     if (onLose && state.phase === Phase.Lost) onLose(heroHp)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, onWin, onLose])
@@ -220,16 +220,16 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
   /* ---------- card interactions ---------- */
   const onCardPointerDown = useCallback(
     (e: React.PointerEvent, card: CardInstance) => {
-      if (!playerTurn || card.def.cost > state.mana) return
+      if (!playerTurn || card.def.cost > state.coin) return
       beginDrag(DragKind.Card, e, { card })
     },
-    [beginDrag, playerTurn, state.mana],
+    [beginDrag, playerTurn, state.coin],
   )
 
   const onCardTap = useCallback(
     (card: CardInstance) => {
       // called via onClick fallback when not dragged
-      if (suppressClick.current || !playerTurn || card.def.cost > state.mana) return
+      if (suppressClick.current || !playerTurn || card.def.cost > state.coin) return
       if (card.def.target === CardTarget.Self) {
         cast(card.uid, {})
         setPendingCard(null)
@@ -238,7 +238,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
       setPendingCard((p) => (p?.uid === card.uid ? null : card))
       select(null)
     },
-    [cast, playerTurn, select, state.mana],
+    [cast, playerTurn, select, state.coin],
   )
 
   /* ---------- unit interactions ---------- */
@@ -291,9 +291,29 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
     [cast, move, pendingCard, playerTurn, state.selectedUnitId],
   )
 
-  /* ---------- bottom bar values ---------- */
-  const manaPct = (state.mana / state.maxMana) * 100
-  const canBuy = playerTurn && state.coin >= BUY_COST && state.hand.length < 8
+  /* ---------- cancel an armed card (right-click / Escape) ---------- */
+  const cancelPending = useCallback(() => {
+    setPendingCard(null)
+    setArrow(null)
+    select(null)
+  }, [select])
+
+  useEffect(() => {
+    if (!pendingCard) return
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault()
+      cancelPending()
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") cancelPending()
+    }
+    window.addEventListener("contextmenu", onContextMenu)
+    window.addEventListener("keydown", onKey)
+    return () => {
+      window.removeEventListener("contextmenu", onContextMenu)
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [pendingCard, cancelPending])
 
   return (
     <main className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
@@ -333,19 +353,9 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
 
       {/* bottom: hand + controls */}
       <div className="flex shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
-        {/* left cluster: mana + piles */}
+        {/* left cluster: coin register + piles */}
         <div className="flex items-center gap-3">
-          <div
-            className="relative flex h-16 w-16 items-center justify-center rounded-full"
-            style={{
-              background: `conic-gradient(var(--gold) ${manaPct}%, oklch(0.3 0.03 248) ${manaPct}%)`,
-            }}
-          >
-            <div className="flex h-[52px] w-[52px] flex-col items-center justify-center rounded-full bg-ocean-deep">
-              <span className="font-display text-xl font-bold leading-none text-gold">{state.mana}</span>
-              <span className="font-display text-[8px] uppercase tracking-widest text-muted-foreground">Mana</span>
-            </div>
-          </div>
+          <CoinRegister coin={state.coin} active={playerTurn} />
           <div className="hidden flex-col gap-1 sm:flex">
             <Pile icon={<Layers size={13} />} label="Draw" value={state.deck.length} />
             <Pile icon={<Trash2 size={13} />} label="Spent" value={state.discard.length} />
@@ -367,7 +377,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
               <GameCard
                 key={card.uid}
                 card={card}
-                playable={playerTurn && card.def.cost <= state.mana}
+                playable={playerTurn && card.def.cost <= state.coin}
                 // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
                 dragging={isDragged && !isUnitTargetDrag}
                 armed={pendingCard?.uid === card.uid || isUnitTargetDrag}
@@ -392,20 +402,6 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
           </button>
           <button
             type="button"
-            onClick={buy}
-            disabled={!canBuy}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider transition-colors",
-              canBuy
-                ? "border-gold/50 bg-gold/10 text-gold hover:bg-gold/20"
-                : "cursor-not-allowed border-white/10 text-muted-foreground/50",
-            )}
-          >
-            <ShoppingCart size={13} />
-            Buy Card · {BUY_COST}
-          </button>
-          <button
-            type="button"
             onClick={endTurn}
             disabled={!playerTurn}
             className={cn(
@@ -423,8 +419,13 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
 
       {/* click-to-cast hint */}
       {pendingCard && (
-        <div className="pointer-events-none fixed bottom-28 left-1/2 z-50 -translate-x-1/2 rounded-full border border-gold/40 bg-ocean-deep/90 px-4 py-1.5 font-display text-xs uppercase tracking-widest text-gold">
-          Pick a target for {pendingCard.def.name} · click to cancel
+        <div className="pointer-events-none fixed bottom-28 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-gold/40 bg-ocean-deep/90 px-4 py-1.5 font-display text-xs uppercase tracking-widest text-gold">
+          <span>Pick a target for {pendingCard.def.name}</span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <span aria-hidden>·</span>
+            <MousePointer2 size={12} className="-scale-x-100" aria-hidden />
+            right-click to cancel
+          </span>
         </div>
       )}
 

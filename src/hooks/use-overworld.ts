@@ -134,9 +134,20 @@ export function useOverworld() {
     [maps.length],
   )
 
-  /** Write hero HP back into the run after a won battle. */
-  const updateHp = useCallback((hp: number) => {
-    setState((s) => (s ? { ...s, hp: Math.max(1, Math.min(s.maxHp, hp)) } : s))
+  /**
+   * Write hero HP (and optionally the run-scoped Fin earned in battle) back
+   * into the run after a won battle.
+   */
+  const updateHp = useCallback((hp: number, fin?: number) => {
+    setState((s) =>
+      s
+        ? {
+            ...s,
+            hp: Math.max(1, Math.min(s.maxHp, hp)),
+            ...(typeof fin === "number" ? { fin } : {}),
+          }
+        : s,
+    )
   }, [])
 
   /** Boss node win with no reward pick (final boss): unlock / advance. */
@@ -208,6 +219,7 @@ export function useOverworld() {
         heroMaxHp: eff.maxHp,
         deck: eff.deck,
         enemies: enemiesForNode(eff),
+        fin: eff.fin,
       })
     },
     [state],

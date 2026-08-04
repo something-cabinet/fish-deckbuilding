@@ -473,6 +473,7 @@ export function createNewRun(seed?: number): OverworldState {
     hp: HERO_MAX_HP,
     maxHp: HERO_MAX_HP,
     gold: 0,
+    fin: 0,
     debt: START_DEBT,
     deck: [...STARTER_DECK],
     visited: [],
@@ -488,7 +489,8 @@ export function loadSave(): OverworldState | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as OverworldState
     if (!isValidSave(parsed)) return null
-    return parsed
+    // backfill fields added after this save version was written
+    return { ...parsed, fin: typeof parsed.fin === "number" ? parsed.fin : 0 }
   } catch {
     return null
   }

@@ -9,8 +9,7 @@ import { Team } from "@/lib/game/units"
 function fresh(): GameState {
   const s = createInitialState()
   s.hand = [{ uid: "c_h", def: CARD_LIBRARY.demand_letter }]
-  s.mana = 10
-  s.maxMana = 10
+  s.coin = 10
   return s
 }
 
@@ -30,12 +29,12 @@ describe("history: snapshot round-trip per action (AC-9)", () => {
       cardUid: "c_h",
       target,
     })
-    expect(after.mana).toBe(s.mana - 1)
+    expect(after.coin).toBe(s.coin - 1)
     expect(after.units.find((u) => u.id === enemy.id)!.hp).toBe(enemy.hp - 2)
 
     const undone = session.undo(after)
     expect(undone).toBeDefined()
-    expect(undone!.mana).toBe(s.mana)
+    expect(undone!.coin).toBe(s.coin)
     expect(undone!.hand.length).toBe(s.hand.length)
     expect(undone!.units.find((u) => u.id === enemy.id)!.hp).toBe(enemy.hp)
     expect(undone!.log.length).toBe(s.log.length)
@@ -60,15 +59,15 @@ describe("history: snapshot round-trip per action (AC-9)", () => {
     expect(hAfter.hasMoved).toBe(false)
   })
 
-  it("buy → undo restores coin and hand", () => {
+  it("sell → undo restores coin and hand", () => {
     const session = new GameSession()
     const s = fresh()
     s.coin = 10
     const handBefore = s.hand.length
 
-    const { state: after } = session.execute(s, { kind: "buy" })
-    expect(after.coin).toBe(7)
-    expect(after.hand.length).toBe(handBefore + 1)
+    const { state: after } = session.execute(s, { kind: "sell", cardUid: "c_h" })
+    expect(after.coin).toBeGreaterThan(10)
+    expect(after.hand.length).toBe(handBefore - 1)
 
     const undone = session.undo(after)!
     expect(undone.coin).toBe(10)

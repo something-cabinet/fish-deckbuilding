@@ -73,6 +73,12 @@ export interface OverworldState {
   maxHp: number
   gold: number
   /**
+   * persistent run currency earned by defeating enemies in battle (spec D11).
+   * Carried into each battle and read back out on victory; reserved for a
+   * future card-upgrade shop.
+   */
+  fin: number
+  /**
    * outstanding debt to the syndicate. Interest accrues every time a node
    * is cleared; if it reaches the foreclosure cap the run is lost. Gold's
    * primary sink is paying this down (shops / tribute).
