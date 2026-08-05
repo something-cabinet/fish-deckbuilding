@@ -39,7 +39,7 @@ const _schemaEffectMatchesTsUnion: _Equal<CardEffect, InferredCardEffect> = true
 /* CardDef schema                                                      */
 /*                                                                     */
 /* CardType / CardTarget / FxKind are string-valued enums whose values */
-/* must equal the strings in pack-01-starter.json; nativeEnum keeps    */
+/* must equal the strings in card-database.json; nativeEnum keeps    */
 /* the schema inferred type identical to the TS enum (AC-16).          */
 /* ------------------------------------------------------------------ */
 
