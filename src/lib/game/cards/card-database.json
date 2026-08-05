@@ -1,0 +1,47 @@
+{
+  "cards": [
+    {
+      "id": "custom_disposal_msg8wdvf",
+      "name": "Disposal",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "desc": "Deal 10 damage to an enemy.",
+      "icon": "Skull",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 10
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    },
+    {
+      "id": "custom_absorb_msg8xedc",
+      "name": "Absorb",
+      "type": "attack",
+      "cost": 2,
+      "value": 1,
+      "target": "enemy",
+      "desc": "Deal 1 damage and heal 1 health.",
+      "icon": "Droplet",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "heal",
+          "amount": 1,
+          "target": "caster"
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    }
+  ]
+}

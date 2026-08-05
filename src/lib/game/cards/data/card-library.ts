@@ -2,6 +2,7 @@ import { nid } from "../../shared"
 import { CardPackSchema } from "./schema.helper"
 import type { CardDef, CardInstance } from "../models"
 import pack01 from "../pack-01-starter.json"
+import userCards from "../card-database.json"
 
 /**
  * Card definitions ship as data-driven JSON packs (FR-7/FR-13, NFR-6/NFR-7).
@@ -9,7 +10,7 @@ import pack01 from "../pack-01-starter.json"
  * malformed pack throws here rather than silently corrupting the game.
  * The pack order defines CARD_LIBRARY insertion order.
  */
-const cardPacks = [pack01]
+const cardPacks = [pack01, userCards]
 
 const parsedCardPacks = cardPacks.map((pack) => CardPackSchema.parse(pack))
 

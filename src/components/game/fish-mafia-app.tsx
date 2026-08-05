@@ -198,7 +198,11 @@ export function FishMafiaApp() {
         onBack={() => setScreen("library")}
         onSave={(def) => {
           setCustomCards((prev) => [...prev, def])
-          setScreen("library")
+          fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
         }}
       />
     )

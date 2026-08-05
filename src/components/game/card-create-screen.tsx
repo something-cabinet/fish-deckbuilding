@@ -3,9 +3,11 @@
 import { useState } from "react"
 import { ArrowLeft, Check, PlusCircle } from "lucide-react"
 import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
+import { EffectEditor, type EffectRow } from "./effect-editor"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -21,20 +23,22 @@ const TARGETS: { id: CardTarget; label: string }[] = [
   { id: CardTarget.Self, label: "Self" },
   { id: CardTarget.EmptyTile, label: "Empty tile" },
 ]
-const FX_OPTIONS: FxKind[] = [
-  FxKind.Letter,
-  FxKind.Phone,
-  FxKind.Gavel,
-  FxKind.Coin,
-  FxKind.Draw,
-  FxKind.Heal,
-  FxKind.Shock,
-  FxKind.Summon,
-]
-
 function slugify(name: string) {
   const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
   return `custom_${base || "card"}_${Date.now().toString(36)}`
+}
+
+function toCardEffects(rows: EffectRow[]): CardEffect[] {
+  return rows.map((r) => {
+    switch (r.kind) {
+      case "damage": return { kind: "damage", amount: r.amount }
+      case "heal": return { kind: "heal", amount: r.amount, target: r.healTarget ?? "caster" }
+      case "drawCards": return { kind: "drawCards", amount: r.amount }
+      case "gainCoin": return { kind: "gainCoin", amount: r.amount }
+      case "buffAtk": return { kind: "buffAtk", amount: r.amount }
+      case "summon": return { kind: "summon", unit: "goon" }
+    }
+  })
 }
 
 export function CardCreateScreen({ onBack, onSave }: Props) {
@@ -45,7 +49,9 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
   const [value, setValue] = useState(1)
   const [desc, setDesc] = useState("")
   const [icon, setIcon] = useState("Swords")
-  const [fx, setFx] = useState<FxKind>(FxKind.Shock)
+  const [effects, setEffects] = useState<EffectRow[]>([])
+
+  const cardEffects = toCardEffects(effects)
 
   const draft: CardDef = {
     id: "preview",
@@ -56,9 +62,8 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
     target,
     desc,
     icon,
-    fx,
-    // custom cards are display-only (D3) — no resolvable effects yet
-    effects: [],
+    fx: FxKind.Shock,
+    effects: cardEffects,
     log: "",
     logTone: "neutral",
   }
@@ -145,15 +150,9 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
             />
           </Field>
 
-          {/* fx */}
-          <Field label="Resolve Effect">
-            <div className="flex flex-wrap gap-2">
-              {FX_OPTIONS.map((f) => (
-                <Chip key={f} active={fx === f} onClick={() => setFx(f)}>
-                  {f}
-                </Chip>
-              ))}
-            </div>
+          {/* effects */}
+          <Field label="Effects">
+            <EffectEditor effects={effects} onChange={setEffects} />
           </Field>
 
           {/* icon */}

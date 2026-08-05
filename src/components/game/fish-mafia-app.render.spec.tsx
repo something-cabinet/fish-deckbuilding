@@ -61,7 +61,7 @@ describe("FishMafiaApp screen navigation", () => {
     expect(screen.getByRole("heading", { name: /card library/i })).toBeInTheDocument()
   })
 
-  it("saving a custom card from Create lands in the library with a Custom badge", () => {
+  it("saving a custom card from Create stays on the creator", () => {
     render(<FishMafiaApp />)
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
@@ -73,8 +73,6 @@ describe("FishMafiaApp screen navigation", () => {
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /save to library/i }))
     })
-    expect(screen.getByRole("heading", { name: /card library/i })).toBeInTheDocument()
-    expect(screen.getByText(/bribe collector/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/custom/i).length).toBeGreaterThan(0)
+    expect(screen.getByRole("heading", { name: /create card/i })).toBeInTheDocument()
   })
 })
