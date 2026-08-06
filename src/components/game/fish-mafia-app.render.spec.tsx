@@ -51,6 +51,9 @@ describe("FishMafiaApp screen navigation", () => {
   it("Create opens the card creator, Back returns to the library", () => {
     render(<FishMafiaApp />)
     act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /library/i }))
+    })
+    act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
     })
     expect(screen.getByText(/editor/i)).toBeInTheDocument()
@@ -63,6 +66,9 @@ describe("FishMafiaApp screen navigation", () => {
 
   it("saving a custom card from Create stays on the creator", () => {
     render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /library/i }))
+    })
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
     })

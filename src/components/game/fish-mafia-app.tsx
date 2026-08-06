@@ -177,7 +177,6 @@ export function FishMafiaApp() {
         onStart={startNewRun}
         onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
         onOpenLibrary={() => setScreen("library")}
-        onOpenCreate={() => setScreen("create")}
       />
     )
   }
