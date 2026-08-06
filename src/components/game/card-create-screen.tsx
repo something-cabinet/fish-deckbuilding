@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils"
 interface Props {
   onBack: () => void
   onSave: (def: CardDef) => void
+  editCard?: CardDef
+  onUpdate?: (def: CardDef) => void
 }
 
 const TYPES: CardType[] = [CardType.Attack, CardType.Skill, CardType.Summon]
@@ -28,6 +30,20 @@ function slugify(name: string) {
   return `custom_${base || "card"}_${Date.now().toString(36)}`
 }
 
+function fromCardEffects(effects: CardEffect[]): EffectRow[] {
+  return effects.map((e) => {
+    switch (e.kind) {
+      case "damage": return { kind: "damage", amount: e.amount }
+      case "heal": return { kind: "heal", amount: e.amount, healTarget: e.target }
+      case "drawCards": return { kind: "drawCards", amount: e.amount }
+      case "gainCoin": return { kind: "gainCoin", amount: e.amount }
+      case "buffAtk": return { kind: "buffAtk", amount: e.amount }
+      case "summon": return { kind: "summon", amount: 0 }
+      case "custom": return { kind: "damage", amount: 0 }
+    }
+  })
+}
+
 function toCardEffects(rows: EffectRow[]): CardEffect[] {
   return rows.map((r) => {
     switch (r.kind) {
@@ -41,15 +57,15 @@ function toCardEffects(rows: EffectRow[]): CardEffect[] {
   })
 }
 
-export function CardCreateScreen({ onBack, onSave }: Props) {
-  const [name, setName] = useState("")
-  const [type, setType] = useState<CardType>(CardType.Attack)
-  const [target, setTarget] = useState<CardTarget>(CardTarget.Enemy)
-  const [cost, setCost] = useState(1)
-  const [value, setValue] = useState(1)
-  const [desc, setDesc] = useState("")
-  const [icon, setIcon] = useState("Swords")
-  const [effects, setEffects] = useState<EffectRow[]>([])
+export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) {
+  const [name, setName] = useState(editCard?.name ?? "")
+  const [type, setType] = useState<CardType>(editCard?.type ?? CardType.Attack)
+  const [target, setTarget] = useState<CardTarget>(editCard?.target ?? CardTarget.Enemy)
+  const [cost, setCost] = useState(editCard?.cost ?? 1)
+  const [value, setValue] = useState(editCard?.value ?? 1)
+  const [desc, setDesc] = useState(editCard?.desc ?? "")
+  const [icon, setIcon] = useState(editCard?.icon ?? "Swords")
+  const [effects, setEffects] = useState<EffectRow[]>(editCard ? fromCardEffects(editCard.effects) : [])
 
   const cardEffects = toCardEffects(effects)
 
@@ -71,7 +87,14 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
 
   function handleSave() {
     if (!canSave) return
-    onSave({ ...draft, id: slugify(name) })
+    const card: CardDef = editCard
+      ? { ...draft, id: editCard.id }
+      : { ...draft, id: slugify(name) }
+    if (editCard && onUpdate) {
+      onUpdate(card)
+    } else {
+      onSave(card)
+    }
   }
 
   return (
@@ -88,7 +111,7 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
         </button>
         <h1 className="flex items-center gap-1.5 font-display text-lg font-bold uppercase tracking-widest text-foreground">
           <PlusCircle size={16} className="text-gold" />
-          Card <span className="text-gold">Editor</span>
+          {editCard ? "Edit" : "Card"} <span className="text-gold">Editor</span>
         </h1>
       </header>
 
@@ -198,7 +221,7 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
             )}
           >
             <Check size={16} />
-            Save
+            {editCard ? "Update" : "Save"}
           </button>
           {!canSave && (
             <p className="text-center text-[10px] text-muted-foreground">Give your card a name to save it.</p>

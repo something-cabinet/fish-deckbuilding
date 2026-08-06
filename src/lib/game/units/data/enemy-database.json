@@ -1,0 +1,150 @@
+{
+  "enemies": [
+    {
+      "id": "thug",
+      "name": "Thug",
+      "kind": 2,
+      "hp": 6,
+      "atk": 2,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 5,
+      "isMinion": false,
+      "icon": "thug",
+      "deck": [
+        {
+          "id": "demand_letter",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "enforcer",
+      "name": "Enforcer",
+      "kind": 3,
+      "hp": 6,
+      "atk": 3,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 8,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "collection_call",
+          "count": 2
+        },
+        {
+          "id": "foreclose",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "boss_thug",
+      "name": "Barnacle Brute",
+      "kind": 4,
+      "hp": 18,
+      "atk": 4,
+      "move": 1,
+      "range": 1,
+      "goldDrop": 20,
+      "isMinion": false,
+      "icon": "boss",
+      "deck": [
+        {
+          "id": "foreclose",
+          "count": 2
+        },
+        {
+          "id": "demand_letter",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "midwaters_thug",
+      "name": "Thug",
+      "kind": 2,
+      "hp": 7,
+      "atk": 3,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 6,
+      "isMinion": false,
+      "icon": "thug",
+      "deck": [
+        {
+          "id": "demand_letter",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "depths_thug",
+      "name": "Thug",
+      "kind": 2,
+      "hp": 10,
+      "atk": 4,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 8,
+      "isMinion": false,
+      "icon": "thug",
+      "deck": [
+        {
+          "id": "demand_letter",
+          "count": 2
+        },
+        {
+          "id": "kneecap",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "collection_shark",
+      "name": "The Collection Shark",
+      "kind": 4,
+      "hp": 26,
+      "atk": 5,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 30,
+      "isMinion": false,
+      "icon": "boss",
+      "deck": [
+        {
+          "id": "foreclose",
+          "count": 3
+        },
+        {
+          "id": "loan_shark",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "forecloser",
+      "name": "The Forecloser",
+      "kind": 4,
+      "hp": 34,
+      "atk": 6,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 40,
+      "isMinion": false,
+      "icon": "boss",
+      "deck": [
+        {
+          "id": "foreclose",
+          "count": 3
+        },
+        {
+          "id": "loan_shark",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}

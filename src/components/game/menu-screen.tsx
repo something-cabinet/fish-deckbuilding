@@ -75,7 +75,7 @@ export function MenuScreen({
               className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gold/40 bg-ocean-deep/50 px-4 py-3 font-display text-sm font-bold uppercase tracking-wider text-gold backdrop-blur-sm transition-colors hover:bg-gold/15"
             >
               <Library size={16} />
-              Library
+              Design
             </button>
           </div>
           <button

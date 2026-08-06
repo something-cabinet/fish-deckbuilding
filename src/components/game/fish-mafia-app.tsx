@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react"
 import type { CardDef, GameState } from "@/lib/game"
+import type { EnemyDef } from "@/lib/game/units"
 import type { MapNode } from "@/lib/game/overworld-types"
 import type { EventChoice } from "@/lib/game/overworld-data"
+import enemyDb from "@/lib/game/units/data/enemy-database.json"
 import { CardCreateScreen } from "./card-create-screen"
 import { CardLibraryScreen } from "./card-library-screen"
+import { EnemyCreateScreen } from "./enemy-create-screen"
 import { EventScreen } from "./event-screen"
 import { FishMafiaGame } from "./fish-mafia-game"
 import { MenuScreen } from "./menu-screen"
@@ -28,7 +31,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   visualEffects: true,
 }
 
-type Screen = "menu" | "overworld" | "battle" | "library" | "create"
+type Screen = "menu" | "overworld" | "battle" | "library" | "create" | "create-enemy"
 /** an overworld node resolved on the map itself, via an overlay */
 type NodeAction = "shop" | "event" | null
 
@@ -41,6 +44,10 @@ export function FishMafiaApp() {
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
   // custom cards authored in the card creator, surfaced in the library
   const [customCards, setCustomCards] = useState<CardDef[]>([])
+  const [editingCard, setEditingCard] = useState<CardDef | null>(null)
+  // enemies from the database, manage in-app for the designer
+  const [enemies, setEnemies] = useState<EnemyDef[]>(() => (enemyDb as { enemies: EnemyDef[] }).enemies ?? [])
+  const [editingEnemy, setEditingEnemy] = useState<EnemyDef | null>(null)
   // the battle being played right now (built from the overworld run)
   const [battle, setBattle] = useState<GameState | null>(null)
   const [battleIsBoss, setBattleIsBoss] = useState(false)
@@ -185,8 +192,24 @@ export function FishMafiaApp() {
     return (
       <CardLibraryScreen
         customCards={customCards}
+        enemies={enemies}
         onBack={() => setScreen("menu")}
         onCreate={() => setScreen("create")}
+        onEdit={(card) => {
+          setEditingCard(card)
+          setScreen("create")
+        }}
+        onEnemyCreate={() => setScreen("create-enemy")}
+        onEnemyEdit={(enemy) => {
+          setEditingEnemy(enemy)
+          setScreen("create-enemy")
+        }}
+        onEnemyDelete={(id) => {
+          setEnemies((prev) => prev.filter((e) => e.id !== id))
+          fetch(`/api/enemies?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
       />
     )
   }
@@ -194,7 +217,11 @@ export function FishMafiaApp() {
   if (screen === "create") {
     return (
       <CardCreateScreen
-        onBack={() => setScreen("library")}
+        editCard={editingCard}
+        onBack={() => {
+          setEditingCard(null)
+          setScreen("library")
+        }}
         onSave={(def) => {
           setCustomCards((prev) => [...prev, def])
           fetch("/api/cards", {
@@ -202,6 +229,44 @@ export function FishMafiaApp() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(def),
           }).catch(() => {})
+        }}
+        onUpdate={(def) => {
+          setCustomCards((prev) => prev.map((c) => (c.id === def.id ? def : c)))
+          fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+          setEditingCard(null)
+        }}
+      />
+    )
+  }
+
+  if (screen === "create-enemy") {
+    return (
+      <EnemyCreateScreen
+        editEnemy={editingEnemy}
+        onBack={() => {
+          setEditingEnemy(null)
+          setScreen("library")
+        }}
+        onSave={(def) => {
+          setEnemies((prev) => [...prev, def])
+          fetch("/api/enemies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+        }}
+        onUpdate={(def) => {
+          setEnemies((prev) => prev.map((e) => (e.id === def.id ? def : e)))
+          fetch("/api/enemies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+          setEditingEnemy(def)
         }}
       />
     )

@@ -20,7 +20,7 @@ describe("MenuScreen", () => {
     )
     expect(screen.getByRole("heading", { level: 1, name: /fish mafia/i })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /library/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /design/i })).toBeInTheDocument()
   })
 
   it("Start / Library fire their callbacks", () => {
@@ -30,7 +30,7 @@ describe("MenuScreen", () => {
       <MenuScreen settings={settings} onChangeSettings={() => {}} onStart={onStart} onOpenLibrary={onOpenLibrary} />,
     )
     act(() => fireEvent.click(screen.getByRole("button", { name: /start/i })))
-    act(() => fireEvent.click(screen.getByRole("button", { name: /library/i })))
+    act(() => fireEvent.click(screen.getByRole("button", { name: /design/i })))
     expect(onStart).toHaveBeenCalledTimes(1)
     expect(onOpenLibrary).toHaveBeenCalledTimes(1)
   })
