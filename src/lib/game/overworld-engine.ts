@@ -1,6 +1,12 @@
 import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
 import { ENEMY_LIBRARY, HERO_DEF, UnitKind, type EnemyDef, type EnemySpawn } from "@/lib/game/units"
-import { STAGE_LIBRARY, pickStage, stageToSpawns, type StageDef } from "@/lib/game/stages"
+import {
+  STAGE_LIBRARY,
+  pickStage,
+  stageToSpawns,
+  type StageDef,
+  type StageType,
+} from "@/lib/game/stages"
 import type { Pos } from "@/lib/game/battle/models"
 import {
   EVENTS,
@@ -415,19 +421,46 @@ export function enemiesForNode(state: OverworldState): EnemySpawn[] {
   return battleEnemiesForZone(state.zoneIndex, false)
 }
 
+/** Which stage pool a node draws from. */
+export function stageTypeForNode(type: NodeType): StageType {
+  if (type === "boss") return "boss"
+  if (type === "elite") return "elite"
+  return "normal"
+}
+
+/** A chosen stage, plus whether it needs elite scaling applied. */
+export interface StagePick {
+  stage: StageDef
+  /** true only when a normal stage is standing in for a missing elite one */
+  scaled: boolean
+}
+
 /**
  * The authored stage this node fights on, or null when the zone has no stage
- * of the required kind. Seeded from the run seed plus the node ref, so
- * re-entering a node fights the same stage instead of rerolling.
+ * for it. Seeded from the run seed plus the node ref, so re-entering a node
+ * fights the same stage instead of rerolling.
+ *
+ * An elite node prefers an authored elite stage and uses it exactly as built.
+ * With none authored it borrows a normal stage and scales it, which is what
+ * elites did before stages existed.
  */
 export function stageForNode(
   state: OverworldState,
   stages: StageDef[] = STAGE_LIBRARY,
-): StageDef | null {
+): StagePick | null {
   const zone = ZONES[state.zoneIndex]
   if (!zone) return null
   const seed = state.seed + state.zoneIndex * 101 + hashStr(state.nodeId)
-  return pickStage(stages, zone.id, nodeTypeAt(state) === "boss", seed)
+  const want = stageTypeForNode(nodeTypeAt(state))
+
+  const exact = pickStage(stages, zone.id, want, seed)
+  if (exact) return { stage: exact, scaled: false }
+
+  if (want === "elite") {
+    const standIn = pickStage(stages, zone.id, "normal", seed)
+    if (standIn) return { stage: standIn, scaled: true }
+  }
+  return null
 }
 
 /** Everything a battle needs from the overworld: lineup plus board geometry. */
@@ -447,11 +480,12 @@ export function battleSetupForNode(
   stages: StageDef[] = STAGE_LIBRARY,
   enemyDefs: EnemyDef[] = ENEMY_LIBRARY,
 ): BattleSetup {
-  const stage = stageForNode(state, stages)
-  if (!stage) return { enemies: enemiesForNode(state) }
+  const pick = stageForNode(state, stages)
+  if (!pick) return { enemies: enemiesForNode(state) }
 
+  const { stage, scaled } = pick
   return {
-    enemies: stageToSpawns(stage, enemyDefs, { elite: nodeTypeAt(state) === "elite" }),
+    enemies: stageToSpawns(stage, enemyDefs, { elite: scaled }),
     cols: stage.cols,
     rows: stage.rows,
     heroStart: stage.heroStart,

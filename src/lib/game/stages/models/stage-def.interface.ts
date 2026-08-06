@@ -10,9 +10,16 @@ export interface StagePlacement {
 }
 
 /**
+ * Which kind of node draws a stage. Each zone keeps three separate pools, so a
+ * boss node never rolls a standard lineup and an elite never rolls a boss.
+ */
+export type StageType = "normal" | "elite" | "boss"
+
+export const STAGE_TYPES: StageType[] = ["normal", "elite", "boss"]
+
+/**
  * An authored battle layout: a grid of a given size with enemies placed on it.
- * Battle nodes draw a stage at random from their zone's pool — `isBossStage`
- * splits that pool, so boss nodes never roll a standard lineup and vice versa.
+ * A battle node draws at random from the pool matching its zone and type.
  */
 export interface StageDef {
   id: string
@@ -20,7 +27,7 @@ export interface StageDef {
   zone: ZoneId
   cols: number
   rows: number
-  isBossStage: boolean
+  type: StageType
   /** where the hero spawns; kept on the stage so small grids stay valid */
   heroStart: Pos
   placements: StagePlacement[]

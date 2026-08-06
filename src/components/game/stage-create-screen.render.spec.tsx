@@ -98,16 +98,45 @@ describe("StageCreateScreen", () => {
     expect(def.placements).toEqual([])
   })
 
-  it("saves the zone and boss flag it was created with", () => {
+  it("saves the zone and stage type it was created with", () => {
     const onSave = vi.fn()
     renderScreen({ initialZone: "depths", onSave })
     act(() => fireEvent.change(screen.getByPlaceholderText(/reef ambush/i), { target: { value: "Deep Ambush" } }))
-    act(() => fireEvent.click(screen.getByRole("button", { name: /^boss$/i })))
-    act(() => fireEvent.click(screen.getByRole("button", { name: /^save$/i })))
+    act(() => fireEvent.click(tool("Boss")))
+    act(() => fireEvent.click(tool(/^save$/i)))
 
     const def = onSave.mock.calls[0][0]
     expect(def.zone).toBe("depths")
-    expect(def.isBossStage).toBe(true)
+    expect(def.type).toBe("boss")
     expect(def.id).toMatch(/^stage_deep_ambush_/)
+  })
+
+  it("offers all three pools and defaults to normal", () => {
+    const onSave = vi.fn()
+    renderScreen({ onSave })
+    expect(tool("Normal")).toHaveAttribute("aria-pressed", "true")
+    expect(tool("Elite")).toHaveAttribute("aria-pressed", "false")
+    expect(tool("Boss")).toHaveAttribute("aria-pressed", "false")
+
+    act(() => fireEvent.click(tool("Elite")))
+    act(() => fireEvent.change(screen.getByPlaceholderText(/reef ambush/i), { target: { value: "Ambush" } }))
+    act(() => fireEvent.click(tool(/^save$/i)))
+    expect(onSave.mock.calls[0][0].type).toBe("elite")
+  })
+
+  it("opens an existing stage on its own type", () => {
+    renderScreen({
+      editStage: {
+        id: "s1",
+        name: "Elite Reef",
+        zone: "shallows",
+        cols: 9,
+        rows: 5,
+        type: "elite",
+        heroStart: { x: 1, y: 2 },
+        placements: [],
+      },
+    })
+    expect(tool("Elite")).toHaveAttribute("aria-pressed", "true")
   })
 })

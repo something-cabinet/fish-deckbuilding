@@ -1,14 +1,17 @@
 import type { EnemyDef } from "../../units/models"
 import type { EnemySpawn } from "../../units/data/enemy-spawn.interface"
 import type { ZoneId } from "../../overworld-types"
-import type { StageDef } from "../models/stage-def.interface"
+import type { StageDef, StageType } from "../models/stage-def.interface"
 
-/** Multiplier applied to a standard stage when the node is an elite. */
+/**
+ * Multiplier applied to a *normal* stage standing in for a missing elite one.
+ * Authored elite stages are used as-is — their difficulty is the author's call.
+ */
 export const ELITE_SCALE = 1.6
 
 /** Stages available to a zone for a given kind of node. */
-export function stagesFor(stages: StageDef[], zone: ZoneId, isBoss: boolean): StageDef[] {
-  return stages.filter((s) => s.zone === zone && s.isBossStage === isBoss)
+export function stagesFor(stages: StageDef[], zone: ZoneId, type: StageType): StageDef[] {
+  return stages.filter((s) => s.zone === zone && s.type === type)
 }
 
 /**
@@ -19,10 +22,10 @@ export function stagesFor(stages: StageDef[], zone: ZoneId, isBoss: boolean): St
 export function pickStage(
   stages: StageDef[],
   zone: ZoneId,
-  isBoss: boolean,
+  type: StageType,
   seed: number,
 ): StageDef | null {
-  const pool = stagesFor(stages, zone, isBoss)
+  const pool = stagesFor(stages, zone, type)
   if (pool.length === 0) return null
   const idx = Math.abs(Math.trunc(seed)) % pool.length
   return pool[idx]

@@ -13,6 +13,7 @@ import {
   STAGE_MIN_ROWS,
   type StageDef,
   type StagePlacement,
+  type StageType,
 } from "@/lib/game/stages"
 import { StageGrid } from "./stage-grid"
 import { ZONE_SECTIONS } from "./stage-library-screen"
@@ -44,6 +45,12 @@ const SPRITE_PATH = "/sprites/"
 /** What a grid click does. "hero" moves the spawn, "erase" clears a tile. */
 type Tool = { kind: "enemy"; enemyId: string } | { kind: "hero" } | { kind: "erase" }
 
+const STAGE_TYPE_OPTIONS: { id: StageType; label: string; hint: string }[] = [
+  { id: "normal", label: "Normal", hint: "standard battle nodes" },
+  { id: "elite", label: "Elite", hint: "elite nodes, used as built" },
+  { id: "boss", label: "Boss", hint: "the zone's boss node" },
+]
+
 function slugify(name: string) {
   const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
   return `stage_${base || "stage"}_${Date.now().toString(36)}`
@@ -61,7 +68,7 @@ export function StageCreateScreen({
   const [zone, setZone] = useState<ZoneId>(editStage?.zone ?? initialZone ?? "shallows")
   const [cols, setCols] = useState(editStage?.cols ?? STAGE_DEFAULT_COLS)
   const [rows, setRows] = useState(editStage?.rows ?? STAGE_DEFAULT_ROWS)
-  const [isBossStage, setIsBossStage] = useState(editStage?.isBossStage ?? false)
+  const [type, setType] = useState<StageType>(editStage?.type ?? "normal")
   const [heroStart, setHeroStart] = useState(
     editStage?.heroStart ?? { x: 1, y: Math.floor(STAGE_DEFAULT_ROWS / 2) },
   )
@@ -76,7 +83,7 @@ export function StageCreateScreen({
     zone,
     cols,
     rows,
-    isBossStage,
+    type,
     heroStart,
     placements,
   }
@@ -152,14 +159,16 @@ export function StageCreateScreen({
                 ))}
               </div>
             </Field>
-            <Field label="Pool" hint="which battles draw this">
+            <Field
+              label="Type"
+              hint={STAGE_TYPE_OPTIONS.find((o) => o.id === type)?.hint}
+            >
               <div className="flex gap-1.5">
-                <Chip active={!isBossStage} onClick={() => setIsBossStage(false)}>
-                  Normal
-                </Chip>
-                <Chip active={isBossStage} onClick={() => setIsBossStage(true)}>
-                  Boss
-                </Chip>
+                {STAGE_TYPE_OPTIONS.map((o) => (
+                  <Chip key={o.id} active={type === o.id} onClick={() => setType(o.id)}>
+                    {o.label}
+                  </Chip>
+                ))}
               </div>
             </Field>
             <Field label="Width">
@@ -239,8 +248,7 @@ export function StageCreateScreen({
             <StageGrid stage={draft} enemies={enemies} />
           </div>
           <p className="text-center font-display text-[10px] uppercase tracking-wider text-muted-foreground">
-            {placements.length} {placements.length === 1 ? "enemy" : "enemies"}
-            {isBossStage && " · boss pool"}
+            {placements.length} {placements.length === 1 ? "enemy" : "enemies"} · {type} pool
           </p>
         </PreviewRail>
       </div>

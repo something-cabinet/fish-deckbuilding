@@ -2,21 +2,16 @@
   "stages": [
     {
       "id": "stage_tripple_enforcer_mshy0c3v",
-      "name": "Tripple Enforcer",
+      "name": "Double Enforcer",
       "zone": "shallows",
       "cols": 9,
       "rows": 5,
-      "isBossStage": false,
+      "type": "normal",
       "heroStart": {
         "x": 1,
         "y": 2
       },
       "placements": [
-        {
-          "enemyId": "enforcer",
-          "x": 6,
-          "y": 2
-        },
         {
           "enemyId": "enforcer",
           "x": 7,
@@ -35,7 +30,7 @@
       "zone": "shallows",
       "cols": 9,
       "rows": 5,
-      "isBossStage": false,
+      "type": "normal",
       "heroStart": {
         "x": 1,
         "y": 2
@@ -59,7 +54,7 @@
       "zone": "shallows",
       "cols": 9,
       "rows": 5,
-      "isBossStage": true,
+      "type": "boss",
       "heroStart": {
         "x": 1,
         "y": 2
@@ -88,6 +83,45 @@
         {
           "enemyId": "thug",
           "x": 7,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_elito_mshyw397",
+      "name": "Elito",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 2
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 3
+        },
+        {
+          "enemyId": "thug",
+          "x": 4,
+          "y": 0
+        },
+        {
+          "enemyId": "thug",
+          "x": 4,
           "y": 4
         }
       ]

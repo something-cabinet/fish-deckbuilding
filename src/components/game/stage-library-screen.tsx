@@ -1,8 +1,8 @@
 "use client"
 
-import { Crown, Pencil, Plus, ScrollText, Trash2 } from "lucide-react"
+import { Crown, Pencil, Plus, ScrollText, Star, Trash2 } from "lucide-react"
 import type { EnemyDef } from "@/lib/game/units"
-import type { StageDef } from "@/lib/game/stages"
+import { STAGE_TYPES, type StageDef, type StageType } from "@/lib/game/stages"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import { StageGrid } from "./stage-grid"
 import { EmptyState, TileAction } from "./design-ui"
@@ -23,6 +23,13 @@ export const ZONE_SECTIONS: { id: ZoneId; name: string; tagline: string }[] = [
   { id: "depths", name: "The Depths", tagline: "Zone 3" },
 ]
 
+/** Corner badge marking which pool a stage belongs to; normal needs none. */
+const TYPE_BADGE: Record<StageType, { label: string; icon: React.ElementType; className: string } | null> = {
+  normal: null,
+  elite: { label: "Elite", icon: Star, className: "border-teal/50 text-teal" },
+  boss: { label: "Boss", icon: Crown, className: "border-gold/40 text-gold" },
+}
+
 export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete }: Props) {
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
@@ -34,7 +41,9 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
 
       {ZONE_SECTIONS.map((zone) => {
         const zoneStages = stages.filter((s) => s.zone === zone.id)
-        const bossCount = zoneStages.filter((s) => s.isBossStage).length
+        const byType = STAGE_TYPES.map(
+          (t) => `${zoneStages.filter((s) => s.type === t).length} ${t}`,
+        ).join(" · ")
 
         return (
           <section
@@ -46,8 +55,7 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
                 {zone.name}
               </h2>
               <span className="font-display text-[10px] uppercase tracking-wider text-muted-foreground">
-                {zone.tagline} · {zoneStages.length} {zoneStages.length === 1 ? "stage" : "stages"}
-                {zoneStages.length > 0 && ` · ${bossCount} boss`}
+                {zone.tagline} · {zoneStages.length > 0 ? byType : "0 stages"}
               </span>
               <button
                 type="button"
@@ -65,14 +73,20 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
               </p>
             ) : (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
-                {zoneStages.map((stage) => (
+                {zoneStages.map((stage) => {
+                  const badge = TYPE_BADGE[stage.type]
+                  const BadgeIcon = badge?.icon
+                  return (
                   <div key={stage.id} className="flex flex-col gap-1.5">
                     <div className="relative">
                       <StageGrid stage={stage} enemies={enemies} />
-                      {stage.isBossStage && (
-                        <span className="absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-gold shadow">
-                          <Crown size={9} />
-                          Boss
+                      {badge && BadgeIcon && (
+                        <span className={cn(
+                          "absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border bg-ocean-deep px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider shadow",
+                          badge.className,
+                        )}>
+                          <BadgeIcon size={9} />
+                          {badge.label}
                         </span>
                       )}
                     </div>
@@ -99,7 +113,8 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
                       </TileAction>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </section>

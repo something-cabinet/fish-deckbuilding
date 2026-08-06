@@ -20,19 +20,34 @@ export const StagePlacementSchema = z.object({
   y: z.number().int().min(0),
 })
 
+export const StageTypeSchema = z.enum(["normal", "elite", "boss"])
+
 export const StageDefSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   zone: ZoneIdSchema,
   cols: z.number().int().min(STAGE_MIN_COLS).max(STAGE_MAX_COLS),
   rows: z.number().int().min(STAGE_MIN_ROWS).max(STAGE_MAX_ROWS),
-  isBossStage: z.boolean(),
+  type: StageTypeSchema,
   heroStart: PosSchema,
   placements: z.array(StagePlacementSchema),
 })
 
+/**
+ * Reading is lenient about stages authored before `type` existed: a row with
+ * the old `isBossStage` flag is normalised on the way in. Writes always go
+ * through StageDefSchema, so the file converges on `type` as stages are saved.
+ */
+const withLegacyType = z.preprocess((raw) => {
+  if (raw && typeof raw === "object" && !("type" in raw) && "isBossStage" in raw) {
+    const { isBossStage, ...rest } = raw as Record<string, unknown>
+    return { ...rest, type: isBossStage ? "boss" : "normal" }
+  }
+  return raw
+}, StageDefSchema)
+
 export const StagePackSchema = z.object({
-  stages: z.array(StageDefSchema),
+  stages: z.array(withLegacyType),
 })
 
 export type InferredStageDef = z.infer<typeof StageDefSchema>
