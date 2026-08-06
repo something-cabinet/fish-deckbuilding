@@ -11,10 +11,7 @@
       "icon": "Mail",
       "fx": "letter",
       "effects": [
-        {
-          "kind": "damage",
-          "amount": 2
-        }
+        { "kind": "damage", "amount": 2 }
       ],
       "log": "Demand Letter hits {target} for 2.",
       "logTone": "good"
@@ -30,10 +27,7 @@
       "icon": "PhoneCall",
       "fx": "phone",
       "effects": [
-        {
-          "kind": "damage",
-          "amount": 3
-        }
+        { "kind": "damage", "amount": 3 }
       ],
       "log": "Collection Call rattles {target} for 3.",
       "logTone": "good"
@@ -49,10 +43,7 @@
       "icon": "FileX2",
       "fx": "gavel",
       "effects": [
-        {
-          "kind": "damage",
-          "amount": 6
-        }
+        { "kind": "damage", "amount": 6 }
       ],
       "log": "Foreclose slams {target} for 6!",
       "logTone": "good"
@@ -68,14 +59,8 @@
       "icon": "Hammer",
       "fx": "shock",
       "effects": [
-        {
-          "kind": "damage",
-          "amount": 2
-        },
-        {
-          "kind": "buffAtk",
-          "amount": -1
-        }
+        { "kind": "damage", "amount": 2 },
+        { "kind": "buffAtk", "amount": -1 }
       ],
       "log": "Kneecap hits {target} for 2 and weakens it.",
       "logTone": "good"
@@ -91,10 +76,7 @@
       "icon": "Coins",
       "fx": "coin",
       "effects": [
-        {
-          "kind": "gainCoin",
-          "amount": 3
-        }
+        { "kind": "gainCoin", "amount": 3 }
       ],
       "log": "Cash Flow launders 3 coin.",
       "logTone": "gold"
@@ -110,10 +92,7 @@
       "icon": "TrendingUp",
       "fx": "draw",
       "effects": [
-        {
-          "kind": "drawCards",
-          "amount": 2
-        }
+        { "kind": "drawCards", "amount": 2 }
       ],
       "log": "Market Rate draws 2 cards.",
       "logTone": "neutral"
@@ -129,15 +108,8 @@
       "icon": "Skull",
       "fx": "shock",
       "effects": [
-        {
-          "kind": "damage",
-          "amount": 4
-        },
-        {
-          "kind": "heal",
-          "amount": 2,
-          "target": "caster"
-        }
+        { "kind": "damage", "amount": 4 },
+        { "kind": "heal", "amount": 2, "target": "caster" }
       ],
       "log": "Loan Shark drains {target} for 4, heals Guppy 2.",
       "logTone": "good"
@@ -153,11 +125,7 @@
       "icon": "HeartPulse",
       "fx": "heal",
       "effects": [
-        {
-          "kind": "heal",
-          "amount": 5,
-          "target": "cast-target"
-        }
+        { "kind": "heal", "amount": 5, "target": "cast-target" }
       ],
       "log": "Hush Money patches up {target} for 5.",
       "logTone": "good"
@@ -173,10 +141,7 @@
       "icon": "Fish",
       "fx": "summon",
       "effects": [
-        {
-          "kind": "summon",
-          "unit": "goon"
-        }
+        { "kind": "summon", "unit": "goon" }
       ],
       "log": "Hired Muscle joins at {tile}.",
       "logTone": "good"
@@ -192,13 +157,43 @@
       "icon": "Banknote",
       "fx": "coin",
       "effects": [
-        {
-          "kind": "gainCoin",
-          "amount": 2
-        }
+        { "kind": "gainCoin", "amount": 2 }
       ],
       "log": "Shakedown nets 2 coin.",
       "logTone": "gold"
+    },
+    {
+      "id": "custom_disposal_msg8wdvf",
+      "name": "Disposal",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "desc": "Deal 10 damage to an enemy.",
+      "icon": "Skull",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 10 }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    },
+    {
+      "id": "custom_absorb_msg8xedc",
+      "name": "Absorb",
+      "type": "attack",
+      "cost": 2,
+      "value": 1,
+      "target": "enemy",
+      "desc": "Deal 1 damage and heal 1 health.",
+      "icon": "Droplet",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 1 },
+        { "kind": "heal", "amount": 1, "target": "caster" }
+      ],
+      "log": "",
+      "logTone": "neutral"
     }
   ]
 }

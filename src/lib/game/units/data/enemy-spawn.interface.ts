@@ -8,4 +8,6 @@ export interface EnemySpawn {
   hp: number
   atk: number
   move: number
+  /** attack range from the enemy template; defaults to 1 (melee) */
+  range?: number
 }

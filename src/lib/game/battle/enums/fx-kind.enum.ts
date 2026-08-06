@@ -1,5 +1,5 @@
 /**
- * Visual effect ids. Values must match the `fx` strings in pack-01-starter.json
+ * Visual effect ids. Values must match the `fx` strings in card-database.json
  * and schema CardFxSchema — they cross the JSON validation boundary.
  */
 export enum FxKind {

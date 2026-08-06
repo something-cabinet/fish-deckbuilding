@@ -1,14 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { CARD_LIBRARY } from "@/lib/game"
 import type { CardDef, GameState } from "@/lib/game"
+import { STAGE_LIBRARY, type StageDef } from "@/lib/game/stages"
+import type { EnemyDef } from "@/lib/game/units"
+import type { ZoneId } from "@/lib/game/overworld-types"
 import type { MapNode } from "@/lib/game/overworld-types"
 import type { EventChoice } from "@/lib/game/overworld-data"
+import { ENEMY_LIBRARY } from "@/lib/game/units"
 import { CardCreateScreen } from "./card-create-screen"
-import { CardLibraryScreen } from "./card-library-screen"
+import { CardLibraryScreen, type SubTab } from "./card-library-screen"
+import { EnemyCreateScreen } from "./enemy-create-screen"
 import { EventScreen } from "./event-screen"
 import { FishMafiaGame } from "./fish-mafia-game"
 import { MenuScreen } from "./menu-screen"
+import { StageCreateScreen } from "./stage-create-screen"
 import { OverworldMap } from "./overworld-map"
 import { RewardScreen } from "./reward-screen"
 import { RunSummary } from "./run-summary"
@@ -28,19 +35,117 @@ export const DEFAULT_SETTINGS: GameSettings = {
   visualEffects: true,
 }
 
-type Screen = "menu" | "overworld" | "battle" | "library" | "create"
+type Screen =
+  | "menu"
+  | "overworld"
+  | "battle"
+  | "library"
+  | "create"
+  | "create-enemy"
+  | "create-stage"
 /** an overworld node resolved on the map itself, via an overlay */
 type NodeAction = "shop" | "event" | null
 
+/** the design-tool screens, which are safe to restore after a reload */
+type DesignScreen = Extract<Screen, "library" | "create" | "create-enemy" | "create-stage">
+
+const DESIGN_SCREENS: DesignScreen[] = ["library", "create", "create-enemy", "create-stage"]
+
+function isDesignScreen(s: Screen): s is DesignScreen {
+  return (DESIGN_SCREENS as Screen[]).includes(s)
+}
+
+const DESIGN_LOCATION_KEY = "fm.design.location"
+
+/**
+ * Where the user was inside the design tool.
+ *
+ * Saving or deleting rewrites the card/enemy JSON databases, and those files
+ * are imported by the game modules outside the React tree — so the dev server's
+ * Fast Refresh does a full page reload, which would otherwise drop the user
+ * back on the main menu mid-edit. We stash the location and restore it on mount.
+ * Only design screens are restored: a run's battle and overworld state live in
+ * memory and cannot be rebuilt from an id.
+ */
+interface DesignLocation {
+  screen: DesignScreen
+  subtab: SubTab
+  cardId?: string
+  enemyId?: string
+  stageId?: string
+  stageZone?: ZoneId
+}
+
 export function FishMafiaApp() {
   const [hydrated, setHydrated] = useState(false)
-  useEffect(() => {
-    setHydrated(true)
-  }, [])
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
-  // custom cards authored in the card creator, surfaced in the library
-  const [customCards, setCustomCards] = useState<CardDef[]>([])
+  // cards from the database, managed in-app for the editor
+  const [cards, setCards] = useState<CardDef[]>(() => Object.values(CARD_LIBRARY))
+  // ids authored this session, badged as Custom in the library
+  const [customIds, setCustomIds] = useState<string[]>([])
+  const [editingCard, setEditingCard] = useState<CardDef | null>(null)
+  // enemies from the database, manage in-app for the designer
+  const [enemies, setEnemies] = useState<EnemyDef[]>(() => ENEMY_LIBRARY)
+  const [editingEnemy, setEditingEnemy] = useState<EnemyDef | null>(null)
+  // authored battle layouts, drawn from when a battle node is entered
+  const [stages, setStages] = useState<StageDef[]>(() => STAGE_LIBRARY)
+  const [editingStage, setEditingStage] = useState<StageDef | null>(null)
+  /** zone a brand-new stage belongs to, from the section its button was in */
+  const [newStageZone, setNewStageZone] = useState<ZoneId>("shallows")
+  // the library tab to return to after an editor round-trip
+  const [librarySubtab, setLibrarySubtab] = useState<SubTab>("cards")
+
+  // restore the design-tool location a Fast Refresh reload would have discarded
+  useEffect(() => {
+    setHydrated(true)
+
+    const raw = sessionStorage.getItem(DESIGN_LOCATION_KEY)
+    if (!raw) return
+    let loc: DesignLocation
+    try {
+      loc = JSON.parse(raw) as DesignLocation
+    } catch {
+      sessionStorage.removeItem(DESIGN_LOCATION_KEY)
+      return
+    }
+    if (!isDesignScreen(loc.screen)) return
+
+    // look the records up in the freshly re-imported databases so the editor
+    // reopens on what was just written, not a stale pre-save copy
+    if (loc.cardId) {
+      const card = CARD_LIBRARY[loc.cardId]
+      if (card) setEditingCard(card)
+    }
+    if (loc.enemyId) {
+      const enemy = ENEMY_LIBRARY.find((e) => e.id === loc.enemyId)
+      if (enemy) setEditingEnemy(enemy)
+    }
+    if (loc.stageId) {
+      const stage = STAGE_LIBRARY.find((s) => s.id === loc.stageId)
+      if (stage) setEditingStage(stage)
+    }
+    if (loc.stageZone) setNewStageZone(loc.stageZone)
+    setLibrarySubtab(loc.subtab)
+    setScreen(loc.screen)
+  }, [])
+
+  // keep that location current while the design tool is open
+  useEffect(() => {
+    if (!isDesignScreen(screen)) {
+      sessionStorage.removeItem(DESIGN_LOCATION_KEY)
+      return
+    }
+    const loc: DesignLocation = {
+      screen,
+      subtab: librarySubtab,
+      cardId: editingCard?.id,
+      enemyId: editingEnemy?.id,
+      stageId: editingStage?.id,
+      stageZone: newStageZone,
+    }
+    sessionStorage.setItem(DESIGN_LOCATION_KEY, JSON.stringify(loc))
+  }, [screen, librarySubtab, editingCard, editingEnemy, editingStage, newStageZone])
   // the battle being played right now (built from the overworld run)
   const [battle, setBattle] = useState<GameState | null>(null)
   const [battleIsBoss, setBattleIsBoss] = useState(false)
@@ -177,7 +282,6 @@ export function FishMafiaApp() {
         onStart={startNewRun}
         onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
         onOpenLibrary={() => setScreen("library")}
-        onOpenCreate={() => setScreen("create")}
       />
     )
   }
@@ -185,9 +289,50 @@ export function FishMafiaApp() {
   if (screen === "library") {
     return (
       <CardLibraryScreen
-        customCards={customCards}
+        cards={cards}
+        customIds={customIds}
+        enemies={enemies}
+        initialSubtab={librarySubtab}
+        onSubtabChange={setLibrarySubtab}
         onBack={() => setScreen("menu")}
         onCreate={() => setScreen("create")}
+        onEdit={(card) => {
+          setEditingCard(card)
+          setScreen("create")
+        }}
+        onDelete={(id) => {
+          setCards((prev) => prev.filter((c) => c.id !== id))
+          setCustomIds((prev) => prev.filter((c) => c !== id))
+          fetch(`/api/cards?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
+        onEnemyCreate={() => setScreen("create-enemy")}
+        onEnemyEdit={(enemy) => {
+          setEditingEnemy(enemy)
+          setScreen("create-enemy")
+        }}
+        onEnemyDelete={(id) => {
+          setEnemies((prev) => prev.filter((e) => e.id !== id))
+          fetch(`/api/enemies?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
+        stages={stages}
+        onStageCreate={(zone) => {
+          setNewStageZone(zone)
+          setScreen("create-stage")
+        }}
+        onStageEdit={(stage) => {
+          setEditingStage(stage)
+          setScreen("create-stage")
+        }}
+        onStageDelete={(id) => {
+          setStages((prev) => prev.filter((s) => s.id !== id))
+          fetch(`/api/stages?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
       />
     )
   }
@@ -195,10 +340,88 @@ export function FishMafiaApp() {
   if (screen === "create") {
     return (
       <CardCreateScreen
-        onBack={() => setScreen("library")}
-        onSave={(def) => {
-          setCustomCards((prev) => [...prev, def])
+        editCard={editingCard ?? undefined}
+        onBack={() => {
+          setEditingCard(null)
           setScreen("library")
+        }}
+        onSave={(def) => {
+          setCards((prev) => [...prev, def])
+          setCustomIds((prev) => [...prev, def.id])
+          fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+        }}
+        onUpdate={(def) => {
+          setCards((prev) => prev.map((c) => (c.id === def.id ? def : c)))
+          fetch("/api/cards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+          setEditingCard(null)
+        }}
+      />
+    )
+  }
+
+  if (screen === "create-enemy") {
+    return (
+      <EnemyCreateScreen
+        editEnemy={editingEnemy ?? undefined}
+        onBack={() => {
+          setEditingEnemy(null)
+          setScreen("library")
+        }}
+        onSave={(def) => {
+          setEnemies((prev) => [...prev, def])
+          fetch("/api/enemies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+        }}
+        onUpdate={(def) => {
+          setEnemies((prev) => prev.map((e) => (e.id === def.id ? def : e)))
+          fetch("/api/enemies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+          setEditingEnemy(def)
+        }}
+      />
+    )
+  }
+
+  if (screen === "create-stage") {
+    return (
+      <StageCreateScreen
+        enemies={enemies}
+        editStage={editingStage ?? undefined}
+        initialZone={newStageZone}
+        onBack={() => {
+          setEditingStage(null)
+          setScreen("library")
+        }}
+        onSave={(def) => {
+          setStages((prev) => [...prev, def])
+          fetch("/api/stages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+        }}
+        onUpdate={(def) => {
+          setStages((prev) => prev.map((s) => (s.id === def.id ? def : s)))
+          fetch("/api/stages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(def),
+          }).catch(() => {})
+          setEditingStage(def)
         }}
       />
     )

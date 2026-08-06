@@ -1,4 +1,3 @@
-import { COLS, ROWS } from "../../battle/constants"
 import { Phase } from "../../battle/enums"
 import type { GameState, Pos } from "../../battle/models"
 import { Team } from "../../units"
@@ -19,8 +18,8 @@ function occupied(state: GameState): Set<string> {
 function emptyTiles(state: GameState): Pos[] {
   const blocked = occupied(state)
   const out: Pos[] = []
-  for (let y = 0; y < ROWS; y++)
-    for (let x = 0; x < COLS; x++) {
+  for (let y = 0; y < state.rows; y++)
+    for (let x = 0; x < state.cols; x++) {
       const p = { x, y }
       if (!blocked.has(posKey(p))) out.push(p)
     }

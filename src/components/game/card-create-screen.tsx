@@ -1,16 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Check, PlusCircle } from "lucide-react"
+import { Check, PlusCircle } from "lucide-react"
 import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
+import { EffectEditor, type EffectRow } from "./effect-editor"
+import {
+  Chip,
+  DesignHeader,
+  EditingBadge,
+  Field,
+  Panel,
+  PreviewRail,
+  PrimaryButton,
+  Stepper,
+  inputClass,
+} from "./design-ui"
 import { cn } from "@/lib/utils"
 
 interface Props {
   onBack: () => void
   onSave: (def: CardDef) => void
+  editCard?: CardDef
+  onUpdate?: (def: CardDef) => void
 }
 
 const TYPES: CardType[] = [CardType.Attack, CardType.Skill, CardType.Summon]
@@ -21,31 +36,49 @@ const TARGETS: { id: CardTarget; label: string }[] = [
   { id: CardTarget.Self, label: "Self" },
   { id: CardTarget.EmptyTile, label: "Empty tile" },
 ]
-const FX_OPTIONS: FxKind[] = [
-  FxKind.Letter,
-  FxKind.Phone,
-  FxKind.Gavel,
-  FxKind.Coin,
-  FxKind.Draw,
-  FxKind.Heal,
-  FxKind.Shock,
-  FxKind.Summon,
-]
-
 function slugify(name: string) {
   const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
   return `custom_${base || "card"}_${Date.now().toString(36)}`
 }
 
-export function CardCreateScreen({ onBack, onSave }: Props) {
-  const [name, setName] = useState("")
-  const [type, setType] = useState<CardType>(CardType.Attack)
-  const [target, setTarget] = useState<CardTarget>(CardTarget.Enemy)
-  const [cost, setCost] = useState(1)
-  const [value, setValue] = useState(1)
-  const [desc, setDesc] = useState("")
-  const [icon, setIcon] = useState("Swords")
-  const [fx, setFx] = useState<FxKind>(FxKind.Shock)
+function fromCardEffects(effects: CardEffect[]): EffectRow[] {
+  return effects.map((e) => {
+    switch (e.kind) {
+      case "damage": return { kind: "damage", amount: e.amount }
+      case "heal": return { kind: "heal", amount: e.amount, healTarget: e.target }
+      case "drawCards": return { kind: "drawCards", amount: e.amount }
+      case "gainCoin": return { kind: "gainCoin", amount: e.amount }
+      case "buffAtk": return { kind: "buffAtk", amount: e.amount }
+      case "summon": return { kind: "summon", amount: 0 }
+      case "custom": return { kind: "damage", amount: 0 }
+    }
+  })
+}
+
+function toCardEffects(rows: EffectRow[]): CardEffect[] {
+  return rows.map((r) => {
+    switch (r.kind) {
+      case "damage": return { kind: "damage", amount: r.amount }
+      case "heal": return { kind: "heal", amount: r.amount, target: r.healTarget ?? "caster" }
+      case "drawCards": return { kind: "drawCards", amount: r.amount }
+      case "gainCoin": return { kind: "gainCoin", amount: r.amount }
+      case "buffAtk": return { kind: "buffAtk", amount: r.amount }
+      case "summon": return { kind: "summon", unit: "goon" }
+    }
+  })
+}
+
+export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) {
+  const [name, setName] = useState(editCard?.name ?? "")
+  const [type, setType] = useState<CardType>(editCard?.type ?? CardType.Attack)
+  const [target, setTarget] = useState<CardTarget>(editCard?.target ?? CardTarget.Enemy)
+  const [cost, setCost] = useState(editCard?.cost ?? 1)
+  const [value, setValue] = useState(editCard?.value ?? 1)
+  const [desc, setDesc] = useState(editCard?.desc ?? "")
+  const [icon, setIcon] = useState(editCard?.icon ?? "Swords")
+  const [effects, setEffects] = useState<EffectRow[]>(editCard ? fromCardEffects(editCard.effects) : [])
+
+  const cardEffects = toCardEffects(effects)
 
   const draft: CardDef = {
     id: "preview",
@@ -56,9 +89,8 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
     target,
     desc,
     icon,
-    fx,
-    // custom cards are display-only (D3) — no resolvable effects yet
-    effects: [],
+    fx: FxKind.Shock,
+    effects: cardEffects,
     log: "",
     logTone: "neutral",
   }
@@ -66,226 +98,122 @@ export function CardCreateScreen({ onBack, onSave }: Props) {
 
   function handleSave() {
     if (!canSave) return
-    onSave({ ...draft, id: slugify(name) })
+    const card: CardDef = editCard
+      ? { ...draft, id: editCard.id }
+      : { ...draft, id: slugify(name) }
+    if (editCard && onUpdate) {
+      onUpdate(card)
+    } else {
+      onSave(card)
+    }
   }
 
   return (
     <main className="flex h-dvh w-full flex-col overflow-hidden bg-ocean-deep text-foreground">
-      {/* header */}
-      <header className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-ocean-deep/80 px-5 py-4 backdrop-blur-sm">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
-        >
-          <ArrowLeft size={14} />
-          Back
-        </button>
-        <h1 className="flex items-center gap-2 font-display text-2xl font-bold uppercase tracking-widest text-foreground">
-          <PlusCircle size={22} className="text-gold" />
-          Create <span className="text-gold">Card</span>
-        </h1>
-      </header>
+      <DesignHeader icon={PlusCircle} title="Card" accent="Editor" onBack={onBack}>
+        {editCard && <EditingBadge name={editCard.name} />}
+      </DesignHeader>
 
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6 lg:flex-row lg:items-start">
-        {/* form */}
-        <div className="flex-1 space-y-5">
-          {/* name */}
-          <Field label="Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={22}
-              placeholder="Racketeering"
-              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-gold/50"
-            />
-          </Field>
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 md:flex-row">
+        {/* form — splits into two columns once there is room for them */}
+        <div className="flex min-w-0 flex-1 flex-col gap-3 xl:flex-row xl:items-start">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Panel title="Identity">
+              <Field label="Name" htmlFor="card-name">
+                <input
+                  id="card-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={22}
+                  placeholder="Racketeering"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Description" htmlFor="card-desc" hint={`${desc.length}/120`}>
+                <textarea
+                  id="card-desc"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
+                  maxLength={120}
+                  rows={2}
+                  placeholder="Deal 3 damage to a target enemy."
+                  className={cn(inputClass, "resize-none leading-snug")}
+                />
+              </Field>
+            </Panel>
 
-          {/* type */}
-          <Field label="Type">
-            <div className="flex gap-2">
-              {TYPES.map((t) => (
-                <Chip key={t} active={type === t} onClick={() => setType(t)}>
-                  {t}
-                </Chip>
-              ))}
-            </div>
-          </Field>
-
-          {/* target */}
-          <Field label="Target">
-            <div className="flex flex-wrap gap-2">
-              {TARGETS.map((t) => (
-                <Chip key={t.id} active={target === t.id} onClick={() => setTarget(t.id)}>
-                  {t.label}
-                </Chip>
-              ))}
-            </div>
-          </Field>
-
-          {/* cost + value */}
-          <div className="flex gap-4">
-            <Field label="Mana Cost" className="flex-1">
-              <Stepper value={cost} min={0} max={10} onChange={setCost} />
-            </Field>
-            <Field label="Sell Value" className="flex-1">
-              <Stepper value={value} min={0} max={10} onChange={setValue} />
-            </Field>
+            <Panel title="Rules" bodyClassName="space-y-0 flex flex-wrap gap-x-5 gap-y-3">
+              <Field label="Type">
+                <div className="flex gap-1.5">
+                  {TYPES.map((t) => (
+                    <Chip key={t} active={type === t} onClick={() => setType(t)}>
+                      {t}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Cost">
+                <Stepper value={cost} min={0} max={10} onChange={setCost} label="cost" />
+              </Field>
+              <Field label="Value" hint="sell price">
+                <Stepper value={value} min={0} max={10} onChange={setValue} label="value" />
+              </Field>
+              <Field label="Target" className="basis-full">
+                <div className="flex flex-wrap gap-1.5">
+                  {TARGETS.map((t) => (
+                    <Chip key={t.id} active={target === t.id} onClick={() => setTarget(t.id)}>
+                      {t.label}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+            </Panel>
           </div>
 
-          {/* description */}
-          <Field label="Description">
-            <textarea
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              maxLength={120}
-              rows={3}
-              placeholder="Deal 3 damage to a target enemy."
-              className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-gold/50"
-            />
-          </Field>
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Panel title="Effects">
+              <EffectEditor effects={effects} onChange={setEffects} />
+            </Panel>
 
-          {/* fx */}
-          <Field label="Resolve Effect">
-            <div className="flex flex-wrap gap-2">
-              {FX_OPTIONS.map((f) => (
-                <Chip key={f} active={fx === f} onClick={() => setFx(f)}>
-                  {f}
-                </Chip>
-              ))}
-            </div>
-          </Field>
-
-          {/* icon */}
-          <Field label="Icon">
-            <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
-              {CARD_ICON_NAMES.map((n) => {
-                const Ico = getCardIcon(n)
-                return (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setIcon(n)}
-                    aria-label={n}
-                    aria-pressed={icon === n}
-                    className={cn(
-                      "flex aspect-square items-center justify-center rounded-lg border transition-colors",
-                      icon === n
-                        ? "border-gold bg-gold/15 text-gold"
-                        : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-foreground",
-                    )}
-                  >
-                    <Ico size={18} strokeWidth={1.75} />
-                  </button>
-                )
-              })}
-            </div>
-          </Field>
+            <Panel title="Artwork">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1.5">
+                {CARD_ICON_NAMES.map((n) => {
+                  const Ico = getCardIcon(n)
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setIcon(n)}
+                      aria-label={n}
+                      aria-pressed={icon === n}
+                      className={cn(
+                        "flex aspect-square items-center justify-center rounded-md border transition-colors",
+                        icon === n
+                          ? "border-gold bg-gold/15 text-gold"
+                          : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-foreground",
+                      )}
+                    >
+                      <Ico size={15} strokeWidth={1.75} />
+                    </button>
+                  )
+                })}
+              </div>
+            </Panel>
+          </div>
         </div>
 
-        {/* preview + save */}
-        <div className="flex shrink-0 flex-col items-center gap-5 lg:sticky lg:top-0 lg:w-64">
-          <span className="font-display text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground">
-            Preview
-          </span>
-          <CardFace def={draft} size="lg" />
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave}
-            className={cn(
-              "flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3.5 font-display text-base font-bold uppercase tracking-widest transition-all",
-              canSave
-                ? "bg-gold text-ocean-deep hover:scale-[1.03]"
-                : "cursor-not-allowed bg-white/10 text-muted-foreground",
-            )}
-          >
-            <Check size={18} />
-            Save to Library
-          </button>
-          {!canSave && (
-            <p className="text-center text-xs text-muted-foreground">Give your card a name to save it.</p>
-          )}
-        </div>
+        <PreviewRail
+          note={canSave ? undefined : "Give your card a name to save it."}
+          action={
+            <PrimaryButton onClick={handleSave} disabled={!canSave} className="w-full py-2.5 text-sm">
+              <Check size={16} />
+              {editCard ? "Update" : "Save"}
+            </PrimaryButton>
+          }
+        >
+          <CardFace def={draft} size="md" />
+        </PreviewRail>
       </div>
     </main>
-  )
-}
-
-function Field({
-  label,
-  children,
-  className,
-}: {
-  label: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <label className={cn("block", className)}>
-      <span className="mb-1.5 block font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      {children}
-    </label>
-  )
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-full px-3.5 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
-        active
-          ? "bg-gold text-ocean-deep"
-          : "border border-white/10 text-muted-foreground hover:border-gold/40 hover:text-gold",
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Stepper({
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  value: number
-  min: number
-  max: number
-  onChange: (v: number) => void
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(min, value - 1))}
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold"
-      >
-        −
-      </button>
-      <span className="flex h-9 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] font-display text-lg font-bold text-gold">
-        {value}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(max, value + 1))}
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold"
-      >
-        +
-      </button>
-    </div>
   )
 }

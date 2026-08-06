@@ -1,6 +1,6 @@
 /**
  * How a card is aimed by the player.
- * Values must match pack-01-starter.json `target` strings + schema CardTargetSchema.
+ * Values must match card-database.json `target` strings + schema CardTargetSchema.
  */
 export enum CardTarget {
   /** any enemy unit */

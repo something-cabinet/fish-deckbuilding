@@ -12,13 +12,16 @@ import { CardCreateScreen } from "@/components/game/card-create-screen"
 afterEach(cleanup)
 
 describe("CardCreateScreen", () => {
+  function getSaveButton() {
+    return screen.getByRole("button", { name: /^save$/i }) as HTMLButtonElement
+  }
+
   it("Save is disabled until a name is entered", () => {
     render(<CardCreateScreen onBack={() => {}} onSave={() => {}} />)
-    const save = screen.getByRole("button", { name: /save to library/i }) as HTMLButtonElement
-    expect(save.disabled).toBe(true)
+    expect(getSaveButton().disabled).toBe(true)
 
     act(() => fireEvent.change(screen.getByPlaceholderText(/racketeering/i), { target: { value: "Bribe" } }))
-    expect(save.disabled).toBe(false)
+    expect(getSaveButton().disabled).toBe(false)
   })
 
   it("live preview updates as the name changes", () => {
@@ -31,7 +34,7 @@ describe("CardCreateScreen", () => {
     const onSave = vi.fn()
     render(<CardCreateScreen onBack={() => {}} onSave={onSave} />)
     act(() => fireEvent.change(screen.getByPlaceholderText(/racketeering/i), { target: { value: "Bribe Collector" } }))
-    act(() => fireEvent.click(screen.getByRole("button", { name: /save to library/i })))
+    act(() => fireEvent.click(getSaveButton()))
 
     expect(onSave).toHaveBeenCalledTimes(1)
     const def = onSave.mock.calls[0][0]

@@ -1,6 +1,5 @@
 "use client"
 
-import { COLS, ROWS } from "@/lib/game/battle"
 import { Team, UnitKind, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
@@ -14,6 +13,9 @@ const SPRITES: Record<Unit["kind"], string> = {
 
 interface Props {
   unit: Unit
+  /** board dimensions, so tokens position correctly on any stage size */
+  cols: number
+  rows: number
   selected: boolean
   isValidTarget: boolean
   hit: boolean
@@ -21,9 +23,9 @@ interface Props {
   onClick: (unit: Unit) => void
 }
 
-export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, onClick }: Props) {
-  const left = ((unit.pos.x + 0.5) / COLS) * 100
-  const top = ((unit.pos.y + 0.5) / ROWS) * 100
+export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPointerDown, onClick }: Props) {
+  const left = ((unit.pos.x + 0.5) / cols) * 100
+  const top = ((unit.pos.y + 0.5) / rows) * 100
   const isPlayer = unit.team === Team.Player
   const canMove = isPlayer && !unit.hasMoved
   const hpPct = Math.max(0, (unit.hp / unit.maxHp) * 100)
@@ -39,7 +41,7 @@ export function UnitToken({ unit, selected, isValidTarget, hit, onPointerDown, o
         canMove ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isValidTarget && "cursor-pointer",
       )}
-      style={{ left: `${left}%`, top: `${top}%`, width: `${100 / COLS}%` }}
+      style={{ left: `${left}%`, top: `${top}%`, width: `${100 / cols}%` }}
       onPointerDown={(e) => canMove && onPointerDown(e, unit)}
       onClick={() => onClick(unit)}
       role="button"

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { COLS, ROWS, FxKind, type FxEvent } from "@/lib/game/battle"
+import { FxKind, type FxEvent } from "@/lib/game/battle"
 
 interface Particle {
   x: number
@@ -42,7 +42,7 @@ const COLORS = {
   ink: "#2a3550",
 }
 
-export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
+export function ParticleCanvas({ fx, cols, rows }: { fx: FxEvent[]; cols: number; rows: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particles = useRef<Particle[]>([])
   const projectiles = useRef<Projectile[]>([])
@@ -52,8 +52,8 @@ export function ParticleCanvas({ fx }: { fx: FxEvent[] }) {
 
   // grid -> pixel
   const toPx = (gx: number, gy: number) => ({
-    x: ((gx + 0.5) / COLS) * size.current.w,
-    y: ((gy + 0.5) / ROWS) * size.current.h,
+    x: ((gx + 0.5) / cols) * size.current.w,
+    y: ((gy + 0.5) / rows) * size.current.h,
   })
 
   const spawnBurst = (

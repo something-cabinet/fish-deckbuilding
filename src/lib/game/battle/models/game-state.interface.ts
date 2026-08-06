@@ -7,6 +7,10 @@ import type { Pos } from "./pos.interface"
 export interface GameState {
   turn: number
   phase: Phase
+  /** board width in tiles — set by the stage, defaults to DEFAULT_COLS */
+  cols: number
+  /** board height in tiles — set by the stage, defaults to DEFAULT_ROWS */
+  rows: number
   /** per-turn resource spent to play cards; resets each turn (earned mainly by selling) */
   coin: number
   /** persistent run currency earned by defeating enemies; spent on future upgrades */

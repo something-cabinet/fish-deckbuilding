@@ -1,0 +1,32 @@
+{
+  "entity_id": "wiki:specs:card-database-persistence",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-05T14:57:11.439Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "tags",
+          "old_value": [
+            "spec",
+            "cards",
+            "persistence",
+            "dev-tool"
+          ],
+          "new_value": [
+            "spec",
+            "approved",
+            "cards",
+            "persistence",
+            "dev-tool"
+          ]
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

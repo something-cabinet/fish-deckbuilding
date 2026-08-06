@@ -1,4 +1,4 @@
-/** Values must match pack-01-starter.json `type` strings + schema CardTypeSchema. */
+/** Values must match card-database.json `type` strings + schema CardTypeSchema. */
 export enum CardType {
   Attack = "attack",
   Skill = "skill",

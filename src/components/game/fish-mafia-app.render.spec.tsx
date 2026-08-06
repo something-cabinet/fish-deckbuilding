@@ -12,7 +12,11 @@ import { FishMafiaApp } from "@/components/game/fish-mafia-app"
 
 installJsdomShims()
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  // each render models a fresh page load; drop the stashed design-tool location
+  sessionStorage.clear()
+})
 
 describe("FishMafiaApp screen navigation", () => {
   it("starts on the menu", () => {
@@ -38,9 +42,9 @@ describe("FishMafiaApp screen navigation", () => {
   it("Library opens the card library and Back returns to the menu", () => {
     render(<FishMafiaApp />)
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: /library/i }))
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
     })
-    expect(screen.getByRole("heading", { name: /card library/i })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /game design/i })).toBeInTheDocument()
 
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /menu/i }))
@@ -51,18 +55,24 @@ describe("FishMafiaApp screen navigation", () => {
   it("Create opens the card creator, Back returns to the library", () => {
     render(<FishMafiaApp />)
     act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
+    act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
     })
-    expect(screen.getByText(/create/i)).toBeInTheDocument()
+    expect(screen.getByText(/editor/i)).toBeInTheDocument()
 
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /back/i }))
     })
-    expect(screen.getByRole("heading", { name: /card library/i })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /game design/i })).toBeInTheDocument()
   })
 
-  it("saving a custom card from Create lands in the library with a Custom badge", () => {
+  it("saving a custom card from Create stays on the creator", () => {
     render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
     })
@@ -71,10 +81,41 @@ describe("FishMafiaApp screen navigation", () => {
       fireEvent.change(input, { target: { value: "Bribe Collector" } })
     })
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: /save to library/i }))
+      fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
     })
-    expect(screen.getByRole("heading", { name: /card library/i })).toBeInTheDocument()
-    expect(screen.getByText(/bribe collector/i)).toBeInTheDocument()
-    expect(screen.getAllByText(/custom/i).length).toBeGreaterThan(0)
+    expect(screen.getByRole("heading", { name: /card editor/i })).toBeInTheDocument()
+  })
+
+  it("a reload mid-design returns to the same screen and subtab", () => {
+    const first = render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /^enemies$/i }))
+    })
+    expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
+
+    // saving/deleting rewrites the JSON db, so the dev server hard-reloads
+    first.unmount()
+    render(<FishMafiaApp />)
+
+    expect(screen.getByRole("heading", { name: /game design/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
+  })
+
+  it("leaving the design tool clears the stored location", () => {
+    const first = render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /menu/i }))
+    })
+
+    first.unmount()
+    render(<FishMafiaApp />)
+
+    expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument()
   })
 })

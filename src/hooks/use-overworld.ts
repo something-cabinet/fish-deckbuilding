@@ -6,9 +6,9 @@ import {
   applyEventChoice,
   buyCard as buyCardEngine,
   clearCurrentNode,
+  battleSetupForNode,
   clearSave,
   createNewRun,
-  enemiesForNode,
   eventForNode,
   generateAllZoneMaps,
   healAtRest,
@@ -214,11 +214,17 @@ export function useOverworld() {
       const s = state
       if (!s) return null
       const eff = nodeIdOverride ? { ...s, nodeId: nodeIdOverride } : s
+      // the stage supplies the board size and hero spawn; both fall back to
+      // the 9x5 default when the zone has no matching stage authored yet
+      const setup = battleSetupForNode(eff)
       return createInitialState({
         heroHp: eff.hp,
         heroMaxHp: eff.maxHp,
         deck: eff.deck,
-        enemies: enemiesForNode(eff),
+        enemies: setup.enemies,
+        cols: setup.cols,
+        rows: setup.rows,
+        heroStart: setup.heroStart,
         fin: eff.fin,
       })
     },

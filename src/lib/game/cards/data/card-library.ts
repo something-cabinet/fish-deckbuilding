@@ -1,15 +1,15 @@
 import { nid } from "../../shared"
 import { CardPackSchema } from "./schema.helper"
 import type { CardDef, CardInstance } from "../models"
-import pack01 from "../pack-01-starter.json"
+import userCards from "../card-database.json"
 
 /**
- * Card definitions ship as data-driven JSON packs (FR-7/FR-13, NFR-6/NFR-7).
- * Each pack is validated against the zod schema at module load (AC-4): a
- * malformed pack throws here rather than silently corrupting the game.
- * The pack order defines CARD_LIBRARY insertion order.
+ * Card definitions ship as a data-driven JSON database (FR-7/FR-13, NFR-6/NFR-7).
+ * The file is validated against the zod schema at module load (AC-4): a
+ * malformed entry throws here rather than silently corrupting the game.
+ * The array order defines CARD_LIBRARY insertion order.
  */
-const cardPacks = [pack01]
+const cardPacks = [userCards]
 
 const parsedCardPacks = cardPacks.map((pack) => CardPackSchema.parse(pack))
 
