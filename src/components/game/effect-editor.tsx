@@ -40,16 +40,16 @@ export function EffectEditor({ effects, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {effects.map((effect, idx) => (
         <div
           key={idx}
-          className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] p-2.5"
+          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] p-1.5"
         >
           <select
             value={effect.kind}
             onChange={(e) => updateEffect(idx, { kind: e.target.value as EffectRow["kind"] })}
-            className="rounded-md border border-white/10 bg-ocean-deep px-2 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
+            className="rounded-md border border-white/10 bg-ocean-deep px-2 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
           >
             {EFFECT_KINDS.map((k) => (
               <option key={k.id} value={k.id}>
@@ -59,21 +59,21 @@ export function EffectEditor({ effects, onChange }: Props) {
           </select>
 
           {HAS_AMOUNT.has(effect.kind) && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => updateEffect(idx, { amount: Math.max(1, effect.amount - 1) })}
-                className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-xs text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
                 −
               </button>
-              <span className="flex h-7 w-8 items-center justify-center font-display text-sm font-bold text-gold">
+              <span className="flex h-6 w-7 items-center justify-center font-display text-xs font-bold text-gold">
                 {effect.amount}
               </span>
               <button
                 type="button"
                 onClick={() => updateEffect(idx, { amount: Math.min(99, effect.amount + 1) })}
-                className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-xs text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
                 +
               </button>
@@ -86,7 +86,7 @@ export function EffectEditor({ effects, onChange }: Props) {
               onChange={(e) =>
                 updateEffect(idx, { healTarget: e.target.value as "caster" | "cast-target" })
               }
-              className="rounded-md border border-white/10 bg-ocean-deep px-2 py-1.5 font-display text-[10px] uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
+              className="rounded-md border border-white/10 bg-ocean-deep px-1.5 py-1 font-display text-[9px] uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
             >
               <option value="caster">Self</option>
               <option value="cast-target">Target</option>
@@ -96,9 +96,9 @@ export function EffectEditor({ effects, onChange }: Props) {
           <button
             type="button"
             onClick={() => removeEffect(idx)}
-            className="ml-auto flex h-7 w-7 items-center justify-center rounded text-xs text-muted-foreground transition-colors hover:text-red-400"
+            className="ml-auto flex h-6 w-6 items-center justify-center rounded text-[10px] text-muted-foreground transition-colors hover:text-red-400"
           >
-            <Trash2 size={14} />
+            <Trash2 size={12} />
           </button>
         </div>
       ))}
@@ -107,12 +107,12 @@ export function EffectEditor({ effects, onChange }: Props) {
         type="button"
         onClick={addEffect}
         className={cn(
-          "flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/10 px-3 py-2.5",
-          "font-display text-xs font-bold uppercase tracking-wider text-muted-foreground",
+          "flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-white/10 px-2.5 py-1.5",
+          "font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground",
           "transition-colors hover:border-gold/40 hover:text-gold",
         )}
       >
-        <Plus size={14} />
+        <Plus size={12} />
         Add Effect
       </button>
     </div>

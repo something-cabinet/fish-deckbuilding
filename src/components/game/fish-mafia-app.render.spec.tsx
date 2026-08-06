@@ -53,7 +53,7 @@ describe("FishMafiaApp screen navigation", () => {
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /create/i }))
     })
-    expect(screen.getByText(/create/i)).toBeInTheDocument()
+    expect(screen.getByText(/editor/i)).toBeInTheDocument()
 
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /back/i }))
@@ -71,8 +71,8 @@ describe("FishMafiaApp screen navigation", () => {
       fireEvent.change(input, { target: { value: "Bribe Collector" } })
     })
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: /save to library/i }))
+      fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
     })
-    expect(screen.getByRole("heading", { name: /create card/i })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /card editor/i })).toBeInTheDocument()
   })
 })
