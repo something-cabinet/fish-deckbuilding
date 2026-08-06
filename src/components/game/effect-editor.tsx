@@ -1,6 +1,7 @@
 "use client"
 
 import { Plus, Trash2 } from "lucide-react"
+import { selectClass } from "./design-ui"
 import { cn } from "@/lib/utils"
 
 export interface EffectRow {
@@ -48,8 +49,9 @@ export function EffectEditor({ effects, onChange }: Props) {
         >
           <select
             value={effect.kind}
+            aria-label={`Effect ${idx + 1} kind`}
             onChange={(e) => updateEffect(idx, { kind: e.target.value as EffectRow["kind"] })}
-            className="rounded-md border border-white/10 bg-ocean-deep px-2 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
+            className={cn(selectClass, "min-w-0 flex-1 py-1 sm:max-w-[240px]")}
           >
             {EFFECT_KINDS.map((k) => (
               <option key={k.id} value={k.id}>
@@ -59,9 +61,10 @@ export function EffectEditor({ effects, onChange }: Props) {
           </select>
 
           {HAS_AMOUNT.has(effect.kind) && (
-            <div className="flex items-center gap-0.5">
+            <div className="flex shrink-0 items-center gap-0.5">
               <button
                 type="button"
+                aria-label="Decrease amount"
                 onClick={() => updateEffect(idx, { amount: Math.max(1, effect.amount - 1) })}
                 className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
@@ -72,6 +75,7 @@ export function EffectEditor({ effects, onChange }: Props) {
               </span>
               <button
                 type="button"
+                aria-label="Increase amount"
                 onClick={() => updateEffect(idx, { amount: Math.min(99, effect.amount + 1) })}
                 className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
@@ -83,6 +87,7 @@ export function EffectEditor({ effects, onChange }: Props) {
           {HAS_TARGET.has(effect.kind) && (
             <select
               value={effect.healTarget ?? "caster"}
+              aria-label={`Effect ${idx + 1} heal target`}
               onChange={(e) =>
                 updateEffect(idx, { healTarget: e.target.value as "caster" | "cast-target" })
               }
@@ -95,8 +100,9 @@ export function EffectEditor({ effects, onChange }: Props) {
 
           <button
             type="button"
+            aria-label="Remove effect"
             onClick={() => removeEffect(idx)}
-            className="ml-auto flex h-6 w-6 items-center justify-center rounded text-[10px] text-muted-foreground transition-colors hover:text-red-400"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:text-red-400"
           >
             <Trash2 size={12} />
           </button>

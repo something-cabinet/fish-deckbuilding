@@ -1,5 +1,6 @@
 import { Phase } from "../enums"
-import type { GameState } from "../models"
+import type { GameState, Pos } from "../models"
+import { DEFAULT_COLS, DEFAULT_ROWS } from "../constants"
 import { COIN_TURN_BASE, makeCard, STARTER_DECK, type CardInstance } from "../../cards"
 import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
 import { HAND_START, shuffle } from "../../deck"
@@ -12,6 +13,11 @@ export function createInitialState(overrides?: {
   enemies?: EnemySpawn[]
   /** run-scoped Fin carried in from the overworld (spec D11) */
   fin?: number
+  /** board size, supplied by the stage the battle was built from */
+  cols?: number
+  rows?: number
+  /** where the hero starts; clamped into the board below */
+  heroStart?: Pos
 }): GameState {
   resetIds()
   const deck = overrides?.deck
@@ -19,10 +25,18 @@ export function createInitialState(overrides?: {
     : STARTER_DECK.map(makeCard)
   const hand: CardInstance[] = []
 
+  const cols = overrides?.cols ?? DEFAULT_COLS
+  const rows = overrides?.rows ?? DEFAULT_ROWS
+  const start = overrides?.heroStart ?? { x: 1, y: Math.floor(rows / 2) }
+
   const hero: Unit = {
     ...HERO_DEF,
     id: "hero",
-    pos: { x: 1, y: 2 },
+    // clamp so a stage that shrank below the stored start still spawns on board
+    pos: {
+      x: Math.max(0, Math.min(cols - 1, start.x)),
+      y: Math.max(0, Math.min(rows - 1, start.y)),
+    },
     hp: overrides?.heroHp ?? HERO_DEF.hp,
     maxHp: overrides?.heroMaxHp ?? HERO_DEF.maxHp,
   }
@@ -37,7 +51,7 @@ export function createInitialState(overrides?: {
     maxHp: e.hp,
     atk: e.atk,
     move: e.move,
-    range: 1,
+    range: e.range ?? 1,
     hasMoved: false,
     hasActed: false,
     buffAtk: 0,
@@ -46,6 +60,8 @@ export function createInitialState(overrides?: {
   return {
     turn: 1,
     phase: Phase.Player,
+    cols,
+    rows,
     coin: COIN_TURN_BASE,
     fin: overrides?.fin ?? 0,
     interest: 0,

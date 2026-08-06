@@ -1,5 +1,7 @@
 import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
-import { HERO_DEF, UnitKind, type EnemySpawn } from "@/lib/game/units"
+import { ENEMY_LIBRARY, HERO_DEF, UnitKind, type EnemyDef, type EnemySpawn } from "@/lib/game/units"
+import { STAGE_LIBRARY, pickStage, stageToSpawns, type StageDef } from "@/lib/game/stages"
+import type { Pos } from "@/lib/game/battle/models"
 import {
   EVENTS,
   FORECLOSURE_CAP,
@@ -411,6 +413,49 @@ export function enemiesForNode(state: OverworldState): EnemySpawn[] {
   if (type === "boss") return bossEnemiesForZone(state.zoneIndex)
   if (type === "elite") return battleEnemiesForZone(state.zoneIndex, true)
   return battleEnemiesForZone(state.zoneIndex, false)
+}
+
+/**
+ * The authored stage this node fights on, or null when the zone has no stage
+ * of the required kind. Seeded from the run seed plus the node ref, so
+ * re-entering a node fights the same stage instead of rerolling.
+ */
+export function stageForNode(
+  state: OverworldState,
+  stages: StageDef[] = STAGE_LIBRARY,
+): StageDef | null {
+  const zone = ZONES[state.zoneIndex]
+  if (!zone) return null
+  const seed = state.seed + state.zoneIndex * 101 + hashStr(state.nodeId)
+  return pickStage(stages, zone.id, nodeTypeAt(state) === "boss", seed)
+}
+
+/** Everything a battle needs from the overworld: lineup plus board geometry. */
+export interface BattleSetup {
+  enemies: EnemySpawn[]
+  cols?: number
+  rows?: number
+  heroStart?: Pos
+}
+
+/**
+ * Build a node's battle from its stage. Falls back to the zone's built-in
+ * lineup when no stage matches, so a run never stalls on an empty pool.
+ */
+export function battleSetupForNode(
+  state: OverworldState,
+  stages: StageDef[] = STAGE_LIBRARY,
+  enemyDefs: EnemyDef[] = ENEMY_LIBRARY,
+): BattleSetup {
+  const stage = stageForNode(state, stages)
+  if (!stage) return { enemies: enemiesForNode(state) }
+
+  return {
+    enemies: stageToSpawns(stage, enemyDefs, { elite: nodeTypeAt(state) === "elite" }),
+    cols: stage.cols,
+    rows: stage.rows,
+    heroStart: stage.heroStart,
+  }
 }
 
 export function zoneName(index: number): string {

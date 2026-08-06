@@ -41,12 +41,12 @@ describe("ParticleCanvas", () => {
       amount: kind === FxKind.Coin || kind === FxKind.Heal ? 2 : 5,
     }))
 
-    const { container } = render(<ParticleCanvas fx={fx} />)
+    const { container } = render(<ParticleCanvas fx={fx} cols={9} rows={5} />)
     expect(container.querySelector("canvas")).not.toBeNull()
   })
 
   it("renders an empty canvas when no fx events are supplied", () => {
-    const { container } = render(<ParticleCanvas fx={[]} />)
+    const { container } = render(<ParticleCanvas fx={[]} cols={9} rows={5} />)
     expect(container.querySelector("canvas")).not.toBeNull()
   })
 })

@@ -1,4 +1,4 @@
 export interface Pos {
-  x: number // 0..COLS-1
-  y: number // 0..ROWS-1
+  x: number // 0..state.cols-1
+  y: number // 0..state.rows-1
 }

@@ -1,21 +1,26 @@
 import { NextResponse } from "next/server"
 import path from "path"
 import fs from "fs"
-import { CardDefSchema } from "@/lib/game/cards/data/schema.helper"
-import type { CardDef } from "@/lib/game/cards/models"
+import { StageDefSchema } from "@/lib/game/stages/data/stage-schema.helper"
+import type { StageDef } from "@/lib/game/stages/models"
 
-const DB_PATH = path.join(process.cwd(), "src", "lib", "game", "cards", "card-database.json")
+const DB_PATH = path.join(process.cwd(), "src", "lib", "game", "stages", "data", "stage-database.json")
 
-function readDb(): CardDef[] {
+function readDb(): StageDef[] {
   if (!fs.existsSync(DB_PATH)) return []
   const raw = fs.readFileSync(DB_PATH, "utf-8")
   const parsed = JSON.parse(raw)
-  return Array.isArray(parsed.cards) ? parsed.cards : []
+  return Array.isArray(parsed.stages) ? parsed.stages : []
 }
 
-function writeDb(cards: CardDef[]): void {
-  const data = JSON.stringify({ cards }, null, 2)
+function writeDb(stages: StageDef[]): void {
+  const data = JSON.stringify({ stages }, null, 2)
   fs.writeFileSync(DB_PATH, data, "utf-8")
+}
+
+export async function GET() {
+  const stages = readDb()
+  return NextResponse.json(stages)
 }
 
 export async function POST(request: Request) {
@@ -30,24 +35,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
   }
 
-  const result = CardDefSchema.safeParse(body)
+  const result = StageDefSchema.safeParse(body)
   if (!result.success) {
     return NextResponse.json({ error: "Validation failed", issues: result.error.issues }, { status: 400 })
   }
 
-  const card = result.data
-  const cards = readDb()
-  const idx = cards.findIndex((c) => c.id === card.id)
+  const stage = result.data
+  const stages = readDb()
+  const idx = stages.findIndex((s) => s.id === stage.id)
 
   if (idx >= 0) {
-    cards[idx] = card
+    stages[idx] = stage
   } else {
-    cards.push(card)
+    stages.push(stage)
   }
 
-  writeDb(cards)
+  writeDb(stages)
 
-  return NextResponse.json({ ok: true, id: card.id })
+  return NextResponse.json({ ok: true, id: stage.id })
 }
 
 export async function DELETE(request: Request) {
@@ -61,14 +66,14 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Missing ?id=" }, { status: 400 })
   }
 
-  const cards = readDb()
-  const idx = cards.findIndex((c) => c.id === id)
+  const stages = readDb()
+  const idx = stages.findIndex((s) => s.id === id)
   if (idx < 0) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  cards.splice(idx, 1)
-  writeDb(cards)
+  stages.splice(idx, 1)
+  writeDb(stages)
 
   return NextResponse.json({ ok: true })
 }

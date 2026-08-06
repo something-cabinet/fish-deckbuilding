@@ -13,6 +13,8 @@ import { CardLibraryScreen } from "@/components/game/card-library-screen"
 
 afterEach(cleanup)
 
+const baseCards = Object.values(CARD_LIBRARY)
+
 const customCard: CardDef = {
   ...CARD_LIBRARY.demand_letter,
   id: "custom_bribe",
@@ -23,14 +25,19 @@ describe("CardLibraryScreen", () => {
   function renderScreen(props: Partial<Parameters<typeof CardLibraryScreen>[0]> = {}) {
     return render(
       <CardLibraryScreen
-        customCards={[]}
+        cards={baseCards}
         enemies={[]}
+        stages={[]}
         onBack={() => {}}
         onCreate={() => {}}
         onEdit={() => {}}
+        onDelete={() => {}}
         onEnemyCreate={() => {}}
         onEnemyEdit={() => {}}
         onEnemyDelete={() => {}}
+        onStageCreate={() => {}}
+        onStageEdit={() => {}}
+        onStageDelete={() => {}}
         {...props}
       />,
     )
@@ -40,7 +47,7 @@ describe("CardLibraryScreen", () => {
     renderScreen()
     expect(screen.getByText("Demand Letter")).toBeInTheDocument()
     expect(screen.getByText("Hired Muscle")).toBeInTheDocument()
-    expect(screen.getByText(`${Object.keys(CARD_LIBRARY).length} cards`)).toBeInTheDocument()
+    expect(screen.getByText(`${baseCards.length} cards`)).toBeInTheDocument()
   })
 
   it("filters by type via the chips", () => {
@@ -58,7 +65,7 @@ describe("CardLibraryScreen", () => {
   })
 
   it("shows a Custom badge for authored cards and includes them in the grid", () => {
-    renderScreen({ customCards: [customCard] })
+    renderScreen({ cards: [...baseCards, customCard], customIds: [customCard.id] })
     expect(screen.getByText("Bribe Collector")).toBeInTheDocument()
     expect(screen.getAllByText(/custom/i).length).toBeGreaterThan(0)
   })
@@ -73,16 +80,25 @@ describe("CardLibraryScreen", () => {
     expect(onCreate).toHaveBeenCalledTimes(1)
   })
 
-  it("Edit fires onEdit with the custom card", () => {
+  it("Edit fires onEdit with the card of that tile", () => {
     const onEdit = vi.fn()
-    renderScreen({ customCards: [customCard], onEdit })
-    act(() => fireEvent.click(screen.getByRole("button", { name: /edit/i })))
+    renderScreen({ cards: [...baseCards, customCard], onEdit })
+    act(() => fireEvent.click(screen.getByRole("button", { name: "Edit Bribe Collector" })))
     expect(onEdit).toHaveBeenCalledTimes(1)
     expect(onEdit).toHaveBeenCalledWith(customCard)
   })
 
+  it("Delete fires onDelete with the id of that tile", () => {
+    const onDelete = vi.fn()
+    renderScreen({ cards: [...baseCards, customCard], onDelete })
+    act(() => fireEvent.click(screen.getByRole("button", { name: "Delete Bribe Collector" })))
+    expect(onDelete).toHaveBeenCalledTimes(1)
+    expect(onDelete).toHaveBeenCalledWith(customCard.id)
+  })
+
   it("switches subtabs and shows enemy library / stage placeholder", () => {
-    renderScreen()
+    const onSubtabChange = vi.fn()
+    renderScreen({ onSubtabChange })
     expect(screen.getByText("Demand Letter")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument()
 
@@ -90,13 +106,21 @@ describe("CardLibraryScreen", () => {
     expect(screen.queryByText("Demand Letter")).not.toBeInTheDocument()
     expect(screen.queryByText("No enemies yet — create your first one.")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
+    expect(onSubtabChange).toHaveBeenCalledWith("enemies")
     // the cards-specific Create button should not be in the header
     expect(screen.queryByRole("button", { name: /^create$/i })).not.toBeInTheDocument()
 
     act(() => fireEvent.click(screen.getByRole("button", { name: /stages/i })))
-    expect(screen.getByText("Stage data coming soon")).toBeInTheDocument()
+    expect(screen.getByText(/no stages yet/i)).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /the shallows/i })).toBeInTheDocument()
 
     act(() => fireEvent.click(screen.getByRole("button", { name: /^cards$/i })))
     expect(screen.getByText("Demand Letter")).toBeInTheDocument()
+  })
+
+  it("opens on initialSubtab so an editor round-trip returns to the right tab", () => {
+    renderScreen({ initialSubtab: "enemies" })
+    expect(screen.queryByText("Demand Letter")).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
   })
 })

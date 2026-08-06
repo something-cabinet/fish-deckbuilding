@@ -1,0 +1,96 @@
+{
+  "stages": [
+    {
+      "id": "stage_tripple_enforcer_mshy0c3v",
+      "name": "Tripple Enforcer",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "isBossStage": false,
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 2
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "id": "stage_shit_duo_mshy1b1o",
+      "name": "Shit Duo",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "isBossStage": false,
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "id": "stage_boss_alpha_mshy1szy",
+      "name": "Boss Alpha",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "isBossStage": true,
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "collection_shark",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "thug",
+          "x": 7,
+          "y": 0
+        },
+        {
+          "enemyId": "thug",
+          "x": 7,
+          "y": 4
+        }
+      ]
+    }
+  ]
+}

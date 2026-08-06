@@ -12,7 +12,11 @@ import { FishMafiaApp } from "@/components/game/fish-mafia-app"
 
 installJsdomShims()
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  // each render models a fresh page load; drop the stashed design-tool location
+  sessionStorage.clear()
+})
 
 describe("FishMafiaApp screen navigation", () => {
   it("starts on the menu", () => {
@@ -80,5 +84,38 @@ describe("FishMafiaApp screen navigation", () => {
       fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
     })
     expect(screen.getByRole("heading", { name: /card editor/i })).toBeInTheDocument()
+  })
+
+  it("a reload mid-design returns to the same screen and subtab", () => {
+    const first = render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /^enemies$/i }))
+    })
+    expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
+
+    // saving/deleting rewrites the JSON db, so the dev server hard-reloads
+    first.unmount()
+    render(<FishMafiaApp />)
+
+    expect(screen.getByRole("heading", { name: /game design/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /create enemy/i })).toBeInTheDocument()
+  })
+
+  it("leaving the design tool clears the stored location", () => {
+    const first = render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /design/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /menu/i }))
+    })
+
+    first.unmount()
+    render(<FishMafiaApp />)
+
+    expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument()
   })
 })

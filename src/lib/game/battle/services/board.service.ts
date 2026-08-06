@@ -1,4 +1,3 @@
-import { COLS, ROWS } from "../constants"
 import type { GameState, Pos } from "../models"
 import { posKey } from "../../shared"
 import type { Unit } from "../../units"
@@ -13,7 +12,8 @@ function occupied(state: GameState): Set<string> {
   return s
 }
 
-export const inBounds = (p: Pos) => p.x >= 0 && p.x < COLS && p.y >= 0 && p.y < ROWS
+export const inBounds = (p: Pos, cols: number, rows: number) =>
+  p.x >= 0 && p.x < cols && p.y >= 0 && p.y < rows
 export const manhattan = (a: Pos, b: Pos) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y)
 
 /** Orthogonal BFS reachable tiles for a unit, blocked by occupancy. */
@@ -36,7 +36,7 @@ export function reachableTiles(state: GameState, unitId: string): Pos[] {
       [0, -1],
     ]) {
       const np = { x: cur.x + dx, y: cur.y + dy }
-      if (!inBounds(np)) continue
+      if (!inBounds(np, state.cols, state.rows)) continue
       const k = posKey(np)
       if (seen.has(k)) continue
       if (blocked.has(k)) continue

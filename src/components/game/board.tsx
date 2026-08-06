@@ -3,12 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ParticleCanvas } from "./particle-canvas"
 import { UnitToken } from "./unit-token"
-import { COLS, ROWS, FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
+import { FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
 import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
-const COL_LABELS = Array.from({ length: COLS }, (_, i) => String.fromCharCode(65 + i))
-const ROW_LABELS = Array.from({ length: ROWS }, (_, i) => `${i + 1}`)
 const BOARD_MAX_WIDTH = 1150
 const COL_LETTERS_HEIGHT = 20
 
@@ -40,6 +38,14 @@ export function Board({
   const containerRef = useRef<HTMLDivElement>(null)
   const [boardWidth, setBoardWidth] = useState<number | null>(null)
 
+  // board size comes from the stage the battle was built from
+  const { cols, rows } = state
+  const colLabels = useMemo(
+    () => Array.from({ length: cols }, (_, i) => String.fromCharCode(65 + i)),
+    [cols],
+  )
+  const rowLabels = useMemo(() => Array.from({ length: rows }, (_, i) => `${i + 1}`), [rows])
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -53,7 +59,7 @@ export function Board({
       const availW = Math.max(parent.clientWidth - padX, 100)
       const availH = Math.max(parent.clientHeight - padY - COL_LETTERS_HEIGHT, 100)
 
-      const aspect = COLS / ROWS
+      const aspect = cols / rows
       let w = Math.min(availW, BOARD_MAX_WIDTH)
       let h = w / aspect
       if (h > availH) {
@@ -68,7 +74,7 @@ export function Board({
     const observer = new ResizeObserver(updateSize)
     observer.observe(parent)
     return () => observer.disconnect()
-  }, [])
+  }, [cols, rows])
   const reachSet = useMemo(() => new Set(reachable.map((p) => `${p.x},${p.y}`)), [reachable])
   const tileSet = useMemo(() => new Set(highlightTiles.map((p) => `${p.x},${p.y}`)), [highlightTiles])
   const unitTargets = useMemo(() => new Set(highlightUnitIds), [highlightUnitIds])
@@ -109,7 +115,7 @@ export function Board({
         <div className="flex gap-1.5 sm:gap-2">
           {/* row numbers */}
           <div className="flex flex-col justify-around py-[2px] font-display text-xs text-gold/70">
-            {ROW_LABELS.map((r) => (
+            {rowLabels.map((r) => (
               <span key={r} className="leading-none">
                 {r}
               </span>
@@ -120,7 +126,7 @@ export function Board({
           <div className="relative flex-1">
             <div
               className="relative w-full overflow-hidden rounded-lg ring-1 ring-inset ring-teal/20"
-              style={{ aspectRatio: `${COLS} / ${ROWS}` }}
+              style={{ aspectRatio: `${cols} / ${rows}` }}
             >
               {/* water backdrop */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,oklch(0.3_0.05_220/0.5),transparent_60%)]" />
@@ -129,13 +135,13 @@ export function Board({
               <div
                 className="absolute inset-0 grid"
                 style={{
-                  gridTemplateColumns: `repeat(${COLS}, 1fr)`,
-                  gridTemplateRows: `repeat(${ROWS}, 1fr)`,
+                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                  gridTemplateRows: `repeat(${rows}, 1fr)`,
                 }}
               >
-                {Array.from({ length: COLS * ROWS }, (_, i) => {
-                  const x = i % COLS
-                  const y = Math.floor(i / COLS)
+                {Array.from({ length: cols * rows }, (_, i) => {
+                  const x = i % cols
+                  const y = Math.floor(i / cols)
                   const key = `${x},${y}`
                   const isReach = reachSet.has(key)
                   const isTile = tileSet.has(key)
@@ -163,13 +169,15 @@ export function Board({
               </div>
 
               {/* particle overlay */}
-              {showEffects && <ParticleCanvas fx={fx} />}
+              {showEffects && <ParticleCanvas fx={fx} cols={cols} rows={rows} />}
 
               {/* units */}
               {state.units.map((u) => (
                 <UnitToken
                   key={u.id}
                   unit={u}
+                  cols={cols}
+                  rows={rows}
                   selected={state.selectedUnitId === u.id}
                   isValidTarget={unitTargets.has(u.id)}
                   hit={hitIds.has(u.id)}
@@ -180,8 +188,8 @@ export function Board({
 
               {/* floating numbers */}
               {showEffects && floaters.map((e) => {
-                const left = ((e.to!.x + 0.5) / COLS) * 100
-                const top = ((e.to!.y + 0.2) / ROWS) * 100
+                const left = ((e.to!.x + 0.5) / cols) * 100
+                const top = ((e.to!.y + 0.2) / rows) * 100
                 const isHeal = e.kind === FxKind.Heal
                 const isCoin = e.kind === FxKind.Coin
                 return (
@@ -203,9 +211,9 @@ export function Board({
             {/* column letters */}
             <div
               className="mt-1 grid font-display text-xs text-gold/70"
-              style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
+              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
             >
-              {COL_LABELS.map((c) => (
+              {colLabels.map((c) => (
                 <span key={c} className="text-center leading-none">
                   {c}
                 </span>

@@ -4,7 +4,7 @@
       "id": "thug",
       "name": "Thug",
       "kind": 2,
-      "hp": 6,
+      "hp": 4,
       "atk": 2,
       "move": 2,
       "range": 1,

@@ -1,13 +1,24 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Check, PlusCircle } from "lucide-react"
+import { Check, PlusCircle } from "lucide-react"
 import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
 import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
 import { EffectEditor, type EffectRow } from "./effect-editor"
+import {
+  Chip,
+  DesignHeader,
+  EditingBadge,
+  Field,
+  Panel,
+  PreviewRail,
+  PrimaryButton,
+  Stepper,
+  inputClass,
+} from "./design-ui"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -99,228 +110,110 @@ export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) 
 
   return (
     <main className="flex h-dvh w-full flex-col overflow-hidden bg-ocean-deep text-foreground">
-      {/* header */}
-      <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-ocean-deep/80 px-4 py-2.5 backdrop-blur-sm">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-1 rounded-md border border-white/10 px-2.5 py-1 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
-        >
-          <ArrowLeft size={13} />
-          Back
-        </button>
-        <h1 className="flex items-center gap-1.5 font-display text-lg font-bold uppercase tracking-widest text-foreground">
-          <PlusCircle size={16} className="text-gold" />
-          {editCard ? "Edit" : "Card"} <span className="text-gold">Editor</span>
-        </h1>
-      </header>
+      <DesignHeader icon={PlusCircle} title="Card" accent="Editor" onBack={onBack}>
+        {editCard && <EditingBadge name={editCard.name} />}
+      </DesignHeader>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 md:flex-row">
-        {/* form */}
-        <div className="flex-1 space-y-3">
-          {/* name */}
-          <Field label="Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={22}
-              placeholder="Racketeering"
-              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-gold/50"
-            />
-          </Field>
+        {/* form — splits into two columns once there is room for them */}
+        <div className="flex min-w-0 flex-1 flex-col gap-3 xl:flex-row xl:items-start">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Panel title="Identity">
+              <Field label="Name" htmlFor="card-name">
+                <input
+                  id="card-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={22}
+                  placeholder="Racketeering"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Description" htmlFor="card-desc" hint={`${desc.length}/120`}>
+                <textarea
+                  id="card-desc"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
+                  maxLength={120}
+                  rows={2}
+                  placeholder="Deal 3 damage to a target enemy."
+                  className={cn(inputClass, "resize-none leading-snug")}
+                />
+              </Field>
+            </Panel>
 
-          {/* type + target */}
-          <div className="flex flex-wrap gap-3">
-            <Field label="Type">
-              <div className="flex gap-1.5">
-                {TYPES.map((t) => (
-                  <Chip key={t} active={type === t} onClick={() => setType(t)}>
-                    {t}
-                  </Chip>
-                ))}
-              </div>
-            </Field>
-            <Field label="Target">
-              <div className="flex flex-wrap gap-1.5">
-                {TARGETS.map((t) => (
-                  <Chip key={t.id} active={target === t.id} onClick={() => setTarget(t.id)}>
-                    {t.label}
-                  </Chip>
-                ))}
-              </div>
-            </Field>
+            <Panel title="Rules" bodyClassName="space-y-0 flex flex-wrap gap-x-5 gap-y-3">
+              <Field label="Type">
+                <div className="flex gap-1.5">
+                  {TYPES.map((t) => (
+                    <Chip key={t} active={type === t} onClick={() => setType(t)}>
+                      {t}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Cost">
+                <Stepper value={cost} min={0} max={10} onChange={setCost} label="cost" />
+              </Field>
+              <Field label="Value" hint="sell price">
+                <Stepper value={value} min={0} max={10} onChange={setValue} label="value" />
+              </Field>
+              <Field label="Target" className="basis-full">
+                <div className="flex flex-wrap gap-1.5">
+                  {TARGETS.map((t) => (
+                    <Chip key={t.id} active={target === t.id} onClick={() => setTarget(t.id)}>
+                      {t.label}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+            </Panel>
           </div>
 
-          {/* cost + value + description */}
-          <div className="flex flex-wrap items-end gap-3">
-            <Field label="Cost">
-              <Stepper value={cost} min={0} max={10} onChange={setCost} compact />
-            </Field>
-            <Field label="Value">
-              <Stepper value={value} min={0} max={10} onChange={setValue} compact />
-            </Field>
-            <Field label="Description" className="min-w-[180px] flex-1">
-              <textarea
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-                maxLength={120}
-                rows={2}
-                placeholder="Deal 3 damage to a target enemy."
-                className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm leading-snug text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-gold/50"
-              />
-            </Field>
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <Panel title="Effects">
+              <EffectEditor effects={effects} onChange={setEffects} />
+            </Panel>
+
+            <Panel title="Artwork">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1.5">
+                {CARD_ICON_NAMES.map((n) => {
+                  const Ico = getCardIcon(n)
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setIcon(n)}
+                      aria-label={n}
+                      aria-pressed={icon === n}
+                      className={cn(
+                        "flex aspect-square items-center justify-center rounded-md border transition-colors",
+                        icon === n
+                          ? "border-gold bg-gold/15 text-gold"
+                          : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-foreground",
+                      )}
+                    >
+                      <Ico size={15} strokeWidth={1.75} />
+                    </button>
+                  )
+                })}
+              </div>
+            </Panel>
           </div>
-
-          {/* effects */}
-          <Field label="Effects">
-            <EffectEditor effects={effects} onChange={setEffects} />
-          </Field>
-
-          {/* icon */}
-          <Field label="Icon">
-            <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-12">
-              {CARD_ICON_NAMES.map((n) => {
-                const Ico = getCardIcon(n)
-                return (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setIcon(n)}
-                    aria-label={n}
-                    aria-pressed={icon === n}
-                    className={cn(
-                      "flex aspect-square items-center justify-center rounded-md border transition-colors",
-                      icon === n
-                        ? "border-gold bg-gold/15 text-gold"
-                        : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-foreground",
-                    )}
-                  >
-                    <Ico size={14} strokeWidth={1.75} />
-                  </button>
-                )
-              })}
-            </div>
-          </Field>
         </div>
 
-        {/* preview + save */}
-        <div className="flex shrink-0 flex-col items-center gap-3 md:sticky md:top-0 md:w-[172px]">
-          <span className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            Preview
-          </span>
+        <PreviewRail
+          note={canSave ? undefined : "Give your card a name to save it."}
+          action={
+            <PrimaryButton onClick={handleSave} disabled={!canSave} className="w-full py-2.5 text-sm">
+              <Check size={16} />
+              {editCard ? "Update" : "Save"}
+            </PrimaryButton>
+          }
+        >
           <CardFace def={draft} size="md" />
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave}
-            className={cn(
-              "flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 font-display text-sm font-bold uppercase tracking-widest transition-all",
-              canSave
-                ? "bg-gold text-ocean-deep hover:scale-[1.03]"
-                : "cursor-not-allowed bg-white/10 text-muted-foreground",
-            )}
-          >
-            <Check size={16} />
-            {editCard ? "Update" : "Save"}
-          </button>
-          {!canSave && (
-            <p className="text-center text-[10px] text-muted-foreground">Give your card a name to save it.</p>
-          )}
-        </div>
+        </PreviewRail>
       </div>
     </main>
-  )
-}
-
-function Field({
-  label,
-  children,
-  className,
-}: {
-  label: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <label className={cn("block", className)}>
-      <span className="mb-1 block font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      {children}
-    </label>
-  )
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-full px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wider transition-colors",
-        active
-          ? "bg-gold text-ocean-deep"
-          : "border border-white/10 text-muted-foreground hover:border-gold/40 hover:text-gold",
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Stepper({
-  value,
-  min,
-  max,
-  onChange,
-  compact,
-}: {
-  value: number
-  min: number
-  max: number
-  onChange: (v: number) => void
-  compact?: boolean
-}) {
-  const size = compact ? "h-7 w-7 text-sm" : "h-9 w-9 text-lg"
-  const displaySize = compact ? "h-7 w-10" : "h-9 w-12"
-  const displayText = compact ? "text-sm" : "text-lg"
-  return (
-    <div className="flex items-center gap-1.5">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(min, value - 1))}
-        className={cn(
-          "flex items-center justify-center rounded-lg border border-white/10 font-display font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold",
-          size,
-        )}
-      >
-        −
-      </button>
-      <span className={cn(
-        "flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] font-display font-bold text-gold",
-        displaySize,
-        displayText,
-      )}>
-        {value}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(max, value + 1))}
-        className={cn(
-          "flex items-center justify-center rounded-lg border border-white/10 font-display font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold",
-          size,
-        )}
-      >
-        +
-      </button>
-    </div>
   )
 }

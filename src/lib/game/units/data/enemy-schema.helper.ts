@@ -21,6 +21,10 @@ export const EnemyDefSchema = z.object({
   deck: z.array(EnemyDeckEntrySchema),
 })
 
+export const EnemyPackSchema = z.object({
+  enemies: z.array(EnemyDefSchema),
+})
+
 export type InferredEnemyDef = z.infer<typeof EnemyDefSchema>
 
 type _Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false

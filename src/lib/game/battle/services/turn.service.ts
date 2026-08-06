@@ -76,7 +76,7 @@ export function planEnemyTurn(state: GameState): EnemyStep[] {
         [0, -1],
       ]) {
         const np = { x: e.pos.x + dx, y: e.pos.y + dy }
-        if (!inBounds(np)) continue
+        if (!inBounds(np, state.cols, state.rows)) continue
         if (blocked.has(posKey(np))) continue
         options.push(np)
       }
