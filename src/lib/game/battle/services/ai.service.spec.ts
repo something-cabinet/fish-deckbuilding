@@ -9,6 +9,7 @@ import {
   Team,
   UnitKind,
   resolveAiWeights,
+  unitBounty,
   type EnemyAiProfile,
   type Unit,
 } from "@/lib/game/units"
@@ -181,6 +182,18 @@ describe("ai: multi-unit planning", () => {
     }
     const finals = [...dest.values()]
     expect(new Set(finals).size).toBe(finals.length)
+  })
+
+  it("acts in descending bounty order, so the boss claims its tile first", () => {
+    const s = duel({ pos: { x: 8, y: 2 } })
+    s.units.push(
+      enemy({ id: "enemy_boss", kind: UnitKind.Boss, hp: 16, atk: 4, pos: { x: 8, y: 3 } }),
+    )
+    const order = planEnemyTurn(s).map((st) => st.unitId)
+    expect(order.indexOf("enemy_boss")).toBeLessThan(order.indexOf("enemy_0"))
+    expect(unitBounty(s.units.find((u) => u.id === "enemy_boss")!)).toBeGreaterThan(
+      unitBounty(s.units.find((u) => u.id === "enemy_0")!),
+    )
   })
 
   it("stops planning once no player unit is left standing", () => {

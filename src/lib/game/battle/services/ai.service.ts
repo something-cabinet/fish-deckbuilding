@@ -1,7 +1,7 @@
 import { EnemyStepKind } from "../enums"
 import type { AiCandidate, EnemyStep, GameState, Pos } from "../models"
 import { posKey } from "../../shared"
-import { AiScorer, Team, resolveAiWeights, type Unit } from "../../units"
+import { AiScorer, Team, resolveAiWeights, unitBounty, type Unit } from "../../units"
 import { inBounds, manhattan } from "./board.service"
 
 /** Orthogonal steps, in a fixed order so enumeration — and ties — stay deterministic. */
@@ -208,14 +208,18 @@ function candidateToSteps(candidate: AiCandidate, from: Pos, targetPos?: Pos): E
 /**
  * Deterministically plan the whole enemy turn against a simulated board.
  *
- * Units act in board order; each picks its highest-scoring candidate, and the
- * simulation absorbs the result (position, damage, occupancy) before the next
- * unit plans — so allies do not walk into each other or pile onto a corpse.
+ * Units act in descending bounty order (spec D13), and each picks its
+ * highest-scoring candidate. The simulation absorbs the result (position,
+ * damage, occupancy) before the next unit plans — so allies do not walk into
+ * each other or pile damage onto a corpse.
  */
 export function planEnemyTurn(state: GameState): EnemyStep[] {
   const steps: EnemyStep[] = []
   const sim = state.units.map((u) => ({ ...u, pos: { ...u.pos } }))
-  const enemies = sim.filter((u) => u.team === Team.Enemy)
+  // stable sort, so equal-bounty units keep board order and stay reproducible
+  const enemies = sim
+    .filter((u) => u.team === Team.Enemy)
+    .sort((a, b) => unitBounty(b) - unitBounty(a))
 
   for (const unit of enemies) {
     if (unit.hp <= 0) continue
