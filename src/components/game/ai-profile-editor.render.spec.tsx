@@ -13,7 +13,9 @@ import { AiArchetype, AiScorer, ARCHETYPE_WEIGHTS } from "@/lib/game/units"
 
 afterEach(cleanup)
 
-const aggression = () => screen.getByLabelText(/aggression/i) as HTMLInputElement
+// getByLabelText is ambiguous here: the "Explain" toggle's aria-label also
+// contains the axis name, so target the slider by its input role instead.
+const aggression = () => screen.getByRole("slider", { name: /close the gap/i }) as HTMLInputElement
 
 describe("AiProfileEditor", () => {
   it("defaults to the brawler preset when the enemy has no profile", () => {
@@ -77,5 +79,19 @@ describe("AiProfileEditor", () => {
 
     act(() => fireEvent.click(reset()))
     expect(onChange).toHaveBeenCalledWith({ archetype: AiArchetype.Skirmisher })
+  })
+
+  it("hides slider explanations until Explain is pressed", () => {
+    render(<AiProfileEditor onChange={() => {}} />)
+    const hintText = /walks toward the fight every turn/i
+    expect(screen.queryByText(hintText)).not.toBeInTheDocument()
+
+    const explainBtn = screen.getByRole("button", { name: /show explanation for close the gap/i })
+    act(() => fireEvent.click(explainBtn))
+    expect(screen.getByText(hintText)).toBeInTheDocument()
+    expect(explainBtn).toHaveAttribute("aria-expanded", "true")
+
+    act(() => fireEvent.click(screen.getByRole("button", { name: /hide explanation for close the gap/i })))
+    expect(screen.queryByText(hintText)).not.toBeInTheDocument()
   })
 })
