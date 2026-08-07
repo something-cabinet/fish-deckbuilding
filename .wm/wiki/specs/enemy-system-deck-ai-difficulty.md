@@ -1,4 +1,5 @@
 ---
+
 title: Enemy System — Deck, AI Card Play, and Difficulty
 type: spec
 tags: [game-design, enemy, cards, ai, combat]
@@ -134,6 +135,17 @@ Define enemy deck composition, card-play AI, and difficulty scaling for the tact
 - `can_counterattack(defender, attacker_pos)` checks `defender.range`: `Melee` requires attacker adjacent, `Ranged` always true — matches Duelyst's strikeback behavior
 - Exhaustion: `GridUnit` fields `moves_made: i32, attacks_made: i32, max_moves: i32, max_attacks: i32`
 - Enemy gold drop stored on enemy type
+
+## Implementation Note (2026-08-07)
+
+This spec was authored against a planned Rust/Godot core (`rust/src/core/...`, `cargo test`). The project has since standardized on TypeScript/Next.js (see @wiki/core/conventions) — the Godot direction was archived 2026-08-04 (see the archived `godot-battle-*` tasks). The AI portion actually implemented lives at `src/lib/game/battle/services/ai.service.ts`:
+
+- **D13 (multi-unit priority) and D14 (lethal detection) are implemented**, but as a utility-scoring planner rather than the literal bounty-sort-then-lethal-scan algorithm described above — see @wiki/patterns/utility-scoring-enemy-ai and @wiki/decisions/utility-scoring-over-behavior-tree-for-enemy-ai. Lethal detection in particular is not a separate pre-pass; it collapses into a `LethalOnHero` scorer weighted high enough (1000) to dominate the decision, which reproduces D14's effect without a special-cased branch.
+- **D15 (Range enum) and D16 (exhaustion counters) are NOT implemented.** The current TS `Unit` interface has a numeric `range` field and `hasMoved`/`hasActed` bools — no `Range::Melee`/`Range::Ranged` enum, no `moves_made`/`attacks_made`/`max_moves`/`max_attacks`. AC-12 through AC-20 do not apply to the current stack.
+- **FR-1 through FR-10 (enemy deck/hand/mana card-play AI) are NOT implemented.** Enemies currently only move and base-attack; they have no hand, deck, or mana loop of their own. `EnemyDef.deck` exists in `enemy-database.json` (see @wiki/specs/enemy-designer-ui) but nothing yet expands it into enemy hands or plays cards from it.
+- AC-9 (`cargo test`) does not apply — the equivalent gate is `npm test` (Vitest) per @wiki/core/conventions.
+
+Re-scope this spec's ACs against the TS implementation before treating it as a checklist again — several are stale claims about a platform that was never built here, not unmet current-stack requirements.
 
 ## Open Questions
 

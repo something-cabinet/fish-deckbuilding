@@ -13,6 +13,8 @@ type: reference
 - [cascade panic type assumption godot](wiki/concepts/cascade-panic-type-assumption-godot.md) — *draft*
 - [ci nightly clippy drift](wiki/concepts/ci-nightly-clippy-drift.md) — *draft*
 - [clippy rejects unused reserved code](wiki/concepts/clippy-rejects-unused-reserved-code.md) — *draft*
+- [Failure: CSS Grid Row-Stretch Strands Blank Space Next to a Shorter Sibling](wiki/concepts/css-grid-row-stretch-vs-multi-column-for-variable-height-siblings.md) — *draft*
+- [Failure: eslint@10 Breaks eslint-config-next / eslint-plugin-react in This Repo](wiki/concepts/eslint-10-incompatible-with-current-nextjs-lint-ecosystem.md) — *draft*
 - [fixer-lane-silent-noops-empty-results](wiki/concepts/fixer-lane-silent-noops-empty-results.md) — *draft*
 - [Concept: Game Menu Architecture](wiki/concepts/game-menu-architecture.md) — *draft*
 - [gdext Bridge Pattern](wiki/concepts/gdext-bridge-pattern.md) — *active*
@@ -93,6 +95,7 @@ type: reference
 
 - [app-shell-screen-orchestration](wiki/decisions/app-shell-screen-orchestration.md) — *draft*
 - [pure-function-ecs-pivot](wiki/decisions/pure-function-ecs-pivot.md) — *draft*
+- [Decision: Utility Scoring Over Behavior-Tree/Component System for Enemy AI](wiki/decisions/utility-scoring-over-behavior-tree-for-enemy-ai.md) — *approved*
 
 ## memorys
 
@@ -100,6 +103,7 @@ type: reference
 - [Affix-Based Effect Composition Pattern](wiki/memory/affix-based-effect-composition.md) — *active*
 - [Angular-style file system convention applied (Aug 2026)](wiki/memory/angular-style-file-system-convention-applied-aug-2026.md) — *active*
 - [Bridge-Engine Deadlock Pattern](wiki/memory/bridge-engine-deadlock-pattern.md) — *active*
+- [Card Database Persistence pattern](wiki/memory/card-database-persistence-pattern.md) — *active*
 - [Card Effect Registry — Command Pipeline Implementation (2026-08-03)](wiki/memory/card-effect-registry-command-pipeline-implementation-2026-08-03.md) — *active*
 - [CI nightly clippy lints differ from local](wiki/memory/ci-nightly-clippy-lints-differ-from-local.md) — *active*
 - [Clippy CI Dead Code](wiki/memory/clippy-ci-dead-code.md) — *draft*
@@ -170,6 +174,7 @@ type: reference
 - [critical-patterns](wiki/patterns/critical-patterns.md) — *draft*
 - [Incremental UI Migration from Rust Bridge to tscn](wiki/patterns/incremental-ui-to-tscn.md) — *draft*
 - [rust-ci-caching-subdirectory](wiki/patterns/rust-ci-caching-subdirectory.md) — *draft*
+- [Pattern: Utility-Scoring Enemy AI (Enumerate-and-Score Planner)](wiki/patterns/utility-scoring-enemy-ai.md) — *draft*
 
 ## references
 
@@ -205,6 +210,7 @@ type: reference
 - [Combat Affix & Crafting System](wiki/specs/combat-affix-crafting-system.md) — *draft*
 - [Domain-Layered Engine Structure (Option B)](wiki/specs/domain-layered-engine-structure.md) — *approved*
 - [Enemy Card Reveal Animation & Graveyard Viewer](wiki/specs/enemy-card-reveal-graveyard-viewer.md) — *draft*
+- [Enemy Designer UI](wiki/specs/enemy-designer-ui.md) — *approved*
 - [Enemy System — Deck, AI Card Play, and Difficulty](wiki/specs/enemy-system-deck-ai-difficulty.md) — *approved*
 - [Fish Roguelite Deckbuilding Game](wiki/specs/fish-roguelite-deckbuilding.md) — *superseded*
 - [Fish Tactical RPG — Overworld + Duelyst-Style Grid Combat](wiki/specs/fish-tactical-rpg.md) — *approved*
@@ -239,6 +245,7 @@ type: reference
 - [Implement crafting actions — mode actions, confirmation, result, accept/close](wiki/tasks/crafting-ui-actions.md) — *done*
 - [Implement crafting Rust bridge — open, card browser, detail view](wiki/tasks/crafting-ui-bridge-plumbing.md) — *done*
 - [Add CraftingPanel node tree to overworld.tscn](wiki/tasks/crafting-ui-scene-nodes.md) — *done*
+- [Create POST /api/cards route with upsert](wiki/tasks/create-post-apicards-route-with-upsert.md) — *done*
 - [Deck/discard pile visualization (Godot)](wiki/tasks/deckdiscard-pile-visualization-godot.md) — *todo*
 - [Defeat flow — return to overworld with HP, no permadeath](wiki/tasks/defeat-flow--return-to-overworld-with-hp-no-permadeath.md) — *todo*
 - [Dialogue system — wire dialogue scene into campaign flow (Godot)](wiki/tasks/dialogue-system--wire-dialogue-scene-into-campaign-flow-godot.md) — *todo*
@@ -256,6 +263,7 @@ type: reference
 - [Hook StrictMode render test — red-green validated against the command-drain fix](wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix.md) — *done*
 - [Implement correct UI theme — Guppy's mafia underworld escape story](wiki/tasks/implement-correct-ui-theme--guppys-mafia-underworld-escape-story.md) — *in-progress*
 - [Implement effect resolver (exhaustive match + custom registry)](wiki/tasks/implement-effect-resolver-exhaustive-match--custom-registry.md) — *done*
+- [Import card-database.json into CARD_LIBRARY and wire save button](wiki/tasks/import-card-databasejson-into-cardlibrary-and-wire-save-button.md) — *done*
 - [Investigate GDScript vs godot-rust for scene scripting](wiki/tasks/investigate-gdscript-vs-godot-rust.md) — *done*
 - [Migrate cards to JSON packs with zod schema + loader](wiki/tasks/migrate-cards-to-json-packs-with-zod-schema--loader.md) — *done*
 - [Overworld engine — types, zone data, seeded map generation, save/load](wiki/tasks/overworld-engine--types-zone-data-seeded-map-generation-saveload.md) — *done*
@@ -273,6 +281,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 237
-- **Edges:** 389
+- **Nodes:** 245
+- **Edges:** 409
 
