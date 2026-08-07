@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react"
 import { Check, Plus, Swords, Trash2 } from "lucide-react"
 import { CARD_LIBRARY } from "@/lib/game"
-import { UnitKind, type EnemyDef } from "@/lib/game/units"
+import { isDefaultAiProfile, UnitKind, type EnemyAiProfile, type EnemyDef } from "@/lib/game/units"
+import { AiProfileEditor } from "./ai-profile-editor"
 import { EnemyFace } from "./enemy-face"
 import {
   Chip,
@@ -53,6 +54,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
   const [isMinion, setIsMinion] = useState(editEnemy?.isMinion ?? false)
   const [sprite, setSprite] = useState(editEnemy?.icon ?? "thug")
   const [deck, setDeck] = useState<{ id: string; count: number }[]>(editEnemy?.deck ?? [])
+  const [aiProfile, setAiProfile] = useState<EnemyAiProfile | undefined>(editEnemy?.aiProfile)
 
   const cardOptions = useMemo(
     () =>
@@ -76,6 +78,8 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
     isMinion,
     icon: sprite,
     deck,
+    // a brawler with no tweaks is the engine default — don't write it down
+    aiProfile: isDefaultAiProfile(aiProfile) ? undefined : aiProfile,
   }
 
   function handleSave() {
@@ -160,6 +164,8 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                 </div>
               </Field>
             </Panel>
+
+            <AiProfileEditor value={aiProfile} onChange={setAiProfile} />
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col gap-3">

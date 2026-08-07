@@ -59,3 +59,14 @@ export function resolveAiWeights(profile?: EnemyAiProfile): Record<AiScorer, num
   const p = profile ?? DEFAULT_AI_PROFILE
   return { ...ARCHETYPE_WEIGHTS[p.archetype], ...p.weights }
 }
+
+/**
+ * True when a profile says nothing the default would not. Editors drop these
+ * on save so authored packs stay sparse and a template only carries an
+ * `aiProfile` when a designer actually meant something by it.
+ */
+export function isDefaultAiProfile(profile?: EnemyAiProfile): boolean {
+  if (!profile) return true
+  if (profile.archetype !== DEFAULT_AI_PROFILE.archetype) return false
+  return Object.keys(profile.weights ?? {}).length === 0
+}
