@@ -59,6 +59,7 @@ export function stageToSpawns(
       atk: Math.round(def.atk * scale),
       move: def.move,
       range: def.range,
+      aiProfile: def.aiProfile,
     })
   }
   return out

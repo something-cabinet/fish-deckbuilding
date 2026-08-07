@@ -1,20 +1,10 @@
 import { EnemyStepKind, FxKind, Phase } from "../enums"
-import type { FxEvent, GameState, Pos } from "../models"
-import { cellLabel, clone, heroUnit, log, posKey } from "../../shared"
+import type { EnemyStep, FxEvent, GameState } from "../models"
+import { clone, heroUnit, log } from "../../shared"
 import { Team } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
 import { COIN_TURN_BASE } from "../../cards"
-import { inBounds, manhattan } from "./board.service"
-
-export interface EnemyStep {
-  kind: EnemyStepKind
-  unitId: string
-  from?: Pos
-  to?: Pos
-  targetId?: string
-  amount?: number
-}
 
 export function checkEnd(state: GameState) {
   const hero = heroUnit(state)
@@ -35,68 +25,6 @@ export function startEnemyPhase(state: GameState): GameState {
   const s = clone(state)
   s.phase = Phase.Enemy
   return s
-}
-
-/** Deterministically plan the enemy turn against a simulated board. */
-export function planEnemyTurn(state: GameState): EnemyStep[] {
-  const steps: EnemyStep[] = []
-  // simulate positions / hp locally
-  const sim = state.units.map((u) => ({ ...u, pos: { ...u.pos } }))
-  const alive = () => sim.filter((u) => u.hp > 0)
-  const blockedSet = () => new Set(alive().map((u) => posKey(u.pos)))
-
-  const players = () => alive().filter((u) => u.team === Team.Player)
-  const enemies = sim.filter((u) => u.team === Team.Enemy)
-
-  for (const e of enemies) {
-    if (e.hp <= 0) continue
-    const targets = players()
-    if (targets.length === 0) break
-    // nearest player
-    let target = targets[0]
-    let best = manhattan(e.pos, target.pos)
-    for (const t of targets) {
-      const d = manhattan(e.pos, t.pos)
-      if (d < best) {
-        best = d
-        target = t
-      }
-    }
-
-    // move greedily toward target (up to move range), not onto occupied tiles
-    let steps_left = e.move
-    while (steps_left > 0 && manhattan(e.pos, target.pos) > 1) {
-      const blocked = blockedSet()
-      blocked.delete(posKey(e.pos))
-      const options: Pos[] = []
-      for (const [dx, dy] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ]) {
-        const np = { x: e.pos.x + dx, y: e.pos.y + dy }
-        if (!inBounds(np, state.cols, state.rows)) continue
-        if (blocked.has(posKey(np))) continue
-        options.push(np)
-      }
-      if (options.length === 0) break
-      options.sort((a, b) => manhattan(a, target.pos) - manhattan(b, target.pos))
-      const next = options[0]
-      if (manhattan(next, target.pos) >= manhattan(e.pos, target.pos)) break
-      steps.push({ kind: EnemyStepKind.Move, unitId: e.id, from: { ...e.pos }, to: { ...next } })
-      e.pos = next
-      steps_left--
-    }
-
-    // attack if adjacent
-    if (manhattan(e.pos, target.pos) <= 1) {
-      const dmg = Math.max(0, e.atk + e.buffAtk)
-      steps.push({ kind: EnemyStepKind.Attack, unitId: e.id, targetId: target.id, amount: dmg, to: { ...target.pos } })
-      target.hp -= dmg
-    }
-  }
-  return steps
 }
 
 /** Apply a single planned enemy step to real state, producing fx. */

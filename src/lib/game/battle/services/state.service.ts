@@ -55,6 +55,7 @@ export function createInitialState(overrides?: {
     hasMoved: false,
     hasActed: false,
     buffAtk: 0,
+    aiProfile: e.aiProfile,
   }))
 
   return {

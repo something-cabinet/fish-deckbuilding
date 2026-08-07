@@ -1,6 +1,7 @@
 import type { Pos } from "../../battle"
 import type { Team } from "../enums/team.enum"
 import type { UnitKind } from "../enums/unit-kind.enum"
+import type { EnemyAiProfile } from "./ai-profile.interface"
 
 export interface Unit {
   id: string
@@ -16,4 +17,6 @@ export interface Unit {
   hasMoved: boolean
   hasActed: boolean
   buffAtk: number
+  /** enemy-only AI tuning, copied from the template at spawn; absent = brawler */
+  aiProfile?: EnemyAiProfile
 }
