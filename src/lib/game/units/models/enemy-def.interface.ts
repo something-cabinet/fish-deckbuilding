@@ -1,4 +1,5 @@
 import type { UnitKind } from "../enums/unit-kind.enum"
+import type { EnemyAiProfile } from "./ai-profile.interface"
 
 export interface EnemyDef {
   id: string
@@ -12,4 +13,6 @@ export interface EnemyDef {
   isMinion: boolean
   icon: string
   deck: { id: string; count: number }[]
+  /** AI tuning; omitted templates fall back to DEFAULT_AI_PROFILE */
+  aiProfile?: EnemyAiProfile
 }

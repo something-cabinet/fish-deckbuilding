@@ -1,0 +1,21 @@
+{
+  "entity_id": "wiki:tasks:scripted-rule-layer-for-boss-ai-phases",
+  "current_version": 1,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-07T08:19:36.732Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "in-progress"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

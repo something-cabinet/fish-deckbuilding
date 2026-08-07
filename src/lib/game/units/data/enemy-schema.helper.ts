@@ -1,10 +1,18 @@
 import { z } from "zod"
+import { AiArchetype } from "../enums/ai-archetype.enum"
+import { AiScorer } from "../enums/ai-scorer.enum"
 import { UnitKind } from "../enums/unit-kind.enum"
 import type { EnemyDef } from "../models/enemy-def.interface"
 
 export const EnemyDeckEntrySchema = z.object({
   id: z.string(),
   count: z.number().int().min(1),
+})
+
+/** partialRecord, not record: designers override individual scorers only */
+export const EnemyAiProfileSchema = z.object({
+  archetype: z.nativeEnum(AiArchetype),
+  weights: z.partialRecord(z.nativeEnum(AiScorer), z.number()).optional(),
 })
 
 export const EnemyDefSchema = z.object({
@@ -19,6 +27,7 @@ export const EnemyDefSchema = z.object({
   isMinion: z.boolean(),
   icon: z.string(),
   deck: z.array(EnemyDeckEntrySchema),
+  aiProfile: EnemyAiProfileSchema.optional(),
 })
 
 export const EnemyPackSchema = z.object({

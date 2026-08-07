@@ -1,4 +1,11 @@
 ---
+
+title: Critical Patterns
+type: core
+tags: [critical]
+---
+
+---
 title: Critical Patterns
 type: core
 tags: [critical]
@@ -217,3 +224,45 @@ The fixer subagent returned `state: completed` with EMPTY result messages and ZE
 **What to do differently:** Centralize the jsdom shims in `src/components/game/test-utils.tsx`; when a render test can't find text, check for split text nodes before suspecting the component; use fake timers for chained async waits.
 
 **Full entry:** @wiki/patterns/render-test-jsdom-gotchas
+
+---
+
+## 2026-08-07 — Utility-Scoring Enemy AI: Enumerate-and-Score Instead of Branching
+
+**Category:** pattern
+**Source:** @wiki/patterns:utility-scoring-enemy-ai
+**Tags:** [ai, enemy, battle, game-design]
+
+When an AI's action space per turn is small and fully enumerable (this project: BFS reachable tiles × in-range targets, ~10-30 candidates), enumerate every candidate and score it on a fixed set of named axes instead of writing per-enemy branching logic or building a behavior-tree/component editor. "Personality" becomes a weight vector (data) instead of code — new enemy archetypes need zero new branches. Two things that looked like special cases (spec D14 "always take the lethal kill first"; the not-yet-built shield/heal-below-HP-threshold logic) both collapsed into scorer weights instead of dedicated branches once framed this way.
+
+**What to do differently:** Before hand-coding branching AI logic or reaching for a visual behavior-tree editor, check whether the action space is enumerable. If it is, enumerate + score is usually cheaper to build, debug (free decision introspection via `rankCandidates()`), and make designer-tunable than either alternative. Reserve bespoke code/behavior trees for genuinely sequential behavior (multi-step boss phases) that a per-turn scorer cannot express.
+
+**Full entry:** @wiki/patterns/utility-scoring-enemy-ai · decision: @wiki/decisions/utility-scoring-over-behavior-tree-for-enemy-ai
+
+---
+
+## 2026-08-07 — CSS Grid Row-Stretch Strands Blank Space Next to a Shorter, Dynamically-Growing Sibling
+
+**Category:** failure
+**Source:** @wiki/concepts:css-grid-row-stretch-vs-multi-column-for-variable-height-siblings
+**Tags:** [css, layout, ui]
+
+Two `grid grid-cols-2` cells sharing a row always share the row's height (`max-content` of the tallest cell). When one cell's content can grow interactively (a collapsible explanation toggled open) while its row-mate stays short, the short cell is left with dead space beneath it — and `items-start` does NOT fix this, it only changes alignment *within* the shared row height, not the row height itself. This was hit twice in one session in the same enemy-designer UI: once fixed correctly with `items-start` (independent panels, not sharing a row), once where `items-start` visibly failed to help (two sliders sharing a row, one expandable).
+
+**What to do differently:** When two elements are literal siblings in the same grid row and one's height can change independently at runtime, use CSS multi-column flow (`columns-2 gap-x-6` + `break-inside-avoid` per item) instead of `grid`, so each item stacks down its own column with no shared row height. Reserve `items-start` on `grid` for mismatches between independent rows/panels that don't change height relative to each other after mount. Note: multi-column flow is column-major, not row-major — check whether left-right adjacency matters for the content before switching.
+
+**Full entry:** @wiki/concepts/css-grid-row-stretch-vs-multi-column-for-variable-height-siblings
+
+---
+
+## 2026-08-07 — eslint@10 Is Incompatible with eslint-config-next / eslint-plugin-react
+
+**Category:** failure
+**Source:** @wiki/concepts:eslint-10-incompatible-with-current-nextjs-lint-ecosystem
+**Tags:** [tooling, eslint, nextjs]
+
+`npm run lint` fails in this repo because `package.json` pins `eslint: ^10.8.0` while `eslint-plugin-react` (pulled in by `eslint-config-next`) only supports ESLint up to `^9.7` as of this session — its `react/display-name` rule calls `context.getFilename()`, an API ESLint 9+ removed. The failure surfaces as two different, confusing errors first (`FlatCompat` circular-JSON crash, then `scopeManager.addGlobals is not a function`) before a single-file repro reveals the real peer-dependency mismatch. No flat-config trick fixes it — the plugin itself throws on ESLint 10's context API.
+
+**What to do differently:** When a lint/plugin chain throws confusing internal errors after a major version bump, check `npm view <plugin>@latest peerDependencies` FIRST, before debugging config shape. Fix here (not yet applied) is downgrading `eslint` to `^9.39` to match what the Next.js lint plugin ecosystem actually supports.
+
+**Full entry:** @wiki/concepts/eslint-10-incompatible-with-current-nextjs-lint-ecosystem

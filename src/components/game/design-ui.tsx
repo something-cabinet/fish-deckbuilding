@@ -28,7 +28,7 @@ export function DesignHeader({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+        className="flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
       >
         <ArrowLeft size={14} />
         {backLabel}
@@ -87,7 +87,7 @@ export function Panel({
   return (
     <section className={cn("rounded-xl border border-white/10 bg-white/[0.03] p-3", className)}>
       {title && (
-        <h2 className="mb-2.5 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80">
+        <h2 className="mb-3 border-b border-white/10 pb-2 font-display text-base font-bold uppercase tracking-[0.08em] text-gold">
           {title}
         </h2>
       )}
@@ -117,14 +117,14 @@ export function Field({
     <>
       {label}
       {hint && (
-        <span className="ml-1.5 font-sans text-[9px] font-normal normal-case tracking-normal text-muted-foreground/60">
+        <span className="ml-1.5 font-sans text-xs font-normal normal-case tracking-normal text-muted-foreground">
           {hint}
         </span>
       )}
     </>
   )
   const captionClass =
-    "mb-1 block font-display text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
+    "mb-1.5 block font-display text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground"
 
   return (
     <div className={cn("min-w-0", className)}>
@@ -144,7 +144,7 @@ export const inputClass =
   "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-gold/50"
 
 export const selectClass =
-  "rounded-md border border-white/10 bg-ocean-deep px-2 py-1.5 font-display text-[10px] font-bold uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
+  "rounded-md border border-white/10 bg-ocean-deep px-2 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
 
 export function Chip({
   active,
@@ -161,7 +161,7 @@ export function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wider transition-colors",
+        "rounded-full px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
         active
           ? "bg-gold text-ocean-deep"
           : "border border-white/10 text-muted-foreground hover:border-gold/40 hover:text-gold",
@@ -187,7 +187,7 @@ export function Stepper({
   label: string
 }) {
   const btn =
-    "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 font-display text-sm font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold"
+    "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 font-display text-base font-bold text-foreground transition-colors hover:border-gold/40 hover:text-gold"
   return (
     <div className="flex items-center gap-1">
       <button
@@ -198,7 +198,7 @@ export function Stepper({
       >
         −
       </button>
-      <span className="flex h-7 w-10 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] font-display text-sm font-bold text-gold">
+      <span className="flex h-8 w-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] font-display text-base font-bold text-gold">
         {value}
       </span>
       <button
@@ -229,12 +229,12 @@ export function PreviewRail({
   return (
     <aside className="shrink-0 border-white/10 md:sticky md:top-0 md:w-[190px] md:self-start md:border-l md:pl-4">
       <div className="flex flex-col items-center gap-3">
-        <span className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="font-display text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
           Preview
         </span>
         {children}
         <div className="w-full max-w-[170px]">{action}</div>
-        {note && <p className="max-w-[170px] text-center text-[10px] text-muted-foreground">{note}</p>}
+        {note && <p className="max-w-[170px] text-center text-xs text-muted-foreground">{note}</p>}
       </div>
     </aside>
   )
@@ -250,7 +250,7 @@ export const libraryGridClass =
 /** Header chip naming the record an editor is currently changing. */
 export function EditingBadge({ name }: { name: string }) {
   return (
-    <span className="max-w-[240px] truncate rounded-full border border-gold/30 bg-gold/10 px-3 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-gold">
+    <span className="max-w-[240px] truncate rounded-full border border-gold/30 bg-gold/10 px-3 py-1 font-display text-xs font-bold uppercase tracking-wider text-gold">
       Editing {name}
     </span>
   )
@@ -261,7 +261,7 @@ export function EmptyState({ icon: Icon, children }: { icon: React.ElementType; 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20 text-center">
       <Icon size={28} className="text-muted-foreground/40" />
-      <p className="font-display text-xs uppercase tracking-[0.2em] text-muted-foreground">{children}</p>
+      <p className="font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">{children}</p>
     </div>
   )
 }
@@ -287,7 +287,7 @@ export function TileAction({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "flex items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-display text-[9px] font-bold uppercase tracking-wider text-muted-foreground transition-colors",
+        "flex items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors",
         danger ? "hover:border-red-400/40 hover:text-red-400" : "hover:border-gold/40 hover:text-gold",
         className,
       )}

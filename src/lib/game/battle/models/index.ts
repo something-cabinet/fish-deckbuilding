@@ -1,3 +1,5 @@
+export * from "./ai-candidate.interface"
+export * from "./enemy-step.interface"
 export * from "./fx-event.interface"
 export * from "./game-state.interface"
 export * from "./log-entry.interface"

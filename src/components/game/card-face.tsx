@@ -5,13 +5,14 @@ import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
 import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
-const TYPE_STYLES: Record<CardType, string> = {
+/** Shared with any surface that needs to badge a card by type (e.g. deck-entry detail views). */
+export const TYPE_STYLES: Record<CardType, string> = {
   [CardType.Attack]: "bg-enemy text-white",
   [CardType.Skill]: "bg-teal text-ocean-deep",
   [CardType.Summon]: "bg-gold text-ocean-deep",
 }
 
-const TARGET_LABELS: Record<CardTarget, string> = {
+export const TARGET_LABELS: Record<CardTarget, string> = {
   [CardTarget.Enemy]: "Enemy",
   [CardTarget.Ally]: "Ally",
   [CardTarget.Unit]: "Any unit",
