@@ -51,6 +51,7 @@ type: reference
 - [mafia pixel world replacement](wiki/mafia-pixel-world-replacement.md) — *draft*
 - [browser game persistence localstorage](wiki/memory/browser-game-persistence-localstorage.md) — *draft*
 - [recurring pattern untested orchestrator p0s](wiki/memory/recurring-pattern-untested-orchestrator-p0s.md) — *draft*
+- [utility scoring enemy ai enumerate candidates score by weighted axes](wiki/memory/utility-scoring-enemy-ai-enumerate-candidates-score-by-weighted-axes.md) — *draft*
 - [affix based effect composition](wiki/patterns/affix-based-effect-composition.md) — *draft*
 - [behavior capture parity oracle](wiki/patterns/behavior-capture-parity-oracle.md) — *draft*
 - [card library authoring](wiki/patterns/card-library-authoring.md) — *draft*
@@ -109,6 +110,7 @@ type: reference
 - [Clippy CI Dead Code](wiki/memory/clippy-ci-dead-code.md) — *draft*
 - [CombatOrchestrator for Turn-Based ECS](wiki/memory/combatorchestrator-for-turn-based-ecs.md) — *active*
 - [Component system scan Aug 2026](wiki/memory/component-system-scan-aug-2026.md) — *active*
+- [CSS grid row-stretch traps variable-height siblings — use multi-column instead](wiki/memory/css-grid-row-stretch-traps-variable-height-siblings-use-multi-column-instead.md) — *active*
 - [CSS Variable Theming System](wiki/memory/css-variable-theming-system.md) — *active*
 - [Designer model cost — terra over sol past 256K](wiki/memory/designer-model-cost-terra-over-sol-past-256k.md) — *active*
 - [Discriminator policy — enum keyword over unions (2026-08-04)](wiki/memory/discriminator-policy-enum-keyword-over-unions-2026-08-04.md) — *active*
@@ -119,6 +121,7 @@ type: reference
 - [Effects-First Card Model](wiki/memory/effects-first-card-model.md) — *draft*
 - [Engine restructure — function-first domains (2026-08-04)](wiki/memory/engine-restructure-function-first-domains-2026-08-04.md) — *active*
 - [Engine structure — function-first + enums/constants extraction (2026-08-04)](wiki/memory/engine-structure-function-first-enums-constants-extraction-2026-08-04.md) — *active*
+- [eslint@10 in this repo is incompatible with eslint-config-next](wiki/memory/eslint-10-in-this-repo-is-incompatible-with-eslint-config-next.md) — *active*
 - [FaB Coin System](wiki/memory/fab-coin-system.md) — *active*
 - [FaB-Style Action Card Type](wiki/memory/fab-style-action-card-type.md) — *active*
 - [Fixer lane silent no-ops — verify disk, bound tasks](wiki/memory/fixer-lane-silent-no-ops-verify-disk-bound-tasks.md) — *active*
@@ -224,6 +227,7 @@ type: reference
 - [Save/Load — Godot ConfigFile/Resource Persistence](wiki/specs/save-load-persistence.md) — *superseded*
 - [StrictMode Command Regression Tests — Hook + Component + E2E Coverage](wiki/specs/strictmode-command-regression-tests.md) — *approved*
 - [Summon Card System — Unit Spawning and Minion Management](wiki/specs/summon-card-system.md) — *draft*
+- [Trinket System (StS Relic-style)](wiki/specs/trinket-system.md) — *draft*
 - [Battle & Overworld UI — Declare in .tscn](wiki/specs/tscn-ui-declaration.md) — *superseded*
 - [UI Exported Node References — GDScript @export for Rust Bridge](wiki/specs/ui-exported-node-refs.md) — *superseded*
 - [ui-panels-to-tscn](wiki/specs/ui-panels-to-tscn.md) — *superseded*
@@ -274,6 +278,7 @@ type: reference
 - [Review and rename card types to thematic names (Rust core)](wiki/tasks/review-and-rename-card-types-to-thematic-names-rust-core.md) — *todo*
 - [Rewire castCard to the resolver; remove the card-id switch](wiki/tasks/rewire-castcard-to-the-resolver-remove-the-card-id-switch.md) — *done*
 - [Save/Load — Godot ConfigFile/Resource persistence, wire to menu](wiki/tasks/saveload--godot-configfileresource-persistence-wire-to-menu.md) — *todo*
+- [Scripted-rule layer for boss AI phases](wiki/tasks/scripted-rule-layer-for-boss-ai-phases.md) — *todo*
 - [Set up vitest test harness for the engine](wiki/tasks/set-up-vitest-test-harness-for-the-engine.md) — *done*
 - [Update stale docs (CONVENTIONS, ARCHITECTURE, DESIGN.md) to real Next.js/React stack + new file convention](wiki/tasks/update-stale-docs-conventions-architecture-designmd-to-real-nextjsreact-stack--new-file-convention.md) — *done*
 - [Wire Rust battle/combat core to Godot via gdext bridge with signals](wiki/tasks/wire-rust-battlecombat-core-to-godot-via-gdext-bridge-with-signals.md) — *done*
@@ -281,6 +286,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 245
-- **Edges:** 409
+- **Nodes:** 250
+- **Edges:** 420
 
