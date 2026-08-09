@@ -31,11 +31,12 @@ interface GameProps {
   onWin?: (heroHp: number, fin: number) => void
   onLose?: (heroHp: number) => void
   onExit: () => void
+  onDebugReady?: (debug: { debugUpdate: (p: Partial<GameState>) => void }) => void
 }
 
-export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: GameProps) {
+export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebugReady }: GameProps) {
   const game = useFishMafia(initial)
-  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor } = game
+  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor, debugUpdate } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
@@ -129,6 +130,11 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit }: Game
     },
     [state.units],
   )
+
+  // expose battle debug handle to parent
+  useEffect(() => {
+    onDebugReady?.({ debugUpdate })
+  }, [onDebugReady, debugUpdate])
 
   // track the cursor while a card is armed via click (no active drag)
   useEffect(() => {

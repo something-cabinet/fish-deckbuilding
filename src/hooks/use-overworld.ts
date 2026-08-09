@@ -221,6 +221,11 @@ export function useOverworld() {
   )
 
   /** Build the battle GameState for the hero's current node. */
+  /** Debug: apply a partial update to overworld state directly. */
+  const debugUpdate = useCallback((partial: Partial<OverworldState>) => {
+    setState((s) => (s ? { ...s, ...partial } : s))
+  }, [])
+
   const buildBattleState = useCallback(
     (nodeIdOverride?: string): GameState | null => {
       const s = state
@@ -276,6 +281,7 @@ export function useOverworld() {
     leaveShop,
     resolveEvent,
     onLoss,
+    debugUpdate,
     buildBattleState,
   }
 }

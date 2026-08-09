@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { CARD_LIBRARY } from "@/lib/game"
 import type { CardDef, GameState } from "@/lib/game"
 import { STAGE_LIBRARY, type StageDef } from "@/lib/game/stages"
@@ -22,6 +22,7 @@ import { RunSummary } from "./run-summary"
 import { SavePrompt } from "./save-prompt"
 import { ShopScreen } from "./shop-screen"
 import { useOverworld } from "@/hooks/use-overworld"
+import { DebugMenu } from "./debug-menu"
 
 export interface GameSettings {
   /** show teal reachable-tile dots when a unit is selected */
@@ -80,6 +81,8 @@ export function FishMafiaApp() {
   const [hydrated, setHydrated] = useState(false)
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
+  // battle debug handle set by FishMafiaGame on mount
+  const battleDebugRef = useRef<{ debugUpdate: (p: Partial<GameState>) => void } | null>(null)
   // cards from the database, managed in-app for the editor
   const [cards, setCards] = useState<CardDef[]>(() => Object.values(CARD_LIBRARY))
   // ids authored this session, badged as Custom in the library
@@ -276,19 +279,26 @@ export function FishMafiaApp() {
 
   if (screen === "menu") {
     return (
-      <MenuScreen
-        settings={settings}
-        onChangeSettings={setSettings}
-        onStart={startNewRun}
-        onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
-        onOpenLibrary={() => setScreen("library")}
-      />
+      <>
+        <MenuScreen
+          settings={settings}
+          onChangeSettings={setSettings}
+          onStart={startNewRun}
+          onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
+          onOpenLibrary={() => setScreen("library")}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "library") {
     return (
-      <CardLibraryScreen
+      <>
+        <CardLibraryScreen
         cards={cards}
         customIds={customIds}
         enemies={enemies}
@@ -334,12 +344,18 @@ export function FishMafiaApp() {
           }).catch(() => {})
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create") {
     return (
-      <CardCreateScreen
+      <>
+        <CardCreateScreen
         editCard={editingCard ?? undefined}
         onBack={() => {
           setEditingCard(null)
@@ -364,12 +380,18 @@ export function FishMafiaApp() {
           setEditingCard(null)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create-enemy") {
     return (
-      <EnemyCreateScreen
+      <>
+        <EnemyCreateScreen
         editEnemy={editingEnemy ?? undefined}
         onBack={() => {
           setEditingEnemy(null)
@@ -393,12 +415,18 @@ export function FishMafiaApp() {
           setEditingEnemy(def)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create-stage") {
     return (
-      <StageCreateScreen
+      <>
+        <StageCreateScreen
         enemies={enemies}
         editStage={editingStage ?? undefined}
         initialZone={newStageZone}
@@ -424,13 +452,19 @@ export function FishMafiaApp() {
           setEditingStage(def)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "overworld") {
     const s = overworld.state
     return (
-      <div className="relative h-dvh w-full">
+      <>
+        <div className="relative h-dvh w-full">
         {s ? (
           <OverworldMap
             state={s}
@@ -511,19 +545,32 @@ export function FishMafiaApp() {
           />
         )}
       </div>
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   // screen === "battle"
   return (
-    <FishMafiaGame
-      key={`battle-${overworld.state?.nodeId ?? "r"}`}
-      settings={settings}
-      initial={battle ?? undefined}
-      onWin={handleWin}
-      onLose={handleLoss}
-      onExit={backToMenu}
-    />
+    <>
+      <FishMafiaGame
+        key={`battle-${overworld.state?.nodeId ?? "r"}`}
+        settings={settings}
+        initial={battle ?? undefined}
+        onWin={handleWin}
+        onLose={handleLoss}
+        onExit={backToMenu}
+        onDebugReady={(d) => { battleDebugRef.current = d }}
+      />
+      <DebugMenu
+        battleDebug={battleDebugRef.current}
+        overworldState={overworld.state}
+        onOverworldUpdate={overworld.debugUpdate}
+      />
+    </>
   )
 }
 

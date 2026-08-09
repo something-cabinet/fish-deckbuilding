@@ -1,0 +1,724 @@
+"use client"
+
+import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  Bug,
+  Coins,
+  Gem,
+  HeartPulse,
+  Layers,
+  Plus,
+  Trash2,
+  X,
+  Zap,
+  Swords,
+  Shield,
+} from "lucide-react"
+import { CARD_LIBRARY } from "@/lib/game/cards"
+import { TRINKET_LIBRARY, TRINKET_IDS } from "@/lib/game/trinkets"
+import type { OverworldState } from "@/lib/game/overworld-types"
+import { FORECLOSURE_CAP } from "@/lib/game/overworld-data"
+import type { GameState } from "@/lib/game/battle"
+import { Phase } from "@/lib/game/battle"
+import { cn } from "@/lib/utils"
+
+type Tab = "overworld" | "battle" | "cards" | "trinkets"
+
+interface DebugMenuProps {
+  overworldState?: OverworldState | null
+  onOverworldUpdate?: (partial: Partial<OverworldState>) => void
+  battleDebug?: { debugUpdate: (p: Partial<GameState>) => void } | null
+  onBattleUpdate?: (partial: Partial<GameState>) => void
+}
+
+export function DebugMenu({
+  overworldState,
+  onOverworldUpdate,
+  battleDebug,
+  onBattleUpdate,
+}: DebugMenuProps) {
+  const [open, setOpen] = useState(false)
+  const [tab, setTab] = useState<Tab>("overworld")
+  const [goldInput, setGoldInput] = useState("")
+  const [debtInput, setDebtInput] = useState("")
+  const [hpInput, setHpInput] = useState("")
+  const [finInput, setFinInput] = useState("")
+  const [coinInput, setCoinInput] = useState("")
+  const [cardSearch, setCardSearch] = useState("")
+  const [trinketSearch, setTrinketSearch] = useState("")
+
+  const toggle = useCallback(() => setOpen((v) => !v), [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "`" || (e.key === "F12")) {
+        e.preventDefault()
+        toggle()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [toggle])
+
+  useEffect(() => {
+    if (!open) return
+    setGoldInput(String(overworldState?.gold ?? ""))
+    setDebtInput(String(overworldState?.debt ?? ""))
+    setHpInput(String(overworldState?.hp ?? ""))
+    setFinInput(String(overworldState?.fin ?? 0))
+    setCoinInput("")
+  }, [open, overworldState])
+
+  const isOverworld = !!onOverworldUpdate && !!overworldState
+  const isBattle = !!battleDebug || !!onBattleUpdate
+
+  const overworldUpdate = useCallback(
+    (partial: Partial<OverworldState>) => {
+      onOverworldUpdate?.(partial)
+    },
+    [onOverworldUpdate],
+  )
+
+  const battleUpdate = useCallback(
+    (partial: Partial<GameState>) => {
+      battleDebug?.debugUpdate(partial)
+      onBattleUpdate?.(partial)
+    },
+    [battleDebug, onBattleUpdate],
+  )
+
+  const availableCards = useMemo(() => {
+    const ids = Object.keys(CARD_LIBRARY)
+    return cardSearch
+      ? ids.filter((id) => {
+          const def = CARD_LIBRARY[id]
+          return (
+            def &&
+            (def.id.toLowerCase().includes(cardSearch.toLowerCase()) ||
+              def.name.toLowerCase().includes(cardSearch.toLowerCase()))
+          )
+        })
+      : ids
+  }, [cardSearch])
+
+  const availableTrinkets = useMemo(() => {
+    const ids = TRINKET_IDS
+    return trinketSearch
+      ? ids.filter((id) => {
+          const def = TRINKET_LIBRARY[id]
+          return (
+            def &&
+            (def.id.toLowerCase().includes(trinketSearch.toLowerCase()) ||
+              def.name.toLowerCase().includes(trinketSearch.toLowerCase()))
+          )
+        })
+      : ids
+  }, [trinketSearch])
+
+  const activeTab: Tab = (() => {
+    if (isBattle && tab === "battle") return "battle"
+    if (isOverworld && tab === "overworld") return "overworld"
+    if (tab === "cards") return "cards"
+    if (tab === "trinkets") return "trinkets"
+    if (isOverworld) return "overworld"
+    return "battle"
+  })()
+
+  return (
+    <>
+      {/* floating toggle button */}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label="Debug tools"
+        className={cn(
+          "fixed bottom-4 left-4 z-[9999] flex h-10 w-10 items-center justify-center rounded-full border shadow-lg transition-all",
+          open
+            ? "border-enemy/60 bg-enemy/20 text-enemy scale-110"
+            : "border-white/20 bg-ocean-deep/80 text-muted-foreground hover:border-gold/40 hover:text-gold",
+        )}
+      >
+        <Bug size={18} />
+      </button>
+
+      {/* panel */}
+      {open && (
+        <div className="fixed inset-0 z-[9998] flex items-start justify-center bg-black/60 p-4 pt-16 backdrop-blur-sm">
+          <div className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl border border-gold/30 bg-ocean-deep/95 shadow-2xl animate-fm-fade-in">
+            {/* header */}
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+              <div className="flex items-center gap-2">
+                <Bug size={18} className="text-enemy" />
+                <h2 className="font-display text-base font-bold uppercase tracking-widest text-foreground">
+                  Debug
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close debug menu"
+                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* tabs */}
+            <div className="flex shrink-0 gap-1 border-b border-white/10 px-4 py-2 overflow-x-auto">
+              {isOverworld && (
+                <TabBtn active={activeTab === "overworld"} onClick={() => setTab("overworld")}>
+                  <Coins size={14} />
+                  Overworld
+                </TabBtn>
+              )}
+              {isBattle && (
+                <TabBtn active={activeTab === "battle"} onClick={() => setTab("battle")}>
+                  <Swords size={14} />
+                  Battle
+                </TabBtn>
+              )}
+              <TabBtn active={activeTab === "cards"} onClick={() => setTab("cards")}>
+                <Layers size={14} />
+                Cards
+              </TabBtn>
+              <TabBtn active={activeTab === "trinkets"} onClick={() => setTab("trinkets")}>
+                <Gem size={14} />
+                Trinkets
+              </TabBtn>
+            </div>
+
+            {/* body */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {activeTab === "overworld" && isOverworld && (
+                <OverworldTab
+                  state={overworldState!}
+                  onUpdate={overworldUpdate}
+                  goldInput={goldInput}
+                  setGoldInput={setGoldInput}
+                  debtInput={debtInput}
+                  setDebtInput={setDebtInput}
+                  hpInput={hpInput}
+                  setHpInput={setHpInput}
+                  finInput={finInput}
+                  setFinInput={setFinInput}
+                />
+              )}
+
+              {activeTab === "battle" && isBattle && (
+                <BattleTab
+                  coinInput={coinInput}
+                  setCoinInput={setCoinInput}
+                  finInput={finInput}
+                  setFinInput={setFinInput}
+                  onUpdate={battleUpdate}
+                />
+              )}
+
+              {activeTab === "cards" && (
+                <CardListTab
+                  search={cardSearch}
+                  setSearch={setCardSearch}
+                  cards={availableCards}
+                  overworldState={overworldState}
+                  onOverworldUpdate={overworldUpdate}
+                />
+              )}
+
+              {activeTab === "trinkets" && (
+                <TrinketListTab
+                  search={trinketSearch}
+                  setSearch={setTrinketSearch}
+                  trinkets={availableTrinkets}
+                  overworldState={overworldState}
+                  onOverworldUpdate={overworldUpdate}
+                />
+              )}
+            </div>
+
+            {/* footer hint */}
+            <div className="border-t border-white/10 px-5 py-2 text-center font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+              Press <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">`</kbd> or{" "}
+              <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">F12</kbd> to toggle
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Tab button                                                          */
+/* ------------------------------------------------------------------ */
+
+function TabBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
+        active
+          ? "bg-gold/15 text-gold"
+          : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Input helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+function NumInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <input
+      type="number"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={cn(
+        "w-full rounded-md border border-white/20 bg-white/5 px-3 py-1.5 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none",
+        className,
+      )}
+    />
+  )
+}
+
+function ActionBtn({
+  onClick,
+  children,
+  variant = "default",
+}: {
+  onClick: () => void
+  children: React.ReactNode
+  variant?: "default" | "danger" | "gold"
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-md px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
+        variant === "danger" && "border border-enemy/50 bg-enemy/10 text-enemy hover:bg-enemy/20",
+        variant === "gold" && "border border-gold/50 bg-gold/10 text-gold hover:bg-gold/20",
+        variant === "default" &&
+          "border border-white/20 bg-white/5 text-foreground hover:bg-white/10",
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Overworld tab                                                       */
+/* ------------------------------------------------------------------ */
+
+function OverworldTab({
+  state,
+  onUpdate,
+  goldInput,
+  setGoldInput,
+  debtInput,
+  setDebtInput,
+  hpInput,
+  setHpInput,
+  finInput,
+  setFinInput,
+}: {
+  state: OverworldState
+  onUpdate: (p: Partial<OverworldState>) => void
+  goldInput: string
+  setGoldInput: (v: string) => void
+  debtInput: string
+  setDebtInput: (v: string) => void
+  hpInput: string
+  setHpInput: (v: string) => void
+  finInput: string
+  setFinInput: (v: string) => void
+}) {
+  const setGold = useCallback(() => {
+    const v = parseInt(goldInput, 10)
+    if (!isNaN(v)) onUpdate({ gold: Math.max(0, v) })
+  }, [goldInput, onUpdate])
+
+  const setDebt = useCallback(() => {
+    const v = parseInt(debtInput, 10)
+    if (!isNaN(v)) onUpdate({ debt: Math.max(0, Math.min(v, FORECLOSURE_CAP)) })
+  }, [debtInput, onUpdate])
+
+  const setHp = useCallback(() => {
+    const v = parseInt(hpInput, 10)
+    if (!isNaN(v)) onUpdate({ hp: Math.max(1, Math.min(v, state.maxHp)) })
+  }, [hpInput, onUpdate, state.maxHp])
+
+  const setFin = useCallback(() => {
+    const v = parseInt(finInput, 10)
+    if (!isNaN(v)) onUpdate({ fin: Math.max(0, v) })
+  }, [finInput, onUpdate])
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* gold */}
+      <Section label="Gold" icon={<Coins size={14} className="text-gold" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={goldInput} onChange={setGoldInput} placeholder={String(state.gold)} />
+          <ActionBtn onClick={setGold} variant="gold">Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ gold: state.gold + 50 })} variant="gold">+50</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ gold: Math.max(0, state.gold - 50) })} variant="danger">-50</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ gold: 999 })} variant="gold">Max</ActionBtn>
+        </div>
+      </Section>
+
+      {/* debt */}
+      <Section label="Debt" icon={<Coins size={14} className="text-enemy" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={debtInput} onChange={setDebtInput} placeholder={String(state.debt)} />
+          <ActionBtn onClick={setDebt} variant="danger">Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ debt: Math.max(0, state.debt - 25) })} variant="gold">-25</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ debt: Math.min(FORECLOSURE_CAP, state.debt + 25) })} variant="danger">+25</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ debt: 0 })} variant="gold">Clear</ActionBtn>
+        </div>
+      </Section>
+
+      {/* HP */}
+      <Section label="HP" icon={<HeartPulse size={14} className="text-enemy" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={hpInput} onChange={setHpInput} placeholder={String(state.hp)} />
+          <ActionBtn onClick={setHp}>Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ hp: state.maxHp })} variant="gold">Full Heal</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ hp: Math.max(1, state.hp - 5) })} variant="danger">-5</ActionBtn>
+        </div>
+      </Section>
+
+      {/* Fin */}
+      <Section label="Fin" icon={<Gem size={14} className="text-teal" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={finInput} onChange={setFinInput} placeholder={String(state.fin)} />
+          <ActionBtn onClick={setFin}>Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ fin: state.fin + 10 })}>+10</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ fin: Math.max(0, state.fin - 10) })}>-10</ActionBtn>
+        </div>
+      </Section>
+
+      {/* deck info */}
+      <Section label={`Deck (${state.deck.length} cards)`} icon={<Layers size={14} />}>
+        <p className="text-xs text-muted-foreground">
+          Use the <strong>Cards</strong> tab to add or remove cards from your deck.
+        </p>
+      </Section>
+
+      {/* trinkets info */}
+      <Section label={`Trinkets (${state.trinkets.length})`} icon={<Gem size={14} />}>
+        <p className="text-xs text-muted-foreground">
+          Use the <strong>Trinkets</strong> tab to add or remove trinkets.
+        </p>
+      </Section>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Battle tab                                                          */
+/* ------------------------------------------------------------------ */
+
+function BattleTab({
+  coinInput,
+  setCoinInput,
+  finInput,
+  setFinInput,
+  onUpdate,
+}: {
+  coinInput: string
+  setCoinInput: (v: string) => void
+  finInput: string
+  setFinInput: (v: string) => void
+  onUpdate: (p: Partial<GameState>) => void
+}) {
+  const setCoin = useCallback(() => {
+    const v = parseInt(coinInput, 10)
+    if (!isNaN(v)) onUpdate({ coin: Math.max(0, v) })
+  }, [coinInput, onUpdate])
+
+  const setFin = useCallback(() => {
+    const v = parseInt(finInput, 10)
+    if (!isNaN(v)) onUpdate({ fin: Math.max(0, v) })
+  }, [finInput, onUpdate])
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* coin */}
+      <Section label="Coin" icon={<Coins size={14} className="text-gold" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={coinInput} onChange={setCoinInput} placeholder="coin" />
+          <ActionBtn onClick={setCoin} variant="gold">Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ coin: 10 })} variant="gold">10</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ coin: 20 })} variant="gold">20</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ coin: 50 })} variant="gold">50</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ coin: 99 })} variant="gold">Max</ActionBtn>
+        </div>
+      </Section>
+
+      {/* fin */}
+      <Section label="Fin" icon={<Gem size={14} className="text-teal" />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={finInput} onChange={setFinInput} placeholder="fin" />
+          <ActionBtn onClick={setFin}>Set</ActionBtn>
+        </div>
+        <div className="flex gap-2">
+          <ActionBtn onClick={() => onUpdate({ fin: 50 })}>50</ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ fin: 100 })}>100</ActionBtn>
+        </div>
+      </Section>
+
+      {/* quick actions */}
+      <Section label="Quick Actions" icon={<Zap size={14} />}>
+        <div className="flex flex-wrap gap-2">
+          <ActionBtn onClick={() => onUpdate({ phase: Phase.Won })} variant="gold">
+            Win Battle
+          </ActionBtn>
+          <ActionBtn onClick={() => onUpdate({ phase: Phase.Lost })} variant="danger">
+            Lose Battle
+          </ActionBtn>
+        </div>
+      </Section>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Card list tab                                                       */
+/* ------------------------------------------------------------------ */
+
+function CardListTab({
+  search,
+  setSearch,
+  cards,
+  overworldState,
+  onOverworldUpdate,
+}: {
+  search: string
+  setSearch: (v: string) => void
+  cards: string[]
+  overworldState?: OverworldState | null
+  onOverworldUpdate?: (p: Partial<OverworldState>) => void
+}) {
+  const deck = overworldState?.deck ?? []
+  const deckCounts = useMemo(() => {
+    const m: Record<string, number> = {}
+    for (const id of deck) m[id] = (m[id] ?? 0) + 1
+    return m
+  }, [deck])
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search cards..."
+        className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
+      />
+      <p className="text-xs text-muted-foreground">{cards.length} cards</p>
+      {onOverworldUpdate && overworldState && (
+        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+          {cards.map((id) => {
+            const def = CARD_LIBRARY[id]
+            if (!def) return null
+            const count = deckCounts[id] ?? 0
+            return (
+              <div
+                key={id}
+                className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-3 py-2"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Shield size={12} className="shrink-0 text-gold/70" />
+                  <span className="truncate font-display text-xs font-bold text-foreground">
+                    {def.name}
+                  </span>
+                  {count > 0 && (
+                    <span className="shrink-0 font-display text-[10px] text-muted-foreground">
+                      ×{count}
+                    </span>
+                  )}
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  <ActionBtn
+                    onClick={() =>
+                      onOverworldUpdate({ deck: [...overworldState.deck, id] })
+                    }
+                    variant="gold"
+                  >
+                    <Plus size={12} />
+                  </ActionBtn>
+                  {count > 0 && (
+                    <ActionBtn
+                      onClick={() => {
+                        const i = overworldState.deck.indexOf(id)
+                        if (i >= 0) {
+                          const next = [...overworldState.deck]
+                          next.splice(i, 1)
+                          onOverworldUpdate({ deck: next })
+                        }
+                      }}
+                      variant="danger"
+                    >
+                      <Trash2 size={12} />
+                    </ActionBtn>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {!onOverworldUpdate && (
+        <p className="text-xs text-muted-foreground">
+          Card management is only available from the Overworld screen.
+        </p>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Trinket list tab                                                    */
+/* ------------------------------------------------------------------ */
+
+function TrinketListTab({
+  search,
+  setSearch,
+  trinkets,
+  overworldState,
+  onOverworldUpdate,
+}: {
+  search: string
+  setSearch: (v: string) => void
+  trinkets: string[]
+  overworldState?: OverworldState | null
+  onOverworldUpdate?: (p: Partial<OverworldState>) => void
+}) {
+  const owned = overworldState?.trinkets ?? []
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search trinkets..."
+        className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
+      />
+      <p className="text-xs text-muted-foreground">{trinkets.length} trinkets</p>
+      {onOverworldUpdate && overworldState ? (
+        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+          {trinkets.map((id) => {
+            const def = TRINKET_LIBRARY[id]
+            if (!def) return null
+            const isOwned = owned.includes(id)
+            return (
+              <div
+                key={id}
+                className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-3 py-2"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Gem size={12} className={cn("shrink-0", isOwned ? "text-gold" : "text-muted-foreground/50")} />
+                  <span className="truncate font-display text-xs font-bold text-foreground">
+                    {def.name}
+                  </span>
+                  <span className="shrink-0 rounded border border-white/10 px-1 font-display text-[8px] uppercase tracking-wider text-muted-foreground">
+                    {def.rarity}
+                  </span>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  {!isOwned ? (
+                    <ActionBtn
+                      onClick={() =>
+                        onOverworldUpdate({ trinkets: [...overworldState.trinkets, id] })
+                      }
+                      variant="gold"
+                    >
+                      <Plus size={12} />
+                    </ActionBtn>
+                  ) : (
+                    <ActionBtn
+                      onClick={() =>
+                        onOverworldUpdate({
+                          trinkets: overworldState.trinkets.filter((t) => t !== id),
+                        })
+                      }
+                      variant="danger"
+                    >
+                      <Trash2 size={12} />
+                    </ActionBtn>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Trinket management is only available from the Overworld screen.
+        </p>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Section wrapper                                                     */
+/* ------------------------------------------------------------------ */
+
+function Section({
+  label,
+  icon,
+  children,
+}: {
+  label: string
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="mb-2 flex items-center gap-1.5">
+        {icon}
+        <span className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
+          {label}
+        </span>
+      </div>
+      <div className="flex flex-col gap-2">{children}</div>
+    </div>
+  )
+}

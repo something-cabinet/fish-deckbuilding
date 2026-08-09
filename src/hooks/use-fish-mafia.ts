@@ -168,6 +168,10 @@ export function useFishMafia(initial?: GameState) {
 
   /* ---- derived ---- */
 
+  const debugUpdate = useCallback((partial: Partial<GameState>) => {
+    setState((s) => ({ ...s, ...partial }))
+  }, [])
+
   const reachable = useMemo(() => {
     if (!state.selectedUnitId) return [] as Pos[]
     const u = state.units.find((x) => x.id === state.selectedUnitId)
@@ -193,6 +197,7 @@ export function useFishMafia(initial?: GameState) {
     redo,
     endTurn,
     restart,
+    debugUpdate,
     reachable,
     targetsFor,
   }
