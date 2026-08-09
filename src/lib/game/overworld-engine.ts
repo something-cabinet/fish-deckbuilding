@@ -20,6 +20,7 @@ import {
   type EventDef,
 } from "./overworld-data"
 import type { MapNode, NodeType, OverworldState, ZoneDef } from "./overworld-types"
+import { rollTrinketIds, rollTrinketIdsWeighted, rollShopTrinkets } from "./trinkets"
 
 /* ------------------------------------------------------------------ */
 /* seeded rng (mulberry32)                                             */
@@ -294,16 +295,19 @@ export function payDebt(state: OverworldState, amount: number): OverworldState {
 export interface ShopOffer {
   cardId: string
   price: number
+  trinketId?: string
 }
 
-/** Seeded card inventory for a shop node (4 distinct offers). */
+/** Seeded card inventory for a shop node (4 distinct offers) with optional trinket section. */
 export function shopInventory(seed: number, zoneIndex: number, nodeId: string): ShopOffer[] {
   const rng = mulberry32(seed * 53 + zoneIndex * 197 + hashStr(nodeId))
   const pool = shuffle(rng, Object.keys(CARD_LIBRARY))
-  return pool.slice(0, Math.min(4, pool.length)).map((cardId) => ({
+  const cardOffers = pool.slice(0, Math.min(4, pool.length)).map((cardId) => ({
     cardId,
     price: shopCardPrice(CARD_LIBRARY[cardId]?.cost ?? 1),
   }))
+  const trinketOffers = rollShopTrinkets(seed, zoneIndex, nodeId, [])
+  return [...cardOffers, ...trinketOffers.map((t) => ({ cardId: "", price: t.price, trinketId: t.trinketId }))]
 }
 
 export const REMOVE_PRICE = SHOP_REMOVE_PRICE
@@ -341,13 +345,14 @@ export function eventForNode(seed: number, zoneIndex: number, nodeId: string): E
 /** Apply an event choice's outcome, then clear the node (ticks interest). */
 export function applyEventChoice(
   state: OverworldState,
-  choice: { gold?: number; hp?: number; debt?: number; card?: string },
+  choice: { gold?: number; hp?: number; debt?: number; card?: string; trinket?: string },
 ): OverworldState {
   let s = { ...state }
   if (choice.gold) s.gold = Math.max(0, s.gold + choice.gold)
   if (choice.hp) s.hp = Math.max(1, Math.min(s.maxHp, s.hp + choice.hp))
   if (choice.debt) s.debt = Math.max(0, s.debt + choice.debt)
   if (choice.card) s.deck = [...s.deck, choice.card]
+  if (choice.trinket && !s.trinkets.includes(choice.trinket)) s.trinkets = [...s.trinkets, choice.trinket]
   return clearCurrentNode(s)
 }
 
@@ -503,6 +508,7 @@ export function zoneName(index: number): string {
 export interface RolledRewards {
   cards: string[]
   gold: number
+  trinkets: string[]
 }
 
 /** Roll 3 distinct reward cards + a gold amount from the run seed + node. */
@@ -514,27 +520,46 @@ export function rollRewards(seed: number, zoneIndex: number, nodeId: string): Ro
     const c = pool[Math.floor(rng() * pool.length)]
     if (!cards.includes(c)) cards.push(c)
   }
-  return { cards, gold: 5 + Math.floor(rng() * 6) + zoneIndex * 3 }
+  return { cards, gold: 5 + Math.floor(rng() * 6) + zoneIndex * 3, trinkets: [] }
 }
 
 /** Elite rewards: same card pick, richer gold purse. */
 export function rollEliteRewards(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
   const base = rollRewards(seed, zoneIndex, nodeId)
-  return { cards: base.cards, gold: base.gold + 15 + zoneIndex * 5 }
+  // elite wins award 1 trinket alongside card picks, no player-level rarity filter
+  const trinkets = rollTrinketIds(seed, zoneIndex, nodeId, [], 1)
+  return { cards: base.cards, gold: base.gold + 15 + zoneIndex * 5, trinkets }
 }
 
-/** Treasure rewards: no fight, generous gold + a card pick. */
+/** Treasure rewards: no fight, generous gold + a card pick + a trinket pick (3 options). */
 export function rollTreasure(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
   const base = rollRewards(seed, zoneIndex, nodeId)
-  return { cards: base.cards, gold: base.gold * 2 + 20 }
+  const trinkets = rollTrinketIds(seed, zoneIndex, nodeId, [], 3)
+  return { cards: base.cards, gold: base.gold * 2 + 20, trinkets }
 }
 
 export function addRewardToState(
   state: OverworldState,
   cardId: string,
   gold: number,
+  trinketId?: string,
 ): OverworldState {
-  return { ...state, deck: [...state.deck, cardId], gold: state.gold + gold }
+  return {
+    ...state,
+    deck: [...state.deck, cardId],
+    gold: state.gold + gold,
+    trinkets: trinketId ? [...state.trinkets, trinketId] : state.trinkets,
+  }
+}
+
+/** Buy a trinket at a shop: deduct gold, add to trinkets. No-op if unaffordable. */
+export function buyTrinket(
+  state: OverworldState,
+  trinketId: string,
+  price: number,
+): OverworldState {
+  if (state.gold < price || state.trinkets.includes(trinketId)) return state
+  return { ...state, gold: state.gold - price, trinkets: [...state.trinkets, trinketId] }
 }
 
 /* ------------------------------------------------------------------ */
@@ -542,7 +567,7 @@ export function addRewardToState(
 /* ------------------------------------------------------------------ */
 
 // bumped to v2: node-type + debt model changed, old saves are incompatible.
-export const SAVE_KEY = "fish-mafia-save-v2"
+export const SAVE_KEY = "fish-mafia-save-v3"
 
 export function createNewRun(seed?: number): OverworldState {
   const s = seed ?? Math.floor(Math.random() * 0xffffffff)
@@ -558,6 +583,7 @@ export function createNewRun(seed?: number): OverworldState {
     visited: [],
     unlockedZones: 1,
     seed: s,
+    trinkets: [],
   }
 }
 
@@ -569,7 +595,7 @@ export function loadSave(): OverworldState | null {
     const parsed = JSON.parse(raw) as OverworldState
     if (!isValidSave(parsed)) return null
     // backfill fields added after this save version was written
-    return { ...parsed, fin: typeof parsed.fin === "number" ? parsed.fin : 0 }
+    return { ...parsed, fin: typeof parsed.fin === "number" ? parsed.fin : 0, trinkets: Array.isArray(parsed.trinkets) ? parsed.trinkets : [] }
   } catch {
     return null
   }

@@ -2,8 +2,8 @@
 title: Trinket System (StS Relic-style)
 type: spec
 id: wiki:specs:trinket-system
-status: draft
-tags: [game-design, trinkets, run-state, combat, rewards, ui]
+status: approved
+tags: [game-design, trinkets, run-state, combat, rewards, ui, approved]
 ---
 
 ## Overview

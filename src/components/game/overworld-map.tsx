@@ -21,6 +21,7 @@ import type { MapNode, NodeType, OverworldState } from "@/lib/game/overworld-typ
 import { FORECLOSURE_CAP, FORECLOSURE_WARN } from "@/lib/game/overworld-data"
 import { accrueInterest } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
+import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -154,6 +155,27 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
             value={`${state.hp}/${state.maxHp}`}
             icon={<HeartPulse size={13} className="text-enemy" />}
           />
+          {state.trinkets.length > 0 && (
+            <div className="flex items-center gap-1">
+              {state.trinkets.map((id) => {
+                const def = TRINKET_LIBRARY[id]
+                if (!def) return null
+                return (
+                  <div key={id} className="group relative">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md border border-gold/30 bg-gold/10">
+                      <Gem size={11} className="text-gold" />
+                    </div>
+                    <div className="pointer-events-none absolute -top-1 right-full z-50 mr-2 w-40 origin-bottom-right scale-95 rounded-lg border border-gold/30 bg-ocean-deep/95 px-2 py-1.5 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:scale-100 group-hover:opacity-100">
+                      <p className="font-display text-[9px] font-bold uppercase tracking-wider text-gold">{def.name}</p>
+                      <p className="mt-0.5 font-display text-[8px] uppercase tracking-wider text-muted-foreground">
+                        {def.description}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setShowDeck(true)}

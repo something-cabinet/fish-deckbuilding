@@ -452,6 +452,7 @@ export function FishMafiaApp() {
             offers={overworld.shop}
             removePrice={overworld.removePrice}
             onBuy={overworld.buyCard}
+            onBuyTrinket={overworld.buyTrinket}
             onRemove={overworld.removeCard}
             onPayDebt={overworld.payDebt}
             onLeave={() => {
@@ -477,12 +478,13 @@ export function FishMafiaApp() {
           <RewardScreen
             cardIds={overworld.reward.cards}
             gold={overworld.reward.gold}
-            onPick={(cardId) => {
+            trinketIds={overworld.reward.trinkets}
+            onPick={(cardId, trinketId) => {
               if (pendingBossReward) {
-                overworld.claimBossReward(cardId, overworld.reward!.gold)
+                overworld.claimBossReward(cardId, overworld.reward!.gold, trinketId)
                 setPendingBossReward(false)
               } else {
-                overworld.claimReward(cardId, overworld.reward!.gold)
+                overworld.claimReward(cardId, overworld.reward!.gold, trinketId)
               }
             }}
           />

@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Coins, Scale, ShoppingBag, Trash2, X } from "lucide-react"
+import { Coins, Gem, Scale, ShoppingBag, Trash2, X } from "lucide-react"
 import type { ShopOffer } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
+import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { CardFace } from "./card-face"
 import { cn } from "@/lib/utils"
 
@@ -15,6 +16,7 @@ interface Props {
   removePrice: number
   /** ids already bought this visit (so each offer sells once) */
   onBuy: (cardId: string, price: number) => void
+  onBuyTrinket: (trinketId: string, price: number) => void
   onRemove: (cardId: string) => void
   onPayDebt: (amount: number) => void
   onLeave: () => void
@@ -29,6 +31,7 @@ export function ShopScreen({
   offers,
   removePrice,
   onBuy,
+  onBuyTrinket,
   onRemove,
   onPayDebt,
   onLeave,
@@ -41,6 +44,15 @@ export function ShopScreen({
     onBuy(cardId, price)
     setBought((prev) => new Set(prev).add(cardId))
   }
+
+  const buyTrinketLocal = (trinketId: string, price: number) => {
+    if (gold < price || bought.has(`trinket-${trinketId}`)) return
+    onBuyTrinket(trinketId, price)
+    setBought((prev) => new Set(prev).add(`trinket-${trinketId}`))
+  }
+
+  const cardOffers = offers.filter((o) => o.cardId)
+  const trinketOffers = offers.filter((o) => o.trinketId)
 
   const uniqueDeck = Array.from(new Set(deck))
 
@@ -81,7 +93,7 @@ export function ShopScreen({
             Cards for sale
           </h3>
           <div className="flex flex-wrap gap-4">
-            {offers.map(({ cardId, price }) => {
+            {cardOffers.map(({ cardId, price }) => {
               const def = CARD_LIBRARY[cardId]
               if (!def) return null
               const sold = bought.has(cardId)
@@ -117,6 +129,56 @@ export function ShopScreen({
             })}
           </div>
         </section>
+
+        {/* trinkets for sale */}
+        {trinketOffers.length > 0 && (
+          <section>
+            <h3 className="mb-3 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground">
+              <Gem size={13} />
+              Trinkets
+            </h3>
+            <div className="flex flex-wrap gap-4">
+              {trinketOffers.map(({ trinketId, price }) => {
+                if (!trinketId) return null
+                const def = TRINKET_LIBRARY[trinketId]
+                if (!def) return null
+                const sold = bought.has(`trinket-${trinketId}`)
+                const afford = gold >= price
+                return (
+                  <div key={trinketId} className="flex flex-col items-center gap-2">
+                    <div
+                      className={cn(
+                        "flex h-20 w-20 items-center justify-center rounded-xl border-2 bg-ocean-deep/60 backdrop-blur-sm transition-all",
+                        sold ? "border-white/10 opacity-40 grayscale" : "border-gold/50",
+                      )}
+                    >
+                      <Gem size={28} className="text-gold" />
+                    </div>
+                    <p className="max-w-20 text-center font-display text-[10px] font-bold uppercase leading-tight text-foreground">
+                      {def.name}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={sold || !afford}
+                      onClick={() => buyTrinketLocal(trinketId, price)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
+                        sold
+                          ? "cursor-not-allowed border-white/10 text-muted-foreground/50"
+                          : afford
+                            ? "border-gold/50 bg-gold/15 text-gold hover:bg-gold/25"
+                            : "cursor-not-allowed border-enemy/40 text-enemy/70",
+                      )}
+                    >
+                      <Coins size={13} />
+                      {price}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         {/* services: pay debt + strike a card */}
         <section className="grid gap-4 sm:grid-cols-2">

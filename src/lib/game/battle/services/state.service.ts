@@ -1,10 +1,11 @@
 import { Phase } from "../enums"
-import type { GameState, Pos } from "../models"
+import type { FxEvent, GameState, Pos } from "../models"
 import { DEFAULT_COLS, DEFAULT_ROWS } from "../constants"
 import { COIN_TURN_BASE, makeCard, STARTER_DECK, type CardInstance } from "../../cards"
 import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
 import { HAND_START, shuffle } from "../../deck"
 import { resetIds } from "../../shared"
+import { getTrinketDef, resolveTrigger } from "../../trinkets"
 
 export function createInitialState(overrides?: {
   heroHp?: number
@@ -18,6 +19,8 @@ export function createInitialState(overrides?: {
   rows?: number
   /** where the hero starts; clamped into the board below */
   heroStart?: Pos
+  /** trinket def ids active in this battle */
+  trinkets?: string[]
 }): GameState {
   resetIds()
   const deck = overrides?.deck
@@ -39,6 +42,15 @@ export function createInitialState(overrides?: {
     },
     hp: overrides?.heroHp ?? HERO_DEF.hp,
     maxHp: overrides?.heroMaxHp ?? HERO_DEF.maxHp,
+  }
+  const trinkets = overrides?.trinkets ?? []
+  // apply stat modifiers from owned trinkets to the hero
+  for (const id of trinkets) {
+    const def = getTrinketDef(id)
+    if (!def?.stats) continue
+    if (def.stats.maxHp) hero.maxHp += def.stats.maxHp
+    if (def.stats.atk) hero.atk += def.stats.atk
+    if (def.stats.move) hero.move += def.stats.move
   }
   const spawns = overrides?.enemies ?? ENEMY_SPAWNS
   const enemies: Unit[] = spawns.map((e, i) => ({
@@ -76,6 +88,7 @@ export function createInitialState(overrides?: {
     log: [{ id: 0, turn: 1, text: "The ledger opens. Collect what you're owed.", tone: "gold" }],
     selectedUnitId: "hero",
     logCounter: 1,
+    activeTrinkets: overrides?.trinkets ?? [],
   }
 }
 
@@ -88,7 +101,11 @@ export function startGame(base?: GameState): GameState {
   const s = base ?? createInitialState()
   const deck = shuffle(s.deck)
   const hand = deck.splice(0, HAND_START)
-  return { ...s, deck, hand }
+  const state = { ...s, deck, hand }
+  // fire onCombatStart trinket triggers after opening hand is drawn
+  const fx: FxEvent[] = []
+  resolveTrigger(state, state.activeTrinkets, "onCombatStart", fx)
+  return state
 }
 
 export function selectUnit(state: GameState, unitId: string | null): GameState {

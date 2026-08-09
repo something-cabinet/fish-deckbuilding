@@ -5,6 +5,7 @@ import {
   REMOVE_PRICE,
   applyEventChoice,
   buyCard as buyCardEngine,
+  buyTrinket as buyTrinketEngine,
   clearCurrentNode,
   battleSetupForNode,
   clearSave,
@@ -100,11 +101,15 @@ export function useOverworld() {
     [state],
   )
 
-  /** Claim a reward card + gold: add to deck, grey the node, save. */
-  const claimReward = useCallback((cardId: string, gold: number) => {
+  /** Claim a reward card + gold + optional trinket: add to deck/trinkets, grey the node, save. */
+  const claimReward = useCallback((cardId: string, gold: number, trinketId?: string) => {
     setState((s) => {
       if (!s) return s
-      return clearCurrentNode({ ...s, deck: [...s.deck, cardId], gold: s.gold + gold })
+      let next = clearCurrentNode({ ...s, deck: [...s.deck, cardId], gold: s.gold + gold })
+      if (trinketId && !next.trinkets.includes(trinketId)) {
+        next = { ...next, trinkets: [...next.trinkets, trinketId] }
+      }
+      return next
     })
     setReward(null)
   }, [])
@@ -114,14 +119,17 @@ export function useOverworld() {
    * the hero to the next zone's start node (if one exists). Save.
    */
   const claimBossReward = useCallback(
-    (cardId: string, gold: number) => {
+    (cardId: string, gold: number, trinketId?: string) => {
       setState((s) => {
         if (!s) return s
-        const withReward = clearCurrentNode({
+        let withReward = clearCurrentNode({
           ...s,
           deck: [...s.deck, cardId],
           gold: s.gold + gold,
         })
+        if (trinketId && !withReward.trinkets.includes(trinketId)) {
+          withReward = { ...withReward, trinkets: [...withReward.trinkets, trinketId] }
+        }
         const unlocked = unlockNextZone(withReward)
         const nextZone = unlocked.zoneIndex + 1
         if (nextZone < maps.length) {
@@ -170,6 +178,10 @@ export function useOverworld() {
     setState((s) => (s ? buyCardEngine(s, cardId, price) : s))
   }, [])
 
+  const buyTrinket = useCallback((trinketId: string, price: number) => {
+    setState((s) => (s ? buyTrinketEngine(s, trinketId, price) : s))
+  }, [])
+
   const removeCard = useCallback((cardId: string) => {
     setState((s) => (s ? removeCardFromDeck(s, cardId, REMOVE_PRICE) : s))
   }, [])
@@ -186,7 +198,7 @@ export function useOverworld() {
   /* --- event actions --- */
 
   const resolveEvent = useCallback(
-    (choice: { gold?: number; hp?: number; debt?: number; card?: string }) => {
+    (choice: { gold?: number; hp?: number; debt?: number; card?: string; trinket?: string }) => {
       setState((s) => (s ? applyEventChoice(s, choice) : s))
     },
     [],
@@ -226,6 +238,7 @@ export function useOverworld() {
         rows: setup.rows,
         heroStart: setup.heroStart,
         fin: eff.fin,
+        trinkets: eff.trinkets,
       })
     },
     [state],
@@ -257,6 +270,7 @@ export function useOverworld() {
     claimBossWin,
     updateHp,
     buyCard,
+    buyTrinket,
     removeCard,
     payDebt,
     leaveShop,

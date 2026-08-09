@@ -2,6 +2,7 @@
 
 import { Gem, Percent } from "lucide-react"
 import { Phase, type GameState } from "@/lib/game/battle"
+import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { cn } from "@/lib/utils"
 
 function phaseTitle(phase: Phase): string {
@@ -30,11 +31,35 @@ export function TopBar({ state }: { state: GameState }) {
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
       {/* left: identity */}
-      <div className="min-w-[160px]">
-        <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">Guppy the Debtor</p>
-        <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
-          Turn <span className="text-foreground">{state.turn}</span>
-        </p>
+      <div className="flex min-w-[160px] items-center gap-3">
+        <div>
+          <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">Guppy the Debtor</p>
+          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
+            Turn <span className="text-foreground">{state.turn}</span>
+          </p>
+        </div>
+        {/* trinket tray */}
+        {state.activeTrinkets.length > 0 && (
+          <div className="flex max-w-[316px] flex-wrap content-start gap-1">
+            {state.activeTrinkets.map((id) => {
+              const def = TRINKET_LIBRARY[id]
+              if (!def) return null
+              return (
+                <div key={id} className="group relative">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md border border-gold/30 bg-gold/10">
+                    <Gem size={13} className="text-gold" />
+                  </div>
+                  <div className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 w-44 -translate-x-1/2 origin-top scale-95 rounded-lg border border-gold/30 bg-ocean-deep/95 px-2.5 py-2 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:scale-100 group-hover:opacity-100">
+                    <p className="font-display text-[10px] font-bold uppercase tracking-wider text-gold">{def.name}</p>
+                    <p className="mt-0.5 font-display text-[9px] uppercase tracking-wider text-muted-foreground">
+                      {def.description}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* center: phase title */}
