@@ -23,13 +23,18 @@ The Project's Critical Patterns doc warns that all P0 bugs live in the untested 
 ## Solution
 A single `valid_targets(effect, caster, grid, caster_faction) -> Vec<GridCoord>` function in the pure core. It is called by:
 
-1. The **bridge overlay** — to highlight valid tiles when a card is selected
-2. The **bridge click handler** — to reject clicks outside the valid set (no card consumed, no mana deducted)
+1. The **renderer/overlay** � to highlight valid tiles when a card is selected
+2. The **click handler** � to reject clicks outside the valid set (no card consumed, no mana deducted)
 3. The **AI** — to determine which targets are valid for enemy card play
 4. The **engine** — to validate play decisions before resolving effects
 
-```rust
-pub fn valid_targets(effect: &CardEffect, caster: (i32, i32), grid: &GridState, caster_faction: Faction) -> Vec<(i32, i32)> {
+```typescript
+function validTargets(
+  effect: CardEffect,
+  caster: [number, number],
+  grid: GridState,
+  casterFaction: Faction
+): [number, number][] {
     // Stage 1: Range filter (Melee = Chebyshev 1, Ranged = all tiles)
     // Stage 2: Target filter (EnemyUnit, AllyUnit, AnyUnit, EmptyTile, AnyTile, Self)
     // Stage 3: Edge-crop (pattern must fully fit on board for AnyTile/EmptyTile)
@@ -49,4 +54,4 @@ One code path. One test suite. No drift possible.
 
 ## Related
 - @wiki/core:critical-patterns (2026-07-27 — Test the UI Orchestration Layer)
-- Implemented in: `rust/src/core/cards/targeting.rs`
+- Implemented in: `src/lib/game/cards/targeting.ts`

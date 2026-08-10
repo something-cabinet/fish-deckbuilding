@@ -2,25 +2,25 @@
 title: Pattern: Domain-Driven Barrel Structure
 type: pattern
 id: wiki:patterns:domain-barrel-structure
-tags: [pattern, rust, architecture, module-structure]
+tags: [pattern, architecture, module-structure]
 ---
 
 ## Problem
-Flat file organization in a Rust game crate leads to long files that mix models, services, and tests. Imports are fragile and refactoring requires touching many files.
+Flat file organization in a game project leads to long files that mix models, services, and tests. Imports are fragile and refactoring requires touching many files.
 
 ## Solution
 Organize by domain, each with its own folder, barrel mod.rs, and model/service subdirectories:
 
 ```text
 domain/
-  mod.rs          # barrel: pub use model::*; pub use service::*;
+  index.ts          # barrel: export * from './model'; export * from './service';
   model/
-    mod.rs        # barrel: pub use file_a::*; pub use file_b::*;
-    file_a.rs     # single type or small group of related types
-    file_b.rs     # each file = one conceptual unit
+    index.ts        # barrel: export * from './file-a'; export * from './file-b';
+    file-a.ts       # single type or small group of related types
+    file-b.ts       # each file = one conceptual unit
   service/
-    mod.rs        # barrel: pub use file_c::*;
-    file_c.rs     # pure functions operating on model types
+    index.ts        # barrel: export * from './file-c';
+    file-c.ts       # pure functions operating on model types
 ```
 
 Key rules:
@@ -34,13 +34,13 @@ Key rules:
 
 ## When to Use
 - Game logic with clear domain boundaries (grid, combat, battle)
-- Any Rust crate with 5+ source files that group by feature
+- Any project with 5+ source files that group by feature
 
 ## When Not to Use
 - Very small crates (<5 files) — flat is simpler
-- Crates where all types are tightly coupled into one domain
-- Utility crates with no domain structure
+- Projects where all types are tightly coupled into one domain
+- Utility modules with no domain structure
 
 ## Related
 - wiki-mem convention: barrel files, model/service split
-- @wiki/specs:godot-battle-scaffold
+- @wiki/specs:battle-system

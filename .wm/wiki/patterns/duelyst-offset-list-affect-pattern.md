@@ -23,20 +23,20 @@ Named AoE shapes (Cross, Square, Diamond) require new code per shape. Adding a n
 ## Solution
 Adopt Duelyst's approach: AoE is an explicit list of `(dx, dy)` offsets from the target tile. The target tile is always included. Named patterns are just constants:
 
-```rust
-pub mod patterns {
-    pub const SINGLE: &[(i32, i32)] = &[];
-    pub const CROSS: &[(i32, i32)] = &[(-1,0), (0,-1), (0,0), (0,1), (1,0)];
-    pub const SQUARE_3X3: &[(i32, i32)] = &[
-        (-1,-1), (0,-1), (1,-1),
-        (-1, 0), (0, 0), (1, 0),
-        (-1, 1), (0, 1), (1, 1)];
-}
+```typescript
+export const PATTERNS = {
+  SINGLE: [] as [number, number][],
+  CROSS: [[-1,0], [0,-1], [0,0], [0,1], [1,0]],
+  SQUARE_3X3: [[-1,-1], [0,-1], [1,-1], [-1,0], [0,0], [1,0], [-1,1], [0,1], [1,1]],
+} as const;
 ```
 
 Any shape is expressible — row, diamond, whole-board, custom — with zero new code per shape. Resolution is one function:
-```rust
-fn apply_affect_pattern(target: (i32, i32), pattern: &[(i32, i32)]) -> Vec<(i32, i32)> {
+```typescript
+function applyAffectPattern(
+  target: [number, number],
+  pattern: [number, number][]
+): [number, number][] {
     // map offsets + always include target tile
 }
 ```
@@ -50,4 +50,4 @@ fn apply_affect_pattern(target: (i32, i32), pattern: &[(i32, i32)]) -> Vec<(i32,
 
 ## Related
 - Duelyst source: `app/sdk/spells/spell.coffee` — `_findApplyEffectPositions`
-- Implemented in: `rust/src/core/cards/targeting.rs`
+- Implemented in: `src/lib/game/cards/targeting.ts`

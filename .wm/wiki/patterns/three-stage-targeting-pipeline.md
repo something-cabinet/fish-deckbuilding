@@ -8,13 +8,13 @@ relates_to:
 title: Pattern: Three-Stage Targeting Pipeline
 type: pattern
 id: wiki:patterns:three-stage-targeting-pipeline
-tags: [pattern, cards, targeting, rust]
+tags: [pattern, cards, targeting]
 ---
 
 ---
 title: Pattern: Three-Stage Targeting Pipeline
 type: pattern
-tags: [pattern, cards, targeting, rust]
+tags: [pattern, cards, targeting]
 ---
 
 ## Problem
@@ -37,10 +37,10 @@ Does the blast pattern fully fit on the board?
 - For `AnyTile` and `EmptyTile` targets: reject if any pattern offset falls outside the board
 - For unit-targeted AoE: allow partial clips (otherwise allies on the edge become unhealable)
 
-Expressed as Rust enums:
-```rust
-enum Range { Melee, Ranged }
-enum TargetFilter { EnemyUnit, AllyUnit, AnyUnit, EmptyTile, AnyTile, Self }
+Expressed as TypeScript types:
+```typescript
+type Range = 'melee' | 'ranged';
+type TargetFilter = 'enemyUnit' | 'allyUnit' | 'anyUnit' | 'emptyTile' | 'anyTile' | 'self';
 ```
 
 This maps directly to Duelyst's `_filterPlayPositions` (where can I click) + `_filterApplyPositions` (what actually gets hit).
@@ -53,4 +53,4 @@ This maps directly to Duelyst's `_filterPlayPositions` (where can I click) + `_f
 - Simple point-and-click with no distance or filtering constraints
 
 ## Related
-- Implemented in: `rust/src/core/cards/targeting.rs`
+- Implemented in: `src/lib/game/cards/targeting.ts`

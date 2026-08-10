@@ -45,7 +45,7 @@ Supersedes the FR-5 placeholder in `wiki:specs:fish-tactical-rpg`. See `wiki:spe
 
 ### Non-Functional Requirements
 
-- NFR-1: Summon logic is pure Rust (zero Godot deps), unit-testable.
+- NFR-1: Summon logic is pure TypeScript, unit-testable.
 - NFR-2: Spawn location computation must complete in < 1ms.
 - NFR-3: Duration-counter minions auto-remove at end of turn (no expensive scanning needed).
 
@@ -65,7 +65,7 @@ Supersedes the FR-5 placeholder in `wiki:specs:fish-tactical-rpg`. See `wiki:spe
 - [ ] AC-12: Minion dies, is removed from grid, triggers death effects
 - [ ] AC-13: Enemy Summon card played by AI spawns a unit correctly
 - [ ] AC-14: Enemy summoned minion acts on the enemy's turn with multi-unit AI
-- [ ] AC-15: All existing tests plus new summon-specific tests pass with `cargo test`
+- [ ] AC-15: All existing tests plus new summon-specific tests pass with `npm test`
 
 ## Scenarios
 
@@ -114,11 +114,11 @@ Supersedes the FR-5 placeholder in `wiki:specs:fish-tactical-rpg`. See `wiki:spe
 
 - SummonData added to CardDef: `summon: Option<SummonData>`. CardDef gains a helper `is_summon() -> bool`.
 - GridUnitTemplate: lightweight struct (hp, atk, move_points, attack_range, keywords: Vec<Keyword>) that the summon card carries. The bridge instantiates a new GridUnit from this template.
-- Spawn logic: new function `fn find_spawn_tiles(state: &BattleState, caster_pos, spawn_tag: SpawnTag) -> Vec<GridCoord>` in `rust/src/core/battle/service/spawn.rs`.
+- Spawn logic: new function `fn find_spawn_tiles(state: &BattleState, caster_pos, spawn_tag: SpawnTag) -> Vec<GridCoord>` in `src/lib/game/battle/services/spawn.ts`.
 - Summoning sickness: GridUnit's `moves_made`/`attacks_made` initialized to `max_moves`/`max_attacks` on creation. `reset_turn()` in `engine.rs` resets both to 0.
 - Duration: GridUnit gains `turns_remaining: Option<i32>`. `end_turn()` in engine checks all units and decrements then removes any with `turns_remaining == 0`.
 - The existing effect system handles summon card effects: the card effect creates the unit on the grid instead of dealing damage/healing.
-- Valid spawn tile visualization: reused from the move-overlay/damage-overlay system in the gdext bridge.
+- Valid spawn tile visualization: reused from the move-overlay/damage-overlay system in the UI bridge.
 - Minion AI: existing `decide_all()` in `enemy-system` AI already handles multiple units — minions controlled by the player have their own simple AI (click-to-attack in player's turn) OR they act automatically (follow nearest enemy). Phase 1: player controls minions directly via click (same as hero). Phase 2: auto-attack AI for player minions.
 
 ## Open Questions

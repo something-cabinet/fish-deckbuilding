@@ -16,7 +16,7 @@ tags: [ui, ux, battle, js, polish]
 
 # Battle UI Polish — Duelyst/Hearthstone Patterns
 
-Presentation-layer polish for the JS combat vertical slice, derived from @wiki/reference/battle-ui-research-duelyst-hearthstone. Re-targets the design intent of the Godot-era @wiki/specs/battle-ui-ux-upgrades to the JS stack (Vite + Svelte 5 UI + PixiJS canvas + pure TS engine). Implemented UI already covers the theme layer (@wiki/specs/mafia-underworld-ui-theme); this spec is about feedback readability and actionability.
+Presentation-layer polish for the JS combat vertical slice, derived from @wiki/reference/battle-ui-research-duelyst-hearthstone. Re-targets the design intent of the previous @wiki/specs/battle-ui-ux-upgrades to the JS stack (Vite + Svelte 5 UI + PixiJS canvas + pure TS engine). Implemented UI already covers the theme layer (@wiki/specs/mafia-underworld-ui-theme); this spec is about feedback readability and actionability.
 
 ## Locked Decisions
 
@@ -88,4 +88,4 @@ Presentation-layer polish for the JS combat vertical slice, derived from @wiki/r
 - UI: `app/src/ui/LogPanel.svelte` (scroll), `app/src/ui/HandRack.svelte` (glow grammar + hand-full), `app/src/ui/EndTurnTransport.svelte` (finished state), `app/src/ui/DeskFrame.svelte` (banner node), `app/src/bridge/game.ts` (wiring).
 - Canvas: `app/src/render/` — hover previews + overlay rendering in PixiJS (desk.ts / units.ts), damage-squash in the needle/stat-change view state.
 - Engine: `app/src/engine/` — new pure helper(s): e.g., `hasAnyActionable(state)` and reachability exposure for hover previews, with tests in `controller.test.ts`-style suites. Valid-targets logic remains the single source of truth.
-- Related: @wiki/reference/battle-ui-research-duelyst-hearthstone, @wiki/specs/battle-ui-ux-upgrades (design intent, Godot-era), @wiki/specs/js-combat-vertical-slice (approved baseline), @wiki/specs/mafia-underworld-ui-theme (theme layer).
+- Related: @wiki/reference/battle-ui-research-duelyst-hearthstone, @wiki/specs/battle-ui-ux-upgrades (design intent, previous version), @wiki/specs/js-combat-vertical-slice (approved baseline), @wiki/specs/mafia-underworld-ui-theme (theme layer).

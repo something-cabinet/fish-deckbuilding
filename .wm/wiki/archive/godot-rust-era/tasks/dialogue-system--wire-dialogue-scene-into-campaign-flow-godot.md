@@ -5,7 +5,7 @@ tags:
 - godot
 - story
 - ui
-status: todo
+status: cancelled
 priority: low
 acceptance_criteria:
 - text: Dialogue scene is instantiated and reachable from campaign flow

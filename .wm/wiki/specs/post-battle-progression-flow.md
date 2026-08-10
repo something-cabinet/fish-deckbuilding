@@ -28,7 +28,7 @@ Define the flow between combat encounters: victory rewards, overworld navigation
 - D15: **Deck management anytime** — Accessible outside combat via button/key. Swap between 10-card combat deck and 30-card stash.
 - D16: **Reward: choose 1 of 3** — After victory, pick one card from three random offers. Plus gold.
 - D17: **Zone unlock system** — The overworld is divided into zones, each gated by a boss defeat. Beating the zone boss unlocks the path to the next zone. Story chapters precede each new zone unlock (dialogue/cutscene). Initially only Zone 1 is accessible.
-- D18: **Save/load integration** — RunState (gold, card_collection, deck, current_node, unlocked_zones, defeated_bosses) is serialized to JSON and saved via Godot's user:// persistence (ConfigFile or Resource). Auto-save on every node transition and after battle completion. Manual load from menu.
+- D18: **Save/load integration** — RunState (gold, card_collection, deck, current_node, unlocked_zones, defeated_bosses) is serialized to JSON and saved via localStorage. Auto-save on every node transition and after battle completion. Manual load from menu.
 
 ## Requirements
 
@@ -66,7 +66,7 @@ Define the flow between combat encounters: victory rewards, overworld navigation
 - NFR-1: Overworld state saved on every node transition
 - NFR-2: Deck management changes are persisted immediately
 - NFR-3: Reward card pool is seeded deterministic from run seed
-- NFR-4: Save/load uses Godot's `user://` directory (cross-platform, persists across app restarts)
+- NFR-4: Save/load uses localStorage's `user://` directory (cross-platform, persists across app restarts)
 - NFR-5: Save file size must be < 100KB (JSON, single-slot)
 - NFR-6: Serialization/deserialization must complete in < 50ms
 
@@ -147,17 +147,17 @@ Define the flow between combat encounters: victory rewards, overworld navigation
 
 ## Technical Notes
 
-- Overworld is a Rust core module `rust/src/core/overworld/` with model/service split
+- Overworld logic lives in `src/lib/game/overworld/` with model/service split
 - Overworld state: current_node, unlocked_paths, gold, card_collection (Vec<CardDef>), defeated_nodes, unlocked_zones, defeated_bosses
 - Zone model: `Zone` struct with `id`, `name`, `encounter_pool: Vec<EnemyTemplate>`, `boss_id`, `is_unlocked: bool`
 - Card collection starts with 2 copies of each starter card = 26 cards
 - Reward generation: pick 3 random cards from a pool (weighted by rarity, excludes full-duplicate cards beyond 2 copies)
 - The bridge scene for overworld can be simpler than battle — mostly clickable nodes and UI panels
-- Deck management UI is a Godot scene triggered from the overworld bridge
-- **Save/load**: Implemented as a new Rust core module `rust/src/core/save/` with `save_manager.rs`
+- Deck management UI is a React component triggered from the overworld screen
+- **Save/load**: Implemented as `src/lib/game/save/saveManager.ts`
 - Serialization: Use `serde` + `serde_json` for JSON serialization. CardDef, RunState derive Serialize/Deserialize.
-- Godot bridge: `GodotSaveManager` (gdext class) wraps the save core, reads/writes files via `godot::engine::FileAccess`.
-- Zones defined in a data file `rust/src/core/overworld/zones.rs` as a static array.
+- Save persistence: via browser localStorage API.
+- Zones defined in `src/lib/game/overworld/zones.ts` as a static array.
 
 ## Open Questions
 
@@ -165,6 +165,6 @@ Define the flow between combat encounters: victory rewards, overworld navigation
 - [ ] OQ-2: **(RESOLVED)** Branching paths (StS style) — player chooses between more battles (more rewards) vs shorter path to boss.
 - [ ] OQ-3: **(RESOLVED)** Visible hero icon that animates between nodes on click.
 - [ ] OQ-4: **(RESOLVED)** Zone encounter pools — each zone has unique enemies and reward tables.
-- [ ] OQ-5: **(RESOLVED)** Save/load uses `user://save_0.json` with serde JSON. Single-slot for Phase 1.
+- [ ] OQ-5: **(RESOLVED)** Save/load uses `localStorage` with JSON. Single-slot for Phase 1.
 - [ ] OQ-6: **(RESOLVED)** Auto-save triggers on node transition, battle end, shop purchase, crafting operation.
 - [ ] OQ-7: **(RESOLVED)** 3 zones minimum for Phase 1: Shallows, Midwaters, Depths.

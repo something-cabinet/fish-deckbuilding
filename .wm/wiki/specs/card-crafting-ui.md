@@ -13,9 +13,9 @@ status: approved
 
 ## Overview
 
-Shared crafting panel for Enchanter (add slot), Gambler (reroll affix), and Corrupt operations. Replaces the current debug-print placeholder (`overworld_scene.rs:231-249`) with a full UI allowing card selection, operation choice, and result display. All three modes share a single panel container with mode-specific controls.
+Shared crafting panel for Enchanter (add slot), Gambler (reroll affix), and Corrupt operations. Replaces the current debug-print placeholder with a full UI allowing card selection, operation choice, and result display. All three modes share a single panel container with mode-specific controls.
 
-Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already implements all three operations. The spec covers only the Godot UI layer.
+Builds on the existing TypeScript engine (affix, model) which already implements all three operations. This spec covers only the UI layer.
 
 ## Locked Decisions
 
@@ -55,8 +55,8 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 ### Non-Functional Requirements
 
 - NFR-1: Panel follows the same dark theme as existing UI (`#0b1a24` bg, `#4fd1c5` accent)
-- NFR-2: Self-contained UI panels (CardDetail, ActionSection, ResultSection, ConfirmDialog) extracted as sub-scenes. Sub-scenes work with gdext when using full absolute paths from `self.base()` — see @wiki/patterns/scene-branch-extraction
-- NFR-3: Rust bridge (`overworld_scene.rs`) syncs all UI state via `get_node_as` — no GDScript additions
+- NFR-2: Self-contained UI panels (CardDetail, ActionSection, ResultSection, ConfirmDialog) extracted as sub-components. Sub-components receive state via props and callbacks — see @wiki/patterns/scene-branch-extraction
+- NFR-3: Engine service syncs all UI state via React state management
 - NFR-4: Panel toggles visibility (shown/hidden) — does not change scene
 - NFR-5: Close button restores overworld map interaction
 
@@ -150,7 +150,7 @@ Builds on the existing Rust backend (`affix.rs`, `model.rs`) which already imple
 
 ### Panel structure in overworld.tscn
 
-Self-contained panel groups extracted as sub-scenes. Full paths from `self.base()` resolve correctly through sub-scene boundaries. Sub-scenes have no GDScript — the Rust bridge accesses children via `get_node_as` with absolute paths.
+Self-contained panel groups extracted as sub-components. Full state flows via React context and prop drilling.
 
 ```
 UI/CraftingPanel (Panel, hidden by default)
@@ -168,7 +168,7 @@ UI/CraftingPanel (Panel, hidden by default)
 │   │   └── DeckStashToggle/StashButton (Button, "Stash")
 │   └── CardBrowser/Scroll (ScrollContainer)
 │       └── Scroll/Grid (GridContainer, 3 columns)
-│           └── CardSlot_* (Panel, populated dynamically via Rust)
+│           └── CardSlot (populated dynamically via engine)
 ├── CraftingPanel/CardDetail (Panel, sub-scene: crafting_card_detail.tscn)
 │   ├── CardDetail/NameLabel
 │   ├── CardDetail/CostLabel
@@ -195,7 +195,7 @@ UI/CraftingPanel (Panel, hidden by default)
     └── ConfirmDialog/CancelButton (Button)
 ```
 
-### Rust bridge integration
+### Engine service integration
 
 - `overworld_scene.rs` gains a `CraftingMode` enum (`Enchanter`, `Gambler`, `Corrupt`)
 - `open_crafting(mode)` populates the card browser from `run.combat_deck`, shows the panel
@@ -218,7 +218,7 @@ UI/CraftingPanel (Panel, hidden by default)
 - `UI/CraftingPanel/ResultSection/BeforeCard` / `AfterCard` — result display
 - `UI/CraftingPanel/ConfirmDialog` — confirmation prompt
 
-### Existing Rust API
+### Existing TypeScript API
 
 | Operation | RunState method | Cost | Signature |
 |-----------|----------------|------|-----------|

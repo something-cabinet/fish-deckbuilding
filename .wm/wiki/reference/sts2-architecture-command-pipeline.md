@@ -7,7 +7,7 @@ tags: [reference, research, sts2, command-pattern, architecture, gof]
 
 # StS2 Architecture — Command Pipeline, ModelDB, Pooling (source analysis)
 
-Source analysis (user-provided, 2026-08-03) of **Slay the Spire 2** (Godot + C#) software architecture. Informs @wiki/specs/card-effect-registry (D9 command pipeline) and @wiki/reference/design-patterns-gof (Flyweight/Prototype/Strategy/Command mapping).
+Source analysis (user-provided, 2026-08-03) of **Slay the Spire 2** (Godot + C# � the original game engine) software architecture. Informs @wiki/specs/card-effect-registry (D9 command pipeline) and @wiki/reference/design-patterns-gof (Flyweight/Prototype/Strategy/Command mapping).
 
 ## Command Pattern — GameActionQueue
 

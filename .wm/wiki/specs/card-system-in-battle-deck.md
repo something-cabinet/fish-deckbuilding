@@ -1,7 +1,7 @@
 ---
 title: Card System — In-Battle Hand, Deck, and Play
 type: spec
-tags: [game-design, cards, combat, rust]
+tags: [game-design, cards, combat]
 status: approved
 ---
 
@@ -13,7 +13,7 @@ tags:
 - game-design
 - cards
 - combat
-- rust
+
 ---
 
 ## Overview
@@ -40,14 +40,14 @@ Implement the card data model, in-battle hand/deck management, and basic card pl
 - FR-2a: BuffType enum: Blind (next attack deals 50% less), Strengthen (+2 damage on attacks, N turns)
 - FR-2b: CardEffect struct contains: `effect: Effect`, `range: Range`, `target: TargetFilter`, `affect_pattern: Vec<(i32, i32)>`
 - FR-2c: **Range enum** — shared with unit combat:
-  ```rust
+  ```typescript
   enum Range {
       Melee,  // Chebyshev distance 1 (8-way adjacent)
       Ranged, // Any tile on the board
   }
   ```
 - FR-2d: **TargetFilter enum** — Duelyst-style:
-  ```rust
+  ```typescript
   enum TargetFilter {
       EnemyUnit,  // Must target an enemy unit
       AllyUnit,   // Must target an allied unit
@@ -58,7 +58,7 @@ Implement the card data model, in-battle hand/deck management, and basic card pl
   }
   ```
 - FR-2e: **Affect pattern** — Duelyst-style offset list. `affect_pattern: Vec<(i32, i32)>` defines the blast area as explicit (dx, dy) offsets from the target tile. The target tile itself is always included. Empty vec = target tile only. Pre-defined constants for common patterns:
-  ```rust
+  ```typescript
   mod patterns {
       use crate::grid::GridCoord;
       pub const SINGLE: &[(i32, i32)] = &[];
@@ -92,12 +92,12 @@ Implement the card data model, in-battle hand/deck management, and basic card pl
 - FR-13: Enemy AI decides which card to play based on simple priority (highest-damage affordable card first).
 - FR-14: **Mana ramping** — Player's `max_mana` starts at 1, increments by 1 at the start of each player turn, caps at 9. `current_mana` is reset to `max_mana` at the start of each player turn.
 - FR-15: **Mulligan** — At battle start, after initial 5-card draw, player may select 0-2 cards to replace. Selected cards are shuffled into the deck. An equal number of cards are drawn from the deck. Mulligan happens before turn 1.
-- FR-16: **Mana spring interaction** — (See `wiki:specs:godot-battle-scaffold`) Stepping on a mana spring tile increases max_mana by 1 (once per spring per battle), up to cap.
+- FR-16: **Mana spring interaction** — (See `wiki:specs:battle-system`) Stepping on a mana spring tile increases max_mana by 1 (once per spring per battle), up to cap.
 - FR-17: **Mana display** — HUD shows `current_mana / max_mana`. Mana gems/bubbles (Duelyst-style) display each point visually. Unspent mana is lost at end of turn (not saved).
 
 ### Non-Functional Requirements
 
-- NFR-1: All card logic is pure Rust (zero Godot deps), unit-testable
+- NFR-1: All card logic is pure TypeScript, unit-testable
 - NFR-2: Effect resolution is deterministic (same seed → same outcome)
 - NFR-3: Mana check prevents playing cards when insufficient mana
 - NFR-4: `valid_targets()` must complete in < 1ms (simple range + filter on 9×5 grid)
@@ -129,7 +129,7 @@ Implement the card data model, in-battle hand/deck management, and basic card pl
 - [ ] AC-23: Empty deck shuffles graveyard back automatically
 - [ ] AC-24: Enemy has its own hand + deck, draws 1 card at end of enemy turn
 - [ ] AC-25: Enemy AI plays a card from hand when it has sufficient mana and valid target
-- [ ] AC-26: All tests pass with `cargo test`
+- [ ] AC-26: All tests pass with `npm test`
 - [ ] AC-27: `valid_targets()` is the single function called by both bridge overlay and play validator
 - [ ] AC-28: `max_mana` starts at 1 on turn 1, increments by 1 each turn, caps at 9
 - [ ] AC-29: `current_mana` resets to `max_mana` at start of each player turn
@@ -196,11 +196,11 @@ Implement the card data model, in-battle hand/deck management, and basic card pl
 | 12 | Siren's Call | 1 | Strengthen 2 | Melee | Self | Single | Rare |
 | 13 | Desperate Strike | 3 | Damage 8 | Melee | EnemyUnit | Single | Rare |
 
-- Card system lives in `rust/src/core/cards/` — Range, TargetFilter, AffectPattern types defined here
-- `fn valid_targets(card: &CardDef, caster: GridCoord, state: &BattleState) -> Vec<GridCoord>` — called by bridge for overlay AND by engine for play validation
-- Hand, Deck, Graveyard under `rust/src/core/battle/model/`
-- BattleState gains hand, deck, graveyard, replace_used, mulligan_used, turn_number
-- Draw/Replace/Play in `rust/src/core/battle/service/card_actions.rs`
+- Card system lives in `src/lib/game/cards/` — Range, TargetFilter, AffectPattern types defined here
+- `function validTargets(card: CardDef, caster: GridCoord, state: BattleState): GridCoord[]` — called by bridge for overlay AND by engine for play validation
+- Hand, Deck, Graveyard under `src/lib/game/battle/models/`
+- BattleState gains hand, deck, graveyard, replaceUsed, mulliganUsed, turnNumber
+- Draw/Replace/Play in `src/lib/game/battle/services/cardActions.ts`
 
 ## Open Questions
 

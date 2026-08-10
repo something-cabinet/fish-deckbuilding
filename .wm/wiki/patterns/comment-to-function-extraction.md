@@ -2,7 +2,7 @@
 title: Pattern: Extract Functions Instead of Writing Comments
 type: pattern
 id: wiki:patterns:comment-to-function-extraction
-tags: [pattern, rust, code-quality, refactoring]
+tags: [pattern, code-quality, refactoring]
 ---
 
 ## Problem
@@ -12,26 +12,26 @@ Code with inline comments explaining phases, cases, or layers. Comments rot and 
 If you need a comment to explain a block of code, extract that block into a named function. The function name replaces the comment.
 
 ### Before
-```rust
-fn on_end_turn(&mut self) {
+```typescript
+function onEndTurn(): void {
     // Phase 1: end player turn
-    { ... battle_engine::end_player_turn(s); }
+    endPlayerTurn(this.state);
     // Phase 2: sync
-    self.sync_ui_ref();
+    this.syncUiRef();
     // Phase 3: enemy turn
-    ... battle_engine::execute_enemy_turn(s);
+    executeEnemyTurn(this.state);
     // Phase 4: sync all
-    self.sync_all();
+    this.syncAll();
 }
 ```
 
 ### After
-```rust
-fn on_end_turn(&mut self) {
-    if !self.end_player_turn_if_valid() { return; }
-    self.sync_ui_ref();
-    self.run_enemy_turn();
-    self.sync_all();
+```typescript
+function onEndTurn(): void {
+    if (!this.endPlayerTurnIfValid()) return;
+    this.syncUiRef();
+    this.runEnemyTurn();
+    this.syncAll();
 }
 ```
 

@@ -6,7 +6,7 @@ tags:
 - rust
 - refactor
 - cleanup
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: Legacy phase literals replaced with core Phase model usage

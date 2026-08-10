@@ -7,14 +7,7 @@ tags:
 - naming
 - types
 status: approved
-implementation_notes: 'Tech-stack note: this spec''s FR/AC/Technical Notes reference the old Svelte frontend (CardTypes.ts, cardData.ts, DeckViewer.svelte, CardTooltip.svelte, svelte-check) which no longer exists — the project moved to Godot 4 + godot-rust (gdext). The design intent (single `action` type, stats-not-label-driven combat role) still applies; re-target it at the Rust core card model and Godot UI when card data is implemented there. Tracked by wiki:tasks:review-and-rename-card-types-to-thematic-names-rust-core.'
----
-
----
-title: Card Type Rework — FaB-Style Action Type
-type: spec
-tags: [ui, cards, naming, theming]
-status: draft
+implementation_notes: 'Tech-stack note: this spec''s FR/AC/Technical Notes reference the old Svelte frontend (CardTypes.ts, cardData.ts, DeckViewer.svelte, CardTooltip.svelte, svelte-check) which no longer exists � the project is now on Next.js/React/TypeScript. The design intent (single ction type, stats-not-label-driven combat role) still applies; re-target it at the TypeScript card model when card data is implemented there.'
 ---
 
 ## Overview

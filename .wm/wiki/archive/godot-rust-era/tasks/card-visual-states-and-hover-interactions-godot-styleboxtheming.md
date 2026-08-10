@@ -6,7 +6,7 @@ tags:
 - ui
 - cards
 - interaction
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: Card hover shows lift + glow via Tween

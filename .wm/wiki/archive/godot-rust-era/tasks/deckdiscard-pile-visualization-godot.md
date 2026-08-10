@@ -6,7 +6,7 @@ tags:
 - ui
 - deck
 - visualization
-status: todo
+status: cancelled
 priority: low
 acceptance_criteria:
 - text: Deck pile shows stacked card backs with a count badge

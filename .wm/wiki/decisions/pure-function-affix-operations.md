@@ -1,7 +1,7 @@
 ---
 title: Decision: Pure-Function Affix Operations with Seeded Deterministic RNG
 type: decision
-tags: [decision, affix, rng, rust, testing, crafting]
+tags: [decision, affix, rng, testing, crafting]
 status: approved
 ---
 
@@ -9,17 +9,17 @@ status: approved
 The affix/crafting system needed operations that modify card affixes (reroll, add slot, corrupt). These operations needed to be testable, reproducible across runs, and composable with the existing overworld/run state.
 
 ## Decision
-All crafting operations are pure functions that take a `&CardDef` and return a new `CardDef`, never mutating the original. Randomness is provided by a simple LCG (`SeededRng`) that is seeded per-operation.
+All crafting operations are pure functions that take a `CardDef` and return a new `CardDef`, never mutating the original. Randomness is provided by a simple LCG (`SeededRng`) that is seeded per-operation.
 
-```rust
-pub fn enchanter_reroll(card: &CardDef, affix_idx: usize, seed: u64) -> CardDef;
-pub fn gambler_add_slot(card: &CardDef, seed: u64) -> CardDef;
-pub fn corrupt(card: &CardDef, seed: u64) -> (CardDef, CorruptOutcome);
+```typescript
+function enchanterReroll(card: CardDef, affixIdx: number, seed: number): CardDef;
+function gamblerAddSlot(card: CardDef, seed: number): CardDef;
+function corrupt(card: CardDef, seed: number): [CardDef, CorruptOutcome];
 ```
 
 The overworld `RunState` wraps these with gold-cost checks and deck mutation:
-```rust
-pub fn enchanter_reroll(&mut self, deck_idx: usize, affix_idx: usize, seed: u64) -> Option<&CardDef>;
+```typescript
+enchanterReroll(deckIdx: number, affixIdx: number, seed: number): CardDef | null;
 ```
 
 ## Rationale
@@ -32,7 +32,7 @@ pub fn enchanter_reroll(&mut self, deck_idx: usize, affix_idx: usize, seed: u64)
 - Seeds must be passed through the call chain, which adds a parameter to crafting functions
 - The LCG is simple enough for game purposes but not cryptographically secure (not a concern for single-player games)
 - The pure function approach means small allocations (clone + modify) per operation, but affix operations are infrequent so this is not a performance concern
-- The `RunState` methods return `Option<&CardDef>` with a lifetime tied to the borrow, limiting how the result can be used before the borrow is released
+- The `RunState` methods return `CardDef | null` (nullable), limiting how the result can be used before the reference is released
 
 ## Related
 - @wiki/specs/combat-affix-crafting-system

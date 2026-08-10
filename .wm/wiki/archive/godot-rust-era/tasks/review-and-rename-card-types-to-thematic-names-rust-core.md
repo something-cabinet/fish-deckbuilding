@@ -7,7 +7,7 @@ tags:
 - cards
 - naming
 - theming
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: New card type names feel thematic to the fish/debt/underwater setting

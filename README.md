@@ -1,8 +1,8 @@
 # Fish Mafia: Ledger Tactics — Web App
 
-Investigation branch: **grid-tactics card game in Next.js + React + TypeScript + Tailwind CSS v4** (JS is the real platform going forward).
+Investigation branch: **grid-tactics card game in Next.js + React + TypeScript + Tailwind CSS v4** (JS is the real platform).
 
-This branch replaces the retired Godot 4 + godot-rust stack (see `main` for that implementation) with a JS architecture:
+This repo uses a pure JS/TS architecture — the retired Godot 4 + godot-rust stack lives on the `main` branch:
 
 ```
                    +--------------------------+
@@ -46,4 +46,4 @@ E2E note: `npm run test:e2e` assumes a dev server running at `http://localhost:3
 
 ## Status
 
-Repo cleaned for JS (rust/, godot/, docs/ removed on this branch). `src/app/` scaffolding: engine contract + implementation, React UI, card library, card creator.
+Active JS development. `src/app/` scaffolding: engine contract + implementation, React UI, card library, card creator.
