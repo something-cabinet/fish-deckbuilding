@@ -41,6 +41,29 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [arrow, setArrow] = useState<ArrowState | null>(null)
+  const [hoveredUid, setHoveredUid] = useState<string | null>(null)
+
+  // measured width of the hand track + viewport height, so both the card size and
+  // the fan spacing follow the window instead of assuming a fixed card footprint
+  const handRef = useRef<HTMLDivElement | null>(null)
+  const [handWidth, setHandWidth] = useState(0)
+  const [viewportH, setViewportH] = useState(() => (typeof window === "undefined" ? 900 : window.innerHeight))
+  useEffect(() => {
+    const el = handRef.current
+    if (!el || typeof ResizeObserver === "undefined") return
+    const ro = new ResizeObserver(([entry]) => setHandWidth(entry.contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  useEffect(() => {
+    const onResize = () => setViewportH(window.innerHeight)
+    onResize()
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
+  const cardScale = handScale(handWidth, viewportH)
+  const handH = Math.round(CARD_H * cardScale)
 
   const dragRef = useRef<{
     active: boolean
@@ -359,7 +382,12 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
 
       {/* bottom: hand + controls */}
       {/* fixed height so the bar never resizes with hand size (empty hand included) */}
-      <div className="flex h-[192px] shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
+      {/* `relative z-20`: a hovered card lifts out of this bar and must paint over the board */}
+      <div
+        className="relative z-20 flex shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm"
+        // height follows the card size so the bar tracks the window instead of a fixed 192px
+        style={{ height: handH + 24 }}
+      >
         {/* left cluster: coin register + piles */}
         <div className="flex items-center gap-3">
           <CoinRegister coin={state.coin} active={playerTurn} />
@@ -370,7 +398,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
         </div>
 
         {/* center: hand — fanned, cards overlap so the row never scrolls or resizes the bar */}
-        <div className="flex h-[168px] flex-1 items-end justify-center px-2">
+        <div ref={handRef} className="flex flex-1 items-end justify-center px-2" style={{ height: handH }}>
           {state.hand.length === 0 && (
             <p className="flex h-full items-center font-display text-sm uppercase tracking-widest text-muted-foreground">
               Hand empty — end your turn
@@ -380,31 +408,54 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
             const isDragged = drag?.kind === DragKind.Card && drag.card?.uid === card.uid
             const isUnitTargetDrag =
               isDragged && card.def.target !== CardTarget.EmptyTile && card.def.target !== CardTarget.Self
-            const fan = fanTransform(i, state.hand.length)
+            const isArmed = pendingCard?.uid === card.uid || isUnitTargetDrag
+            const isHovered = hoveredUid === card.uid
+            const fan = fanTransform(i, state.hand.length, handWidth / cardScale)
+            // z-index lives inline because inline styles beat the utility classes; a
+            // hovered / armed card must sit above every neighbour to read in full.
+            const z = isHovered ? 60 : isDragged || isArmed ? 50 : i
             return (
+              // outer slot stays put and owns the hover hit area, so lifting the card
+              // never slides it out from under the cursor and re-triggers hover
               <div
                 key={card.uid}
-                className="relative origin-bottom transition-transform duration-150 [transform:rotate(var(--fan-r))_translateY(var(--fan-y))] hover:z-50 hover:[transform:rotate(0deg)_translateY(0)]"
-                style={
-                  {
-                    marginLeft: i === 0 ? 0 : fan.overlap,
-                    zIndex: isDragged || pendingCard?.uid === card.uid ? 40 : i,
-                    "--fan-r": `${fan.rotate}deg`,
-                    "--fan-y": `${fan.lift}px`,
-                  } as React.CSSProperties
-                }
+                onPointerEnter={() => setHoveredUid(card.uid)}
+                onPointerLeave={() => setHoveredUid((u) => (u === card.uid ? null : u))}
+                className="relative"
+                // `zoom` (not `transform: scale`) so the slot's *layout* box shrinks with
+                // the card — margins, hit area and getBoundingClientRect all stay honest.
+                // Everything inside is therefore in card-local units.
+                style={{ zoom: cardScale, marginLeft: i === 0 ? 0 : fan.overlap, zIndex: z }}
               >
-                <GameCard
-                  card={card}
-                  playable={playerTurn && card.def.cost <= state.coin}
-                  // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
-                  dragging={isDragged && !isUnitTargetDrag}
-                  armed={pendingCard?.uid === card.uid || isUnitTargetDrag}
-                  onPointerDown={onCardPointerDown}
-                  onTap={onCardTap}
-                  onSell={(c) => playerTurn && sell(c.uid)}
-                  compact
-                />
+                <div
+                  className={cn(
+                    "origin-bottom transition-transform duration-150 ease-out",
+                    isHovered || isArmed
+                      ? // lifted flat and enlarged, fully clear of the cards it was tucked under
+                        "[transform:rotate(0deg)_translateY(var(--lift))_scale(var(--scale))]"
+                      : "[transform:rotate(var(--fan-r))_translateY(var(--fan-y))]",
+                  )}
+                  style={
+                    {
+                      "--fan-r": `${fan.rotate}deg`,
+                      "--fan-y": `${fan.lift}px`,
+                      "--lift": isHovered ? "-44px" : "-16px",
+                      "--scale": isHovered ? "1.12" : "1.04",
+                    } as React.CSSProperties
+                  }
+                >
+                  <GameCard
+                    card={card}
+                    playable={playerTurn && card.def.cost <= state.coin}
+                    // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
+                    dragging={isDragged && !isUnitTargetDrag}
+                    armed={isArmed}
+                    onPointerDown={onCardPointerDown}
+                    onTap={onCardTap}
+                    onSell={(c) => playerTurn && sell(c.uid)}
+                    compact
+                  />
+                </div>
               </div>
             )
           })}
@@ -460,7 +511,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
             className="pointer-events-none fixed z-[60] -translate-x-1/2 -translate-y-1/2"
             style={{ left: drag.x, top: drag.y }}
           >
-            <div className="rotate-3 opacity-90 drop-shadow-2xl">
+            <div className="rotate-3 scale-105 drop-shadow-2xl" style={{ zoom: cardScale }}>
               <GameCard
                 card={drag.card}
                 playable
@@ -476,23 +527,46 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   )
 }
 
-const CARD_W = 124 // compact GameCard width
+const CARD_W = 124 // compact GameCard width, at scale 1
+const CARD_H = 168 // compact GameCard height, at scale 1
 const CARD_GAP = 8 // spacing used while the hand is still small
+const TARGET_STEP = 46 // spacing we try to keep between cards — cost pip + art stay visible
+const MIN_STEP = 28 // hard floor once even the target spacing cannot fit
+const MIN_SCALE = 0.66
+const MAX_SCALE = 1.3
+const HAND_VH = 0.24 // the hand may claim at most this share of the window height
+const HAND_REF = 7 // card size is sized for a hand this big, so playing a card never resizes the bar
+
+/**
+ * How large a card should render for the current window. Cards grow on roomy screens
+ * and shrink on cramped ones, bounded so the hand never eats the board (height) and a
+ * reference-sized hand still fits the track at readable spacing (width). Deliberately
+ * independent of the live card count: the fan spacing absorbs that instead, so the bar
+ * keeps a stable height as cards are played.
+ */
+function handScale(available: number, viewportH: number) {
+  const byHeight = (viewportH * HAND_VH) / CARD_H
+  const byWidth = available > 0 ? available / (CARD_W + (HAND_REF - 1) * TARGET_STEP) : MAX_SCALE
+  return Math.max(MIN_SCALE, Math.min(MAX_SCALE, byHeight, byWidth))
+}
 
 /**
  * Fan geometry for card `i` of `n`: cards spread from the centre, tilt outward and
- * dip along an arc. Past a handful they slide under each other instead of widening
- * the row, so the hand keeps a stable footprint no matter the card count.
+ * dip along an arc. As the hand grows they slide under each other instead of widening
+ * the row, so the hand keeps a stable footprint no matter the card count. Works in
+ * card-local units — the slot is zoomed by `handScale`, so `available` is divided by
+ * that scale before it gets here.
  */
-function fanTransform(i: number, n: number) {
-  const step = Math.max(20, CARD_W + CARD_GAP - (n - 1) * 8)
+function fanTransform(i: number, n: number, available: number) {
+  const fits = available > CARD_W ? (available - CARD_W) / Math.max(n - 1, 1) : CARD_W + CARD_GAP
+  const step = Math.max(MIN_STEP, Math.min(CARD_W + CARD_GAP, fits))
   const offset = i - (n - 1) / 2
   const half = Math.max((n - 1) / 2, 0.5)
-  const spread = Math.min(16, (n - 1) * 3) // total degrees edge to edge
+  const spread = Math.min(14, (n - 1) * 2.5) // total degrees edge to edge
   return {
     overlap: step - CARD_W,
     rotate: n <= 1 ? 0 : (offset / half) * (spread / 2),
-    lift: (offset / half) ** 2 * Math.min(10, n * 1.5),
+    lift: (offset / half) ** 2 * Math.min(12, n * 1.5),
   }
 }
 

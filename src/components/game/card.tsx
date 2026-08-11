@@ -54,15 +54,18 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
       onPointerDown={(e) => onPointerDown(e, card)}
       onClick={() => onTap?.(card)}
       className={cn(
-        "group relative flex shrink-0 select-none flex-col overflow-hidden rounded-lg border text-left shadow-lg transition-all",
+        // cards are always fully opaque: they overlap in hand, so anything see-through
+        // reads as a rendering bug. State is carried by filters, ring and shadow instead.
+        "group relative flex shrink-0 select-none flex-col overflow-hidden rounded-lg border text-left opacity-100 shadow-lg transition-all",
         "border-black/40 bg-[oklch(0.9_0.03_85)] text-[oklch(0.2_0.03_260)]",
         compact ? "h-[168px] w-[124px]" : "h-[196px] w-[150px]",
-        dragging ? "opacity-30" : "hover:-translate-y-3 hover:shadow-2xl",
+        // the card being dragged stays in place as a dimmed-but-solid slot marker
+        dragging && "brightness-[0.45] saturate-[0.25]",
         playable
           ? "cursor-grab ring-1 ring-gold/40 active:cursor-grabbing"
-          : "cursor-not-allowed opacity-70 saturate-50",
+          : "cursor-not-allowed brightness-[0.82] saturate-[0.35]",
         !dragging && playable && "hover:ring-2 hover:ring-gold",
-        armed && "-translate-y-3 ring-2 ring-gold shadow-2xl",
+        armed && "ring-2 ring-gold shadow-2xl",
       )}
     >
       {/* cost */}

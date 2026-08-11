@@ -1,6 +1,7 @@
-"use client"
+﻿"use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   Bug,
   Coins,
@@ -133,24 +134,24 @@ export function DebugMenu({
         onClick={toggle}
         aria-label="Debug tools"
         className={cn(
-          "fixed bottom-4 left-4 z-[9999] flex h-10 w-10 items-center justify-center rounded-full border shadow-lg transition-all",
+          "fixed bottom-4 left-4 z-[9999] flex h-12 w-12 items-center justify-center rounded-full border shadow-lg transition-all",
           open
             ? "border-enemy/60 bg-enemy/20 text-enemy scale-110"
             : "border-white/20 bg-ocean-deep/80 text-muted-foreground hover:border-gold/40 hover:text-gold",
         )}
       >
-        <Bug size={18} />
+        <Bug size={22} />
       </button>
 
       {/* panel */}
       {open && (
         <div className="fixed inset-0 z-[9998] flex items-start justify-center bg-black/60 p-4 pt-16 backdrop-blur-sm">
-          <div className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl border border-gold/30 bg-ocean-deep/95 shadow-2xl animate-fm-fade-in">
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-gold/30 bg-ocean-deep/95 shadow-2xl animate-fm-fade-in">
             {/* header */}
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
-              <div className="flex items-center gap-2">
-                <Bug size={18} className="text-enemy" />
-                <h2 className="font-display text-base font-bold uppercase tracking-widest text-foreground">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+              <div className="flex items-center gap-2.5">
+                <Bug size={24} className="text-enemy" />
+                <h2 className="font-display text-xl font-bold uppercase tracking-widest text-foreground">
                   Debug
                 </h2>
               </div>
@@ -158,38 +159,38 @@ export function DebugMenu({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close debug menu"
-                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
               >
-                <X size={18} />
+                <X size={24} />
               </button>
             </div>
 
             {/* tabs */}
-            <div className="flex shrink-0 gap-1 border-b border-white/10 px-4 py-2 overflow-x-auto">
+            <div className="flex shrink-0 gap-1.5 border-b border-white/10 px-5 py-3 overflow-x-auto">
               {isOverworld && (
                 <TabBtn active={activeTab === "overworld"} onClick={() => setTab("overworld")}>
-                  <Coins size={14} />
+                  <Coins size={18} />
                   Overworld
                 </TabBtn>
               )}
               {isBattle && (
                 <TabBtn active={activeTab === "battle"} onClick={() => setTab("battle")}>
-                  <Swords size={14} />
+                  <Swords size={18} />
                   Battle
                 </TabBtn>
               )}
               <TabBtn active={activeTab === "cards"} onClick={() => setTab("cards")}>
-                <Layers size={14} />
+                <Layers size={18} />
                 Cards
               </TabBtn>
               <TabBtn active={activeTab === "trinkets"} onClick={() => setTab("trinkets")}>
-                <Gem size={14} />
+                <Gem size={18} />
                 Trinkets
               </TabBtn>
             </div>
 
             {/* body */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-5">
               {activeTab === "overworld" && isOverworld && (
                 <OverworldTab
                   state={overworldState!}
@@ -235,14 +236,15 @@ export function DebugMenu({
                   trinkets={availableTrinkets}
                   overworldState={overworldState}
                   onOverworldUpdate={overworldUpdate}
+                  onBattleUpdate={isBattle ? battleUpdate : undefined}
                 />
               )}
             </div>
 
             {/* footer hint */}
-            <div className="border-t border-white/10 px-5 py-2 text-center font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-              Press <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">`</kbd> or{" "}
-              <kbd className="rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">F12</kbd> to toggle
+            <div className="border-t border-white/10 px-5 py-3 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+              Press <kbd className="rounded border border-white/20 bg-white/10 px-2 py-1 font-mono text-xs">`</kbd> or{" "}
+              <kbd className="rounded border border-white/20 bg-white/10 px-2 py-1 font-mono text-xs">F12</kbd> to toggle
             </div>
           </div>
         </div>
@@ -269,7 +271,7 @@ function TabBtn({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
+        "flex items-center gap-2 whitespace-nowrap rounded-md px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wider transition-colors",
         active
           ? "bg-gold/15 text-gold"
           : "text-muted-foreground hover:text-foreground",
@@ -302,7 +304,7 @@ function NumInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={cn(
-        "w-full rounded-md border border-white/20 bg-white/5 px-3 py-1.5 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none",
+        "w-full rounded-md border border-white/20 bg-white/5 px-4 py-2.5 font-display text-base text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none",
         className,
       )}
     />
@@ -323,7 +325,7 @@ function ActionBtn({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-md px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
+        "rounded-md px-4 py-2 font-display text-sm font-bold uppercase tracking-wider transition-colors",
         variant === "danger" && "border border-enemy/50 bg-enemy/10 text-enemy hover:bg-enemy/20",
         variant === "gold" && "border border-gold/50 bg-gold/10 text-gold hover:bg-gold/20",
         variant === "default" &&
@@ -385,7 +387,7 @@ function OverworldTab({
   return (
     <div className="flex flex-col gap-4">
       {/* gold */}
-      <Section label="Gold" icon={<Coins size={14} className="text-gold" />}>
+      <Section label="Gold" icon={<Coins size={16} className="text-gold" />}>
         <div className="flex items-center gap-2">
           <NumInput value={goldInput} onChange={setGoldInput} placeholder={String(state.gold)} />
           <ActionBtn onClick={setGold} variant="gold">Set</ActionBtn>
@@ -398,7 +400,7 @@ function OverworldTab({
       </Section>
 
       {/* debt */}
-      <Section label="Debt" icon={<Coins size={14} className="text-enemy" />}>
+      <Section label="Debt" icon={<Coins size={16} className="text-enemy" />}>
         <div className="flex items-center gap-2">
           <NumInput value={debtInput} onChange={setDebtInput} placeholder={String(state.debt)} />
           <ActionBtn onClick={setDebt} variant="danger">Set</ActionBtn>
@@ -411,7 +413,7 @@ function OverworldTab({
       </Section>
 
       {/* HP */}
-      <Section label="HP" icon={<HeartPulse size={14} className="text-enemy" />}>
+      <Section label="HP" icon={<HeartPulse size={16} className="text-enemy" />}>
         <div className="flex items-center gap-2">
           <NumInput value={hpInput} onChange={setHpInput} placeholder={String(state.hp)} />
           <ActionBtn onClick={setHp}>Set</ActionBtn>
@@ -423,7 +425,7 @@ function OverworldTab({
       </Section>
 
       {/* Fin */}
-      <Section label="Fin" icon={<Gem size={14} className="text-teal" />}>
+      <Section label="Fin" icon={<Gem size={16} className="text-teal" />}>
         <div className="flex items-center gap-2">
           <NumInput value={finInput} onChange={setFinInput} placeholder={String(state.fin)} />
           <ActionBtn onClick={setFin}>Set</ActionBtn>
@@ -435,15 +437,15 @@ function OverworldTab({
       </Section>
 
       {/* deck info */}
-      <Section label={`Deck (${state.deck.length} cards)`} icon={<Layers size={14} />}>
-        <p className="text-xs text-muted-foreground">
+      <Section label={`Deck (${state.deck.length} cards)`} icon={<Layers size={16} />}>
+        <p className="text-sm text-muted-foreground">
           Use the <strong>Cards</strong> tab to add or remove cards from your deck.
         </p>
       </Section>
 
       {/* trinkets info */}
-      <Section label={`Trinkets (${state.trinkets.length})`} icon={<Gem size={14} />}>
-        <p className="text-xs text-muted-foreground">
+      <Section label={`Trinkets (${state.trinkets.length})`} icon={<Gem size={16} />}>
+        <p className="text-sm text-muted-foreground">
           Use the <strong>Trinkets</strong> tab to add or remove trinkets.
         </p>
       </Section>
@@ -492,7 +494,7 @@ function BattleTab({
   return (
     <div className="flex flex-col gap-4">
       {/* coin */}
-      <Section label="Coin" icon={<Coins size={14} className="text-gold" />}>
+      <Section label="Coin" icon={<Coins size={16} className="text-gold" />}>
         <div className="flex items-center gap-2">
           <NumInput value={coinInput} onChange={setCoinInput} placeholder="coin" />
           <ActionBtn onClick={setCoin} variant="gold">Set</ActionBtn>
@@ -506,7 +508,7 @@ function BattleTab({
       </Section>
 
       {/* fin */}
-      <Section label="Fin" icon={<Gem size={14} className="text-teal" />}>
+      <Section label="Fin" icon={<Gem size={16} className="text-teal" />}>
         <div className="flex items-center gap-2">
           <NumInput value={finInput} onChange={setFinInput} placeholder="fin" />
           <ActionBtn onClick={setFin}>Set</ActionBtn>
@@ -526,7 +528,7 @@ function BattleTab({
       </Section>
 
       {/* quick actions */}
-      <Section label="Quick Actions" icon={<Zap size={14} />}>
+      <Section label="Quick Actions" icon={<Zap size={16} />}>
         <div className="flex flex-wrap gap-2">
           {drawCards && (
             <>
@@ -546,6 +548,44 @@ function BattleTab({
           </ActionBtn>
         </div>
       </Section>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Hover tooltip (portaled so it escapes the scrollable list's clip)   */
+/* ------------------------------------------------------------------ */
+
+function HoverCard({
+  tooltip,
+  children,
+}: {
+  tooltip: React.ReactNode
+  children: React.ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+
+  const show = useCallback(() => {
+    const r = ref.current?.getBoundingClientRect()
+    if (r) setPos({ top: r.bottom + 4, left: r.left })
+  }, [])
+  const hide = useCallback(() => setPos(null), [])
+
+  return (
+    <div ref={ref} className="relative" onMouseEnter={show} onMouseLeave={hide}>
+      {children}
+      {pos &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[10000] w-72 rounded-lg border border-gold/30 bg-ocean-deep/95 px-3.5 py-3 shadow-xl backdrop-blur-sm"
+            style={{ top: pos.top, left: pos.left }}
+          >
+            {tooltip}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
@@ -575,69 +615,80 @@ function CardListTab({
   }, [deck])
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search cards..."
-        className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
+        className="w-full rounded-md border border-white/20 bg-white/5 px-4 py-2.5 font-display text-base text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
       />
-      <p className="text-xs text-muted-foreground">{cards.length} cards</p>
+      <p className="text-sm text-muted-foreground">{cards.length} cards</p>
       {onOverworldUpdate && overworldState && (
-        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-1.5 max-h-96 overflow-y-auto pr-1">
           {cards.map((id) => {
             const def = CARD_LIBRARY[id]
             if (!def) return null
             const count = deckCounts[id] ?? 0
             return (
-              <div
+              <HoverCard
                 key={id}
-                className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-3 py-2"
+                tooltip={
+                  <>
+                    <p className="font-display text-xs font-bold uppercase tracking-wider text-gold">
+                      {def.name} <span className="text-muted-foreground">· {def.type} · {def.cost}c</span>
+                    </p>
+                    <p className="mt-1 font-display text-xs uppercase tracking-wider text-muted-foreground">
+                      {def.desc}
+                    </p>
+                  </>
+                }
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Shield size={12} className="shrink-0 text-gold/70" />
-                  <span className="truncate font-display text-xs font-bold text-foreground">
-                    {def.name}
-                  </span>
-                  {count > 0 && (
-                    <span className="shrink-0 font-display text-[10px] text-muted-foreground">
-                      ×{count}
+                <div className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Shield size={16} className="shrink-0 text-gold/70" />
+                    <span className="truncate font-display text-sm font-bold text-foreground">
+                      {def.name}
                     </span>
-                  )}
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  <ActionBtn
-                    onClick={() =>
-                      onOverworldUpdate({ deck: [...overworldState.deck, id] })
-                    }
-                    variant="gold"
-                  >
-                    <Plus size={12} />
-                  </ActionBtn>
-                  {count > 0 && (
+                    {count > 0 && (
+                      <span className="shrink-0 font-display text-xs text-muted-foreground">
+                        ×{count}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
                     <ActionBtn
-                      onClick={() => {
-                        const i = overworldState.deck.indexOf(id)
-                        if (i >= 0) {
-                          const next = [...overworldState.deck]
-                          next.splice(i, 1)
-                          onOverworldUpdate({ deck: next })
-                        }
-                      }}
-                      variant="danger"
+                      onClick={() =>
+                        onOverworldUpdate({ deck: [...overworldState.deck, id] })
+                      }
+                      variant="gold"
                     >
-                      <Trash2 size={12} />
+                      <Plus size={14} />
                     </ActionBtn>
-                  )}
+                    {count > 0 && (
+                      <ActionBtn
+                        onClick={() => {
+                          const i = overworldState.deck.indexOf(id)
+                          if (i >= 0) {
+                            const next = [...overworldState.deck]
+                            next.splice(i, 1)
+                            onOverworldUpdate({ deck: next })
+                          }
+                        }}
+                        variant="danger"
+                      >
+                        <Trash2 size={14} />
+                      </ActionBtn>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </HoverCard>
             )
           })}
         </div>
       )}
       {!onOverworldUpdate && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Card management is only available from the Overworld screen.
         </p>
       )}
@@ -655,74 +706,87 @@ function TrinketListTab({
   trinkets,
   overworldState,
   onOverworldUpdate,
+  onBattleUpdate,
 }: {
   search: string
   setSearch: (v: string) => void
   trinkets: string[]
   overworldState?: OverworldState | null
   onOverworldUpdate?: (p: Partial<OverworldState>) => void
+  onBattleUpdate?: (p: Partial<GameState>) => void
 }) {
   const owned = overworldState?.trinkets ?? []
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search trinkets..."
-        className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 font-display text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
+        className="w-full rounded-md border border-white/20 bg-white/5 px-4 py-2.5 font-display text-base text-foreground placeholder:text-muted-foreground/50 focus:border-gold/50 focus:outline-none"
       />
-      <p className="text-xs text-muted-foreground">{trinkets.length} trinkets</p>
+      <p className="text-sm text-muted-foreground">{trinkets.length} trinkets</p>
       {onOverworldUpdate && overworldState ? (
-        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-1.5 max-h-96 overflow-y-auto pr-1">
           {trinkets.map((id) => {
             const def = TRINKET_LIBRARY[id]
             if (!def) return null
             const isOwned = owned.includes(id)
             return (
-              <div
+              <HoverCard
                 key={id}
-                className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-3 py-2"
+                tooltip={
+                  <>
+                    <p className="font-display text-xs font-bold uppercase tracking-wider text-gold">{def.name}</p>
+                    <p className="mt-1 font-display text-xs uppercase tracking-wider text-muted-foreground">
+                      {def.description}
+                    </p>
+                  </>
+                }
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Gem size={12} className={cn("shrink-0", isOwned ? "text-gold" : "text-muted-foreground/50")} />
-                  <span className="truncate font-display text-xs font-bold text-foreground">
-                    {def.name}
-                  </span>
-                  <span className="shrink-0 rounded border border-white/10 px-1 font-display text-[8px] uppercase tracking-wider text-muted-foreground">
-                    {def.rarity}
-                  </span>
+                <div className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Gem size={16} className={cn("shrink-0", isOwned ? "text-gold" : "text-muted-foreground/50")} />
+                    <span className="truncate font-display text-sm font-bold text-foreground">
+                      {def.name}
+                    </span>
+                    <span className="shrink-0 rounded border border-white/10 px-1.5 py-0.5 font-display text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {def.rarity}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    {!isOwned ? (
+                      <ActionBtn
+                        onClick={() => {
+                          const next = [...overworldState.trinkets, id]
+                          onOverworldUpdate({ trinkets: next })
+                          onBattleUpdate?.({ activeTrinkets: next })
+                        }}
+                        variant="gold"
+                      >
+                        <Plus size={14} />
+                      </ActionBtn>
+                    ) : (
+                      <ActionBtn
+                        onClick={() => {
+                          const next = overworldState.trinkets.filter((t) => t !== id)
+                          onOverworldUpdate({ trinkets: next })
+                          onBattleUpdate?.({ activeTrinkets: next })
+                        }}
+                        variant="danger"
+                      >
+                        <Trash2 size={14} />
+                      </ActionBtn>
+                    )}
+                  </div>
                 </div>
-                <div className="flex shrink-0 gap-1">
-                  {!isOwned ? (
-                    <ActionBtn
-                      onClick={() =>
-                        onOverworldUpdate({ trinkets: [...overworldState.trinkets, id] })
-                      }
-                      variant="gold"
-                    >
-                      <Plus size={12} />
-                    </ActionBtn>
-                  ) : (
-                    <ActionBtn
-                      onClick={() =>
-                        onOverworldUpdate({
-                          trinkets: overworldState.trinkets.filter((t) => t !== id),
-                        })
-                      }
-                      variant="danger"
-                    >
-                      <Trash2 size={12} />
-                    </ActionBtn>
-                  )}
-                </div>
-              </div>
+              </HoverCard>
             )
           })}
         </div>
       ) : (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Trinket management is only available from the Overworld screen.
         </p>
       )}
@@ -744,14 +808,14 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <div className="mb-2 flex items-center gap-1.5">
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="mb-3 flex items-center gap-2">
         {icon}
-        <span className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
+        <span className="font-display text-sm font-bold uppercase tracking-wider text-foreground">
           {label}
         </span>
       </div>
-      <div className="flex flex-col gap-2">{children}</div>
+      <div className="flex flex-col gap-2.5">{children}</div>
     </div>
   )
 }
