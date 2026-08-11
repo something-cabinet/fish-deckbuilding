@@ -5,6 +5,7 @@ import { Coins, Gem, Sparkles } from "lucide-react"
 import { CardFace } from "./card-face"
 import { CARD_LIBRARY } from "@/lib/game/cards"
 import { TRINKET_LIBRARY, getTrinketDef } from "@/lib/game/trinkets"
+import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -60,7 +61,7 @@ export function RewardScreen({ cardIds, gold, trinketIds = [], onPick, onSkip }:
                 disabled={picked}
                 className="group relative transition-transform hover:-translate-y-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
-                <span className="pointer-events-none absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-gold/50 bg-ocean-deep px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-gold opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="pointer-events-none absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-gold/50 bg-ocean-deep px-2 py-0.5 font-display text-xs font-bold uppercase tracking-widest text-gold opacity-0 transition-opacity group-hover:opacity-100">
                   <Sparkles size={10} />
                   Add to deck
                 </span>
@@ -81,6 +82,7 @@ export function RewardScreen({ cardIds, gold, trinketIds = [], onPick, onSkip }:
             {trinketIds.map((id) => {
               const def = TRINKET_LIBRARY[id]
               if (!def) return null
+              const TrinketIcon = getCardIcon(def.icon)
 
               if (trinketsOnly) {
                 return (
@@ -91,14 +93,14 @@ export function RewardScreen({ cardIds, gold, trinketIds = [], onPick, onSkip }:
                     disabled={picked}
                     className="group relative flex flex-col items-center gap-1.5 rounded-xl border-2 border-white/10 bg-white/[0.03] p-3 transition-all hover:border-gold/50 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   >
-                    <Gem size={24} className="text-gold/60 transition-colors group-hover:text-gold" />
-                    <p className="font-display text-[10px] font-bold uppercase tracking-wider text-foreground">
+                    <TrinketIcon size={24} className="text-gold/60 transition-colors group-hover:text-gold" />
+                    <p className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
                       {def.name}
                     </p>
-                    <p className="max-w-24 text-center font-display text-[8px] uppercase tracking-wider text-muted-foreground">
+                    <p className="max-w-24 text-center font-display text-xs uppercase tracking-wider text-muted-foreground">
                       {def.description}
                     </p>
-                    <span className="pointer-events-none absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-gold/50 bg-ocean-deep px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-gold opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="pointer-events-none absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-gold/50 bg-ocean-deep px-2 py-0.5 font-display text-xs font-bold uppercase tracking-widest text-gold opacity-0 transition-opacity group-hover:opacity-100">
                       Take trinket
                     </span>
                   </button>
@@ -118,21 +120,21 @@ export function RewardScreen({ cardIds, gold, trinketIds = [], onPick, onSkip }:
                       : "border-white/10 bg-white/[0.03] hover:border-gold/50",
                   )}
                 >
-                  <Gem
+                  <TrinketIcon
                     size={24}
                     className={cn(
                       "transition-colors",
                       isSelected ? "text-gold" : "text-gold/60 group-hover:text-gold",
                     )}
                   />
-                  <p className="font-display text-[10px] font-bold uppercase tracking-wider text-foreground">
+                  <p className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
                     {def.name}
                   </p>
-                  <p className="max-w-24 text-center font-display text-[8px] uppercase tracking-wider text-muted-foreground">
+                  <p className="max-w-24 text-center font-display text-xs uppercase tracking-wider text-muted-foreground">
                     {def.description}
                   </p>
                   {isSelected && (
-                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-ocean-deep">
+                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-ocean-deep">
                       ✓
                     </span>
                   )}

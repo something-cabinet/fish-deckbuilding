@@ -3,6 +3,7 @@
 import { Gem, Percent } from "lucide-react"
 import { Phase, type GameState } from "@/lib/game/battle"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
+import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
 function phaseTitle(phase: Phase): string {
@@ -44,14 +45,15 @@ export function TopBar({ state }: { state: GameState }) {
             {state.activeTrinkets.map((id) => {
               const def = TRINKET_LIBRARY[id]
               if (!def) return null
+              const TrinketIcon = getCardIcon(def.icon)
               return (
                 <div key={id} className="group relative">
                   <div className="flex h-7 w-7 items-center justify-center rounded-md border border-gold/30 bg-gold/10">
-                    <Gem size={13} className="text-gold" />
+                    <TrinketIcon size={13} className="text-gold" />
                   </div>
                   <div className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 w-44 -translate-x-1/2 origin-top scale-95 rounded-lg border border-gold/30 bg-ocean-deep/95 px-2.5 py-2 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:scale-100 group-hover:opacity-100">
-                    <p className="font-display text-[10px] font-bold uppercase tracking-wider text-gold">{def.name}</p>
-                    <p className="mt-0.5 font-display text-[9px] uppercase tracking-wider text-muted-foreground">
+                    <p className="font-display text-xs font-bold uppercase tracking-wider text-gold">{def.name}</p>
+                    <p className="mt-0.5 font-display text-xs uppercase tracking-wider text-muted-foreground">
                       {def.description}
                     </p>
                   </div>
@@ -77,7 +79,7 @@ export function TopBar({ state }: { state: GameState }) {
         <Stat label="Fin" value={state.fin} icon={<Gem size={13} className="text-teal" />} />
         <Stat label="Interest" value={state.interest} icon={<Percent size={13} className="text-enemy" />} />
         <div className="flex flex-col items-end gap-1">
-          <span className="flex items-center gap-1.5 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-muted-foreground">
             Foreclosure
             <span className={cn("font-bold", danger ? "text-enemy" : "text-foreground")}>T-{state.foreclosure}</span>
           </span>
@@ -96,7 +98,7 @@ export function TopBar({ state }: { state: GameState }) {
 function Stat({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
     <div className="flex flex-col items-end">
-      <span className="flex items-center gap-1 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+      <span className="flex items-center gap-1 font-display text-xs uppercase tracking-widest text-muted-foreground">
         {icon}
         {label}
       </span>

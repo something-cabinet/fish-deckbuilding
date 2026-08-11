@@ -135,7 +135,7 @@ export function AiProfileEditor({ value, onChange }: Props) {
                       aria-controls={hintId}
                       aria-label={`${isExplained ? "Hide" : "Show"} explanation for ${meta.label}`}
                       className={cn(
-                        "flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wider transition-colors",
+                        "flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
                         isExplained
                           ? "border-gold/50 bg-gold/15 text-gold"
                           : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-gold",

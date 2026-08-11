@@ -751,7 +751,7 @@ function TrinketListTab({
                     <span className="truncate font-display text-sm font-bold text-foreground">
                       {def.name}
                     </span>
-                    <span className="shrink-0 rounded border border-white/10 px-1.5 py-0.5 font-display text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <span className="shrink-0 rounded border border-white/10 px-1.5 py-0.5 font-display text-xs uppercase tracking-wider text-muted-foreground">
                       {def.rarity}
                     </span>
                   </div>

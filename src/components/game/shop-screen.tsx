@@ -6,6 +6,7 @@ import type { ShopOffer } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { CardFace } from "./card-face"
+import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -78,7 +79,7 @@ export function ShopScreen({
             type="button"
             onClick={onLeave}
             aria-label="Leave shop"
-            className="flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+            className="flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
           >
             <X size={14} />
             Leave
@@ -144,6 +145,7 @@ export function ShopScreen({
                 if (!def) return null
                 const sold = bought.has(`trinket-${trinketId}`)
                 const afford = gold >= price
+                const TrinketIcon = getCardIcon(def.icon)
                 return (
                   <div key={trinketId} className="flex flex-col items-center gap-2">
                     <div
@@ -152,9 +154,9 @@ export function ShopScreen({
                         sold ? "border-white/10 opacity-40 grayscale" : "border-gold/50",
                       )}
                     >
-                      <Gem size={28} className="text-gold" />
+                      <TrinketIcon size={28} className="text-gold" />
                     </div>
-                    <p className="max-w-20 text-center font-display text-[10px] font-bold uppercase leading-tight text-foreground">
+                    <p className="max-w-20 text-center font-display text-xs font-bold uppercase leading-tight text-foreground">
                       {def.name}
                     </p>
                     <button
@@ -272,7 +274,7 @@ export function ShopScreen({
                         onRemove(id)
                         setRemoveMode(false)
                       }}
-                      className="rounded border border-enemy/40 bg-enemy/5 px-2 py-1 text-[11px] text-foreground transition-colors hover:bg-enemy/20"
+                      className="rounded border border-enemy/40 bg-enemy/5 px-2 py-1 text-xs text-foreground transition-colors hover:bg-enemy/20"
                     >
                       {def.name}
                     </button>

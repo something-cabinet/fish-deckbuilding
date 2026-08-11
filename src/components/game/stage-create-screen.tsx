@@ -218,7 +218,7 @@ export function StageCreateScreen({
               />
             </div>
             {enemies.length === 0 && (
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 No enemy templates yet — create some on the Enemies tab first.
               </p>
             )}
@@ -229,7 +229,7 @@ export function StageCreateScreen({
             <div className="max-w-[620px]">
               <StageGrid stage={draft} enemies={enemies} onTileClick={handleTile} interactive />
             </div>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Click a tile to place the armed tool. Placing over an occupied tile replaces it.
             </p>
           </Panel>
@@ -247,7 +247,7 @@ export function StageCreateScreen({
           <div className="w-full max-w-[170px]">
             <StageGrid stage={draft} enemies={enemies} />
           </div>
-          <p className="text-center font-display text-[10px] uppercase tracking-wider text-muted-foreground">
+          <p className="text-center font-display text-xs uppercase tracking-wider text-muted-foreground">
             {placements.length} {placements.length === 1 ? "enemy" : "enemies"} · {type} pool
           </p>
         </PreviewRail>
@@ -273,7 +273,7 @@ function ToolButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-display text-[10px] font-bold uppercase tracking-wider transition-colors",
+        "flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-wider transition-colors",
         active
           ? "border-gold bg-gold/15 text-gold"
           : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-gold",

@@ -248,13 +248,13 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <span
                                   className={cn(
-                                    "rounded px-1.5 py-0.5 font-display text-[11px] font-bold uppercase tracking-wider",
+                                    "rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
                                     TYPE_STYLES[card.type],
                                   )}
                                 >
                                   {card.type}
                                 </span>
-                                <span className="font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                                <span className="font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                   {card.cost} mana · {TARGET_LABELS[card.target]}
                                 </span>
                               </div>
@@ -319,7 +319,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                         <img src={`${SPRITE_PATH}${s}.png`} alt="" className="h-9 w-9 object-contain" />
                         <span
                           className={cn(
-                            "truncate font-display text-[10px] font-bold uppercase tracking-wider",
+                            "truncate font-display text-xs font-bold uppercase tracking-wider",
                             sprite === s ? "text-gold" : "text-muted-foreground",
                           )}
                         >

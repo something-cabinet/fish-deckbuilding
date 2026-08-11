@@ -74,13 +74,13 @@ function Effects({ choice }: { choice: EventChoice }) {
   if (choice.card) {
     const def = CARD_LIBRARY[choice.card]
     items.push(
-      <span key="c" className="flex items-center gap-1 font-display text-[11px] font-bold uppercase tracking-wide text-teal">
+      <span key="c" className="flex items-center gap-1 font-display text-xs font-bold uppercase tracking-wide text-teal">
         <Layers size={12} />+{def?.name ?? "card"}
       </span>,
     )
   }
   if (items.length === 0) {
-    return <span className="font-display text-[11px] uppercase tracking-wide text-muted-foreground">No cost</span>
+    return <span className="font-display text-xs uppercase tracking-wide text-muted-foreground">No cost</span>
   }
   return <>{items}</>
 }
@@ -104,7 +104,7 @@ function Chip({
   return (
     <span
       className={cn(
-        "flex items-center gap-1 font-display text-[11px] font-bold uppercase tracking-wide",
+        "flex items-center gap-1 font-display text-xs font-bold uppercase tracking-wide",
         tone === "gold" ? "text-gold" : good ? "text-teal" : "text-enemy",
       )}
     >

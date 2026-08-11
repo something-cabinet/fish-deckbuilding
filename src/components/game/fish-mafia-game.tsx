@@ -466,7 +466,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           <button
             type="button"
             onClick={onExit}
-            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
           >
             <Home size={13} />
             Menu
@@ -574,7 +574,7 @@ function Pile({ icon, label, value }: { icon: React.ReactNode; label: string; va
   return (
     <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1">
       <span className="text-gold/70">{icon}</span>
-      <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className="font-display text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
       <span className="ml-auto font-display text-sm font-bold text-foreground">{value}</span>
     </div>
   )

@@ -139,7 +139,7 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
             <Fish size={14} className="text-gold" />
             Guppy the Debtor
           </p>
-          <p className="font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+          <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {curZoneName} · Zone {state.zoneIndex + 1} of 3
           </p>
         </div>
@@ -166,8 +166,8 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
                       <Gem size={11} className="text-gold" />
                     </div>
                     <div className="pointer-events-none absolute -top-1 right-full z-50 mr-2 w-40 origin-bottom-right scale-95 rounded-lg border border-gold/30 bg-ocean-deep/95 px-2 py-1.5 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:scale-100 group-hover:opacity-100">
-                      <p className="font-display text-[9px] font-bold uppercase tracking-wider text-gold">{def.name}</p>
-                      <p className="mt-0.5 font-display text-[8px] uppercase tracking-wider text-muted-foreground">
+                      <p className="font-display text-xs font-bold uppercase tracking-wider text-gold">{def.name}</p>
+                      <p className="mt-0.5 font-display text-xs uppercase tracking-wider text-muted-foreground">
                         {def.description}
                       </p>
                     </div>
@@ -179,7 +179,7 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
           <button
             type="button"
             onClick={() => setShowDeck(true)}
-            className="flex items-center gap-1.5 rounded-md border border-gold/40 bg-gold/10 px-2.5 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20"
+            className="flex items-center gap-1.5 rounded-md border border-gold/40 bg-gold/10 px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-gold transition-colors hover:bg-gold/20"
           >
             <Layers size={13} />
             Deck · {state.deck.length}
@@ -187,7 +187,7 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
           <button
             type="button"
             onClick={onExit}
-            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
           >
             Menu
           </button>
@@ -364,7 +364,7 @@ function LedgerBar({
       >
         <span
           className={cn(
-            "flex items-center gap-1.5 font-display text-[11px] font-bold uppercase tracking-widest",
+            "flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-widest",
             critical ? "text-enemy" : "text-gold",
           )}
         >
@@ -428,7 +428,7 @@ function MapLegend() {
             <span className={cn("flex h-6 w-6 items-center justify-center rounded-full border", ring, bg)}>
               <Icon size={13} className={icon} />
             </span>
-            <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
               {label}
             </span>
           </div>
@@ -438,7 +438,7 @@ function MapLegend() {
         <span className="flex h-6 w-6 items-center justify-center rounded-full border border-enemy/70 bg-enemy/15">
           <span className="h-1.5 w-1.5 rounded-full bg-enemy" />
         </span>
-        <span className="font-display text-[11px] font-bold uppercase tracking-wider text-foreground">
+        <span className="font-display text-xs font-bold uppercase tracking-wider text-foreground">
           Threat
         </span>
       </div>
@@ -457,7 +457,7 @@ function Stat({
 }) {
   return (
     <div className="flex flex-col items-end">
-      <span className="flex items-center gap-1 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
+      <span className="flex items-center gap-1 font-display text-xs uppercase tracking-widest text-muted-foreground">
         {icon}
         {label}
       </span>

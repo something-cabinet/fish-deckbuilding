@@ -287,7 +287,7 @@ export function TileAction({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "flex items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground transition-colors",
+        "flex items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors",
         danger ? "hover:border-red-400/40 hover:text-red-400" : "hover:border-gold/40 hover:text-gold",
         className,
       )}

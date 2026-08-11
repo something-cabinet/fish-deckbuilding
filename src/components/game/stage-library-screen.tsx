@@ -54,13 +54,13 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
               <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-gold">
                 {zone.name}
               </h2>
-              <span className="font-display text-[10px] uppercase tracking-wider text-muted-foreground">
+              <span className="font-display text-xs uppercase tracking-wider text-muted-foreground">
                 {zone.tagline} · {zoneStages.length > 0 ? byType : "0 stages"}
               </span>
               <button
                 type="button"
                 onClick={() => onCreate(zone.id)}
-                className="ml-auto flex items-center gap-1 rounded-md border border-white/10 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+                className="ml-auto flex items-center gap-1 rounded-md border border-white/10 px-2.5 py-1 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
                 <Plus size={12} />
                 New stage
@@ -68,7 +68,7 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
             </header>
 
             {zoneStages.length === 0 ? (
-              <p className="py-6 text-center font-display text-[11px] uppercase tracking-wider text-muted-foreground/60">
+              <p className="py-6 text-center font-display text-xs uppercase tracking-wider text-muted-foreground/60">
                 No stages — battles here fall back to the built-in lineup.
               </p>
             ) : (
@@ -82,7 +82,7 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
                       <StageGrid stage={stage} enemies={enemies} />
                       {badge && BadgeIcon && (
                         <span className={cn(
-                          "absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border bg-ocean-deep px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider shadow",
+                          "absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border bg-ocean-deep px-2 py-0.5 font-display text-xs font-bold uppercase tracking-wider shadow",
                           badge.className,
                         )}>
                           <BadgeIcon size={9} />
@@ -96,7 +96,7 @@ export function StageLibraryScreen({ stages, enemies, onCreate, onEdit, onDelete
                         {stage.name}
                       </h3>
                       <span className={cn(
-                        "ml-auto shrink-0 font-display text-[10px] uppercase tracking-wider",
+                        "ml-auto shrink-0 font-display text-xs uppercase tracking-wider",
                         "text-muted-foreground",
                       )}>
                         {stage.cols}×{stage.rows} · {stage.placements.length}
