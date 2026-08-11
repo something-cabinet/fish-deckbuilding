@@ -485,7 +485,7 @@ const CARD_GAP = 8 // spacing used while the hand is still small
  * the row, so the hand keeps a stable footprint no matter the card count.
  */
 function fanTransform(i: number, n: number) {
-  const step = n <= 6 ? CARD_W + CARD_GAP : Math.max(44, CARD_W + CARD_GAP - (n - 6) * 12)
+  const step = Math.max(20, CARD_W + CARD_GAP - (n - 1) * 8)
   const offset = i - (n - 1) / 2
   const half = Math.max((n - 1) / 2, 0.5)
   const spread = Math.min(16, (n - 1) * 3) // total degrees edge to edge
