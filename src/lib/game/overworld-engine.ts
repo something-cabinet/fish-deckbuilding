@@ -531,11 +531,11 @@ export function rollEliteRewards(seed: number, zoneIndex: number, nodeId: string
   return { cards: base.cards, gold: base.gold + 15 + zoneIndex * 5, trinkets }
 }
 
-/** Treasure rewards: no fight, generous gold + a card pick + a trinket pick (3 options). */
+/** Treasure rewards: no cards, generous gold + a choice of trinkets (3 options). */
 export function rollTreasure(seed: number, zoneIndex: number, nodeId: string): RolledRewards {
   const base = rollRewards(seed, zoneIndex, nodeId)
   const trinkets = rollTrinketIds(seed, zoneIndex, nodeId, [], 3)
-  return { cards: base.cards, gold: base.gold * 2 + 20, trinkets }
+  return { cards: [], gold: base.gold * 2 + 20, trinkets }
 }
 
 export function addRewardToState(

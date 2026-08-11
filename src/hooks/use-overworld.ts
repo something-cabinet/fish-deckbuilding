@@ -114,6 +114,28 @@ export function useOverworld() {
     setReward(null)
   }, [])
 
+  /** Skip the reward: keep the gold but don't add any card or trinket. */
+  const skipReward = useCallback((gold: number) => {
+    setState((s) => {
+      if (!s) return s
+      return clearCurrentNode({ ...s, gold: s.gold + gold })
+    })
+    setReward(null)
+  }, [])
+
+  /** Claim a treasure reward: gold + optional trinket, no card. */
+  const claimTreasureReward = useCallback((gold: number, trinketId?: string) => {
+    setState((s) => {
+      if (!s) return s
+      let next = clearCurrentNode({ ...s, gold: s.gold + gold })
+      if (trinketId && !next.trinkets.includes(trinketId)) {
+        next = { ...next, trinkets: [...next.trinkets, trinketId] }
+      }
+      return next
+    })
+    setReward(null)
+  }, [])
+
   /**
    * Claim a boss-win reward: add card + gold, clear the boss node, and move
    * the hero to the next zone's start node (if one exists). Save.
@@ -131,6 +153,24 @@ export function useOverworld() {
           withReward = { ...withReward, trinkets: [...withReward.trinkets, trinketId] }
         }
         const unlocked = unlockNextZone(withReward)
+        const nextZone = unlocked.zoneIndex + 1
+        if (nextZone < maps.length) {
+          return { ...unlocked, zoneIndex: nextZone, nodeId: "0-0", visited: [] }
+        }
+        return unlocked
+      })
+      setReward(null)
+    },
+    [maps.length],
+  )
+
+  /** Skip boss reward: keep gold, unlock next zone, no card or trinket. */
+  const skipBossReward = useCallback(
+    (gold: number) => {
+      setState((s) => {
+        if (!s) return s
+        const withGold = { ...s, gold: s.gold + gold }
+        const unlocked = unlockNextZone(withGold)
         const nextZone = unlocked.zoneIndex + 1
         if (nextZone < maps.length) {
           return { ...unlocked, zoneIndex: nextZone, nodeId: "0-0", visited: [] }
@@ -271,7 +311,10 @@ export function useOverworld() {
     heal,
     startReward,
     claimReward,
+    claimTreasureReward,
+    skipReward,
     claimBossReward,
+    skipBossReward,
     claimBossWin,
     updateHp,
     buyCard,

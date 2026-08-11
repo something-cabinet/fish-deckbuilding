@@ -514,11 +514,21 @@ export function FishMafiaApp() {
             gold={overworld.reward.gold}
             trinketIds={overworld.reward.trinkets}
             onPick={(cardId, trinketId) => {
-              if (pendingBossReward) {
+              if (!cardId) {
+                overworld.claimTreasureReward(overworld.reward!.gold, trinketId)
+              } else if (pendingBossReward) {
                 overworld.claimBossReward(cardId, overworld.reward!.gold, trinketId)
                 setPendingBossReward(false)
               } else {
                 overworld.claimReward(cardId, overworld.reward!.gold, trinketId)
+              }
+            }}
+            onSkip={() => {
+              if (pendingBossReward) {
+                overworld.skipBossReward(overworld.reward!.gold)
+                setPendingBossReward(false)
+              } else {
+                overworld.skipReward(overworld.reward!.gold)
               }
             }}
           />
