@@ -12,18 +12,6 @@ relates_to:
   - {type: references, target: wiki:tasks:crafting-ui-actions}
 ---
 
----
-title: Combat Affix & Crafting System
-type: spec
-status: implemented
-tags:
-- game-design
-- combat
-- affix
-- crafting
-- cards
----
-
 ## Overview
 
 Enhance the combat system with Diablo-style affix lines on cards, a stash system for deck management between fights, NPC crafting mechanics (reroll, add slot, corrupt), and character-specific unique cards. Inspired by Inkbound and Path of Exile.
@@ -151,10 +139,10 @@ No overworld is implemented. The tactical RPG spec (approved) targets a Cross Bl
 Gold is the campaign-persistent currency (earned from battles, spent at shops). No gold amounts, prices, or balance are defined. The FaB coin system (per-turn, resets) is superseded — gold is the durable economy. Crafting costs can be designed freely.
 
 ### Card System
-No card data model exists in Rust. The card system is greenfield. The affix spec can define its data model from scratch. AttackResult and GridUnit are the only combat primitives affix effects would interact with.
+The card data model exists in TypeScript under `src/lib/game/cards/`. The card system is greenfield. The affix spec can define its data model from scratch. AttackResult and GridUnit are the only combat primitives affix effects would interact with.
 
-### Rust Architecture
-Core logic lives in `rust/src/core/` (model/service split, zero Godot deps). The affix/crafting system would be new modules under `core/` (e.g., `cards/`, `affix/`, `crafting/`). The existing Run/Combat State Split pattern separates persistent state (deck, gold) from per-battle state (hand, draw pile).
+### TypeScript Architecture
+Game logic lives in `src/lib/game/` (model/service split, zero UI deps). The affix/crafting system modules live under `src/lib/game/` (e.g., `cards/`, `affix/`, `crafting/`). The existing Run/Combat State Split pattern separates persistent state (deck, gold) from per-battle state (hand, draw pile).
 
 ## Implementation Notes
 

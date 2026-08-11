@@ -6,7 +6,7 @@ tags:
 - ui
 - animations
 - feedback
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: Damage dealt shows floating number above the target that fades

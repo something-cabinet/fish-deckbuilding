@@ -108,6 +108,7 @@ export interface EventChoice {
   hp?: number
   debt?: number
   card?: string
+  trinket?: string
 }
 
 export interface EventDef {

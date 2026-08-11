@@ -1,14 +1,16 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Library, Pencil, Plus, ScrollText, Shield, Sparkles, Swords, Trash2 } from "lucide-react"
+import { Gem, Library, Pencil, Plus, ScrollText, Shield, Sparkles, Swords, Trash2 } from "lucide-react"
 import { CardType, type CardDef } from "@/lib/game/cards"
 import type { EnemyDef } from "@/lib/game/units"
 import type { StageDef } from "@/lib/game/stages"
+import type { TrinketDef } from "@/lib/game/trinkets"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import { CardFace } from "./card-face"
 import { EnemyLibraryScreen } from "./enemy-library-screen"
 import { StageLibraryScreen } from "./stage-library-screen"
+import { TrinketLibraryScreen } from "./trinket-library-screen"
 import {
   Chip,
   DesignHeader,
@@ -25,6 +27,7 @@ interface Props {
   customIds?: string[]
   enemies: EnemyDef[]
   stages: StageDef[]
+  trinkets: TrinketDef[]
   /** tab to open on; lets the app restore the tab after an editor round-trip */
   initialSubtab?: SubTab
   onSubtabChange?: (tab: SubTab) => void
@@ -38,17 +41,21 @@ interface Props {
   onStageCreate: (zone: ZoneId) => void
   onStageEdit: (stage: StageDef) => void
   onStageDelete: (id: string) => void
+  onTrinketCreate: () => void
+  onTrinketEdit: (trinket: TrinketDef) => void
+  onTrinketDelete: (id: string) => void
 }
 
 /** Card filter; null means "All" (no bare literal discriminators). */
 type Filter = CardType | null
 
-export type SubTab = "cards" | "enemies" | "stages"
+export type SubTab = "cards" | "enemies" | "stages" | "trinkets"
 
 const SUBTABS: { id: SubTab; label: string; icon: React.ElementType }[] = [
   { id: "cards", label: "Cards", icon: Swords },
   { id: "enemies", label: "Enemies", icon: Shield },
   { id: "stages", label: "Stages", icon: ScrollText },
+  { id: "trinkets", label: "Trinkets", icon: Gem },
 ]
 
 const FILTERS: { id: Filter; label: string }[] = [
@@ -63,6 +70,7 @@ export function CardLibraryScreen({
   customIds,
   enemies,
   stages,
+  trinkets,
   initialSubtab,
   onSubtabChange,
   onBack,
@@ -75,6 +83,9 @@ export function CardLibraryScreen({
   onStageCreate,
   onStageEdit,
   onStageDelete,
+  onTrinketCreate,
+  onTrinketEdit,
+  onTrinketDelete,
 }: Props) {
   const [subtab, setSubtab] = useState<SubTab>(initialSubtab ?? "cards")
   const [filter, setFilter] = useState<Filter>(null)
@@ -91,10 +102,11 @@ export function CardLibraryScreen({
   return (
     <main className="flex h-dvh w-full flex-col overflow-hidden bg-ocean-deep text-foreground">
       <DesignHeader icon={Library} title="Game" accent="Design" onBack={onBack} backLabel="Menu">
-        <span className="hidden font-display text-[11px] font-bold uppercase tracking-wider text-muted-foreground sm:inline">
+        <span className="hidden font-display text-xs font-bold uppercase tracking-wider text-muted-foreground sm:inline">
           {subtab === "cards" && `${visible.length} cards`}
           {subtab === "enemies" && `${enemies.length} enemies`}
           {subtab === "stages" && `${stages.length} stages`}
+          {subtab === "trinkets" && `${trinkets.length} trinkets`}
         </span>
         {subtab === "cards" && (
           <PrimaryButton onClick={onCreate}>
@@ -106,6 +118,12 @@ export function CardLibraryScreen({
           <PrimaryButton onClick={onEnemyCreate}>
             <Plus size={15} />
             Create Enemy
+          </PrimaryButton>
+        )}
+        {subtab === "trinkets" && (
+          <PrimaryButton onClick={onTrinketCreate}>
+            <Plus size={15} />
+            Create Trinket
           </PrimaryButton>
         )}
       </DesignHeader>
@@ -153,7 +171,7 @@ export function CardLibraryScreen({
               {visible.map((def) => (
                 <div key={def.id} className="relative w-[150px]">
                   {custom.has(def.id) && (
-                    <span className="absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-2 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-gold shadow">
+                    <span className="absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-2 py-0.5 font-display text-xs font-bold uppercase tracking-wider text-gold shadow">
                       <Sparkles size={9} />
                       Custom
                     </span>
@@ -188,6 +206,15 @@ export function CardLibraryScreen({
           onCreate={onStageCreate}
           onEdit={onStageEdit}
           onDelete={onStageDelete}
+        />
+      )}
+
+      {/* trinkets tab */}
+      {subtab === "trinkets" && (
+        <TrinketLibraryScreen
+          trinkets={trinkets}
+          onEdit={onTrinketEdit}
+          onDelete={onTrinketDelete}
         />
       )}
     </main>

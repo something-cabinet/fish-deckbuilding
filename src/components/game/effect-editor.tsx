@@ -13,6 +13,10 @@ export interface EffectRow {
 interface Props {
   effects: EffectRow[]
   onChange: (effects: EffectRow[]) => void
+  /** restrict the kind dropdown; defaults to every kind a card can use */
+  allowedKinds?: EffectRow["kind"][]
+  /** label on the add button, when "Add Effect" would be ambiguous */
+  addLabel?: string
 }
 
 const EFFECT_KINDS: { id: EffectRow["kind"]; label: string }[] = [
@@ -27,9 +31,14 @@ const EFFECT_KINDS: { id: EffectRow["kind"]; label: string }[] = [
 const HAS_AMOUNT = new Set(["damage", "heal", "drawCards", "gainCoin", "buffAtk"])
 const HAS_TARGET = new Set(["heal"])
 
-export function EffectEditor({ effects, onChange }: Props) {
+export function EffectEditor({ effects, onChange, allowedKinds, addLabel }: Props) {
+  // caller order wins, so the first allowed kind is the one Add starts on
+  const kinds = allowedKinds
+    ? allowedKinds.flatMap((id) => EFFECT_KINDS.filter((k) => k.id === id))
+    : EFFECT_KINDS
+
   function addEffect() {
-    onChange([...effects, { kind: "damage", amount: 1 }])
+    onChange([...effects, { kind: kinds[0]?.id ?? "damage", amount: 1 }])
   }
 
   function removeEffect(idx: number) {
@@ -53,7 +62,7 @@ export function EffectEditor({ effects, onChange }: Props) {
             onChange={(e) => updateEffect(idx, { kind: e.target.value as EffectRow["kind"] })}
             className={cn(selectClass, "min-w-0 flex-1 py-1 sm:max-w-[240px]")}
           >
-            {EFFECT_KINDS.map((k) => (
+            {kinds.map((k) => (
               <option key={k.id} value={k.id}>
                 {k.label}
               </option>
@@ -66,7 +75,7 @@ export function EffectEditor({ effects, onChange }: Props) {
                 type="button"
                 aria-label="Decrease amount"
                 onClick={() => updateEffect(idx, { amount: Math.max(1, effect.amount - 1) })}
-                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-xs text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
                 −
               </button>
@@ -77,7 +86,7 @@ export function EffectEditor({ effects, onChange }: Props) {
                 type="button"
                 aria-label="Increase amount"
                 onClick={() => updateEffect(idx, { amount: Math.min(99, effect.amount + 1) })}
-                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-[10px] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+                className="flex h-6 w-6 items-center justify-center rounded border border-white/10 text-xs text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
               >
                 +
               </button>
@@ -91,7 +100,7 @@ export function EffectEditor({ effects, onChange }: Props) {
               onChange={(e) =>
                 updateEffect(idx, { healTarget: e.target.value as "caster" | "cast-target" })
               }
-              className="rounded-md border border-white/10 bg-ocean-deep px-1.5 py-1 font-display text-[9px] uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
+              className="rounded-md border border-white/10 bg-ocean-deep px-1.5 py-1 font-display text-xs uppercase tracking-wider text-foreground outline-none focus:border-gold/50"
             >
               <option value="caster">Self</option>
               <option value="cast-target">Target</option>
@@ -114,12 +123,12 @@ export function EffectEditor({ effects, onChange }: Props) {
         onClick={addEffect}
         className={cn(
           "flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-white/10 px-2.5 py-1.5",
-          "font-display text-[10px] font-bold uppercase tracking-wider text-muted-foreground",
+          "font-display text-xs font-bold uppercase tracking-wider text-muted-foreground",
           "transition-colors hover:border-gold/40 hover:text-gold",
         )}
       >
         <Plus size={12} />
-        Add Effect
+        {addLabel ?? "Add Effect"}
       </button>
     </div>
   )

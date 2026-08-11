@@ -48,7 +48,7 @@ export function CoinRegister({ coin, active }: Props) {
               {d}
             </span>
           ))}
-          <span className="ml-1 font-display text-[7px] uppercase tracking-widest text-[oklch(0.65_0.08_200)]">
+          <span className="ml-1 font-display text-xs uppercase tracking-widest text-[oklch(0.65_0.08_200)]">
             Coin
           </span>
         </div>

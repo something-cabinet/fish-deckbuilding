@@ -1,29 +1,30 @@
 ---
-title: Pattern: Dynamic UI Hover with Tween (gdext)
+title: Pattern: Dynamic UI Hover with Tween
 type: pattern
 id: wiki:patterns:dynamic-ui-hover-tween
 status: reviewed
-tags: [pattern, gdext, ui, hover, tween]
+tags: [pattern, ui, hover, animation]
 ---
 
 ## Problem
 
-How to add a hover "float and expand" effect to dynamically-created UI nodes (cards in a grid, map nodes on an overworld) in a Rust gdext bridge. Requires smooth tween animation, per-node hover detection, and cleanup when the container is repopulated.
+How to add a hover "float and expand" effect to dynamically-created UI nodes (cards in a grid, map nodes on an overworld) in a React/JS DOM context. Requires smooth CSS/JS animation, per-node hover detection, and cleanup when the container is repopulated.
 
 ## Solution
 
-Three-part approach that works with gdext 0.5 and Godot 4.x:
+Three-part approach that works with React and CSS transitions:
 
 1. **Hover detection via mouse position** — Track `hovered: Option<usize>` field. On `InputEventMouseMotion`, compute which child is under the cursor by iterating the container's children and checking `get_rect()` bounds. Never compute the index from hardcoded slot widths/heights — GridContainer cell sizes vary with content.
 
 2. **Tween animation** — On hover change, create a `create_tween()` on the target node:
-   ```rust
-   let mut tween = slot.create_tween();
-   tween.set_trans(TransitionType::QUINT);
-   tween.set_ease(EaseType::OUT);
-   tween.set_parallel();
-   tween.tween_property(&slot, "scale", &Vector2::new(1.05, 1.05).to_variant(), 0.15);
-   tween.tween_property(&slot, "position", &Vector2::new(x, base_y - 10.0).to_variant(), 0.15);
+   ```tsx
+   <div
+     className={`card-slot ${isHovered ? "hovered" : ""}`}
+     style={{
+       transform: isHovered ? "scale(1.05) translateY(-10px)" : "scale(1) translateY(0)",
+       transition: "transform 0.15s cubic-bezier(0.23, 1, 0.32, 1)",
+     }}
+   >
    ```
    Save the base Y position when hover starts so the tween can restore it exactly.
 
@@ -37,7 +38,7 @@ Three-part approach that works with gdext 0.5 and Godot 4.x:
 ## When Not to Use
 
 - Static UI elements in a `.tscn` — use `mouse_entered`/`mouse_exited` signals instead
-- When `gui_input` per-child signals are simpler (children are few and static)
+- When simple CSS `:hover` transitions suffice (no JS tracking needed)
 
 ## Pitfalls
 
@@ -47,4 +48,4 @@ Three-part approach that works with gdext 0.5 and Godot 4.x:
 
 ## Related
 
-- @wiki/tasks/crafting-ui-bridge-plumbing
+- @wiki/patterns/card-grid-layout

@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { CARD_LIBRARY } from "@/lib/game"
 import type { CardDef, GameState } from "@/lib/game"
 import { STAGE_LIBRARY, type StageDef } from "@/lib/game/stages"
 import type { EnemyDef } from "@/lib/game/units"
+import { TRINKET_DEFS, type TrinketDef } from "@/lib/game/trinkets"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import type { MapNode } from "@/lib/game/overworld-types"
 import type { EventChoice } from "@/lib/game/overworld-data"
@@ -16,12 +17,14 @@ import { EventScreen } from "./event-screen"
 import { FishMafiaGame } from "./fish-mafia-game"
 import { MenuScreen } from "./menu-screen"
 import { StageCreateScreen } from "./stage-create-screen"
+import { TrinketCreateScreen } from "./trinket-create-screen"
 import { OverworldMap } from "./overworld-map"
 import { RewardScreen } from "./reward-screen"
 import { RunSummary } from "./run-summary"
 import { SavePrompt } from "./save-prompt"
 import { ShopScreen } from "./shop-screen"
 import { useOverworld } from "@/hooks/use-overworld"
+import { DebugMenu } from "./debug-menu"
 
 export interface GameSettings {
   /** show teal reachable-tile dots when a unit is selected */
@@ -43,13 +46,23 @@ type Screen =
   | "create"
   | "create-enemy"
   | "create-stage"
+  | "create-trinket"
 /** an overworld node resolved on the map itself, via an overlay */
 type NodeAction = "shop" | "event" | null
 
 /** the design-tool screens, which are safe to restore after a reload */
-type DesignScreen = Extract<Screen, "library" | "create" | "create-enemy" | "create-stage">
+type DesignScreen = Extract<
+  Screen,
+  "library" | "create" | "create-enemy" | "create-stage" | "create-trinket"
+>
 
-const DESIGN_SCREENS: DesignScreen[] = ["library", "create", "create-enemy", "create-stage"]
+const DESIGN_SCREENS: DesignScreen[] = [
+  "library",
+  "create",
+  "create-enemy",
+  "create-stage",
+  "create-trinket",
+]
 
 function isDesignScreen(s: Screen): s is DesignScreen {
   return (DESIGN_SCREENS as Screen[]).includes(s)
@@ -74,12 +87,19 @@ interface DesignLocation {
   enemyId?: string
   stageId?: string
   stageZone?: ZoneId
+  trinketId?: string
 }
 
 export function FishMafiaApp() {
   const [hydrated, setHydrated] = useState(false)
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
+  // battle debug handle set by FishMafiaGame on mount
+  const [battleDebug, setBattleDebug] = useState<{
+    debugUpdate: (p: Partial<GameState>) => void
+    drawCards: (n: number) => void
+    state: GameState
+  } | null>(null)
   // cards from the database, managed in-app for the editor
   const [cards, setCards] = useState<CardDef[]>(() => Object.values(CARD_LIBRARY))
   // ids authored this session, badged as Custom in the library
@@ -91,6 +111,9 @@ export function FishMafiaApp() {
   // authored battle layouts, drawn from when a battle node is entered
   const [stages, setStages] = useState<StageDef[]>(() => STAGE_LIBRARY)
   const [editingStage, setEditingStage] = useState<StageDef | null>(null)
+  // run trinkets from the database, managed in-app for the designer
+  const [trinkets, setTrinkets] = useState<TrinketDef[]>(() => TRINKET_DEFS)
+  const [editingTrinket, setEditingTrinket] = useState<TrinketDef | null>(null)
   /** zone a brand-new stage belongs to, from the section its button was in */
   const [newStageZone, setNewStageZone] = useState<ZoneId>("shallows")
   // the library tab to return to after an editor round-trip
@@ -125,6 +148,10 @@ export function FishMafiaApp() {
       const stage = STAGE_LIBRARY.find((s) => s.id === loc.stageId)
       if (stage) setEditingStage(stage)
     }
+    if (loc.trinketId) {
+      const trinket = TRINKET_DEFS.find((t) => t.id === loc.trinketId)
+      if (trinket) setEditingTrinket(trinket)
+    }
     if (loc.stageZone) setNewStageZone(loc.stageZone)
     setLibrarySubtab(loc.subtab)
     setScreen(loc.screen)
@@ -143,9 +170,10 @@ export function FishMafiaApp() {
       enemyId: editingEnemy?.id,
       stageId: editingStage?.id,
       stageZone: newStageZone,
+      trinketId: editingTrinket?.id,
     }
     sessionStorage.setItem(DESIGN_LOCATION_KEY, JSON.stringify(loc))
-  }, [screen, librarySubtab, editingCard, editingEnemy, editingStage, newStageZone])
+  }, [screen, librarySubtab, editingCard, editingEnemy, editingStage, newStageZone, editingTrinket])
   // the battle being played right now (built from the overworld run)
   const [battle, setBattle] = useState<GameState | null>(null)
   const [battleIsBoss, setBattleIsBoss] = useState(false)
@@ -276,19 +304,26 @@ export function FishMafiaApp() {
 
   if (screen === "menu") {
     return (
-      <MenuScreen
-        settings={settings}
-        onChangeSettings={setSettings}
-        onStart={startNewRun}
-        onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
-        onOpenLibrary={() => setScreen("library")}
-      />
+      <>
+        <MenuScreen
+          settings={settings}
+          onChangeSettings={setSettings}
+          onStart={startNewRun}
+          onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
+          onOpenLibrary={() => setScreen("library")}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "library") {
     return (
-      <CardLibraryScreen
+      <>
+        <CardLibraryScreen
         cards={cards}
         customIds={customIds}
         enemies={enemies}
@@ -333,13 +368,31 @@ export function FishMafiaApp() {
             method: "DELETE",
           }).catch(() => {})
         }}
+        trinkets={trinkets}
+        onTrinketCreate={() => setScreen("create-trinket")}
+        onTrinketEdit={(trinket) => {
+          setEditingTrinket(trinket)
+          setScreen("create-trinket")
+        }}
+        onTrinketDelete={(id) => {
+          setTrinkets((prev) => prev.filter((t) => t.id !== id))
+          fetch(`/api/trinkets?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create") {
     return (
-      <CardCreateScreen
+      <>
+        <CardCreateScreen
         editCard={editingCard ?? undefined}
         onBack={() => {
           setEditingCard(null)
@@ -364,12 +417,18 @@ export function FishMafiaApp() {
           setEditingCard(null)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create-enemy") {
     return (
-      <EnemyCreateScreen
+      <>
+        <EnemyCreateScreen
         editEnemy={editingEnemy ?? undefined}
         onBack={() => {
           setEditingEnemy(null)
@@ -393,12 +452,18 @@ export function FishMafiaApp() {
           setEditingEnemy(def)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "create-stage") {
     return (
-      <StageCreateScreen
+      <>
+        <StageCreateScreen
         enemies={enemies}
         editStage={editingStage ?? undefined}
         initialZone={newStageZone}
@@ -424,13 +489,54 @@ export function FishMafiaApp() {
           setEditingStage(def)
         }}
       />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
+    )
+  }
+
+  if (screen === "create-trinket") {
+    return (
+      <>
+        <TrinketCreateScreen
+          editTrinket={editingTrinket ?? undefined}
+          onBack={() => {
+            setEditingTrinket(null)
+            setScreen("library")
+          }}
+          onSave={(def) => {
+            setTrinkets((prev) => [...prev, def])
+            fetch("/api/trinkets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+          }}
+          onUpdate={(def) => {
+            setTrinkets((prev) => prev.map((t) => (t.id === def.id ? def : t)))
+            fetch("/api/trinkets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+            setEditingTrinket(def)
+          }}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   if (screen === "overworld") {
     const s = overworld.state
     return (
-      <div className="relative h-dvh w-full">
+      <>
+        <div className="relative h-dvh w-full">
         {s ? (
           <OverworldMap
             state={s}
@@ -452,6 +558,7 @@ export function FishMafiaApp() {
             offers={overworld.shop}
             removePrice={overworld.removePrice}
             onBuy={overworld.buyCard}
+            onBuyTrinket={overworld.buyTrinket}
             onRemove={overworld.removeCard}
             onPayDebt={overworld.payDebt}
             onLeave={() => {
@@ -477,12 +584,23 @@ export function FishMafiaApp() {
           <RewardScreen
             cardIds={overworld.reward.cards}
             gold={overworld.reward.gold}
-            onPick={(cardId) => {
-              if (pendingBossReward) {
-                overworld.claimBossReward(cardId, overworld.reward!.gold)
+            trinketIds={overworld.reward.trinkets}
+            onPick={(cardId, trinketId) => {
+              if (!cardId) {
+                overworld.claimTreasureReward(overworld.reward!.gold, trinketId)
+              } else if (pendingBossReward) {
+                overworld.claimBossReward(cardId, overworld.reward!.gold, trinketId)
                 setPendingBossReward(false)
               } else {
-                overworld.claimReward(cardId, overworld.reward!.gold)
+                overworld.claimReward(cardId, overworld.reward!.gold, trinketId)
+              }
+            }}
+            onSkip={() => {
+              if (pendingBossReward) {
+                overworld.skipBossReward(overworld.reward!.gold)
+                setPendingBossReward(false)
+              } else {
+                overworld.skipReward(overworld.reward!.gold)
               }
             }}
           />
@@ -509,19 +627,32 @@ export function FishMafiaApp() {
           />
         )}
       </div>
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
     )
   }
 
   // screen === "battle"
   return (
-    <FishMafiaGame
-      key={`battle-${overworld.state?.nodeId ?? "r"}`}
-      settings={settings}
-      initial={battle ?? undefined}
-      onWin={handleWin}
-      onLose={handleLoss}
-      onExit={backToMenu}
-    />
+    <>
+      <FishMafiaGame
+        key={`battle-${overworld.state?.nodeId ?? "r"}`}
+        settings={settings}
+        initial={battle ?? undefined}
+        onWin={handleWin}
+        onLose={handleLoss}
+        onExit={backToMenu}
+        onDebugReady={setBattleDebug}
+      />
+      <DebugMenu
+        battleDebug={battleDebug}
+        overworldState={overworld.state}
+        onOverworldUpdate={overworld.debugUpdate}
+      />
+    </>
   )
 }
 

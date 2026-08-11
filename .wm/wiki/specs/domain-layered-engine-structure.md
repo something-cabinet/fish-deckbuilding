@@ -77,4 +77,4 @@ Verified 2026-08-04 (final shape + enums/constants extraction): tsc 0, 66/66 tes
 
 - @wiki/specs/angular-style-file-system (base convention: one-type-per-file + barrels + role suffixes incl. `*.enum.ts`, `*.constants.ts`)
 - @wiki/rules/spec-driven-development, @wiki/rules/tdd
-- @wiki/memory/domain-driven-barrel-structure (earlier Rust-era barrel pattern)
+- @wiki/memory/domain-driven-barrel-structure (earlier barrel pattern)

@@ -28,6 +28,7 @@ describe("CardLibraryScreen", () => {
         cards={baseCards}
         enemies={[]}
         stages={[]}
+        trinkets={[]}
         onBack={() => {}}
         onCreate={() => {}}
         onEdit={() => {}}
@@ -38,6 +39,9 @@ describe("CardLibraryScreen", () => {
         onStageCreate={() => {}}
         onStageEdit={() => {}}
         onStageDelete={() => {}}
+        onTrinketCreate={() => {}}
+        onTrinketEdit={() => {}}
+        onTrinketDelete={() => {}}
         {...props}
       />,
     )

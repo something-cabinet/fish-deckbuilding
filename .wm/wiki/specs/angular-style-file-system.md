@@ -14,7 +14,7 @@ status: approved
 
 ## Overview
 
-Restructure the engine, hooks, and shared lib layers of the Next.js/React codebase (`src/lib/game/`, `src/lib/utils.ts`, `src/hooks/`) around an Angular-style file system: one top-level service/helper/interface per file, organized into domain folders with barrel `index.ts` re-exports. This replaces the current flat, mixed files (`types.ts` packs 15 top-level decls; `engine.ts` mixes reducers + helpers) and the stale Rust-era docs that describe a retired stack.
+Restructure the engine, hooks, and shared lib layers of the Next.js/React codebase (`src/lib/game/`, `src/lib/utils.ts`, `src/hooks/`) around an Angular-style file system: one top-level service/helper/interface per file, organized into domain folders with barrel `index.ts` re-exports. This replaces the current flat, mixed files (`types.ts` packs 15 top-level decls; `engine.ts` mixes reducers + helpers) and the stale docs that describe a retired stack.
 
 Components (`src/components/`) are already one-component-per-file and are excluded from this restructure.
 
@@ -57,7 +57,7 @@ Components (`src/components/`) are already one-component-per-file and are exclud
 - [ ] AC-6: `npm run build` passes.
 - [ ] AC-7: No new circular imports introduced (grep-verifiable; type-only cycles documented if they remain).
 - [ ] AC-8: CONVENTIONS.md describes the actual Next.js/React stack and the one-per-file + barrel convention as the standard.
-- [ ] AC-9: ARCHITECTURE.md stack section matches the real repo (Next.js 16 + React 19 + Tailwind v4; no retired Godot/Rust pivot text as current state).
+- [ ] AC-9: ARCHITECTURE.md stack section matches the real repo (Next.js 16 + React 19 + Tailwind v4; no retired stack references as current state).
 - [ ] AC-10: DESIGN.md component map updated to the real `src/` layout and current app shell topology.
 
 ## Scenarios

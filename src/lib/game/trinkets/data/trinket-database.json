@@ -1,0 +1,153 @@
+{
+  "trinkets": [
+    {
+      "id": "gold_pinky_ring",
+      "name": "Gold Pinky Ring",
+      "description": "You get 2 extra coin when you sell a card.",
+      "icon": "Gem",
+      "rarity": "common",
+      "triggers": {
+        "onCardSold": [{ "kind": "gainCoin", "amount": 2 }]
+      }
+    },
+    {
+      "id": "rusty_hook",
+      "name": "Rusty Hook",
+      "description": "Start each battle with 1 extra card drawn.",
+      "icon": "Anchor",
+      "rarity": "common",
+      "triggers": {
+        "onCombatStart": [{ "kind": "drawCards", "amount": 1 }]
+      }
+    },
+    {
+      "id": "chipped_pearl",
+      "name": "Chipped Pearl",
+      "description": "Start each battle with 3 extra coin.",
+      "icon": "Gem",
+      "rarity": "common",
+      "triggers": {
+        "onCombatStart": [{ "kind": "gainCoin", "amount": 3 }]
+      }
+    },
+    {
+      "id": "bent_penny",
+      "name": "Bent Penny",
+      "description": "Gain 1 coin whenever you defeat an enemy.",
+      "icon": "Coins",
+      "rarity": "common",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "gainCoin", "amount": 1 }]
+      }
+    },
+    {
+      "id": "lucky_fin",
+      "name": "Lucky Fin",
+      "description": "Gain 1 coin at the start of each turn.",
+      "icon": "Fish",
+      "rarity": "common",
+      "triggers": {
+        "onTurnStart": [{ "kind": "gainCoin", "amount": 1 }]
+      }
+    },
+    {
+      "id": "shark_tooth",
+      "name": "Shark Tooth",
+      "description": "Your maximum HP is increased by 5.",
+      "icon": "Sword",
+      "rarity": "uncommon",
+      "stats": { "maxHp": 5 }
+    },
+    {
+      "id": "crooked_badge",
+      "name": "Crooked Badge",
+      "description": "Heal 2 HP whenever you defeat an enemy.",
+      "icon": "Shield",
+      "rarity": "uncommon",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "heal", "amount": 2, "target": "caster" }]
+      }
+    },
+    {
+      "id": "pawn_ticket",
+      "name": "Pawn Ticket",
+      "description": "Gain 2 coin at the start of each turn.",
+      "icon": "Scroll",
+      "rarity": "uncommon",
+      "triggers": {
+        "onTurnStart": [{ "kind": "gainCoin", "amount": 2 }]
+      }
+    },
+    {
+      "id": "smugglers_net",
+      "name": "Smuggler's Net",
+      "description": "Start each battle with +1 attack.",
+      "icon": "Fish",
+      "rarity": "uncommon",
+      "triggers": {
+        "onCombatStart": [{ "kind": "buffAtk", "amount": 1 }]
+      }
+    },
+    {
+      "id": "tarnished_locket",
+      "name": "Tarnished Locket",
+      "description": "Heal 3 HP at the start of each battle.",
+      "icon": "Gem",
+      "rarity": "uncommon",
+      "triggers": {
+        "onCombatStart": [{ "kind": "heal", "amount": 3, "target": "caster" }]
+      }
+    },
+    {
+      "id": "foreclosers_ledger",
+      "name": "The Forecloser's Ledger",
+      "description": "You get 5 extra coin when you sell a card.",
+      "icon": "Scroll",
+      "rarity": "rare",
+      "triggers": {
+        "onCardSold": [{ "kind": "gainCoin", "amount": 5 }]
+      }
+    },
+    {
+      "id": "glass_reef",
+      "name": "Glass Reef",
+      "description": "Draw a card whenever you defeat an enemy.",
+      "icon": "Gem",
+      "rarity": "rare",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "drawCards", "amount": 1 }]
+      }
+    },
+    {
+      "id": "coral_crown",
+      "name": "Coral Crown",
+      "description": "Your maximum HP is increased by 8.",
+      "icon": "Crown",
+      "rarity": "rare",
+      "stats": { "maxHp": 8 }
+    },
+    {
+      "id": "obsidian_scale",
+      "name": "Obsidian Scale",
+      "description": "Start each battle with 6 coin and draw 1 card.",
+      "icon": "Shield",
+      "rarity": "rare",
+      "triggers": {
+        "onCombatStart": [
+          { "kind": "gainCoin", "amount": 6 },
+          { "kind": "drawCards", "amount": 1 }
+        ]
+      }
+    },
+    {
+      "id": "spectral_fin",
+      "name": "Spectral Fin",
+      "description": "Gain 3 coin at the start of each turn.",
+      "icon": "Fish",
+      "rarity": "rare",
+      "triggers": {
+        "onTurnStart": [{ "kind": "gainCoin", "amount": 3 }]
+      }
+    }
+  ]
+}

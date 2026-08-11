@@ -92,4 +92,6 @@ export interface OverworldState {
   unlockedZones: number
   /** run seed — map layout + rewards derive from it */
   seed: number
+  /** trinket def ids owned by this run */
+  trinkets: string[]
 }

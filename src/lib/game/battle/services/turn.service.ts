@@ -5,6 +5,7 @@ import { Team } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
 import { COIN_TURN_BASE } from "../../cards"
+import { resolveTrigger } from "../../trinkets"
 
 export function checkEnd(state: GameState) {
   const hero = heroUnit(state)
@@ -90,7 +91,13 @@ export function beginPlayerTurn(state: GameState): GameState {
     }
   }
 
-  drawCards(s, 1, fx)
+  // fresh hand each turn: discard whatever wasn't played, then redeal to handSize
+  s.discard = [...s.discard, ...s.hand]
+  s.hand = []
+  drawCards(s, s.handSize, fx)
+
+  // fire onTurnStart trinket triggers
+  resolveTrigger(s, s.activeTrinkets, "onTurnStart", fx)
 
   // escalation via interest
   if (s.interest > 0 && s.interest % 4 === 0) {

@@ -5,7 +5,7 @@ tags:
 - godot
 - ui
 - theming
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: All UI colors/styles reference the shared Theme resource, no hardcoded colors in scenes

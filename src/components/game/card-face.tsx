@@ -65,7 +65,7 @@ export function CardFace({ def, size = "md", className }: Props) {
       >
         <span
           className={cn(
-            "absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider",
+            "absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
             TYPE_STYLES[def.type],
           )}
         >
@@ -100,7 +100,7 @@ export function CardFace({ def, size = "md", className }: Props) {
         <p
           className={cn(
             "leading-snug text-[oklch(0.35_0.02_260)]",
-            large ? "text-[11px]" : "text-[10px]",
+            large ? "text-xs" : "text-xs",
           )}
         >
           {def.desc || "No description."}
@@ -108,7 +108,7 @@ export function CardFace({ def, size = "md", className }: Props) {
       </div>
 
       {/* footer: target + sell value */}
-      <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
+      <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-xs font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
         <span>{TARGET_LABELS[def.target] ?? def.target}</span>
         <span className="flex items-center gap-1">
           <Coins size={11} />

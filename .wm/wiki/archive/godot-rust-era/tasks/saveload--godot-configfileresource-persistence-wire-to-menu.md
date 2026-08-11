@@ -6,7 +6,7 @@ tags:
 - p0
 - persistence
 - save
-status: todo
+status: cancelled
 priority: high
 acceptance_criteria:
 - text: Save writes game/run state to user:// via ConfigFile or Resource

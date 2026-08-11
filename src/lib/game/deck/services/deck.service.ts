@@ -1,6 +1,5 @@
 import type { FxEvent, GameState } from "../../battle/models"
 import { log } from "../../shared"
-import { HAND_MAX } from "../constants"
 
 export function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -13,7 +12,7 @@ export function shuffle<T>(arr: T[]): T[] {
 
 export function drawCards(state: GameState, n: number, fx: FxEvent[]) {
   for (let i = 0; i < n; i++) {
-    if (state.hand.length >= HAND_MAX) {
+    if (state.hand.length >= state.handMax) {
       log(state, "Your hand is full — a card is burned.", "bad")
       continue
     }

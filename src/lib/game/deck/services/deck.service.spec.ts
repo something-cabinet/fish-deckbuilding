@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { createInitialState } from "@/lib/game/battle"
 import { drawCards, shuffle } from "@/lib/game/deck"
-import { HAND_MAX } from "@/lib/game/deck"
+import { DEFAULT_HAND_MAX } from "@/lib/game/deck"
 import type { FxEvent } from "@/lib/game/battle"
 
 function stateWithHand(count: number) {
@@ -22,11 +22,11 @@ describe("deck: drawCards", () => {
   })
 
   it("burns a card when the hand is full", () => {
-    const s = stateWithHand(HAND_MAX)
+    const s = stateWithHand(DEFAULT_HAND_MAX)
     const deckBefore = s.deck.length
     const fx: FxEvent[] = []
     drawCards(s, 2, fx)
-    expect(s.hand.length).toBe(HAND_MAX)
+    expect(s.hand.length).toBe(DEFAULT_HAND_MAX)
     expect(s.deck.length).toBe(deckBefore)
     expect(s.log.some((l) => l.text.includes("hand is full"))).toBe(true)
   })

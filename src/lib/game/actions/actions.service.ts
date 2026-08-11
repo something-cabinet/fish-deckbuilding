@@ -5,6 +5,7 @@ import { checkEnd, manhattan, reachableTiles } from "../battle/services"
 import { cleanupDead, dealDamage, effAtk } from "../units"
 import { Team } from "../units"
 import { CardTarget, cardTargets, resolveCardEffects, type CardInstance } from "../cards"
+import { resolveTrigger } from "../trinkets"
 
 export function moveUnit(
   state: GameState,
@@ -101,5 +102,8 @@ export function sellCard(state: GameState, cardUid: string): GameState {
   s.hand = s.hand.filter((c) => c.uid !== cardUid)
   s.discard = [...s.discard, card]
   log(s, `Sold ${card.def.name} on the street for ${gain} coin.`, "gold")
+  // fire onCardSold trinket triggers
+  const fx: FxEvent[] = []
+  resolveTrigger(s, s.activeTrinkets, "onCardSold", fx)
   return s
 }

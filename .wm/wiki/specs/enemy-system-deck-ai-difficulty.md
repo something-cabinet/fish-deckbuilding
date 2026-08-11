@@ -5,17 +5,6 @@ type: spec
 tags: [game-design, enemy, cards, ai, combat]
 status: approved
 ---
-
----
-title: Enemy System — Deck, AI Card Play, and Difficulty
-type: spec
-status: approved
-tags:
-- game-design
-- enemy
-- cards
-- ai
-- combat
 ---
 
 ## Overview
@@ -49,20 +38,20 @@ Define enemy deck composition, card-play AI, and difficulty scaling for the tact
 - FR-7: Enemy cards target the nearest enemy unit (player or player summons)
 - FR-8: Enemy AI for AoE cards: target the tile that hits the most allied units
 - FR-9: Enemy difficulty tiers:
-  | Tier | HP | Deck size | Cards | Move | Range |
-  |------|----|-----------|-------|------|-------|
-  | Easy | 8 | 10 | Common only | 2 | Melee |
-  | Medium | 14 | 15 | Common + Uncommon | 2 | Melee |
-  | Hard | 22 | 20 | Common + Uncommon + Rare | 2 | Melee |
-  | Ranged | 10 | 12 | Common + Uncommon | 1 | Ranged |
-  | Boss | 30+ | 25 | All rarities | 2 | Melee |
+ | Tier | HP | Deck size | Cards | Move | Range |
+ |------|----|-----------|-------|------|-------|
+ | Easy | 8 | 10 | Common only | 2 | Melee |
+ | Medium | 14 | 15 | Common + Uncommon | 2 | Melee |
+ | Hard | 22 | 20 | Common + Uncommon + Rare | 2 | Melee |
+ | Ranged | 10 | 12 | Common + Uncommon | 1 | Ranged |
+ | Boss | 30+ | 25 | All rarities | 2 | Melee |
 - FR-10: Gold drop per enemy tier:
-  | Tier | Gold |
-  |------|------|
-  | Easy | 5 |
-  | Medium | 12 |
-  | Hard | 25 |
-  | Boss | 50 |
+ | Tier | Gold |
+ |------|------|
+ | Easy | 5 |
+ | Medium | 12 |
+ | Hard | 25 |
+ | Boss | 50 |
 - FR-11: **Multi-unit AI** — AI `decide()` iterates all enemy units; for each unit, computes best action (move → attack → card play). Units act in order of priority score (bounty = ATK + HP + tier_value). Action-filtering: skip units that cannot act (exhausted).
 - FR-12: **Lethal detection** — Before computing per-unit actions, scan all enemy units for a lethal kill on the hero. If any unit can reach and deal lethal damage, all available units prioritize the lethal strike. If multiple units can deal lethal, the lowest-priority unit delivers the kill.
 - FR-13: **Unified Range on GridUnit** — `range: Range` determines attack distance. `Range::Melee` = Chebyshev distance 1 (8-way). `Range::Ranged` = any tile on the board. `move_points: i32` determines BFS budget (default 2). See `wiki:specs:card-system-in-battle-deck` for the Range enum definition.
@@ -85,7 +74,7 @@ Define enemy deck composition, card-play AI, and difficulty scaling for the tact
 - [ ] AC-6: Enemy HP and card quality match difficulty tier table
 - [ ] AC-7: Gold dropped matches difficulty tier table
 - [ ] AC-8: Same card used by player and enemy resolves identically
-- [ ] AC-9: All tests pass with `cargo test`
+- [ ] AC-9: All tests pass with `npm test`
 - [ ] AC-10: AI iterates all enemy units, sorts by priority, executes action per unit
 - [ ] AC-11: AI detects lethal damage on hero before taking non-lethal actions
 - [ ] AC-12: GridUnit uses `range: Range` (Melee/Ranged) instead of numeric attack_range
@@ -129,7 +118,7 @@ Define enemy deck composition, card-play AI, and difficulty scaling for the tact
 
 ## Technical Notes
 
-- `Range` enum defined in `rust/src/core/cards/` or `rust/src/core/grid/model/` — shared import between card system and combat system
+- `Range` enum defined in `src/lib/game/cards/` or `src/lib/game/units/models/` — shared import between card system and combat system
 - GridUnit `range` field replaces numeric `attack_range: i32`. No more magic number `99`.
 - `can_attack(from, to, state)` checks `attacker.range` instead of hardcoded adjacency — `Melee` = Chebyshev(1), `Ranged` = always true
 - `can_counterattack(defender, attacker_pos)` checks `defender.range`: `Melee` requires attacker adjacent, `Ranged` always true — matches Duelyst's strikeback behavior
@@ -138,12 +127,12 @@ Define enemy deck composition, card-play AI, and difficulty scaling for the tact
 
 ## Implementation Note (2026-08-07)
 
-This spec was authored against a planned Rust/Godot core (`rust/src/core/...`, `cargo test`). The project has since standardized on TypeScript/Next.js (see @wiki/core/conventions) — the Godot direction was archived 2026-08-04 (see the archived `godot-battle-*` tasks). The AI portion actually implemented lives at `src/lib/game/battle/services/ai.service.ts`:
+This spec was authored against a planned architecture. The AI portion actually implemented lives at `src/lib/game/battle/services/ai.service.ts`:
 
 - **D13 (multi-unit priority) and D14 (lethal detection) are implemented**, but as a utility-scoring planner rather than the literal bounty-sort-then-lethal-scan algorithm described above — see @wiki/patterns/utility-scoring-enemy-ai and @wiki/decisions/utility-scoring-over-behavior-tree-for-enemy-ai. Lethal detection in particular is not a separate pre-pass; it collapses into a `LethalOnHero` scorer weighted high enough (1000) to dominate the decision, which reproduces D14's effect without a special-cased branch.
 - **D15 (Range enum) and D16 (exhaustion counters) are NOT implemented.** The current TS `Unit` interface has a numeric `range` field and `hasMoved`/`hasActed` bools — no `Range::Melee`/`Range::Ranged` enum, no `moves_made`/`attacks_made`/`max_moves`/`max_attacks`. AC-12 through AC-20 do not apply to the current stack.
 - **FR-1 through FR-10 (enemy deck/hand/mana card-play AI) are NOT implemented.** Enemies currently only move and base-attack; they have no hand, deck, or mana loop of their own. `EnemyDef.deck` exists in `enemy-database.json` (see @wiki/specs/enemy-designer-ui) but nothing yet expands it into enemy hands or plays cards from it.
-- AC-9 (`cargo test`) does not apply — the equivalent gate is `npm test` (Vitest) per @wiki/core/conventions.
+- AC-9 (`npm test`) does not apply — the equivalent gate is `npm test` (Vitest) per @wiki/core/conventions.
 
 Re-scope this spec's ACs against the TS implementation before treating it as a checklist again — several are stale claims about a platform that was never built here, not unmet current-stack requirements.
 

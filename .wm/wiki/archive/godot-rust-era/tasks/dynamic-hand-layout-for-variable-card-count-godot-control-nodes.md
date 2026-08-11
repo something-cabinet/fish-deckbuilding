@@ -6,7 +6,7 @@ tags:
 - ui
 - hand
 - responsive
-status: todo
+status: cancelled
 priority: medium
 acceptance_criteria:
 - text: Hand renders correctly with 1-10 cards without horizontal overflow

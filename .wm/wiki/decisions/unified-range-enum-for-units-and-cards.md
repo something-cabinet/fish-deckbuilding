@@ -1,7 +1,7 @@
 ---
 {}
 relates_to:
-  - {type: references, target: wiki:specs:godot-battle-scaffold}
+  - {type: references, target: wiki:specs:js-combat-vertical-slice}
 ---
 
 ---
@@ -19,7 +19,7 @@ tags: [decision, range, combat, cards]
 ---
 
 ## Context
-Both unit base attacks and card effects need a range concept. Previously, unit attacks used hardcoded Chebyshev(1) adjacency and cards used a numeric `range: i32` field. Ranged was treated as a keyword (like Provoke) with magic number `attack_range: 99`.
+Both unit base attacks and card effects need a range concept. Previously, unit attacks used hardcoded Chebyshev(1) adjacency and cards used a numeric `range: number` field. Ranged was treated as a keyword (like Provoke) with magic number `attack_range: 99`.
 
 ## Decision
 A single `Range { Melee, Ranged }` enum shared between `GridUnit.range` (for base attacks) and `CardEffect.range` (for card targeting). `Range::Ranged` = any tile on the board (idiom: `GRID_WIDTH + GRID_HEIGHT`), matching Duelyst's `REACH_RANGED`.
@@ -38,6 +38,6 @@ A single `Range { Melee, Ranged }` enum shared between `GridUnit.range` (for bas
 - Cleaner `valid_targets()` pipeline: Stage 1 is just matching on `Range`
 
 ## Related
-- `rust/src/core/grid/model/unit.rs`
-- `rust/src/core/cards/targeting.rs`
+- `src/engine/grid/model/unit.ts`
+- `src/engine/cards/targeting.ts`
 - @wiki/specs\:card-system-in-battle-deck D12

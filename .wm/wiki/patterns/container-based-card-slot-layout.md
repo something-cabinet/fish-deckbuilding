@@ -1,7 +1,7 @@
 ---
-title: Pattern: Container-Based Layout for Dynamically-Created Card Slots in gdext
+title: Pattern: Container-Based Layout for Dynamically-Created Card Slots
 type: pattern
-tags: [pattern, godot, ui, gdext, layout]
+tags: [pattern, ui, layout, react]
 status: active
 edges:
   - {type: references, target: wiki:tasks/crafting-ui-scene-nodes}
@@ -10,50 +10,37 @@ edges:
 
 ## Problem
 
-When dynamically creating card slot UI in a Rust gdext bridge, using `set_position`/`set_size` on Labels within a `Panel` causes text overlap and layout issues. The Panel's children don't respect absolute positioning reliably when the Panel is managed by a `GridContainer`.
+When dynamically creating card slot UI in React/JS with manual DOM positioning, using inline styles with absolute pixel offsets on elements within a CSS grid or flex container causes text overlap and layout issues. The children don't respect absolute positioning reliably when the parent is managed by a grid/flex layout.
 
 ## Solution
 
-Use container-based layout instead of absolute positioning. Each card slot is a `Panel` (for the styled background) containing a `VBoxContainer` that arranges child Labels. Use `HBoxContainer` for side-by-side elements (cost + affix count).
+Use container-based layout instead of absolute positioning. Each card slot is a styled container div (for the visual background) containing flexbox children that arrange child elements. Use CSS flex row for side-by-side elements (cost + affix count).
 
-```rust
-let mut slot = Panel::new_alloc();
-slot.set_custom_minimum_size(Vector2::new(180.0, 70.0));
-slot.add_theme_stylebox_override("panel", &style.upcast::<StyleBox>());
-
-let mut vbox = VBoxContainer::new_alloc();
-vbox.add_theme_constant_override("separation", 2);
-
-let mut name_label = Label::new_alloc();
-name_label.set_text(card.name);
-vbox.add_child(&name_label);
-
-let mut row = HBoxContainer::new_alloc();
-let mut cost = Label::new_alloc();
-cost.set_text(&format!("{}g", card.cost));
-row.add_child(&cost);
-let mut affix = Label::new_alloc();
-affix.set_text(&format!("{} affix", card.affixes.len()));
-row.add_child(&affix);
-vbox.add_child(&row);
-
-slot.add_child(&vbox);
-grid.add_child(&slot);
+```tsx
+<div className="card-slot" style={{ minWidth: 180, minHeight: 70 }}>
+  <div className="card-slot-body" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <span className="card-name">{card.name}</span>
+    <div className="card-meta" style={{ display: "flex", gap: 8 }}>
+      <span className="cost">{card.cost}g</span>
+      <span className="affix-count">{card.affixes.length} affix</span>
+    </div>
+  </div>
+</div>
 ```
 
 ## When to Use
 
-- Dynamically creating card slots, inventory items, or list entries via Rust gdext
+- Dynamically creating card slots, inventory items, or list entries via React/JS
 - Any UI where children are added to a Container-managed parent (GridContainer, VBoxContainer, etc.)
 - When the contents per slot vary (some have corrupted labels, ineligibility reasons, etc.)
 
 ## When Not to Use
 
-- Static UI defined in `.tscn` files — absolute positioning in the editor is fine
+- Static UI defined in HTML/EJS � absolute positioning in the markup is fine
 - Nodes with a single child — `MarginContainer` or `PanelContainer` is simpler
 - When precise pixel-perfect positioning is required across all resolutions
 
 ## Related
 
 - @wiki/specs/card-crafting-ui
-- @wiki/tasks/crafting-ui-scene-nodes
+- @wiki/specs/card-crafting-ui (layout patterns)

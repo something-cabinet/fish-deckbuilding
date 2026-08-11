@@ -37,6 +37,7 @@ import {
   REMOVE_PRICE,
 } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game"
+import { TRINKET_LIBRARY } from "@/lib/game"
 import { UnitKind } from "@/lib/game/units"
 import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
 
@@ -338,16 +339,22 @@ describe("shop", () => {
     const a = shopInventory(SEED, 0, "2-1")
     const b = shopInventory(SEED, 0, "2-1")
     expect(a).toEqual(b)
-    expect(a.length).toBeLessThanOrEqual(4)
+    expect(a.length).toBeLessThanOrEqual(6)
     for (const offer of a) {
-      expect(CARD_LIBRARY[offer.cardId]).toBeTruthy()
+      if (offer.cardId) {
+        expect(CARD_LIBRARY[offer.cardId]).toBeTruthy()
+      }
+      if (offer.trinketId) {
+        expect(TRINKET_LIBRARY[offer.trinketId]).toBeTruthy()
+      }
       expect(offer.price).toBeGreaterThan(0)
     }
   })
 
   it("shopInventory offers distinct cards", () => {
     const inv = shopInventory(SEED, 0, "2-1")
-    expect(new Set(inv.map((o) => o.cardId)).size).toBe(inv.length)
+    const cardIds = inv.filter((o) => o.cardId).map((o) => o.cardId)
+    expect(new Set(cardIds).size).toBe(cardIds.length)
   })
 
   it("buyCard deducts gold and appends to the deck when affordable", () => {

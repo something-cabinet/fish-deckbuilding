@@ -48,17 +48,27 @@ describe("GameCard", () => {
     expect(container.firstChild).toHaveClass("cursor-not-allowed")
   })
 
-  it("marks a dragging card as translucent", () => {
+  it("dims a dragging card without making it transparent", () => {
     const { container } = render(
       <GameCard card={card} playable dragging onPointerDown={() => {}} onTap={() => {}} onSell={() => {}} />,
     )
-    expect(container.firstChild).toHaveClass("opacity-30")
+    expect(container.firstChild).toHaveClass("brightness-[0.45]")
+    expect(container.firstChild).toHaveClass("opacity-100")
   })
 
-  it("marks an armed card as lifted", () => {
+  it("keeps unplayable cards opaque", () => {
+    const { container } = render(
+      <GameCard card={card} playable={false} dragging={false} onPointerDown={() => {}} onTap={() => {}} onSell={() => {}} />,
+    )
+    expect(container.firstChild).toHaveClass("opacity-100")
+    expect(container.firstChild).not.toHaveClass("opacity-70")
+  })
+
+  it("marks an armed card with the gold ring", () => {
     const { container } = render(
       <GameCard card={card} playable dragging={false} armed onPointerDown={() => {}} onTap={() => {}} onSell={() => {}} />,
     )
-    expect(container.firstChild).toHaveClass("-translate-y-3")
+    expect(container.firstChild).toHaveClass("ring-2")
+    expect(container.firstChild).toHaveClass("ring-gold")
   })
 })

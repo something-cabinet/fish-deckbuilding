@@ -46,14 +46,14 @@ export function EnemyFace({ def, className }: Props) {
       <div className="relative flex h-[92px] flex-col bg-[oklch(0.82_0.02_85)]">
         <span
           className={cn(
-            "absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider",
+            "absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
             KIND_STYLES[def.kind] ?? "bg-enemy text-white",
           )}
         >
           {KIND_LABELS[def.kind] ?? "Unknown"}
         </span>
         {def.isMinion && (
-          <span className="absolute left-1.5 top-1.5 z-10 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-1.5 py-0.5 font-display text-[8px] font-bold uppercase tracking-wider text-gold shadow">
+          <span className="absolute left-1.5 top-1.5 z-10 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider text-gold shadow">
             <Sparkles size={7} />
             Minion
           </span>
@@ -72,7 +72,7 @@ export function EnemyFace({ def, className }: Props) {
         <h3 className="font-display text-[13px] font-bold uppercase leading-tight tracking-wide">
           {def.name || "Unnamed"}
         </h3>
-        <div className="flex items-center gap-2.5 text-[10px] text-[oklch(0.35_0.02_260)]">
+        <div className="flex items-center gap-2.5 text-xs text-[oklch(0.35_0.02_260)]">
           <span className="flex items-center gap-1">
             <Footprints size={11} />
             {def.move}
@@ -85,7 +85,7 @@ export function EnemyFace({ def, className }: Props) {
       </div>
 
       {/* footer: combat stats */}
-      <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
+      <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-xs font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
         <span className="flex items-center gap-1">
           <Heart size={11} />
           {def.hp}
