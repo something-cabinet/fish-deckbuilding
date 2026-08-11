@@ -31,12 +31,12 @@ interface GameProps {
   onWin?: (heroHp: number, fin: number) => void
   onLose?: (heroHp: number) => void
   onExit: () => void
-  onDebugReady?: (debug: { debugUpdate: (p: Partial<GameState>) => void }) => void
+  onDebugReady?: (debug: { debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void }) => void
 }
 
 export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebugReady }: GameProps) {
   const game = useFishMafia(initial)
-  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor, debugUpdate } = game
+  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor, debugUpdate, debugDrawCards } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
@@ -133,7 +133,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
 
   // expose battle debug handle to parent
   useEffect(() => {
-    onDebugReady?.({ debugUpdate })
+    onDebugReady?.({ debugUpdate, drawCards: debugDrawCards })
   }, [onDebugReady, debugUpdate])
 
   // track the cursor while a card is armed via click (no active drag)
@@ -358,7 +358,8 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
       </div>
 
       {/* bottom: hand + controls */}
-      <div className="flex shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
+      {/* fixed height so the bar never resizes with hand size (empty hand included) */}
+      <div className="flex h-[192px] shrink-0 items-end gap-3 border-t border-gold/20 bg-ocean-deep/70 px-4 py-3 backdrop-blur-sm">
         {/* left cluster: coin register + piles */}
         <div className="flex items-center gap-3">
           <CoinRegister coin={state.coin} active={playerTurn} />
@@ -368,30 +369,43 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           </div>
         </div>
 
-        {/* center: hand */}
-        <div className="flex flex-1 items-end justify-center gap-2 overflow-x-auto px-2 pt-3">
+        {/* center: hand — fanned, cards overlap so the row never scrolls or resizes the bar */}
+        <div className="flex h-[168px] flex-1 items-end justify-center px-2">
           {state.hand.length === 0 && (
-            <p className="py-8 font-display text-sm uppercase tracking-widest text-muted-foreground">
+            <p className="flex h-full items-center font-display text-sm uppercase tracking-widest text-muted-foreground">
               Hand empty — end your turn
             </p>
           )}
-          {state.hand.map((card) => {
+          {state.hand.map((card, i) => {
             const isDragged = drag?.kind === DragKind.Card && drag.card?.uid === card.uid
             const isUnitTargetDrag =
               isDragged && card.def.target !== CardTarget.EmptyTile && card.def.target !== CardTarget.Self
+            const fan = fanTransform(i, state.hand.length)
             return (
-              <GameCard
+              <div
                 key={card.uid}
-                card={card}
-                playable={playerTurn && card.def.cost <= state.coin}
-                // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
-                dragging={isDragged && !isUnitTargetDrag}
-                armed={pendingCard?.uid === card.uid || isUnitTargetDrag}
-                onPointerDown={onCardPointerDown}
-                onTap={onCardTap}
-                onSell={(c) => playerTurn && sell(c.uid)}
-                compact
-              />
+                className="relative origin-bottom transition-transform duration-150 [transform:rotate(var(--fan-r))_translateY(var(--fan-y))] hover:z-50 hover:[transform:rotate(0deg)_translateY(0)]"
+                style={
+                  {
+                    marginLeft: i === 0 ? 0 : fan.overlap,
+                    zIndex: isDragged || pendingCard?.uid === card.uid ? 40 : i,
+                    "--fan-r": `${fan.rotate}deg`,
+                    "--fan-y": `${fan.lift}px`,
+                  } as React.CSSProperties
+                }
+              >
+                <GameCard
+                  card={card}
+                  playable={playerTurn && card.def.cost <= state.coin}
+                  // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
+                  dragging={isDragged && !isUnitTargetDrag}
+                  armed={pendingCard?.uid === card.uid || isUnitTargetDrag}
+                  onPointerDown={onCardPointerDown}
+                  onTap={onCardTap}
+                  onSell={(c) => playerTurn && sell(c.uid)}
+                  compact
+                />
+              </div>
             )
           })}
         </div>
@@ -460,6 +474,26 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
         )}
     </main>
   )
+}
+
+const CARD_W = 124 // compact GameCard width
+const CARD_GAP = 8 // spacing used while the hand is still small
+
+/**
+ * Fan geometry for card `i` of `n`: cards spread from the centre, tilt outward and
+ * dip along an arc. Past a handful they slide under each other instead of widening
+ * the row, so the hand keeps a stable footprint no matter the card count.
+ */
+function fanTransform(i: number, n: number) {
+  const step = n <= 6 ? CARD_W + CARD_GAP : Math.max(44, CARD_W + CARD_GAP - (n - 6) * 12)
+  const offset = i - (n - 1) / 2
+  const half = Math.max((n - 1) / 2, 0.5)
+  const spread = Math.min(16, (n - 1) * 3) // total degrees edge to edge
+  return {
+    overlap: step - CARD_W,
+    rotate: n <= 1 ? 0 : (offset / half) * (spread / 2),
+    lift: (offset / half) ** 2 * Math.min(10, n * 1.5),
+  }
 }
 
 function Pile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {

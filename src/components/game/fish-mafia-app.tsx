@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { CARD_LIBRARY } from "@/lib/game"
 import type { CardDef, GameState } from "@/lib/game"
 import { STAGE_LIBRARY, type StageDef } from "@/lib/game/stages"
@@ -82,7 +82,7 @@ export function FishMafiaApp() {
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
   // battle debug handle set by FishMafiaGame on mount
-  const battleDebugRef = useRef<{ debugUpdate: (p: Partial<GameState>) => void } | null>(null)
+  const [battleDebug, setBattleDebug] = useState<{ debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void } | null>(null)
   // cards from the database, managed in-app for the editor
   const [cards, setCards] = useState<CardDef[]>(() => Object.values(CARD_LIBRARY))
   // ids authored this session, badged as Custom in the library
@@ -573,10 +573,10 @@ export function FishMafiaApp() {
         onWin={handleWin}
         onLose={handleLoss}
         onExit={backToMenu}
-        onDebugReady={(d) => { battleDebugRef.current = d }}
+        onDebugReady={setBattleDebug}
       />
       <DebugMenu
-        battleDebug={battleDebugRef.current}
+        battleDebug={battleDebug}
         overworldState={overworld.state}
         onOverworldUpdate={overworld.debugUpdate}
       />

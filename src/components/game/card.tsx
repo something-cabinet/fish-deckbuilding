@@ -54,7 +54,7 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
       onPointerDown={(e) => onPointerDown(e, card)}
       onClick={() => onTap?.(card)}
       className={cn(
-        "group relative flex select-none flex-col overflow-hidden rounded-lg border text-left shadow-lg transition-all",
+        "group relative flex shrink-0 select-none flex-col overflow-hidden rounded-lg border text-left shadow-lg transition-all",
         "border-black/40 bg-[oklch(0.9_0.03_85)] text-[oklch(0.2_0.03_260)]",
         compact ? "h-[168px] w-[124px]" : "h-[196px] w-[150px]",
         dragging ? "opacity-30" : "hover:-translate-y-3 hover:shadow-2xl",

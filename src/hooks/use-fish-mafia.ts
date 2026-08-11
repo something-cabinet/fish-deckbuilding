@@ -17,6 +17,8 @@ import {
 } from "@/lib/game/battle"
 import { GameSession } from "@/lib/game"
 import { cardTargets, type CardInstance } from "@/lib/game/cards"
+import { clone } from "@/lib/game/shared"
+import { drawCards } from "@/lib/game/deck"
 import { Team } from "@/lib/game/units"
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -172,6 +174,15 @@ export function useFishMafia(initial?: GameState) {
     setState((s) => ({ ...s, ...partial }))
   }, [])
 
+  const debugDrawCards = useCallback((n: number) => {
+    setState((s) => {
+      const c = clone(s)
+      const fx: FxEvent[] = []
+      drawCards(c, n, fx)
+      return c
+    })
+  }, [])
+
   const reachable = useMemo(() => {
     if (!state.selectedUnitId) return [] as Pos[]
     const u = state.units.find((x) => x.id === state.selectedUnitId)
@@ -198,6 +209,7 @@ export function useFishMafia(initial?: GameState) {
     endTurn,
     restart,
     debugUpdate,
+    debugDrawCards,
     reachable,
     targetsFor,
   }

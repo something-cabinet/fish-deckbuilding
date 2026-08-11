@@ -26,6 +26,7 @@ export interface GameState {
   log: LogEntry[]
   selectedUnitId: string | null
   logCounter: number
+  handMax: number
   /** trinket def ids active in this battle */
   activeTrinkets: string[]
 }

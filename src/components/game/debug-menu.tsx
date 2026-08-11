@@ -27,7 +27,7 @@ type Tab = "overworld" | "battle" | "cards" | "trinkets"
 interface DebugMenuProps {
   overworldState?: OverworldState | null
   onOverworldUpdate?: (partial: Partial<OverworldState>) => void
-  battleDebug?: { debugUpdate: (p: Partial<GameState>) => void } | null
+  battleDebug?: { debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void } | null
   onBattleUpdate?: (partial: Partial<GameState>) => void
 }
 
@@ -44,6 +44,7 @@ export function DebugMenu({
   const [hpInput, setHpInput] = useState("")
   const [finInput, setFinInput] = useState("")
   const [coinInput, setCoinInput] = useState("")
+  const [handMaxInput, setHandMaxInput] = useState("")
   const [cardSearch, setCardSearch] = useState("")
   const [trinketSearch, setTrinketSearch] = useState("")
 
@@ -210,7 +211,10 @@ export function DebugMenu({
                   setCoinInput={setCoinInput}
                   finInput={finInput}
                   setFinInput={setFinInput}
+                  handMaxInput={handMaxInput}
+                  setHandMaxInput={setHandMaxInput}
                   onUpdate={battleUpdate}
+                  drawCards={battleDebug?.drawCards ?? undefined}
                 />
               )}
 
@@ -456,13 +460,19 @@ function BattleTab({
   setCoinInput,
   finInput,
   setFinInput,
+  handMaxInput,
+  setHandMaxInput,
   onUpdate,
+  drawCards,
 }: {
   coinInput: string
   setCoinInput: (v: string) => void
   finInput: string
   setFinInput: (v: string) => void
+  handMaxInput: string
+  setHandMaxInput: (v: string) => void
   onUpdate: (p: Partial<GameState>) => void
+  drawCards?: (n: number) => void
 }) {
   const setCoin = useCallback(() => {
     const v = parseInt(coinInput, 10)
@@ -473,6 +483,11 @@ function BattleTab({
     const v = parseInt(finInput, 10)
     if (!isNaN(v)) onUpdate({ fin: Math.max(0, v) })
   }, [finInput, onUpdate])
+
+  const setHandMax = useCallback(() => {
+    const v = parseInt(handMaxInput, 10)
+    if (!isNaN(v)) onUpdate({ handMax: Math.max(1, v) })
+  }, [handMaxInput, onUpdate])
 
   return (
     <div className="flex flex-col gap-4">
@@ -502,9 +517,27 @@ function BattleTab({
         </div>
       </Section>
 
+      {/* hand max */}
+      <Section label="Hand Max" icon={<Layers size={14} />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={handMaxInput} onChange={setHandMaxInput} placeholder="hand max" />
+          <ActionBtn onClick={setHandMax}>Set</ActionBtn>
+        </div>
+      </Section>
+
       {/* quick actions */}
       <Section label="Quick Actions" icon={<Zap size={14} />}>
         <div className="flex flex-wrap gap-2">
+          {drawCards && (
+            <>
+              <ActionBtn onClick={() => drawCards(1)} variant="gold">
+                Draw 1
+              </ActionBtn>
+              <ActionBtn onClick={() => drawCards(3)} variant="gold">
+                Draw 3
+              </ActionBtn>
+            </>
+          )}
           <ActionBtn onClick={() => onUpdate({ phase: Phase.Won })} variant="gold">
             Win Battle
           </ActionBtn>
