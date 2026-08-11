@@ -31,7 +31,11 @@ interface GameProps {
   onWin?: (heroHp: number, fin: number) => void
   onLose?: (heroHp: number) => void
   onExit: () => void
-  onDebugReady?: (debug: { debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void }) => void
+  onDebugReady?: (debug: {
+    debugUpdate: (p: Partial<GameState>) => void
+    drawCards: (n: number) => void
+    state: GameState
+  }) => void
 }
 
 export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebugReady }: GameProps) {
@@ -154,10 +158,11 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
     [state.units],
   )
 
-  // expose battle debug handle to parent
+  // expose battle debug handle to parent, refreshed with the live state so
+  // the debug menu can prefill its inputs from the current game
   useEffect(() => {
-    onDebugReady?.({ debugUpdate, drawCards: debugDrawCards })
-  }, [onDebugReady, debugUpdate])
+    onDebugReady?.({ debugUpdate, drawCards: debugDrawCards, state })
+  }, [onDebugReady, debugUpdate, debugDrawCards, state])
 
   // track the cursor while a card is armed via click (no active drag)
   useEffect(() => {

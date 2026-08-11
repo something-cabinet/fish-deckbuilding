@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { CARD_LIBRARY } from "@/lib/game/cards"
 import { TRINKET_LIBRARY, TRINKET_IDS } from "@/lib/game/trinkets"
+import { getCardIcon } from "./card-icons"
 import type { OverworldState } from "@/lib/game/overworld-types"
 import { FORECLOSURE_CAP } from "@/lib/game/overworld-data"
 import type { GameState } from "@/lib/game/battle"
@@ -28,7 +29,11 @@ type Tab = "overworld" | "battle" | "cards" | "trinkets"
 interface DebugMenuProps {
   overworldState?: OverworldState | null
   onOverworldUpdate?: (partial: Partial<OverworldState>) => void
-  battleDebug?: { debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void } | null
+  battleDebug?: {
+    debugUpdate: (p: Partial<GameState>) => void
+    drawCards: (n: number) => void
+    state: GameState
+  } | null
   onBattleUpdate?: (partial: Partial<GameState>) => void
 }
 
@@ -46,6 +51,7 @@ export function DebugMenu({
   const [finInput, setFinInput] = useState("")
   const [coinInput, setCoinInput] = useState("")
   const [handMaxInput, setHandMaxInput] = useState("")
+  const [handSizeInput, setHandSizeInput] = useState("")
   const [cardSearch, setCardSearch] = useState("")
   const [trinketSearch, setTrinketSearch] = useState("")
 
@@ -53,7 +59,7 @@ export function DebugMenu({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "`" || (e.key === "F12")) {
+      if (e.key === "`") {
         e.preventDefault()
         toggle()
       }
@@ -70,6 +76,13 @@ export function DebugMenu({
     setFinInput(String(overworldState?.fin ?? 0))
     setCoinInput("")
   }, [open, overworldState])
+
+  useEffect(() => {
+    if (!open) return
+    const s = battleDebug?.state
+    setHandMaxInput(s ? String(s.handMax) : "")
+    setHandSizeInput(s ? String(s.handSize) : "")
+  }, [open, battleDebug])
 
   const isOverworld = !!onOverworldUpdate && !!overworldState
   const isBattle = !!battleDebug || !!onBattleUpdate
@@ -214,6 +227,8 @@ export function DebugMenu({
                   setFinInput={setFinInput}
                   handMaxInput={handMaxInput}
                   setHandMaxInput={setHandMaxInput}
+                  handSizeInput={handSizeInput}
+                  setHandSizeInput={setHandSizeInput}
                   onUpdate={battleUpdate}
                   drawCards={battleDebug?.drawCards ?? undefined}
                 />
@@ -243,8 +258,7 @@ export function DebugMenu({
 
             {/* footer hint */}
             <div className="border-t border-white/10 px-5 py-3 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
-              Press <kbd className="rounded border border-white/20 bg-white/10 px-2 py-1 font-mono text-xs">`</kbd> or{" "}
-              <kbd className="rounded border border-white/20 bg-white/10 px-2 py-1 font-mono text-xs">F12</kbd> to toggle
+              Press <kbd className="rounded border border-white/20 bg-white/10 px-2 py-1 font-mono text-xs">`</kbd> to toggle
             </div>
           </div>
         </div>
@@ -464,6 +478,8 @@ function BattleTab({
   setFinInput,
   handMaxInput,
   setHandMaxInput,
+  handSizeInput,
+  setHandSizeInput,
   onUpdate,
   drawCards,
 }: {
@@ -473,6 +489,8 @@ function BattleTab({
   setFinInput: (v: string) => void
   handMaxInput: string
   setHandMaxInput: (v: string) => void
+  handSizeInput: string
+  setHandSizeInput: (v: string) => void
   onUpdate: (p: Partial<GameState>) => void
   drawCards?: (n: number) => void
 }) {
@@ -490,6 +508,11 @@ function BattleTab({
     const v = parseInt(handMaxInput, 10)
     if (!isNaN(v)) onUpdate({ handMax: Math.max(1, v) })
   }, [handMaxInput, onUpdate])
+
+  const setHandSize = useCallback(() => {
+    const v = parseInt(handSizeInput, 10)
+    if (!isNaN(v)) onUpdate({ handSize: Math.max(1, v) })
+  }, [handSizeInput, onUpdate])
 
   return (
     <div className="flex flex-col gap-4">
@@ -516,6 +539,14 @@ function BattleTab({
         <div className="flex gap-2">
           <ActionBtn onClick={() => onUpdate({ fin: 50 })}>50</ActionBtn>
           <ActionBtn onClick={() => onUpdate({ fin: 100 })}>100</ActionBtn>
+        </div>
+      </Section>
+
+      {/* hand size */}
+      <Section label="Hand Size" icon={<Layers size={14} />}>
+        <div className="flex items-center gap-2">
+          <NumInput value={handSizeInput} onChange={setHandSizeInput} placeholder="hand size" />
+          <ActionBtn onClick={setHandSize}>Set</ActionBtn>
         </div>
       </Section>
 
@@ -733,6 +764,7 @@ function TrinketListTab({
             const def = TRINKET_LIBRARY[id]
             if (!def) return null
             const isOwned = owned.includes(id)
+            const TrinketIcon = getCardIcon(def.icon)
             return (
               <HoverCard
                 key={id}
@@ -747,7 +779,7 @@ function TrinketListTab({
               >
                 <div className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.03] px-4 py-3">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <Gem size={16} className={cn("shrink-0", isOwned ? "text-gold" : "text-muted-foreground/50")} />
+                    <TrinketIcon size={16} className={cn("shrink-0", isOwned ? "text-gold" : "text-muted-foreground/50")} />
                     <span className="truncate font-display text-sm font-bold text-foreground">
                       {def.name}
                     </span>

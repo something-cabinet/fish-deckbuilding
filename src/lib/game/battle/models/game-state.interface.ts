@@ -26,6 +26,9 @@ export interface GameState {
   log: LogEntry[]
   selectedUnitId: string | null
   logCounter: number
+  /** cards the hand is discarded and redealt to at the start of each turn */
+  handSize: number
+  /** ceiling drawCards burns above; always >= handSize */
   handMax: number
   /** trinket def ids active in this battle */
   activeTrinkets: string[]

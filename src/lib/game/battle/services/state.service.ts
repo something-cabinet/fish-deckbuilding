@@ -3,7 +3,7 @@ import type { FxEvent, GameState, Pos } from "../models"
 import { DEFAULT_COLS, DEFAULT_ROWS } from "../constants"
 import { COIN_TURN_BASE, makeCard, STARTER_DECK, type CardInstance } from "../../cards"
 import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
-import { HAND_START, DEFAULT_HAND_MAX, shuffle } from "../../deck"
+import { DEFAULT_HAND_SIZE, DEFAULT_HAND_MAX, shuffle } from "../../deck"
 import { resetIds } from "../../shared"
 import { getTrinketDef, resolveTrigger } from "../../trinkets"
 
@@ -88,6 +88,7 @@ export function createInitialState(overrides?: {
     log: [{ id: 0, turn: 1, text: "The ledger opens. Collect what you're owed.", tone: "gold" }],
     selectedUnitId: "hero",
     logCounter: 1,
+    handSize: DEFAULT_HAND_SIZE,
     handMax: DEFAULT_HAND_MAX,
     activeTrinkets: overrides?.trinkets ?? [],
   }
@@ -101,7 +102,7 @@ export function createInitialState(overrides?: {
 export function startGame(base?: GameState): GameState {
   const s = base ?? createInitialState()
   const deck = shuffle(s.deck)
-  const hand = deck.splice(0, HAND_START)
+  const hand = deck.splice(0, s.handSize)
   const state = { ...s, deck, hand }
   // fire onCombatStart trinket triggers after opening hand is drawn
   const fx: FxEvent[] = []

@@ -91,7 +91,10 @@ export function beginPlayerTurn(state: GameState): GameState {
     }
   }
 
-  drawCards(s, 1, fx)
+  // fresh hand each turn: discard whatever wasn't played, then redeal to handSize
+  s.discard = [...s.discard, ...s.hand]
+  s.hand = []
+  drawCards(s, s.handSize, fx)
 
   // fire onTurnStart trinket triggers
   resolveTrigger(s, s.activeTrinkets, "onTurnStart", fx)

@@ -22,6 +22,7 @@ import { FORECLOSURE_CAP, FORECLOSURE_WARN } from "@/lib/game/overworld-data"
 import { accrueInterest } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
+import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -160,10 +161,11 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
               {state.trinkets.map((id) => {
                 const def = TRINKET_LIBRARY[id]
                 if (!def) return null
+                const TrinketIcon = getCardIcon(def.icon)
                 return (
                   <div key={id} className="group relative">
                     <div className="flex h-6 w-6 items-center justify-center rounded-md border border-gold/30 bg-gold/10">
-                      <Gem size={11} className="text-gold" />
+                      <TrinketIcon size={11} className="text-gold" />
                     </div>
                     <div className="pointer-events-none absolute -top-1 right-full z-50 mr-2 w-40 origin-bottom-right scale-95 rounded-lg border border-gold/30 bg-ocean-deep/95 px-2 py-1.5 opacity-0 shadow-xl backdrop-blur-sm transition-all group-hover:scale-100 group-hover:opacity-100">
                       <p className="font-display text-xs font-bold uppercase tracking-wider text-gold">{def.name}</p>

@@ -88,17 +88,36 @@ describe("turn: enemy phase", () => {
 })
 
 describe("turn: beginPlayerTurn", () => {
-  it("increments turn, resets coin and spentCount, draws a card", () => {
+  it("increments turn, resets coin and spentCount, redeals the hand to handSize", () => {
     const s = fresh()
     s.spentCount = 3
     const turnBefore = s.turn
-    const handBefore = s.hand.length
     const next = beginPlayerTurn(s)
     expect(next.turn).toBe(turnBefore + 1)
     expect(next.spentCount).toBe(0)
     expect(next.coin).toBe(COIN_TURN_BASE)
-    expect(next.hand.length).toBeGreaterThan(handBefore)
+    expect(next.hand.length).toBe(next.handSize)
     expect(next.phase).toBe(Phase.Player)
+  })
+
+  it("discards the unplayed hand before redealing", () => {
+    const s = fresh()
+    // fill the deck with more than a hand's worth so the discard has room to matter
+    const held = s.deck.splice(0, s.handSize)
+    s.hand = held
+    const next = beginPlayerTurn(s)
+    // the old hand went to discard, not back into the fresh hand or the deck
+    for (const card of held) {
+      expect(next.discard.some((c) => c.uid === card.uid)).toBe(true)
+      expect(next.hand.some((c) => c.uid === card.uid)).toBe(false)
+    }
+  })
+
+  it("redeals to exactly handSize even when handMax is larger", () => {
+    const s = fresh()
+    s.handMax = s.handSize + 3
+    const next = beginPlayerTurn(s)
+    expect(next.hand.length).toBe(s.handSize)
   })
 
   it("returns early when the battle is already decided", () => {

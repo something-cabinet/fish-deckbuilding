@@ -95,7 +95,11 @@ export function FishMafiaApp() {
   const [screen, setScreen] = useState<Screen>("menu")
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS)
   // battle debug handle set by FishMafiaGame on mount
-  const [battleDebug, setBattleDebug] = useState<{ debugUpdate: (p: Partial<GameState>) => void; drawCards: (n: number) => void } | null>(null)
+  const [battleDebug, setBattleDebug] = useState<{
+    debugUpdate: (p: Partial<GameState>) => void
+    drawCards: (n: number) => void
+    state: GameState
+  } | null>(null)
   // cards from the database, managed in-app for the editor
   const [cards, setCards] = useState<CardDef[]>(() => Object.values(CARD_LIBRARY))
   // ids authored this session, badged as Custom in the library
