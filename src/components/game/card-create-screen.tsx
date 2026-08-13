@@ -50,7 +50,6 @@ function fromCardEffects(effects: CardEffect[]): EffectRow[] {
       case "gainCoin": return { kind: "gainCoin", amount: e.amount }
       case "buffAtk": return { kind: "buffAtk", amount: e.amount }
       case "summon": return { kind: "summon", amount: 0 }
-      case "custom": return { kind: "damage", amount: 0 }
     }
   })
 }

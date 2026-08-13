@@ -88,6 +88,7 @@ export function createInitialState(overrides?: {
     log: [{ id: 0, turn: 1, text: "The ledger opens. Collect what you're owed.", tone: "gold" }],
     selectedUnitId: "hero",
     logCounter: 1,
+    fxCounter: 1,
     handSize: DEFAULT_HAND_SIZE,
     handMax: DEFAULT_HAND_MAX,
     activeTrinkets: overrides?.trinkets ?? [],
@@ -98,8 +99,11 @@ export function createInitialState(overrides?: {
  * Client-only game start: shuffle the deck and draw the opening hand.
  * Called from a useEffect after mount so the randomness never runs during
  * the server render (avoids hydration mismatches).
+ *
+ * Returns `{ state, fx }` so the caller can surface onCombatStart trinket
+ * fx (FR-5/AC-5 — no dropped fx).
  */
-export function startGame(base?: GameState): GameState {
+export function startGame(base?: GameState): { state: GameState; fx: FxEvent[] } {
   const s = base ?? createInitialState()
   const deck = shuffle(s.deck)
   const hand = deck.splice(0, s.handSize)
@@ -107,7 +111,7 @@ export function startGame(base?: GameState): GameState {
   // fire onCombatStart trinket triggers after opening hand is drawn
   const fx: FxEvent[] = []
   resolveTrigger(state, state.activeTrinkets, "onCombatStart", fx)
-  return state
+  return { state, fx }
 }
 
 export function selectUnit(state: GameState, unitId: string | null): GameState {

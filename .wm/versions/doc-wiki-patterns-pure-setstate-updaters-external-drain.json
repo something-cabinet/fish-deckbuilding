@@ -1,0 +1,66 @@
+{
+  "entity_id": "wiki:patterns:pure-setstate-updaters-external-drain",
+  "current_version": 3,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-13T08:35:17.109Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "content",
+          "old_value": "---\n{}\nrelates_to:\n  - {type: references, target: wiki:tasks:hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix}\n---\n\n---\ntitle: Pattern: Pure setState updaters — drain external queues via stateRef + commit\ntype: pattern\nid: wiki:patterns:pure-setstate-updaters-external-drain\nstatus: draft\ntags: [pattern, react, strictmode, state-management]\n---\n\n## Problem\n\nReact 19 dev StrictMode double-invokes setState updater functions. A hook that mutates an external queue/session inside an updater (e.g. `setState((s) => drainQueue(s))` where `drainQueue` consumes a command queue as a side effect) silently breaks: the first invocation consumes the side effect and is discarded, the second sees an empty queue and returns the unchanged state, so React bails out and the UI never updates. Every action routed through the updater no-ops with zero errors.\n\n## Solution\n\nKeep setState updaters pure. Drain external mutable state synchronously OUTSIDE setState, using a ref that always holds the latest committed state, then commit the concrete result:\n\n```ts\nconst stateRef = useRef<GameState>(state)\nstateRef.current = state // keep in sync each render\n\nconst drain = useCallback(\n  (s: GameState): GameState => {\n    const { results, state: ns } = sessionRef.current.drain(s)\n    for (const r of results) pushFx(r.fx)\n    return ns\n  },\n  [pushFx],\n)\n\nconst commit = useCallback(() => {\n  const ns = drain(stateRef.current) // side effect happens here, once\n  stateRef.current = ns\n  setState(ns) // concrete value — StrictMode-safe\n}, [drain])\n\nconst move = useCallback((unitId, dest) => {\n  sessionRef.current.enqueue({ kind: \"move\", unitId, dest })\n  commit()\n}, [commit])\n```\n\nRules:\n- `stateRef.current` is assigned during render (kept in sync), so `commit()` always drains against the latest committed state.\n- `setState(ns)` takes a concrete value, never a function that mutates external state.\n- Async multi-step flows (e.g. enemy turn) apply each step against `stateRef.current`, update the ref, then `setState(ns)`.\n\n## When to Use\n\n- Any React hook wrapping a queue/session/command pipeline that must execute side effects in response to user actions (command pattern, undo/redo history, event bus).\n- Next.js apps (StrictMode on by default in dev) with a reducer/service layer that consumes state.\n- When adding new actions to a hook that already uses the commit/ref pattern — route the new action through `commit()`, not `setState(drain)`.\n\n## When Not to Use\n\n- Pure functional `setState(prev => ...)` updates with no external side effects — those are already StrictMode-safe.\n- Production-only apps where StrictMode is disabled (the bug is dev-only), though keeping updaters pure is still best practice.\n\n## Related\n\n- @wiki/concepts/strictmode-double-invoke-impure-updater\n- @wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix\n- @wiki/specs/strictmode-command-regression-tests",
+          "new_value": "## Superseded\n\nSuperseded by @wiki/specs/engine-reducer-rewrite (approved 2026-08-13). The external-drain pattern (`stateRef` + `commit()` + `drain()`) was a workaround for the mutable-session design: it existed because `GameSession`/`CommandQueue` were mutated inside `setState` updaters and StrictMode double-invoked them. The reducer rewrite makes it unnecessary — the hook now holds `{state, past, future, fx}` in one `useState` with pure updaters only, so StrictMode correctness is structural (pure `(state, action) → {state, fx}` transitions) and no ref/commit/drain dance is needed.\n\n## Problem\n\nReact 19 dev StrictMode double-invokes setState updater functions. A hook that mutates an external queue/session inside an updater (e.g. `setState((s) => drainQueue(s))` where `drainQueue` consumes a command queue as a side effect) silently breaks: the first invocation consumes the side effect and is discarded, the second sees an empty queue and returns the unchanged state, so React bails out and the UI never updates. Every action routed through the updater no-ops with zero errors.\n\n## Solution\n\nKeep setState updaters pure. Drain external mutable state synchronously OUTSIDE setState, using a ref that always holds the latest committed state, then commit the concrete result:\n\n```ts\nconst stateRef = useRef<GameState>(state)\nstateRef.current = state // keep in sync each render\n\nconst drain = useCallback(\n  (s: GameState): GameState => {\n    const { results, state: ns } = sessionRef.current.drain(s)\n    for (const r of results) pushFx(r.fx)\n    return ns\n  },\n  [pushFx],\n)\n\nconst commit = useCallback(() => {\n  const ns = drain(stateRef.current) // side effect happens here, once\n  stateRef.current = ns\n  setState(ns) // concrete value — StrictMode-safe\n}, [drain])\n\nconst move = useCallback((unitId, dest) => {\n  sessionRef.current.enqueue({ kind: \"move\", unitId, dest })\n  commit()\n}, [commit])\n```\n\nRules:\n- `stateRef.current` is assigned during render (kept in sync), so `commit()` always drains against the latest committed state.\n- `setState(ns)` takes a concrete value, never a function that mutates external state.\n- Async multi-step flows (e.g. enemy turn) apply each step against `stateRef.current`, update the ref, then `setState(ns)`.\n\n## When to Use\n\n- Any React hook wrapping a queue/session/command pipeline that must execute side effects in response to user actions (command pattern, undo/redo history, event bus).\n- Next.js apps (StrictMode on by default in dev) with a reducer/service layer that consumes state.\n- When adding new actions to a hook that already uses the commit/ref pattern — route the new action through `commit()`, not `setState(drain)`.\n\n## When Not to Use\n\n- Pure functional `setState(prev => ...)` updates with no external side effects — those are already StrictMode-safe.\n- Production-only apps where StrictMode is disabled (the bug is dev-only), though keeping updaters pure is still best practice.\n\n## Related\n\n- @wiki/concepts/strictmode-double-invoke-impure-updater\n- @wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix\n- @wiki/specs/strictmode-command-regression-tests"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-13T08:35:35.818Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "title",
+          "old_value": null,
+          "new_value": "Pattern: Pure setState updaters — drain external queues via stateRef + commit"
+        },
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "archived"
+        },
+        {
+          "field": "tags",
+          "old_value": null,
+          "new_value": [
+            "pattern",
+            "react",
+            "strictmode",
+            "state-management"
+          ]
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v3",
+      "version": 3,
+      "timestamp": "2026-08-13T08:35:36.012Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "type",
+          "old_value": null,
+          "new_value": "pattern"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

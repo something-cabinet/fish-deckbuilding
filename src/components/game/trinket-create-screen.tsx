@@ -42,8 +42,9 @@ const TRIGGERS: { id: TrinketTrigger; hint: string }[] = [
 ]
 
 /**
- * Only these four kinds are handled by applyTrinketEffect — offering damage or
- * summon here would author a trinket that silently does nothing.
+ * Only these four kinds survive the trinket resolver — resolveTrigger skips
+ * damage/summon effects, so offering them here would author a trinket that
+ * silently does nothing.
  */
 const TRINKET_EFFECT_KINDS: EffectRow["kind"][] = ["gainCoin", "drawCards", "heal", "buffAtk"]
 

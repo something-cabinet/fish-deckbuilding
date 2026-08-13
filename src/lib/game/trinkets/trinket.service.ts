@@ -1,7 +1,8 @@
-import type { CardEffect } from "../cards"
+import { CardTarget, CardType } from "../cards/enums"
+import type { CardDef } from "../cards/models"
+import { resolveCardEffects } from "../cards/services/effects.service"
 import { FxKind } from "../battle/enums"
 import type { FxEvent, GameState } from "../battle/models"
-import { drawCards } from "../deck"
 import { heroUnit } from "../shared"
 import type { TrinketDef, TrinketTrigger } from "./trinket-def.model"
 import { TRINKET_LIBRARY } from "./trinket-library"
@@ -18,54 +19,47 @@ export function applyStatModifiers(state: GameState, activeTrinketIds: string[])
   }
 }
 
+/**
+ * Fire all trinket trigger effects for `trigger`. D4: there is exactly ONE
+ * effect resolver in the engine — resolveCardEffects — and trinket effects
+ * route through it instead of a duplicated switch. Each trigger's effects
+ * are wrapped in a minimal synthetic card so the shared resolver applies
+ * them against the hero (target = Self, no card-fx, hero as target/from).
+ */
 export function resolveTrigger(
   state: GameState,
   activeTrinketIds: string[],
   trigger: TrinketTrigger,
   fx: FxEvent[],
 ): void {
+  const hero = heroUnit(state)
   for (const id of activeTrinketIds) {
     const def = TRINKET_LIBRARY[id]
     const effects = def?.triggers?.[trigger]
     if (!effects) continue
-    for (const effect of effects) {
-      applyTrinketEffect(state, effect, fx)
-    }
+    // Restore old inert semantics (C1): trinkets must not damage or summon
+    // units. The shared resolver targets the hero (self-synthetic card), so a
+    // hypothetical `damage` effect would hit the hero — skip both kinds.
+    const safe = effects.filter((e) => e.kind !== "damage" && e.kind !== "summon")
+    if (!safe.length) continue
+    resolveCardEffects(state, syntheticCard(def, trigger, safe), { targetUnit: hero, from: hero?.pos }, fx)
   }
 }
 
-function applyTrinketEffect(state: GameState, effect: CardEffect, fx: FxEvent[]): void {
-  const hero = heroUnit(state)
-  switch (effect.kind) {
-    case "gainCoin":
-      state.coin += effect.amount
-      if (hero)
-        fx.push({
-          id: state.logCounter,
-          kind: FxKind.Coin,
-          to: { ...hero.pos },
-          amount: effect.amount,
-        })
-      break
-    case "drawCards":
-      drawCards(state, effect.amount, fx)
-      break
-    case "heal":
-      if (hero && effect.target === "caster") {
-        hero.hp = Math.min(hero.maxHp, hero.hp + effect.amount)
-        fx.push({
-          id: state.logCounter,
-          kind: FxKind.Heal,
-          to: { ...hero.pos },
-          amount: effect.amount,
-        })
-      }
-      break
-    case "buffAtk":
-      if (hero) hero.buffAtk += effect.amount
-      break
-    default:
-      break
+function syntheticCard(def: TrinketDef, trigger: TrinketTrigger, effects: CardDef["effects"]): CardDef {
+  return {
+    id: def.id,
+    name: def.name,
+    type: CardType.Skill,
+    cost: 0,
+    value: 0,
+    target: CardTarget.Self,
+    desc: def.description,
+    icon: def.icon,
+    fx: FxKind.Coin,
+    effects,
+    log: `${def.name} triggers (${trigger}).`,
+    logTone: "neutral",
   }
 }
 

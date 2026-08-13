@@ -1,16 +1,41 @@
 ---
 {}
+status: archived
+title: 'Pattern: Pure setState updaters — drain external queues via stateRef + commit'
+tags: [pattern, react, strictmode, state-management]
+type: pattern
+relates_to:
+  - {type: relates_to, target: wiki:specs:engine-reducer-rewrite}
+---
+
+---
+{}
+relates_to:
+  - {type: references, target: wiki:tasks:hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix}
+status: archived
+title: 'Pattern: Pure setState updaters — drain external queues via stateRef + commit'
+tags: [pattern, react, strictmode, state-management]
+type: pattern
+---
+
+---
+{}
+relates_to:
+  - {type: references, target: wiki:tasks:hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix}
+status: archived
+title: 'Pattern: Pure setState updaters — drain external queues via stateRef + commit'
+tags: [pattern, react, strictmode, state-management]
+---
+
+---
+{}
 relates_to:
   - {type: references, target: wiki:tasks:hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix}
 ---
 
----
-title: Pattern: Pure setState updaters — drain external queues via stateRef + commit
-type: pattern
-id: wiki:patterns:pure-setstate-updaters-external-drain
-status: draft
-tags: [pattern, react, strictmode, state-management]
----
+## Superseded
+
+Superseded by @wiki/specs/engine-reducer-rewrite (approved 2026-08-13). The external-drain pattern (`stateRef` + `commit()` + `drain()`) was a workaround for the mutable-session design: it existed because `GameSession`/`CommandQueue` were mutated inside `setState` updaters and StrictMode double-invoked them. The reducer rewrite makes it unnecessary — the hook now holds `{state, past, future, fx}` in one `useState` with pure updaters only, so StrictMode correctness is structural (pure `(state, action) → {state, fx}` transitions) and no ref/commit/drain dance is needed.
 
 ## Problem
 

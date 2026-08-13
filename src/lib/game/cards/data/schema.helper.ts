@@ -24,7 +24,6 @@ export const CardEffectSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("gainCoin"), amount: z.number() }),
   z.object({ kind: z.literal("buffAtk"), amount: z.number() }),
   z.object({ kind: z.literal("summon"), unit: z.literal("goon") }),
-  z.object({ kind: z.literal("custom"), handlerId: z.string() }),
 ])
 
 export type InferredCardEffect = z.infer<typeof CardEffectSchema>

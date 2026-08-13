@@ -1,9 +1,15 @@
 ---
 title: Card Effect Registry — Data-Driven Effects with Resolver (Visitor)
 type: spec
-status: approved
+status: superseded
 tags: [spec, engine, cards, refactor, tdd, design-patterns, command-pattern, approved]
+relates_to:
+  - {type: relates_to, target: wiki:specs:engine-reducer-rewrite}
 ---
+
+## Superseded
+
+Superseded by @wiki/specs/engine-reducer-rewrite (approved 2026-08-13). The command pipeline claims here — the generic command base, ordered `CommandQueue`, queue determinism (D7/D9/D10, FR-8–FR-12, AC-9–AC-12) — are replaced by a single pure reducer `reduce(state, action) → {state, fx}` with history (`HistoryBundle` past/future) in state. `CommandQueue`, `GameSession`, the custom-effect registry (D11) and the `custom` `CardEffect` kind are deleted; trinkets resolve through the same `resolveCardEffects` resolver. The data-driven effects + zod JSON pack parts (D1–D6, D8, FR-1–FR-7/FR-13, AC-1–AC-8, AC-15/AC-16) remain in force.
 
 # Card Effect Registry & Command Pipeline — Data-Driven Effects, Command Base, Trusted JSON Source
 
