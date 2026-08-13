@@ -73,6 +73,7 @@ type: reference
 - [Session Learnings: Fish Mafia UI Polish & Architecture (2024)](wiki/concepts/session-learnings-2024.md) — *draft*
 - [strictmode double invoke impure updater](wiki/concepts/strictmode-double-invoke-impure-updater.md) — *draft*
 - [svelte5 bindable boot loop failure](wiki/concepts/svelte5-bindable-boot-loop-failure.md) — *draft*
+- [Failure: Layers of stupidity — compensating architecture layers](wiki/concepts/layers-of-stupidity-compensating-layers.md) — *reviewed*
 - [Failure: CSS Grid Row-Stretch Strands Blank Space Next to a Shorter Sibling](wiki/concepts/css-grid-row-stretch-vs-multi-column-for-variable-height-siblings.md) — *draft*
 - [Failure: eslint@10 Breaks eslint-config-next / eslint-plugin-react in This Repo](wiki/concepts/eslint-10-incompatible-with-current-nextjs-lint-ecosystem.md) — *draft*
 - [WM Issue Report Format — version + logs required](wiki/rules/wm-issue-report-format.md) — *reviewed*
@@ -189,6 +190,7 @@ type: reference
 - [No Magic Values — Use Enums and Constants](wiki/rules/no-magic-values.md) — *active*
 - [Spec Before Any Action](wiki/rules/spec-before-action.md) — *active*
 - [No else — Prefer Early Return](wiki/rules/no-else-prefer-early-return.md) — *active*
+- [No Compensating Layers — every abstraction earns its existence](wiki/rules/no-compensating-layers.md) — *active*
 
 ## specs
 
@@ -278,6 +280,6 @@ type: reference
 
 ## Graph Stats
 
-- **Nodes:** 242
-- **Edges:** 339
+- **Nodes:** 244
+- **Edges:** 358
 
