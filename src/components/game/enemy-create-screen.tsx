@@ -8,6 +8,7 @@ import { AiProfileEditor } from "./ai-profile-editor"
 import { TARGET_LABELS, TYPE_STYLES } from "./card-face"
 import { getCardIcon } from "./card-icons"
 import { EnemyFace } from "./enemy-face"
+import { SPRITE_NAMES, spriteUrl } from "./sprites"
 import {
   Chip,
   DesignHeader,
@@ -38,10 +39,6 @@ const KINDS: { id: UnitKind; label: string }[] = [
   { id: UnitKind.Boss, label: "Boss" },
   { id: UnitKind.Goon, label: "Goon" },
 ]
-
-const SPRITE_NAMES = ["thug", "enforcer", "boss", "goon", "hero"] as const
-
-const SPRITE_PATH = "/sprites/"
 
 function slugify(name: string) {
   const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
@@ -316,7 +313,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                           sprite === s ? "border-gold bg-gold/15" : "border-white/10 hover:border-gold/40",
                         )}
                       >
-                        <img src={`${SPRITE_PATH}${s}.png`} alt="" className="h-9 w-9 object-contain" />
+                        <img src={spriteUrl(s)} alt="" className="h-9 w-9 object-contain" />
                         <span
                           className={cn(
                             "truncate font-display text-xs font-bold uppercase tracking-wider",

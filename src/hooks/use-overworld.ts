@@ -54,9 +54,10 @@ export function useOverworld() {
     if (state && !reward) saveState(state)
   }, [state, reward])
 
-  const beginNewRun = useCallback(() => {
+  /** Start a run as the given character (defaults to the first authored one). */
+  const beginNewRun = useCallback((characterId?: string) => {
     clearSave()
-    setState(createNewRun())
+    setState(createNewRun(undefined, characterId))
     setReward(null)
   }, [])
 
@@ -284,6 +285,7 @@ export function useOverworld() {
         heroStart: setup.heroStart,
         fin: eff.fin,
         trinkets: eff.trinkets,
+        characterId: eff.characterId,
       })
     },
     [state],

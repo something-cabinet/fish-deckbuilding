@@ -7,12 +7,21 @@ interface Props {
   outcome: "won" | "lost"
   gold: number
   deckSize: number
+  /** the character this run was played as, named in the flavor text */
+  heroName: string
   /** why the run was lost — changes the flavor text */
   lostReason?: "foreclosure" | "defeat"
   onNewRun: () => void
 }
 
-export function RunSummary({ outcome, gold, deckSize, lostReason = "defeat", onNewRun }: Props) {
+export function RunSummary({
+  outcome,
+  gold,
+  deckSize,
+  heroName,
+  lostReason = "defeat",
+  onNewRun,
+}: Props) {
   const won = outcome === "won"
   const foreclosed = !won && lostReason === "foreclosure"
   return (
@@ -31,10 +40,10 @@ export function RunSummary({ outcome, gold, deckSize, lostReason = "defeat", onN
         </h2>
         <p className="max-w-xs text-sm text-muted-foreground">
           {won
-            ? "The Forecloser is finished. The whole reef pays tribute to Guppy — for real this time."
+            ? `The Forecloser is finished. The whole reef pays tribute to ${heroName} — for real this time.`
             : foreclosed
-              ? "The interest caught up. The syndicate foreclosed on Guppy's debt — and everything else."
-              : "The deepest debt claimed its due. Even Guppy can't out-swim the ledger forever."}
+              ? `The interest caught up. The syndicate foreclosed on ${heroName}'s debt — and everything else.`
+              : `The deepest debt claimed its due. Even ${heroName} can't out-swim the ledger forever.`}
         </p>
         <div className="flex gap-6 font-display text-sm uppercase tracking-wider text-foreground">
           <div className="flex flex-col items-center">

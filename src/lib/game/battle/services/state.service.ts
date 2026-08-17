@@ -1,8 +1,9 @@
 import { Phase } from "../enums"
 import type { FxEvent, GameState, Pos } from "../models"
 import { DEFAULT_COLS, DEFAULT_ROWS } from "../constants"
-import { COIN_TURN_BASE, makeCard, STARTER_DECK, type CardInstance } from "../../cards"
-import { ENEMY_SPAWNS, HERO_DEF, Team, type EnemySpawn, type Unit } from "../../units"
+import { COIN_TURN_BASE, makeCard, type CardInstance } from "../../cards"
+import { resolveCharacter } from "../../characters"
+import { ENEMY_SPAWNS, heroDefFromCharacter, Team, type EnemySpawn, type Unit } from "../../units"
 import { DEFAULT_HAND_SIZE, DEFAULT_HAND_MAX, shuffle } from "../../deck"
 import { resetIds } from "../../shared"
 import { getTrinketDef, resolveTrigger } from "../../trinkets"
@@ -21,11 +22,14 @@ export function createInitialState(overrides?: {
   heroStart?: Pos
   /** trinket def ids active in this battle */
   trinkets?: string[]
+  /** the character being played; supplies hero stats and the fallback deck */
+  characterId?: string
 }): GameState {
   resetIds()
-  const deck = overrides?.deck
-    ? overrides.deck.map(makeCard)
-    : STARTER_DECK.map(makeCard)
+  // an unknown/stale id resolves to the default character rather than throwing,
+  // so a save that names a character deleted in the designer still plays
+  const character = resolveCharacter(overrides?.characterId)
+  const deck = (overrides?.deck ?? character.starterDeck).map(makeCard)
   const hand: CardInstance[] = []
 
   const cols = overrides?.cols ?? DEFAULT_COLS
@@ -33,15 +37,15 @@ export function createInitialState(overrides?: {
   const start = overrides?.heroStart ?? { x: 1, y: Math.floor(rows / 2) }
 
   const hero: Unit = {
-    ...HERO_DEF,
+    ...heroDefFromCharacter(character),
     id: "hero",
     // clamp so a stage that shrank below the stored start still spawns on board
     pos: {
       x: Math.max(0, Math.min(cols - 1, start.x)),
       y: Math.max(0, Math.min(rows - 1, start.y)),
     },
-    hp: overrides?.heroHp ?? HERO_DEF.hp,
-    maxHp: overrides?.heroMaxHp ?? HERO_DEF.maxHp,
+    hp: overrides?.heroHp ?? character.stats.maxHp,
+    maxHp: overrides?.heroMaxHp ?? character.stats.maxHp,
   }
   const trinkets = overrides?.trinkets ?? []
   // apply stat modifiers from owned trinkets to the hero
@@ -91,6 +95,7 @@ export function createInitialState(overrides?: {
     handSize: DEFAULT_HAND_SIZE,
     handMax: DEFAULT_HAND_MAX,
     activeTrinkets: overrides?.trinkets ?? [],
+    characterId: character.id,
   }
 }
 

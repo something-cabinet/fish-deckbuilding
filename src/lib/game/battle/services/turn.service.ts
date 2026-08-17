@@ -12,7 +12,7 @@ export function checkEnd(state: GameState) {
   const enemiesLeft = state.units.some((u) => u.team === Team.Enemy && u.hp > 0)
   if (!hero || hero.hp <= 0) {
     state.phase = Phase.Lost
-    log(state, "Guppy sleeps with the fishes. The mob wins.", "bad")
+    log(state, `${hero?.name ?? "The hero"} sleeps with the fishes. The mob wins.`, "bad")
   } else if (!enemiesLeft) {
     state.phase = Phase.Won
     log(state, "The whole crew is settled. The waters are yours.", "gold")

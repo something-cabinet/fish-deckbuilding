@@ -1,23 +1,9 @@
-/** The player's starting deck (list of card library ids, may repeat). */
-export const STARTER_DECK: string[] = [
-  "demand_letter",
-  "demand_letter",
-  "demand_letter",
-  "collection_call",
-  "collection_call",
-  "foreclose",
-  "foreclose",
-  "kneecap",
-  "kneecap",
-  "cash_flow",
-  "cash_flow",
-  "market_rate",
-  "market_rate",
-  "loan_shark",
-  "hush_money",
-  "muscle",
-  "muscle",
-  "shakedown",
-  "shakedown",
-  "shakedown",
-]
+import { DEFAULT_CHARACTER } from "../../characters"
+
+/**
+ * The player's starting deck (list of card library ids, may repeat).
+ *
+ * Authored on the default character, so the Character Designer is the single
+ * place a starting deck is edited.
+ */
+export const STARTER_DECK: string[] = DEFAULT_CHARACTER.starterDeck

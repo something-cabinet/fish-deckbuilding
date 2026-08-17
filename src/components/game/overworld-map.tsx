@@ -21,8 +21,10 @@ import type { MapNode, NodeType, OverworldState } from "@/lib/game/overworld-typ
 import { FORECLOSURE_CAP, FORECLOSURE_WARN } from "@/lib/game/overworld-data"
 import { accrueInterest } from "@/lib/game/overworld-engine"
 import { CARD_LIBRARY } from "@/lib/game/cards"
+import { resolveCharacter } from "@/lib/game/characters"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { getCardIcon } from "./card-icons"
+import { spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -111,6 +113,7 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
 
   const reachableIds = useMemo(() => new Set(reachable.map((n) => n.id)), [reachable])
   const heroNode = map.find((n) => n.id === state.nodeId) ?? map[0]
+  const character = resolveCharacter(state.characterId)
   const curZoneName = ZONE_NAMES[state.zoneIndex] ?? `Zone ${state.zoneIndex + 1}`
   const nextInterest = accrueInterest(state)
   const debtPct = Math.min(1, state.debt / FORECLOSURE_CAP)
@@ -137,8 +140,8 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
       <header className="relative z-10 flex items-center justify-between gap-4 border-b border-gold/20 bg-ocean-deep/70 px-4 py-2.5 backdrop-blur-sm">
         <div className="min-w-[150px]">
           <p className="flex items-center gap-1.5 font-display text-sm font-bold uppercase tracking-wider text-gold">
-            <Fish size={14} className="text-gold" />
-            Guppy the Debtor
+            <img src={spriteUrl(character.icon)} alt="" className="h-4 w-4 object-contain" />
+            {character.name} {character.title}
           </p>
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             {curZoneName} · Zone {state.zoneIndex + 1} of 3

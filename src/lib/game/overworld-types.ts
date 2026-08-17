@@ -65,6 +65,8 @@ export interface MapNode {
 }
 
 export interface OverworldState {
+  /** the character being played this run (character library id) */
+  characterId: string
   /** current zone index (0 = shallows) */
   zoneIndex: number
   /** current node ref inside the current zone */

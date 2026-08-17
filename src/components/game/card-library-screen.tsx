@@ -1,16 +1,31 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Gem, Library, Pencil, Plus, ScrollText, Shield, Sparkles, Swords, Trash2 } from "lucide-react"
+import {
+  Gem,
+  Library,
+  Pencil,
+  Plus,
+  ScrollText,
+  Shield,
+  Sparkles,
+  Swords,
+  Trash2,
+  User,
+} from "lucide-react"
 import { CardType, type CardDef } from "@/lib/game/cards"
+import type { CharacterDef } from "@/lib/game/characters"
 import type { EnemyDef } from "@/lib/game/units"
 import type { StageDef } from "@/lib/game/stages"
 import type { TrinketDef } from "@/lib/game/trinkets"
+import type { SummonDef } from "@/lib/game/summons"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import { CardFace } from "./card-face"
+import { CharacterLibraryScreen } from "./character-library-screen"
 import { EnemyLibraryScreen } from "./enemy-library-screen"
 import { StageLibraryScreen } from "./stage-library-screen"
 import { TrinketLibraryScreen } from "./trinket-library-screen"
+import { SummonLibraryScreen } from "./summon-library-screen"
 import {
   Chip,
   DesignHeader,
@@ -28,6 +43,8 @@ interface Props {
   enemies: EnemyDef[]
   stages: StageDef[]
   trinkets: TrinketDef[]
+  characters: CharacterDef[]
+  summons: SummonDef[]
   /** tab to open on; lets the app restore the tab after an editor round-trip */
   initialSubtab?: SubTab
   onSubtabChange?: (tab: SubTab) => void
@@ -44,18 +61,26 @@ interface Props {
   onTrinketCreate: () => void
   onTrinketEdit: (trinket: TrinketDef) => void
   onTrinketDelete: (id: string) => void
+  onCharacterCreate: () => void
+  onCharacterEdit: (character: CharacterDef) => void
+  onCharacterDelete: (id: string) => void
+  onSummonCreate: () => void
+  onSummonEdit: (summon: SummonDef) => void
+  onSummonDelete: (id: string) => void
 }
 
 /** Card filter; null means "All" (no bare literal discriminators). */
 type Filter = CardType | null
 
-export type SubTab = "cards" | "enemies" | "stages" | "trinkets"
+export type SubTab = "cards" | "enemies" | "stages" | "trinkets" | "characters" | "summons"
 
 const SUBTABS: { id: SubTab; label: string; icon: React.ElementType }[] = [
   { id: "cards", label: "Cards", icon: Swords },
   { id: "enemies", label: "Enemies", icon: Shield },
   { id: "stages", label: "Stages", icon: ScrollText },
   { id: "trinkets", label: "Trinkets", icon: Gem },
+  { id: "characters", label: "Characters", icon: User },
+  { id: "summons", label: "Summons", icon: Sparkles },
 ]
 
 const FILTERS: { id: Filter; label: string }[] = [
@@ -71,6 +96,8 @@ export function CardLibraryScreen({
   enemies,
   stages,
   trinkets,
+  characters,
+  summons,
   initialSubtab,
   onSubtabChange,
   onBack,
@@ -86,6 +113,12 @@ export function CardLibraryScreen({
   onTrinketCreate,
   onTrinketEdit,
   onTrinketDelete,
+  onCharacterCreate,
+  onCharacterEdit,
+  onCharacterDelete,
+  onSummonCreate,
+  onSummonEdit,
+  onSummonDelete,
 }: Props) {
   const [subtab, setSubtab] = useState<SubTab>(initialSubtab ?? "cards")
   const [filter, setFilter] = useState<Filter>(null)
@@ -107,6 +140,8 @@ export function CardLibraryScreen({
           {subtab === "enemies" && `${enemies.length} enemies`}
           {subtab === "stages" && `${stages.length} stages`}
           {subtab === "trinkets" && `${trinkets.length} trinkets`}
+          {subtab === "characters" && `${characters.length} characters`}
+          {subtab === "summons" && `${summons.length} summons`}
         </span>
         {subtab === "cards" && (
           <PrimaryButton onClick={onCreate}>
@@ -124,6 +159,18 @@ export function CardLibraryScreen({
           <PrimaryButton onClick={onTrinketCreate}>
             <Plus size={15} />
             Create Trinket
+          </PrimaryButton>
+        )}
+        {subtab === "characters" && (
+          <PrimaryButton onClick={onCharacterCreate}>
+            <Plus size={15} />
+            Create Character
+          </PrimaryButton>
+        )}
+        {subtab === "summons" && (
+          <PrimaryButton onClick={onSummonCreate}>
+            <Plus size={15} />
+            Create Summon
           </PrimaryButton>
         )}
       </DesignHeader>
@@ -216,6 +263,20 @@ export function CardLibraryScreen({
           onEdit={onTrinketEdit}
           onDelete={onTrinketDelete}
         />
+      )}
+
+      {/* characters tab */}
+      {subtab === "characters" && (
+        <CharacterLibraryScreen
+          characters={characters}
+          onEdit={onCharacterEdit}
+          onDelete={onCharacterDelete}
+        />
+      )}
+
+      {/* summons tab */}
+      {subtab === "summons" && (
+        <SummonLibraryScreen summons={summons} onEdit={onSummonEdit} onDelete={onSummonDelete} />
       )}
     </main>
   )

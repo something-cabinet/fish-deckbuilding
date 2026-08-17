@@ -6,17 +6,22 @@ import type { CardDef, GameState } from "@/lib/game"
 import { STAGE_LIBRARY, type StageDef } from "@/lib/game/stages"
 import type { EnemyDef } from "@/lib/game/units"
 import { TRINKET_DEFS, type TrinketDef } from "@/lib/game/trinkets"
+import { CHARACTER_DEFS, resolveCharacter, type CharacterDef } from "@/lib/game/characters"
+import { SUMMON_DEFS, type SummonDef } from "@/lib/game/summons"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import type { MapNode } from "@/lib/game/overworld-types"
 import type { EventChoice } from "@/lib/game/overworld-data"
 import { ENEMY_LIBRARY } from "@/lib/game/units"
 import { CardCreateScreen } from "./card-create-screen"
 import { CardLibraryScreen, type SubTab } from "./card-library-screen"
+import { CharacterCreateScreen } from "./character-create-screen"
+import { CharacterSelectScreen } from "./character-select-screen"
 import { EnemyCreateScreen } from "./enemy-create-screen"
 import { EventScreen } from "./event-screen"
 import { FishMafiaGame } from "./fish-mafia-game"
 import { MenuScreen } from "./menu-screen"
 import { StageCreateScreen } from "./stage-create-screen"
+import { SummonCreateScreen } from "./summon-create-screen"
 import { TrinketCreateScreen } from "./trinket-create-screen"
 import { OverworldMap } from "./overworld-map"
 import { RewardScreen } from "./reward-screen"
@@ -40,6 +45,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
 
 type Screen =
   | "menu"
+  | "select-character"
   | "overworld"
   | "battle"
   | "library"
@@ -47,13 +53,21 @@ type Screen =
   | "create-enemy"
   | "create-stage"
   | "create-trinket"
+  | "create-character"
+  | "create-summon"
 /** an overworld node resolved on the map itself, via an overlay */
 type NodeAction = "shop" | "event" | null
 
 /** the design-tool screens, which are safe to restore after a reload */
 type DesignScreen = Extract<
   Screen,
-  "library" | "create" | "create-enemy" | "create-stage" | "create-trinket"
+  | "library"
+  | "create"
+  | "create-enemy"
+  | "create-stage"
+  | "create-trinket"
+  | "create-character"
+  | "create-summon"
 >
 
 const DESIGN_SCREENS: DesignScreen[] = [
@@ -62,6 +76,8 @@ const DESIGN_SCREENS: DesignScreen[] = [
   "create-enemy",
   "create-stage",
   "create-trinket",
+  "create-character",
+  "create-summon",
 ]
 
 function isDesignScreen(s: Screen): s is DesignScreen {
@@ -88,6 +104,8 @@ interface DesignLocation {
   stageId?: string
   stageZone?: ZoneId
   trinketId?: string
+  characterId?: string
+  summonId?: string
 }
 
 export function FishMafiaApp() {
@@ -114,6 +132,12 @@ export function FishMafiaApp() {
   // run trinkets from the database, managed in-app for the designer
   const [trinkets, setTrinkets] = useState<TrinketDef[]>(() => TRINKET_DEFS)
   const [editingTrinket, setEditingTrinket] = useState<TrinketDef | null>(null)
+  // playable characters from the database, managed in-app for the designer
+  const [characters, setCharacters] = useState<CharacterDef[]>(() => CHARACTER_DEFS)
+  const [editingCharacter, setEditingCharacter] = useState<CharacterDef | null>(null)
+  // summon templates from the database, managed in-app for the designer
+  const [summons, setSummons] = useState<SummonDef[]>(() => SUMMON_DEFS)
+  const [editingSummon, setEditingSummon] = useState<SummonDef | null>(null)
   /** zone a brand-new stage belongs to, from the section its button was in */
   const [newStageZone, setNewStageZone] = useState<ZoneId>("shallows")
   // the library tab to return to after an editor round-trip
@@ -152,6 +176,14 @@ export function FishMafiaApp() {
       const trinket = TRINKET_DEFS.find((t) => t.id === loc.trinketId)
       if (trinket) setEditingTrinket(trinket)
     }
+    if (loc.characterId) {
+      const character = CHARACTER_DEFS.find((c) => c.id === loc.characterId)
+      if (character) setEditingCharacter(character)
+    }
+    if (loc.summonId) {
+      const summon = SUMMON_DEFS.find((s) => s.id === loc.summonId)
+      if (summon) setEditingSummon(summon)
+    }
     if (loc.stageZone) setNewStageZone(loc.stageZone)
     setLibrarySubtab(loc.subtab)
     setScreen(loc.screen)
@@ -171,9 +203,21 @@ export function FishMafiaApp() {
       stageId: editingStage?.id,
       stageZone: newStageZone,
       trinketId: editingTrinket?.id,
+      characterId: editingCharacter?.id,
+      summonId: editingSummon?.id,
     }
     sessionStorage.setItem(DESIGN_LOCATION_KEY, JSON.stringify(loc))
-  }, [screen, librarySubtab, editingCard, editingEnemy, editingStage, newStageZone, editingTrinket])
+  }, [
+    screen,
+    librarySubtab,
+    editingCard,
+    editingEnemy,
+    editingStage,
+    newStageZone,
+    editingTrinket,
+    editingCharacter,
+    editingSummon,
+  ])
   // the battle being played right now (built from the overworld run)
   const [battle, setBattle] = useState<GameState | null>(null)
   const [battleIsBoss, setBattleIsBoss] = useState(false)
@@ -197,8 +241,14 @@ export function FishMafiaApp() {
     setLostReason("defeat")
   }
 
-  const startNewRun = () => {
-    overworld.beginNewRun()
+  /** "Start" / "New Run" go through the roster rather than straight into a run */
+  const chooseCharacter = () => {
+    resetRunFlags()
+    setScreen("select-character")
+  }
+
+  const startRunAs = (characterId: string) => {
+    overworld.beginNewRun(characterId)
     resetRunFlags()
     setScreen("overworld")
   }
@@ -308,9 +358,25 @@ export function FishMafiaApp() {
         <MenuScreen
           settings={settings}
           onChangeSettings={setSettings}
-          onStart={startNewRun}
+          onStart={chooseCharacter}
           onContinue={hydrated && overworld.hasSave ? continueRun : undefined}
           onOpenLibrary={() => setScreen("library")}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
+    )
+  }
+
+  if (screen === "select-character") {
+    return (
+      <>
+        <CharacterSelectScreen
+          characters={characters}
+          onBack={() => setScreen("menu")}
+          onConfirm={startRunAs}
         />
         <DebugMenu
           overworldState={overworld.state}
@@ -377,6 +443,32 @@ export function FishMafiaApp() {
         onTrinketDelete={(id) => {
           setTrinkets((prev) => prev.filter((t) => t.id !== id))
           fetch(`/api/trinkets?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
+        characters={characters}
+        onCharacterCreate={() => setScreen("create-character")}
+        onCharacterEdit={(character) => {
+          setEditingCharacter(character)
+          setScreen("create-character")
+        }}
+        onCharacterDelete={(id) => {
+          // the API refuses to delete the last one; keep the local list in step
+          if (characters.length <= 1) return
+          setCharacters((prev) => prev.filter((c) => c.id !== id))
+          fetch(`/api/characters?id=${encodeURIComponent(id)}`, {
+            method: "DELETE",
+          }).catch(() => {})
+        }}
+        summons={summons}
+        onSummonCreate={() => setScreen("create-summon")}
+        onSummonEdit={(summon) => {
+          setEditingSummon(summon)
+          setScreen("create-summon")
+        }}
+        onSummonDelete={(id) => {
+          setSummons((prev) => prev.filter((s) => s.id !== id))
+          fetch(`/api/summons?id=${encodeURIComponent(id)}`, {
             method: "DELETE",
           }).catch(() => {})
         }}
@@ -532,6 +624,76 @@ export function FishMafiaApp() {
     )
   }
 
+  if (screen === "create-character") {
+    return (
+      <>
+        <CharacterCreateScreen
+          editCharacter={editingCharacter ?? undefined}
+          onBack={() => {
+            setEditingCharacter(null)
+            setScreen("library")
+          }}
+          onSave={(def) => {
+            setCharacters((prev) => [...prev, def])
+            fetch("/api/characters", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+          }}
+          onUpdate={(def) => {
+            setCharacters((prev) => prev.map((c) => (c.id === def.id ? def : c)))
+            fetch("/api/characters", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+            setEditingCharacter(def)
+          }}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
+    )
+  }
+
+  if (screen === "create-summon") {
+    return (
+      <>
+        <SummonCreateScreen
+          editSummon={editingSummon ?? undefined}
+          onBack={() => {
+            setEditingSummon(null)
+            setScreen("library")
+          }}
+          onSave={(def) => {
+            setSummons((prev) => [...prev, def])
+            fetch("/api/summons", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+          }}
+          onUpdate={(def) => {
+            setSummons((prev) => prev.map((s) => (s.id === def.id ? def : s)))
+            fetch("/api/summons", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(def),
+            }).catch(() => {})
+            setEditingSummon(def)
+          }}
+        />
+        <DebugMenu
+          overworldState={overworld.state}
+          onOverworldUpdate={overworld.debugUpdate}
+        />
+      </>
+    )
+  }
+
   if (screen === "overworld") {
     const s = overworld.state
     return (
@@ -546,7 +708,7 @@ export function FishMafiaApp() {
             onExit={backToMenu}
           />
         ) : (
-          <SavePrompt hasSave={false} onContinue={() => {}} onNewRun={startNewRun} />
+          <SavePrompt hasSave={false} onContinue={() => {}} onNewRun={chooseCharacter} />
         )}
 
         {/* shop overlay */}
@@ -622,8 +784,9 @@ export function FishMafiaApp() {
             outcome={runResult}
             gold={s.gold}
             deckSize={s.deck.length}
+            heroName={resolveCharacter(s.characterId).name}
             lostReason={lostReason}
-            onNewRun={startNewRun}
+            onNewRun={chooseCharacter}
           />
         )}
       </div>
