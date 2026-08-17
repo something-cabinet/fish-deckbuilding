@@ -3,12 +3,20 @@ title: Summon Card System — Unit Spawning and Minion Management
 type: spec
 id: wiki:specs:summon-card-system
 status: draft
-tags: [game-design, cards, combat, units, summon]
+tags:
+- game-design
+- cards
+- combat
+- units
+- summon
+relates_to:
+  - {type: references, target: wiki:decisions:summon-def-has-no-team-field}
 ---
 
 ---
 title: Summon Card System — Unit Spawning and Minion Management
 type: spec
+id: wiki:specs:summon-card-system
 status: draft
 tags: [game-design, cards, combat, units, summon]
 ---
@@ -18,6 +26,16 @@ tags: [game-design, cards, combat, units, summon]
 Add the Summon card type that spawns a unit onto the grid. This enables minion-based gameplay — one of the core tactical layers in Duelyst. Summon cards create allied units that act independently on subsequent turns, controlled by the same player. This spec covers the card type, spawning rules, summoning sickness, and minion behavior.
 
 Supersedes the FR-5 placeholder in `wiki:specs:fish-tactical-rpg`. See `wiki:specs:card-system-in-battle-deck` for the base card system this builds on.
+
+## Implementation Note (2026-08-17)
+
+A much smaller slice of this spec has actually shipped, and it does **not** match the design below — read this before implementing anything here.
+
+- **What's built:** `CardDef.effects` can include `{ kind: "summon", unit: string }` where `unit` is a `SummonDef` id (`src/lib/game/summons/`), authored through a "Summons" subtab in the Game Design tool (mirrors Enemy Design). `effects.service.ts`'s `case "summon"` resolves the def via `resolveSummon(effect.unit)` and places it on the card's already-chosen `CardTarget.EmptyTile` target — there is no separate spawn-tile-highlight pass, no `SpawnTag` (Adjacent/Nearby/AnyFriendly), and no `duration`. The one shipped Summon card (`muscle` / "Hired Muscle") already used `CardTarget.EmptyTile`, which is how "no space to summon" is naturally handled (the empty-tile target picker just won't offer occupied tiles) without FR-3/FR-4/AC-9's dedicated spawn-search logic.
+- **Summoning sickness (D2/FR-5):** effectively present as a side effect, not a modeled feature — the spawned unit is created with `hasMoved: true, hasActed: true`, so it can't act the turn it's summoned. It resets whenever the rest of that team's units reset, since nothing distinguishes it from a normal unit afterward.
+- **Not built:** `duration`/`turns_remaining` (FR-6, AC-10), keyword flags on the template (FR-7), and — most importantly — **enemy-side summons (D5, FR-10, AC-13/AC-14)**. `castCard` (`src/lib/game/actions/actions.service.ts`) is player-only; there is no code path for the enemy to play a card at all, summon or otherwise, despite `EnemyDef.deck` existing.
+- **OQ-4 status:** "Can summon cards target enemy side? → No" is still true today, but only because of the missing enemy-cast-card plumbing above — not a data-model constraint. `SummonDef` deliberately carries no `team` field so a spawned unit's side can follow whoever casts the card once that plumbing exists; see `wiki:decisions:summon-def-has-no-team-field`.
+- If/when this spec is picked back up, the `unit_template`-per-card design in D1/FR-1 should be reconsidered against the shipped shared-catalog approach (`SummonDef` by id) before building spawn tags or duration on top of either one.
 
 ## Locked Decisions
 
@@ -126,4 +144,4 @@ Supersedes the FR-5 placeholder in `wiki:specs:fish-tactical-rpg`. See `wiki:spe
 - [ ] OQ-1: **(RESOLVED)** Should the player control minions directly or auto-pilot? → Phase 1: direct control (click minion → move/attack same as hero). Phase 2: consider auto-attack toggle.
 - [ ] OQ-2: **(RESOLVED)** Duration minions die at start or end of controller's turn? → Start of controller's turn (so they get one final action window).
 - [ ] OQ-3: How many Summon cards in the starter deck? → Propose 2: "Summon Pufferfish" (1 mana, 3/1, Adjacent, Common) and "Summon Angler" (2 mana, 4/2, Nearby, Uncommon).
-- [ ] OQ-4: Can summon cards target enemy side? → No, summons always spawn on the caster's side of the field.
+- [ ] OQ-4: Can summon cards target enemy side? → **(PARTIALLY RESOLVED 2026-08-17)** Not yet, but no longer for data-model reasons — see the Implementation Note above and `wiki:decisions:summon-def-has-no-team-field`. Blocked purely on there being no enemy-cast-card code path.
