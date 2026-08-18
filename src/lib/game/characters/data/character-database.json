@@ -6,7 +6,11 @@
       "title": "The Debtor",
       "description": "Small fish, big ledger. Starts owing the syndicate and collects the hard way.",
       "icon": "hero",
-      "stats": { "maxHp": 14, "atk": 2, "move": 2 },
+      "stats": {
+        "maxHp": 14,
+        "atk": 2,
+        "move": 2
+      },
       "starterDeck": [
         "demand_letter",
         "demand_letter",
@@ -28,6 +32,26 @@
         "shakedown",
         "shakedown",
         "shakedown"
+      ]
+    },
+    {
+      "id": "character_m_x_mswwixoj",
+      "name": "Mị đô xô",
+      "title": "The Streamer",
+      "description": "funny streamer",
+      "icon": "hero",
+      "stats": {
+        "maxHp": 14,
+        "atk": 2,
+        "move": 2
+      },
+      "starterDeck": [
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter"
       ]
     }
   ]

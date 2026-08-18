@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Check, Search, Sparkles } from "lucide-react"
 import type { SummonDef } from "@/lib/game/summons"
 import { SummonFace } from "./summon-face"
-import { SPRITE_NAMES, spriteUrl } from "./sprites"
+import { spriteUrl, useSpriteNames } from "./sprites"
 import {
   Chip,
   DesignHeader,
@@ -41,11 +41,12 @@ export function SummonCreateScreen({ onBack, onSave, editSummon, onUpdate }: Pro
   const [range, setRange] = useState(editSummon?.range ?? 1)
   const [sprite, setSprite] = useState(editSummon?.icon ?? "goon")
   const [artworkFilter, setArtworkFilter] = useState("")
+  const spriteNames = useSpriteNames()
 
   const filteredSprites = useMemo(() => {
     const q = artworkFilter.trim().toLowerCase()
-    return q ? SPRITE_NAMES.filter((s) => s.includes(q)) : SPRITE_NAMES
-  }, [artworkFilter])
+    return q ? spriteNames.filter((s) => s.includes(q)) : spriteNames
+  }, [artworkFilter, spriteNames])
 
   const canSave = name.trim().length > 0 && hp > 0
 
@@ -117,7 +118,7 @@ export function SummonCreateScreen({ onBack, onSave, editSummon, onUpdate }: Pro
               </Panel>
 
               <Panel title="Artwork" className="lg:col-span-2">
-                {SPRITE_NAMES.length > ARTWORK_SEARCH_THRESHOLD && (
+                {spriteNames.length > ARTWORK_SEARCH_THRESHOLD && (
                   <div className="relative mb-2.5">
                     <Search
                       size={14}
@@ -131,7 +132,7 @@ export function SummonCreateScreen({ onBack, onSave, editSummon, onUpdate }: Pro
                       className={cn(inputClass, "py-1.5 pl-8 text-sm")}
                     />
                     <span className="mt-1 block text-xs text-muted-foreground">
-                      {filteredSprites.length} of {SPRITE_NAMES.length}
+                      {filteredSprites.length} of {spriteNames.length}
                     </span>
                   </div>
                 )}

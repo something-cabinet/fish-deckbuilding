@@ -6,7 +6,7 @@ import { CARD_LIBRARY, type CardDef } from "@/lib/game/cards"
 import type { CharacterDef } from "@/lib/game/characters"
 import { getCardIcon } from "./card-icons"
 import { CharacterFace } from "./character-face"
-import { SPRITE_NAMES, spriteUrl } from "./sprites"
+import { spriteUrl, useSpriteNames } from "./sprites"
 import {
   DesignHeader,
   EditingBadge,
@@ -64,6 +64,7 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
     toCounts(editCharacter?.starterDeck ?? []),
   )
   const [deckFilter, setDeckFilter] = useState("")
+  const spriteNames = useSpriteNames()
 
   const cards = useMemo(() => Object.values(CARD_LIBRARY), [])
 
@@ -198,7 +199,7 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
 
               <Panel title="Artwork" className="lg:col-span-2">
                 <div className="grid max-h-64 grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-1.5 overflow-y-auto pr-1">
-                  {SPRITE_NAMES.map((s) => (
+                  {spriteNames.map((s) => (
                     <button
                       key={s}
                       type="button"

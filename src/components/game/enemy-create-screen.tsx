@@ -8,7 +8,7 @@ import { AiProfileEditor } from "./ai-profile-editor"
 import { TARGET_LABELS, TYPE_STYLES } from "./card-face"
 import { getCardIcon } from "./card-icons"
 import { EnemyFace } from "./enemy-face"
-import { SPRITE_NAMES, spriteUrl } from "./sprites"
+import { spriteUrl, useSpriteNames } from "./sprites"
 import {
   Chip,
   DesignHeader,
@@ -58,6 +58,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
   const [deck, setDeck] = useState<{ id: string; count: number }[]>(editEnemy?.deck ?? [])
   const [aiProfile, setAiProfile] = useState<EnemyAiProfile | undefined>(editEnemy?.aiProfile)
   const [artworkFilter, setArtworkFilter] = useState("")
+  const spriteNames = useSpriteNames()
 
   const cardOptions = useMemo(
     () =>
@@ -69,8 +70,8 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
 
   const filteredSprites = useMemo(() => {
     const q = artworkFilter.trim().toLowerCase()
-    return q ? SPRITE_NAMES.filter((s) => s.includes(q)) : SPRITE_NAMES
-  }, [artworkFilter])
+    return q ? spriteNames.filter((s) => s.includes(q)) : spriteNames
+  }, [artworkFilter, spriteNames])
 
   const canSave = name.trim().length > 0 && hp > 0
 
@@ -278,7 +279,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
               </Panel>
 
               <Panel title="Artwork">
-                {SPRITE_NAMES.length > ARTWORK_SEARCH_THRESHOLD && (
+                {spriteNames.length > ARTWORK_SEARCH_THRESHOLD && (
                   <div className="relative mb-2.5">
                     <Search
                       size={14}
@@ -292,7 +293,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                       className={cn(inputClass, "py-1.5 pl-8 text-sm")}
                     />
                     <span className="mt-1 block text-xs text-muted-foreground">
-                      {filteredSprites.length} of {SPRITE_NAMES.length}
+                      {filteredSprites.length} of {spriteNames.length}
                     </span>
                   </div>
                 )}
