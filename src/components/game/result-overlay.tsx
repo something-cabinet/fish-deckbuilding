@@ -2,6 +2,7 @@
 
 import { RotateCcw } from "lucide-react"
 import { Phase, type GameState } from "@/lib/game/battle"
+import { resolveCharacter } from "@/lib/game/characters"
 import { cn } from "@/lib/utils"
 
 export function ResultOverlay({
@@ -16,6 +17,7 @@ export function ResultOverlay({
   if (state.phase !== Phase.Won && state.phase !== Phase.Lost) return null
   if (hidden) return null
   const won = state.phase === Phase.Won
+  const hero = resolveCharacter(state.characterId).name
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-ocean-deep/85 backdrop-blur-sm animate-fm-fade-in">
@@ -33,8 +35,8 @@ export function ResultOverlay({
         </h2>
         <p className="max-w-xs text-sm text-muted-foreground">
           {won
-            ? "Every last thug is off the board. The reef pays tribute to Guppy now."
-            : "The mob got to Guppy first. The waters run red and the debts roll on."}
+            ? `Every last thug is off the board. The reef pays tribute to ${hero} now.`
+            : `The mob got to ${hero} first. The waters run red and the debts roll on.`}
         </p>
         <p className="font-display text-sm uppercase tracking-wider text-foreground">
           Survived {state.turn} turns · {state.coin} coin banked

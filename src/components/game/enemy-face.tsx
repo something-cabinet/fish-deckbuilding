@@ -2,9 +2,8 @@
 
 import { Coins, Footprints, Heart, Layers, Sparkles, Swords } from "lucide-react"
 import { UnitKind, type EnemyDef } from "@/lib/game/units"
+import { spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
-
-const SPRITE_PATH = "/sprites/"
 
 export const KIND_LABELS: Record<UnitKind, string> = {
   [UnitKind.Hero]: "Hero",
@@ -60,7 +59,7 @@ export function EnemyFace({ def, className }: Props) {
         )}
         <div className="flex flex-1 items-center justify-center">
           <img
-            src={`${SPRITE_PATH}${def.icon}.png`}
+            src={spriteUrl(def.icon)}
             alt={def.name}
             className="h-16 w-16 object-contain"
           />

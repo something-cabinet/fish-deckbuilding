@@ -2,9 +2,8 @@
 
 import type { EnemyDef } from "@/lib/game/units"
 import type { StageDef, StagePlacement } from "@/lib/game/stages"
+import { spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
-
-const SPRITE_PATH = "/sprites/"
 
 interface Props {
   stage: Pick<StageDef, "cols" | "rows" | "heroStart" | "placements">
@@ -56,11 +55,11 @@ export function StageGrid({ stage, enemies, onTileClick, interactive, className 
         const content = (
           <>
             {isHero && (
-              <img src={`${SPRITE_PATH}hero.png`} alt="" className="h-full w-full object-contain p-[6%]" />
+              <img src={spriteUrl("hero")} alt="" className="h-full w-full object-contain p-[6%]" />
             )}
             {!isHero && placement && (
               <img
-                src={`${SPRITE_PATH}${def?.icon ?? "thug"}.png`}
+                src={spriteUrl(def?.icon ?? "thug")}
                 alt=""
                 className="h-full w-full object-contain p-[6%]"
               />

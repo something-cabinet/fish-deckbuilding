@@ -1,0 +1,30 @@
+---
+title: Characters domain owns hero stats and starter deck
+type: memory
+tags:
+- characters
+- engine
+- design-tool
+status: active
+relates_to:
+  - {type: example_of, target: wiki:patterns:authored-unit-catalog-module}
+---
+
+---
+title: Characters domain owns hero stats and starter deck
+type: memory
+tags: [characters, engine, design-tool]
+status: active
+---
+
+`src/lib/game/characters/` is the single source of truth for the player hero — no hero name, stat, sprite or deck is hardcoded in the UI any more.
+
+This module is the first full instance of the six-piece "authored unit-catalog" shape (model + Zod schema w/ drift guard + JSON db + library loader w/ default/fallback + CRUD API route + create-screen/face/library-screen trio) — see @wiki/patterns/authored-unit-catalog-module for the generalized pattern, since repeated for `src/lib/game/summons/`.
+
+- `character-database.json` (design-tool storage, zod-validated at load) holds each `CharacterDef`: `stats.maxHp` (health), `stats.atk` (melee damage), `stats.move` (speed, squares per round), `starterDeck` (card ids, repeated), and `icon` — a **sprite base name**, not a lucide icon (`"hero"` -> `public/sprites/hero.png`), same convention as `EnemyDef.icon`.
+- `src/components/game/sprites.ts` is the shared sprite catalogue (`SPRITE_NAMES`, `SPRITE_PATH`, `spriteUrl`), used by enemy/character faces, both designers, the board token and the stage grid. Add a PNG to `public/sprites/` and its name to `SPRITE_NAMES` to make it selectable.
+- `HERO_DEF` (`units/data/hero-def.ts`) and `STARTER_DECK` (`cards/data/starter-deck.ts`) are derived from `DEFAULT_CHARACTER` — do not re-hardcode hero stats in either file.
+- Run/battle plumbing: `OverworldState.characterId` and `GameState.characterId` both name the run's character. `createNewRun(seed, characterId)` seeds HP/deck; `createInitialState({ characterId })` builds the battle hero; `Unit.icon` carries the character's sprite to the board token. Unknown/stale ids fall back via `resolveCharacter`, and old saves backfill in `loadSave`.
+- UI reading the def rather than hardcoding: `top-bar.tsx`, `overworld-map.tsx`, `result-overlay.tsx`, `run-summary.tsx` (`heroName` prop), `turn.service.ts` defeat log.
+- Screen flow: menu Start (and "New Run" on the run summary) -> `character-select-screen.tsx` roster -> `startRunAs(id)`. Continue skips the roster and uses the save's `characterId`.
+- Authoring UI: `character-create-screen.tsx` (designer), `character-library-screen.tsx` (Characters tab in Game Design), `/api/characters` (GET/POST/DELETE, refuses deleting the last character).

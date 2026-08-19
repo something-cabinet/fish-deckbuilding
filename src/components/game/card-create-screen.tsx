@@ -5,6 +5,7 @@ import { Check, PlusCircle } from "lucide-react"
 import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
 import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
+import { DEFAULT_SUMMON } from "@/lib/game/summons"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
 import { EffectEditor, type EffectRow } from "./effect-editor"
@@ -49,7 +50,8 @@ function fromCardEffects(effects: CardEffect[]): EffectRow[] {
       case "drawCards": return { kind: "drawCards", amount: e.amount }
       case "gainCoin": return { kind: "gainCoin", amount: e.amount }
       case "buffAtk": return { kind: "buffAtk", amount: e.amount }
-      case "summon": return { kind: "summon", amount: 0 }
+case "summon": return { kind: "summon", amount: 0, summonUnitId: e.unit }
+      case "custom": return { kind: "damage", amount: 0 }
     }
   })
 }
@@ -62,7 +64,7 @@ function toCardEffects(rows: EffectRow[]): CardEffect[] {
       case "drawCards": return { kind: "drawCards", amount: r.amount }
       case "gainCoin": return { kind: "gainCoin", amount: r.amount }
       case "buffAtk": return { kind: "buffAtk", amount: r.amount }
-      case "summon": return { kind: "summon", unit: "goon" }
+      case "summon": return { kind: "summon", unit: r.summonUnitId ?? DEFAULT_SUMMON.id }
     }
   })
 }

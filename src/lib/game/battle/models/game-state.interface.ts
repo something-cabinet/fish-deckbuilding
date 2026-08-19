@@ -34,4 +34,6 @@ export interface GameState {
   handMax: number
   /** trinket def ids active in this battle */
   activeTrinkets: string[]
+  /** the character being played, so battle UI can name and portrait the hero */
+  characterId: string
 }
