@@ -4,7 +4,7 @@ import { FxKind } from "../../battle/enums"
 import type { FxEvent, GameState, Pos } from "../../battle/models"
 import { Team, UnitKind, type Unit } from "../../units"
 import { dealDamage } from "../../units"
-import { GOON_DEF } from "../../units"
+import { resolveSummon } from "../../summons"
 import { drawCards } from "../../deck"
 import { cellLabel, heroUnit, log, nid } from "../../shared"
 
@@ -121,22 +121,26 @@ function applyEffect(
     }
     case "summon": {
       if (!tile) break
-      const goon: Unit = {
-        id: nid("goon"),
-        name: GOON_DEF.name,
+      const summonDef = resolveSummon(effect.unit)
+      // castCard is player-only today, so team is always Player; a future
+      // enemy-cast path would set this from the caster instead
+      const summoned: Unit = {
+        id: nid(summonDef.id),
+        name: summonDef.name,
         kind: UnitKind.Goon,
         team: Team.Player,
         pos: { ...tile },
-        hp: GOON_DEF.hp,
-        maxHp: GOON_DEF.hp,
-        atk: GOON_DEF.atk,
-        move: GOON_DEF.move,
-        range: 1,
+        hp: summonDef.hp,
+        maxHp: summonDef.hp,
+        atk: summonDef.atk,
+        move: summonDef.move,
+        range: summonDef.range,
+        icon: summonDef.icon,
         hasMoved: true,
         hasActed: true,
         buffAtk: 0,
       }
-      state.units = [...state.units, goon]
+      state.units = [...state.units, summoned]
       fx.push({ id: state.logCounter, kind: FxKind.Summon, to: { ...tile } })
       break
     }

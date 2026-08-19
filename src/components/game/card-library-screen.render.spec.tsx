@@ -29,6 +29,8 @@ describe("CardLibraryScreen", () => {
         enemies={[]}
         stages={[]}
         trinkets={[]}
+        characters={[]}
+        summons={[]}
         onBack={() => {}}
         onCreate={() => {}}
         onEdit={() => {}}
@@ -42,6 +44,12 @@ describe("CardLibraryScreen", () => {
         onTrinketCreate={() => {}}
         onTrinketEdit={() => {}}
         onTrinketDelete={() => {}}
+        onCharacterCreate={() => {}}
+        onCharacterEdit={() => {}}
+        onCharacterDelete={() => {}}
+        onSummonCreate={() => {}}
+        onSummonEdit={() => {}}
+        onSummonDelete={() => {}}
         {...props}
       />,
     )
@@ -63,7 +71,7 @@ describe("CardLibraryScreen", () => {
     expect(screen.queryByText("Demand Letter")).not.toBeInTheDocument()
     expect(screen.getByText("4 cards")).toBeInTheDocument()
 
-    act(() => fireEvent.click(screen.getByRole("button", { name: /summon/i })))
+    act(() => fireEvent.click(screen.getByRole("button", { name: /^summon$/i })))
     expect(screen.getByText("Hired Muscle")).toBeInTheDocument()
     expect(screen.getByText("1 cards")).toBeInTheDocument()
   })

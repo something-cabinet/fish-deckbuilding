@@ -1,0 +1,58 @@
+{
+  "characters": [
+    {
+      "id": "guppy_debtor",
+      "name": "Guppy",
+      "title": "The Debtor",
+      "description": "Small fish, big ledger. Starts owing the syndicate and collects the hard way.",
+      "icon": "hero",
+      "stats": {
+        "maxHp": 14,
+        "atk": 2,
+        "move": 2
+      },
+      "starterDeck": [
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "collection_call",
+        "collection_call",
+        "foreclose",
+        "foreclose",
+        "kneecap",
+        "kneecap",
+        "cash_flow",
+        "cash_flow",
+        "market_rate",
+        "market_rate",
+        "loan_shark",
+        "hush_money",
+        "muscle",
+        "muscle",
+        "shakedown",
+        "shakedown",
+        "shakedown"
+      ]
+    },
+    {
+      "id": "character_m_x_mswwixoj",
+      "name": "Mị đô xô",
+      "title": "The Streamer",
+      "description": "funny streamer",
+      "icon": "hero",
+      "stats": {
+        "maxHp": 14,
+        "atk": 2,
+        "move": 2
+      },
+      "starterDeck": [
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter",
+        "demand_letter"
+      ]
+    }
+  ]
+}

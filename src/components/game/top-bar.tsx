@@ -2,6 +2,7 @@
 
 import { Gem, Percent } from "lucide-react"
 import { Phase, type GameState } from "@/lib/game/battle"
+import { resolveCharacter } from "@/lib/game/characters"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
@@ -25,6 +26,7 @@ function phaseTitle(phase: Phase): string {
 
 export function TopBar({ state }: { state: GameState }) {
   const title = phaseTitle(state.phase)
+  const character = resolveCharacter(state.characterId)
 
   const pct = (state.foreclosure / state.foreclosureMax) * 100
   const danger = state.foreclosure <= 4
@@ -34,7 +36,9 @@ export function TopBar({ state }: { state: GameState }) {
       {/* left: identity */}
       <div className="flex min-w-[160px] items-center gap-3">
         <div>
-          <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">Guppy the Debtor</p>
+          <p className="font-display text-sm font-bold uppercase tracking-wider text-gold">
+            {character.name} {character.title}
+          </p>
           <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">
             Turn <span className="text-foreground">{state.turn}</span>
           </p>

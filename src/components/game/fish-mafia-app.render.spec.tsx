@@ -25,12 +25,28 @@ describe("FishMafiaApp screen navigation", () => {
     expect(screen.getByRole("heading", { level: 1, name: /fish mafia/i })).toBeInTheDocument()
   })
 
-  it("Start mounts the game, Menu exits back to the menu", () => {
+  it("Start opens the character roster, and Menu backs out of it", () => {
     render(<FishMafiaApp />)
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: /start/i }))
     })
-    // game top bar renders
+    expect(screen.getByRole("heading", { name: /choose your fish/i })).toBeInTheDocument()
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /menu/i }))
+    })
+    expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument()
+  })
+
+  it("Begin Run mounts the run as the picked character, Menu exits back", () => {
+    render(<FishMafiaApp />)
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /start/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /begin run/i }))
+    })
+    // the map HUD names the character the run was started as
     expect(screen.getByText(/guppy the debtor/i)).toBeInTheDocument()
 
     act(() => {

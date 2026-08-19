@@ -1,5 +1,6 @@
-import { CARD_LIBRARY, STARTER_DECK } from "@/lib/game/cards"
-import { ENEMY_LIBRARY, HERO_DEF, UnitKind, type EnemyDef, type EnemySpawn } from "@/lib/game/units"
+import { CARD_LIBRARY } from "@/lib/game/cards"
+import { DEFAULT_CHARACTER, resolveCharacter } from "@/lib/game/characters"
+import { ENEMY_LIBRARY, UnitKind, type EnemyDef, type EnemySpawn } from "@/lib/game/units"
 import {
   STAGE_LIBRARY,
   pickStage,
@@ -356,7 +357,8 @@ export function applyEventChoice(
   return clearCurrentNode(s)
 }
 
-export const HERO_MAX_HP = HERO_DEF.maxHp
+/** Max HP of the default character — the starting HP when none is chosen. */
+export const HERO_MAX_HP = DEFAULT_CHARACTER.stats.maxHp
 
 /* ------------------------------------------------------------------ */
 /* battle setup                                                        */
@@ -569,17 +571,20 @@ export function buyTrinket(
 // bumped to v2: node-type + debt model changed, old saves are incompatible.
 export const SAVE_KEY = "fish-mafia-save-v3"
 
-export function createNewRun(seed?: number): OverworldState {
+export function createNewRun(seed?: number, characterId?: string): OverworldState {
   const s = seed ?? Math.floor(Math.random() * 0xffffffff)
+  // the chosen character seeds the run's HP pool and deck
+  const character = resolveCharacter(characterId)
   return {
+    characterId: character.id,
     zoneIndex: 0,
     nodeId: "0-0",
-    hp: HERO_MAX_HP,
-    maxHp: HERO_MAX_HP,
+    hp: character.stats.maxHp,
+    maxHp: character.stats.maxHp,
     gold: 0,
     fin: 0,
     debt: START_DEBT,
-    deck: [...STARTER_DECK],
+    deck: [...character.starterDeck],
     visited: [],
     unlockedZones: 1,
     seed: s,
@@ -595,7 +600,12 @@ export function loadSave(): OverworldState | null {
     const parsed = JSON.parse(raw) as OverworldState
     if (!isValidSave(parsed)) return null
     // backfill fields added after this save version was written
-    return { ...parsed, fin: typeof parsed.fin === "number" ? parsed.fin : 0, trinkets: Array.isArray(parsed.trinkets) ? parsed.trinkets : [] }
+    return {
+      ...parsed,
+      fin: typeof parsed.fin === "number" ? parsed.fin : 0,
+      trinkets: Array.isArray(parsed.trinkets) ? parsed.trinkets : [],
+      characterId: resolveCharacter(parsed.characterId).id,
+    }
   } catch {
     return null
   }

@@ -1,14 +1,21 @@
 "use client"
 
 import { Team, UnitKind, type Unit } from "@/lib/game/units"
+import { spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
 
+/** Fallback art per kind, used by any unit that carries no sprite of its own. */
 const SPRITES: Record<Unit["kind"], string> = {
-  [UnitKind.Hero]: "/sprites/hero.png",
-  [UnitKind.Goon]: "/sprites/goon.png",
-  [UnitKind.Thug]: "/sprites/thug.png",
-  [UnitKind.Enforcer]: "/sprites/enforcer.png",
-  [UnitKind.Boss]: "/sprites/boss.png",
+  [UnitKind.Hero]: spriteUrl("hero"),
+  [UnitKind.Goon]: spriteUrl("goon"),
+  [UnitKind.Thug]: spriteUrl("thug"),
+  [UnitKind.Enforcer]: spriteUrl("enforcer"),
+  [UnitKind.Boss]: spriteUrl("boss"),
+}
+
+/** A unit's own sprite (the character picked in the designer) wins over its kind's. */
+function unitSprite(unit: Unit): string {
+  return unit.icon ? spriteUrl(unit.icon) : SPRITES[unit.kind]
 }
 
 interface Props {
@@ -76,7 +83,7 @@ export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPo
           style={{ filter: unit.hp <= 0 ? "grayscale(1)" : undefined }}
         >
           <img
-            src={SPRITES[unit.kind] || "/placeholder.svg"}
+            src={unitSprite(unit) || "/placeholder.svg"}
             alt=""
             draggable={false}
             className="h-full w-full select-none object-cover"

@@ -5,5 +5,5 @@ export type CardEffect =
   | { kind: "drawCards"; amount: number }
   | { kind: "gainCoin"; amount: number }
   | { kind: "buffAtk"; amount: number } // signed
-  | { kind: "summon"; unit: "goon" }
+  | { kind: "summon"; unit: string } // SummonDef id; unknown/missing id falls back to the default
   | { kind: "custom"; handlerId: string } // D11 escape hatch — registered handler

@@ -1,6 +1,7 @@
 "use client"
 
 import { Plus, Trash2 } from "lucide-react"
+import { SUMMON_DEFS } from "@/lib/game/summons"
 import { selectClass } from "./design-ui"
 import { cn } from "@/lib/utils"
 
@@ -8,6 +9,8 @@ export interface EffectRow {
   kind: "damage" | "heal" | "drawCards" | "gainCoin" | "buffAtk" | "summon"
   amount: number
   healTarget?: "caster" | "cast-target"
+  /** SummonDef id, for kind "summon" */
+  summonUnitId?: string
 }
 
 interface Props {
@@ -25,11 +28,12 @@ const EFFECT_KINDS: { id: EffectRow["kind"]; label: string }[] = [
   { id: "drawCards", label: "Draw" },
   { id: "gainCoin", label: "Coin" },
   { id: "buffAtk", label: "Buff Atk" },
-  { id: "summon", label: "Summon Goon" },
+  { id: "summon", label: "Summon" },
 ]
 
 const HAS_AMOUNT = new Set(["damage", "heal", "drawCards", "gainCoin", "buffAtk"])
 const HAS_TARGET = new Set(["heal"])
+const HAS_SUMMON_UNIT = new Set(["summon"])
 
 export function EffectEditor({ effects, onChange, allowedKinds, addLabel }: Props) {
   // caller order wins, so the first allowed kind is the one Add starts on
@@ -104,6 +108,21 @@ export function EffectEditor({ effects, onChange, allowedKinds, addLabel }: Prop
             >
               <option value="caster">Self</option>
               <option value="cast-target">Target</option>
+            </select>
+          )}
+
+          {HAS_SUMMON_UNIT.has(effect.kind) && (
+            <select
+              value={effect.summonUnitId ?? SUMMON_DEFS[0]?.id ?? ""}
+              aria-label={`Effect ${idx + 1} summon unit`}
+              onChange={(e) => updateEffect(idx, { summonUnitId: e.target.value })}
+              className={cn(selectClass, "min-w-0 flex-1 py-1 sm:max-w-[180px]")}
+            >
+              {SUMMON_DEFS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
             </select>
           )}
 
