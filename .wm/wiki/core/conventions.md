@@ -5,13 +5,6 @@ tags: [core, conventions]
 status: reviewed
 ---
 
----
-title: Fish Roguelite Deckbuilding — Conventions
-type: core
-status: reviewed
-tags: [core, conventions]
----
-
 # Conventions
 
 ## Development Workflow
@@ -33,7 +26,7 @@ All game logic starts with a failing test (Vitest). The engine is pure React-fre
 
 **Stack**: Next.js 16 + React 19 + TypeScript, Tailwind v4, shadcn (base-nova style), lucide icons, zod, Vitest.
 
-**Engine (pure TS)**: lives in `src/lib/game/`. Zero React dependencies — testable standalone via `npm test`. Organized **function-first** (see @wiki/specs/domain-layered-engine-structure): each domain (`cards/`, `units/`, `battle/`, `deck/`) owns `models/` (types), `enums/`, `constants/`, `services/` (logic), `data/` (content); game use-cases live in top-level function folders (`actions/`, `commands/`, `session/`); `shared/helpers/` holds pure cross-cutting plumbing. Card definitions live as JSON packs in `src/lib/game/cards/data/`, validated at load by a zod schema that throws loudly on malformed data.
+**Engine (pure TS)**: lives in `src/lib/game/`. Zero React dependencies — testable standalone via `npm test`. Organized **function-first** (see @wiki/specs/domain-layered-engine-structure): each domain (`cards/`, `units/`, `battle/`, `deck/`) owns `models/` (types), `enums/`, `constants/`, `services/` (logic), `data/` (content); `actions/` owns the pure action functions plus a single reducer `reduce(state, action) → {state, fx}` (`reducer.service.ts`) and the history functions over a `HistoryBundle` (`history.service.ts`). State transitions are pure — every action is `(state, action) → {state, fx}`; undo/redo travel through the in-state `HistoryBundle` (past[]/future[]) via pure functions, so StrictMode-correct updaters are pure by construction. `shared/helpers/` holds pure cross-cutting plumbing. Card definitions live as JSON packs in `src/lib/game/cards/data/`, validated at load by a zod schema that throws loudly on malformed data.
 
 **Angular-style file system** (see @wiki/specs/angular-style-file-system):
 - One top-level type per file

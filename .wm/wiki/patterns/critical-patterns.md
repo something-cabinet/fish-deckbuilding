@@ -49,12 +49,28 @@ Three traps when linking spec tasks for SDD validation: (1) new wiki pages are i
 
 **Full entry:** @wiki/concepts/wm-sdd-task-linking-gotchas
 
-## 2026-08-04 React StrictMode double-invoke breaks impure setState updaters
+## 2026-08-04 React StrictMode double-invoke breaks impure setState updaters (UPDATED 2026-08-13)
 
 **Category:** failure
 **Source:** @wiki/tasks/hook-strictmode-render-test--red-green-validated-against-the-command-drain-fix
 **Tags:** [react, strictmode, state-management]
 
-NEVER mutate an external queue/session inside a setState updater — React dev StrictMode double-invokes updaters, so the first (discarded) call consumes the side effect and the action silently no-ops (units/movement/mana/cards/HP all frozen, no errors, tests + Node pass). Fix: keep `stateRef.current = state` in sync each render, drain synchronously OUTSIDE setState, then `setState(ns)` with the concrete value via a `commit()` helper. Route every command action through `commit()`. Browser-only failures require browser verification — render tests under `<StrictMode>` catch it. Cost ~1hr.
+NEVER mutate an external queue/session inside a setState updater — React dev StrictMode double-invokes updaters, so the first (discarded) call consumes the side effect and the action silently no-ops (units/movement/mana/cards/HP all frozen, no errors, tests + Node pass).
 
-**Full entry:** @wiki/concepts/strictmode-double-invoke-impure-updater · @wiki/patterns/pure-setstate-updaters-external-drain
+**Durable fix (2026-08-13, supersedes the earlier workaround):** put history IN the state — pure reducer + HistoryBundle; every updater is a pure function of its argument, so the discarded invocation computes the identical result. The earlier external-drain/stateRef workaround (keep `stateRef.current = state` in sync, drain outside setState via `commit()`) was itself a compensating layer: it fixed the action paths but left undo/redo mutating the session inside updaters — one undo click popped two history entries. See @wiki/patterns/pure-reducer-history-in-state.
+
+Browser-only failures require browser verification — render tests under `<StrictMode>` catch it. Red-baseline tests must cover the bug class: the suite tested move/cast/attack/sell/buy/endTurn but not undo, which is exactly where the second instance of this bug lived. Cost ~1hr (M1) + ~1 session rewrite (M2).
+
+**Full entry:** @wiki/concepts/strictmode-double-invoke-impure-updater · @wiki/patterns/pure-reducer-history-in-state
+
+## 2026-08-13 Layers of stupidity — compensating architecture layers
+
+**Category:** failure
+**Source:** @wiki/specs/engine-reducer-rewrite
+**Tags:** [architecture, yagni, refactor, anti-pattern]
+
+External review verdict on the engine: "layers of stupidity stacked, each compensating the other." The evidence, all in one codebase: a CommandQueue that never held more than one command (enqueue + drain synchronously per action), a StrictMode workaround that kept the undo double-pop bug alive, trinket fx dropped at 4 call sites, two fx id systems (duplicate engine ids re-stamped by the UI), two effect resolvers, a custom-effect registry with zero handlers, an if/else with identical branches, and `typescript.ignoreBuildErrors: true` masking type errors.
+
+Prevention rule: every abstraction has a consumer (a queue of one is a function call, a registry of zero is a delete); fix the root cause, never patch the patch; one source of truth per concern; the compiler stays on; red-baseline tests cover the bug class. Cost: ~1 session teardown of machinery that never needed to exist.
+
+**Full entry:** @wiki/concepts/layers-of-stupidity-compensating-layers · @wiki/rules/no-compensating-layers · @wiki/patterns/pure-reducer-history-in-state

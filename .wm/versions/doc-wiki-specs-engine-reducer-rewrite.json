@@ -1,0 +1,36 @@
+{
+  "entity_id": "wiki:specs:engine-reducer-rewrite",
+  "current_version": 2,
+  "versions": [
+    {
+      "id": "v1",
+      "version": 1,
+      "timestamp": "2026-08-13T07:50:50.272Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "type",
+          "old_value": null,
+          "new_value": "spec"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    },
+    {
+      "id": "v2",
+      "version": 2,
+      "timestamp": "2026-08-13T07:55:03.842Z",
+      "author": null,
+      "changes": [
+        {
+          "field": "status",
+          "old_value": null,
+          "new_value": "approved"
+        }
+      ],
+      "path": "",
+      "compacted": false
+    }
+  ]
+}

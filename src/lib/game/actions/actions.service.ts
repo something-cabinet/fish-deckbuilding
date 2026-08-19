@@ -1,6 +1,6 @@
 import { FxKind, Phase } from "../battle/enums"
 import type { FxEvent, GameState, Pos } from "../battle/models"
-import { clone, heroUnit, log } from "../shared"
+import { clone, emitFx, heroUnit, log } from "../shared"
 import { checkEnd, manhattan, reachableTiles } from "../battle/services"
 import { cleanupDead, dealDamage, effAtk } from "../units"
 import { Team } from "../units"
@@ -18,7 +18,7 @@ export function moveUnit(
   if (!u || u.team !== Team.Player || u.hasMoved) return { state, fx }
   const reachable = reachableTiles(s, unitId)
   if (!reachable.some((p) => p.x === dest.x && p.y === dest.y)) return { state, fx }
-  fx.push({ id: s.logCounter, kind: FxKind.Move, from: { ...u.pos }, to: { ...dest } })
+  fx.push(emitFx(s, { kind: FxKind.Move, from: { ...u.pos }, to: { ...dest } }))
   u.pos = { ...dest }
   u.hasMoved = true
   checkEnd(s)
@@ -37,11 +37,12 @@ export function unitAttack(
   const t = s.units.find((x) => x.id === targetId)
   if (!a || !t || a.team !== Team.Player || t.team !== Team.Enemy || a.hasActed) return { state, fx }
   if (manhattan(a.pos, t.pos) > a.range) return { state, fx }
-  fx.push({ id: s.logCounter, kind: FxKind.Melee, from: { ...a.pos }, to: { ...t.pos } })
+  fx.push(emitFx(s, { kind: FxKind.Melee, from: { ...a.pos }, to: { ...t.pos } }))
   dealDamage(s, t, effAtk(a), fx)
   a.hasActed = true
   log(s, `${a.name} strikes ${t.name} for ${effAtk(a)}.`, "good")
-  cleanupDead(s)
+  // fire onEnemyKilled trinket triggers here (units layer can't import trinkets)
+  if (cleanupDead(s) > 0) resolveTrigger(s, s.activeTrinkets, "onEnemyKilled", fx)
   checkEnd(s)
   return { state: s, fx }
 }
@@ -82,7 +83,8 @@ export function castCard(
   // switch on card id; effects come from the trusted JSON source.
   resolveCardEffects(s, card.def, { targetUnit: tgtUnit, tile: target.tile, from }, fx)
 
-  cleanupDead(s)
+  // fire onEnemyKilled trinket triggers here (units layer can't import trinkets)
+  if (cleanupDead(s) > 0) resolveTrigger(s, s.activeTrinkets, "onEnemyKilled", fx)
   checkEnd(s)
   return { state: s, fx }
 }
@@ -91,11 +93,18 @@ export function castCard(
  * Sell a card from hand for Coin this turn (spec D8: sellValue = max(1, cost),
  * with `value` acting as the authored per-card override). Selling is the
  * primary way to fund the turn's plays.
+ *
+ * FR-2/FR-5: returns `{ state, fx }` like every other action and surfaces
+ * the onCardSold trinket trigger fx (previously created and discarded).
  */
-export function sellCard(state: GameState, cardUid: string): GameState {
+export function sellCard(
+  state: GameState,
+  cardUid: string,
+): { state: GameState; fx: FxEvent[] } {
   const s = clone(state)
+  const fx: FxEvent[] = []
   const idx = s.hand.findIndex((c) => c.uid === cardUid)
-  if (idx < 0 || s.phase !== Phase.Player) return state
+  if (idx < 0 || s.phase !== Phase.Player) return { state, fx }
   const card = s.hand[idx]
   const gain = Math.max(1, card.def.value)
   s.coin += gain
@@ -103,7 +112,6 @@ export function sellCard(state: GameState, cardUid: string): GameState {
   s.discard = [...s.discard, card]
   log(s, `Sold ${card.def.name} on the street for ${gain} coin.`, "gold")
   // fire onCardSold trinket triggers
-  const fx: FxEvent[] = []
   resolveTrigger(s, s.activeTrinkets, "onCardSold", fx)
-  return s
+  return { state: s, fx }
 }

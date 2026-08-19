@@ -1,6 +1,6 @@
 import { EnemyStepKind, FxKind, Phase } from "../enums"
 import type { EnemyStep, FxEvent, GameState } from "../models"
-import { clone, heroUnit, log } from "../../shared"
+import { clone, emitFx, heroUnit, log } from "../../shared"
 import { Team } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
@@ -40,7 +40,7 @@ export function applyEnemyStep(
   switch (step.kind) {
     case EnemyStepKind.Move: {
       if (step.to) {
-        fx.push({ id: s.logCounter, kind: FxKind.Move, from: { ...u.pos }, to: { ...step.to } })
+        fx.push(emitFx(s, { kind: FxKind.Move, from: { ...u.pos }, to: { ...step.to } }))
         u.pos = { ...step.to }
       }
       break
@@ -49,7 +49,7 @@ export function applyEnemyStep(
       if (step.targetId) {
         const t = s.units.find((x) => x.id === step.targetId)
         if (t && t.hp > 0) {
-          fx.push({ id: s.logCounter, kind: FxKind.Melee, from: { ...u.pos }, to: { ...t.pos } })
+          fx.push(emitFx(s, { kind: FxKind.Melee, from: { ...u.pos }, to: { ...t.pos } }))
           dealDamage(s, t, step.amount ?? 0, fx)
           log(s, `${u.name} hits ${t.name} for ${step.amount}.`, "bad")
         }
@@ -60,16 +60,21 @@ export function applyEnemyStep(
       const _exhaustive: never = step.kind
     }
   }
-  cleanupDead(s)
+  // fire onEnemyKilled trinket triggers here (units layer can't import trinkets)
+  if (cleanupDead(s) > 0) resolveTrigger(s, s.activeTrinkets, "onEnemyKilled", fx)
   checkEnd(s)
   return { state: s, fx }
 }
 
-/** Finish enemy phase → refresh for the player's next turn. */
-export function beginPlayerTurn(state: GameState): GameState {
+/**
+ * Finish enemy phase → refresh for the player's next turn.
+ * Returns `{ state, fx }` so the caller can surface onTurnStart trinket
+ * trigger fx (FR-5/AC-5 — no dropped fx).
+ */
+export function beginPlayerTurn(state: GameState): { state: GameState; fx: FxEvent[] } {
   const s = clone(state)
   const fx: FxEvent[] = []
-  if (s.phase === Phase.Won || s.phase === Phase.Lost) return s
+  if (s.phase === Phase.Won || s.phase === Phase.Lost) return { state: s, fx }
 
   s.turn += 1
   s.interest += 1
@@ -80,15 +85,11 @@ export function beginPlayerTurn(state: GameState): GameState {
   s.spentCount = 0
   s.phase = Phase.Player
 
-  // refresh player units
+  // refresh all units for the new turn (AC-12: the former if/else had two
+  // identical branches — player and enemy reset the same flags)
   for (const u of s.units) {
-    if (u.team === Team.Player) {
-      u.hasMoved = false
-      u.hasActed = false
-    } else {
-      u.hasMoved = false
-      u.hasActed = false
-    }
+    u.hasMoved = false
+    u.hasActed = false
   }
 
   // fresh hand each turn: discard whatever wasn't played, then redeal to handSize
@@ -106,5 +107,5 @@ export function beginPlayerTurn(state: GameState): GameState {
   }
 
   checkEnd(s)
-  return s
+  return { state: s, fx }
 }

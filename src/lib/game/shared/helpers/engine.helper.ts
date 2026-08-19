@@ -1,4 +1,4 @@
-import type { GameState, LogEntry, Pos } from "../../battle/models"
+import type { FxEvent, GameState, LogEntry, Pos } from "../../battle/models"
 import type { Unit } from "../../units"
 
 let idSeed = 1
@@ -17,6 +17,11 @@ export function heroUnit(state: GameState): Unit | undefined {
 
 export function log(state: GameState, text: string, tone: LogEntry["tone"] = "neutral") {
   state.log = [...state.log, { id: state.logCounter++, turn: state.turn, text, tone }].slice(-40)
+}
+
+/** Emit an fx event with a unique id drawn from state.fxCounter (D3: unique per emission). */
+export function emitFx(state: GameState, event: Omit<FxEvent, "id">): FxEvent {
+  return { ...event, id: state.fxCounter++ }
 }
 
 /** structural clone that preserves function-free game state */

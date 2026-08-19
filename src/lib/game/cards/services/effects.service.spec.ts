@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { createInitialState } from "@/lib/game/battle"
-import {
-  hasCustomEffectHandler,
-  registerCustomEffectHandler,
-  resolveCardEffects,
-} from "@/lib/game/cards"
+import { resolveCardEffects } from "@/lib/game/cards"
 import { heroUnit } from "@/lib/game/shared"
 import { CARD_LIBRARY } from "@/lib/game"
 import { FxKind, type FxEvent, type GameState } from "@/lib/game/battle"
@@ -139,33 +135,17 @@ describe("resolver: exhaustive effect application", () => {
   })
 })
 
-describe("resolver: custom-effect escape hatch (D11)", () => {
-  it("zero custom handlers ship by default", () => {
-    expect(hasCustomEffectHandler("anything")).toBe(false)
-  })
-
-  it("registered handler resolves and mutates state", () => {
-    registerCustomEffectHandler("test_handler", ({ state }) => {
-      state.coin += 99
-    })
-    expect(hasCustomEffectHandler("test_handler")).toBe(true)
-
+describe("resolver: fx ids are unique per emission (D3)", () => {
+  it("multi-fx cards emit events with distinct engine-issued ids", () => {
     const s = fresh()
+    const target = enemyOf(s)
     const fx: FxEvent[] = []
-    const card = CARD_LIBRARY.demand_letter
-    const customCard = { ...card, effects: [{ kind: "custom" as const, handlerId: "test_handler" }] }
+    const card = CARD_LIBRARY.kneecap
 
-    resolveCardEffects(s, customCard, { from: heroUnit(s)?.pos }, fx)
-    expect(s.coin).toBe(99)
-  })
+    resolveCardEffects(s, card, { targetUnit: target, from: heroUnit(s)?.pos }, fx)
 
-  it("unknown handlerId throws loudly (FR-14)", () => {
-    const s = fresh()
-    const fx: FxEvent[] = []
-    const card = { ...CARD_LIBRARY.demand_letter, effects: [{ kind: "custom" as const, handlerId: "nope" }] }
-
-    expect(() =>
-      resolveCardEffects(s, card, { from: heroUnit(s)?.pos }, fx),
-    ).toThrow(/Unknown custom effect handler "nope"/)
+    expect(fx.length).toBeGreaterThan(1)
+    const ids = fx.map((e) => e.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 })

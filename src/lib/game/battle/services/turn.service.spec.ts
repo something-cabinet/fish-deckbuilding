@@ -92,7 +92,7 @@ describe("turn: beginPlayerTurn", () => {
     const s = fresh()
     s.spentCount = 3
     const turnBefore = s.turn
-    const next = beginPlayerTurn(s)
+    const { state: next } = beginPlayerTurn(s)
     expect(next.turn).toBe(turnBefore + 1)
     expect(next.spentCount).toBe(0)
     expect(next.coin).toBe(COIN_TURN_BASE)
@@ -105,7 +105,7 @@ describe("turn: beginPlayerTurn", () => {
     // fill the deck with more than a hand's worth so the discard has room to matter
     const held = s.deck.splice(0, s.handSize)
     s.hand = held
-    const next = beginPlayerTurn(s)
+    const { state: next } = beginPlayerTurn(s)
     // the old hand went to discard, not back into the fresh hand or the deck
     for (const card of held) {
       expect(next.discard.some((c) => c.uid === card.uid)).toBe(true)
@@ -116,7 +116,7 @@ describe("turn: beginPlayerTurn", () => {
   it("redeals to exactly handSize even when handMax is larger", () => {
     const s = fresh()
     s.handMax = s.handSize + 3
-    const next = beginPlayerTurn(s)
+    const { state: next } = beginPlayerTurn(s)
     expect(next.hand.length).toBe(s.handSize)
   })
 
@@ -124,7 +124,7 @@ describe("turn: beginPlayerTurn", () => {
     const s = fresh()
     s.phase = Phase.Won
     const turnBefore = s.turn
-    const next = beginPlayerTurn(s)
+    const { state: next } = beginPlayerTurn(s)
     expect(next.phase).toBe(Phase.Won)
     expect(next.turn).toBe(turnBefore)
   })
