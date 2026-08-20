@@ -138,6 +138,15 @@ export function FishMafiaApp() {
   // summon templates from the database, managed in-app for the designer
   const [summons, setSummons] = useState<SummonDef[]>(() => SUMMON_DEFS)
   const [editingSummon, setEditingSummon] = useState<SummonDef | null>(null)
+  /** shared by the Summon designer and the one embedded in the card editor */
+  const createSummon = (def: SummonDef) => {
+    setSummons((prev) => [...prev, def])
+    fetch("/api/summons", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(def),
+    }).catch(() => {})
+  }
   /** zone a brand-new stage belongs to, from the section its button was in */
   const [newStageZone, setNewStageZone] = useState<ZoneId>("shallows")
   // the library tab to return to after an editor round-trip
@@ -486,6 +495,8 @@ export function FishMafiaApp() {
       <>
         <CardCreateScreen
         editCard={editingCard ?? undefined}
+        summons={summons}
+        onSummonCreated={createSummon}
         onBack={() => {
           setEditingCard(null)
           setScreen("library")
@@ -668,14 +679,7 @@ export function FishMafiaApp() {
             setEditingSummon(null)
             setScreen("library")
           }}
-          onSave={(def) => {
-            setSummons((prev) => [...prev, def])
-            fetch("/api/summons", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(def),
-            }).catch(() => {})
-          }}
+          onSave={createSummon}
           onUpdate={(def) => {
             setSummons((prev) => prev.map((s) => (s.id === def.id ? def : s)))
             fetch("/api/summons", {

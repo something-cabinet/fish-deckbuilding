@@ -4,12 +4,16 @@
  * and onSave receives a slugified custom card id.
  */
 import "@testing-library/jest-dom/vitest"
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { CardCreateScreen } from "@/components/game/card-create-screen"
+import type { SummonDef } from "@/lib/game/summons"
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  sessionStorage.clear()
+})
 
 describe("CardCreateScreen", () => {
   function getSaveButton() {
@@ -40,6 +44,64 @@ describe("CardCreateScreen", () => {
     const def = onSave.mock.calls[0][0]
     expect(def.name).toBe("Bribe Collector")
     expect(def.id).toMatch(/^custom_bribe_collector_/)
+  })
+
+  describe("summon effects", () => {
+    const SUMMONS: SummonDef[] = [
+      { id: "goon", name: "Goon", hp: 5, atk: 2, move: 2, range: 1, icon: "goon" },
+      { id: "shark", name: "Shark", hp: 9, atk: 4, move: 3, range: 2, icon: "shark" },
+    ]
+
+    function addSummonEffect() {
+      act(() => fireEvent.click(screen.getByRole("button", { name: /add effect/i })))
+      act(() =>
+        fireEvent.change(screen.getByLabelText(/effect 1 kind/i), { target: { value: "summon" } }),
+      )
+    }
+
+    it("the picker lists each summon with its stats and previews the selected one", () => {
+      render(<CardCreateScreen onBack={() => {}} onSave={() => {}} summons={SUMMONS} />)
+      addSummonEffect()
+
+      const picker = screen.getByLabelText(/effect 1 summon unit/i)
+      expect(within(picker).getByText(/Shark — 9 HP · 4 ATK · Ranged/)).toBeInTheDocument()
+
+      act(() => fireEvent.change(picker, { target: { value: "shark" } }))
+      // the preview strip repeats the stats of whatever is selected
+      expect(screen.getByText("Shark")).toBeInTheDocument()
+      expect(screen.getByTitle("HP")).toHaveTextContent("9")
+      expect(screen.getByTitle("Attack")).toHaveTextContent("4")
+    })
+
+    it("New opens the summon designer and selects what it saves", () => {
+      const onSummonCreated = vi.fn()
+      render(
+        <CardCreateScreen
+          onBack={() => {}}
+          onSave={() => {}}
+          summons={SUMMONS}
+          onSummonCreated={onSummonCreated}
+        />,
+      )
+      addSummonEffect()
+      act(() => fireEvent.click(screen.getByRole("button", { name: /effect 1 new summon/i })))
+
+      const designer = within(screen.getByRole("dialog"))
+      act(() => fireEvent.change(designer.getByPlaceholderText(/goon/i), { target: { value: "Eel" } }))
+      act(() => fireEvent.click(designer.getByRole("button", { name: /^save$/i })))
+
+      expect(onSummonCreated).toHaveBeenCalledTimes(1)
+      const created = onSummonCreated.mock.calls[0][0] as SummonDef
+      expect(created.name).toBe("Eel")
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      expect(screen.getByLabelText(/effect 1 summon unit/i)).toHaveValue(created.id)
+    })
+
+    it("without onSummonCreated the picker has no New button", () => {
+      render(<CardCreateScreen onBack={() => {}} onSave={() => {}} summons={SUMMONS} />)
+      addSummonEffect()
+      expect(screen.queryByRole("button", { name: /new summon/i })).not.toBeInTheDocument()
+    })
   })
 
   it("Back fires onBack", () => {

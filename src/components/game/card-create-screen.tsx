@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Check, PlusCircle } from "lucide-react"
 import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
 import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
-import { DEFAULT_SUMMON } from "@/lib/game/summons"
+import { DEFAULT_SUMMON, SUMMON_DEFS, type SummonDef } from "@/lib/game/summons"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
 import { EffectEditor, type EffectRow } from "./effect-editor"
+import { SummonCreateScreen } from "./summon-create-screen"
 import {
   Chip,
   DesignHeader,
@@ -27,6 +28,46 @@ interface Props {
   onSave: (def: CardDef) => void
   editCard?: CardDef
   onUpdate?: (def: CardDef) => void
+  /** summon templates a summon effect can pick from; defaults to the database */
+  summons?: SummonDef[]
+  /**
+   * Persists a summon authored from inside this editor. Passing it turns on the
+   * "New" button next to a summon effect's picker.
+   */
+  onSummonCreated?: (def: SummonDef) => void
+}
+
+const DRAFT_KEY = "fm.design.card.draft"
+
+interface CardDraft {
+  /** the card this draft belongs to, "new" for an unsaved one */
+  forId: string
+  name: string
+  type: CardType
+  target: CardTarget
+  cost: number
+  value: number
+  desc: string
+  icon: string
+  effects: EffectRow[]
+}
+
+/**
+ * Saving a summon from inside this editor rewrites a JSON database, and the dev
+ * server answers that with a full page reload — so the in-progress card is
+ * stashed in sessionStorage and read back when the editor remounts. Leaving the
+ * editor for real clears it, so a fresh card never starts on someone's leftovers.
+ */
+function readDraft(forId: string): CardDraft | null {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+    const draft = JSON.parse(raw) as CardDraft
+    return draft.forId === forId ? draft : null
+  } catch {
+    return null
+  }
 }
 
 const TYPES: CardType[] = [CardType.Attack, CardType.Skill, CardType.Summon]
@@ -69,15 +110,44 @@ function toCardEffects(rows: EffectRow[]): CardEffect[] {
   })
 }
 
-export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) {
-  const [name, setName] = useState(editCard?.name ?? "")
-  const [type, setType] = useState<CardType>(editCard?.type ?? CardType.Attack)
-  const [target, setTarget] = useState<CardTarget>(editCard?.target ?? CardTarget.Enemy)
-  const [cost, setCost] = useState(editCard?.cost ?? 1)
-  const [value, setValue] = useState(editCard?.value ?? 1)
-  const [desc, setDesc] = useState(editCard?.desc ?? "")
-  const [icon, setIcon] = useState(editCard?.icon ?? "Swords")
-  const [effects, setEffects] = useState<EffectRow[]>(editCard ? fromCardEffects(editCard.effects) : [])
+export function CardCreateScreen({
+  onBack,
+  onSave,
+  editCard,
+  onUpdate,
+  summons = SUMMON_DEFS,
+  onSummonCreated,
+}: Props) {
+  const draftKey = editCard?.id ?? "new"
+  const [stashed] = useState(() => readDraft(draftKey))
+  const [name, setName] = useState(stashed?.name ?? editCard?.name ?? "")
+  const [type, setType] = useState<CardType>(stashed?.type ?? editCard?.type ?? CardType.Attack)
+  const [target, setTarget] = useState<CardTarget>(
+    stashed?.target ?? editCard?.target ?? CardTarget.Enemy,
+  )
+  const [cost, setCost] = useState(stashed?.cost ?? editCard?.cost ?? 1)
+  const [value, setValue] = useState(stashed?.value ?? editCard?.value ?? 1)
+  const [desc, setDesc] = useState(stashed?.desc ?? editCard?.desc ?? "")
+  const [icon, setIcon] = useState(stashed?.icon ?? editCard?.icon ?? "Swords")
+  const [effects, setEffects] = useState<EffectRow[]>(
+    stashed?.effects ?? (editCard ? fromCardEffects(editCard.effects) : []),
+  )
+  /** effect row waiting on a summon from the designer overlay, if any */
+  const [summonRow, setSummonRow] = useState<number | null>(null)
+
+  useEffect(() => {
+    const stash: CardDraft = { forId: draftKey, name, type, target, cost, value, desc, icon, effects }
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stash))
+  }, [draftKey, name, type, target, cost, value, desc, icon, effects])
+
+  // only a genuine unmount (leaving the editor) discards it; a reload does not
+  useEffect(() => () => sessionStorage.removeItem(DRAFT_KEY), [])
+
+  function handleSummonCreated(def: SummonDef) {
+    onSummonCreated?.(def)
+    setEffects((prev) => prev.map((e, i) => (i === summonRow ? { ...e, summonUnitId: def.id } : e)))
+    setSummonRow(null)
+  }
 
   const cardEffects = toCardEffects(effects)
 
@@ -173,7 +243,12 @@ export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) 
 
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <Panel title="Effects">
-              <EffectEditor effects={effects} onChange={setEffects} />
+              <EffectEditor
+                effects={effects}
+                onChange={setEffects}
+                summons={summons}
+                onCreateSummon={onSummonCreated ? setSummonRow : undefined}
+              />
             </Panel>
 
             <Panel title="Artwork">
@@ -215,6 +290,17 @@ export function CardCreateScreen({ onBack, onSave, editCard, onUpdate }: Props) 
           <CardFace def={draft} size="md" />
         </PreviewRail>
       </div>
+
+      {/* the summon designer runs over the card editor, so the draft stays put
+          and the new template lands straight in the effect row that asked for it */}
+      {summonRow !== null && (
+        <div className="fixed inset-0 z-50 bg-ocean-deep" role="dialog" aria-modal="true">
+          <SummonCreateScreen
+            onBack={() => setSummonRow(null)}
+            onSave={handleSummonCreated}
+          />
+        </div>
+      )}
     </main>
   )
 }
