@@ -12,6 +12,11 @@ import { CARD_LIBRARY } from "@/lib/game/cards"
 import type { CharacterDef } from "@/lib/game/characters"
 import { CharacterCreateScreen } from "@/components/game/character-create-screen"
 
+vi.mock("./sprites", () => ({
+  spriteUrl: (name: string) => `/sprites/${name}.png`,
+  useSpriteNames: () => ["hero", "thug"],
+}))
+
 afterEach(cleanup)
 
 const FIRST_CARD = Object.values(CARD_LIBRARY)[0]

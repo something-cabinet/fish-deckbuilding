@@ -1,13 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Check, Footprints, Heart, Layers, Search, Swords, User } from "lucide-react"
-import { CARD_LIBRARY, type CardDef } from "@/lib/game/cards"
+import { Check, Footprints, Heart, Layers, Search, Sparkles, Sword, Swords, User } from "lucide-react"
+import { CARD_LIBRARY, CardType, type CardDef } from "@/lib/game/cards"
 import type { CharacterDef } from "@/lib/game/characters"
 import { getCardIcon } from "./card-icons"
 import { CharacterFace } from "./character-face"
 import { spriteUrl, useSpriteNames } from "./sprites"
 import {
+  Chip,
   DesignHeader,
   EditingBadge,
   Field,
@@ -64,6 +65,7 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
     toCounts(editCharacter?.starterDeck ?? []),
   )
   const [deckFilter, setDeckFilter] = useState("")
+  const [typeFilter, setTypeFilter] = useState<CardType | null>(null)
   const spriteNames = useSpriteNames()
 
   const cards = useMemo(() => Object.values(CARD_LIBRARY), [])
@@ -71,9 +73,10 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
   // cards already in the deck float to the top so edits stay in one place
   const deckCards = useMemo(() => {
     const q = deckFilter.trim().toLowerCase()
-    const matches = q ? cards.filter((c) => c.name.toLowerCase().includes(q)) : cards
+    let matches = q ? cards.filter((c) => c.name.toLowerCase().includes(q)) : cards
+    if (typeFilter) matches = matches.filter((c) => c.type === typeFilter)
     return [...matches].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0))
-  }, [cards, counts, deckFilter])
+  }, [cards, counts, deckFilter, typeFilter])
 
   const starterDeck = toDeck(counts, cards)
 
@@ -245,6 +248,16 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
                     className={cn(inputClass, "py-1.5 pl-8 text-sm")}
                   />
                 </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <Chip active={typeFilter === null} onClick={() => setTypeFilter(null)}>
+                    All
+                  </Chip>
+                  {[CardType.Attack, CardType.Skill, CardType.Summon].map((t) => (
+                    <Chip key={t} active={typeFilter === t} onClick={() => setTypeFilter(t)}>
+                      {t}
+                    </Chip>
+                  ))}
+                </div>
               </div>
 
               {deckCards.length === 0 ? (
@@ -256,22 +269,32 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
                   {deckCards.map((card) => {
                     const count = counts[card.id] ?? 0
                     const Icon = getCardIcon(card.icon)
+                    const TypeIcon = card.type === CardType.Attack ? Sword : Sparkles
                     return (
                       <li
                         key={card.id}
                         className={cn(
-                          "flex items-center gap-2 rounded-lg border p-2 transition-colors",
+                          "flex items-start gap-2 rounded-lg border p-2 transition-colors",
                           count > 0 ? "border-gold/40 bg-gold/[0.06]" : "border-white/10",
                         )}
                       >
                         <Icon
                           size={16}
-                          className={count > 0 ? "text-gold" : "text-muted-foreground"}
+                          className={cn("mt-1 shrink-0", count > 0 ? "text-gold" : "text-muted-foreground")}
                           aria-hidden
                         />
-                        <span className="min-w-0 flex-1 truncate font-display text-xs font-bold uppercase tracking-wider text-foreground">
-                          {card.name}
-                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="truncate font-display text-xs font-bold uppercase tracking-wider text-foreground">
+                              {card.name}
+                            </span>
+                            <span className="inline-flex shrink-0 items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 font-display text-[10px] font-bold uppercase leading-none tracking-wider text-muted-foreground">
+                              <TypeIcon size={10} aria-hidden />
+                              {card.type}
+                            </span>
+                          </div>
+                          <p className="truncate text-xs text-muted-foreground/70">{card.desc}</p>
+                        </div>
                         <span className="shrink-0 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
                           {card.cost}c
                         </span>
