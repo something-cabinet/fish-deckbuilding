@@ -1,12 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Check, Plus, Search, Swords, Trash2 } from "lucide-react"
-import { CARD_LIBRARY } from "@/lib/game"
+import { Check, Search, Swords } from "lucide-react"
 import { isDefaultAiProfile, UnitKind, type EnemyAiProfile, type EnemyDef } from "@/lib/game/units"
 import { AiProfileEditor } from "./ai-profile-editor"
-import { TARGET_LABELS, TYPE_STYLES } from "./card-face"
-import { getCardIcon } from "./card-icons"
+import { DeckSelectionPanel } from "./deck-selection-panel"
 import { EnemyFace } from "./enemy-face"
 import { spriteUrl, useSpriteNames } from "./sprites"
 import {
@@ -19,7 +17,6 @@ import {
   PrimaryButton,
   Stepper,
   inputClass,
-  selectClass,
 } from "./design-ui"
 import { cn } from "@/lib/utils"
 
@@ -45,6 +42,20 @@ function slugify(name: string) {
   return `enemy_${base || "enemy"}_${Date.now().toString(36)}`
 }
 
+/** Deck entries (id + count) -> copies per card id; drops empty placeholders. */
+function toCounts(deck: { id: string; count: number }[]): Record<string, number> {
+  return deck.reduce<Record<string, number>>((acc, e) => {
+    if (!e.id) return acc
+    acc[e.id] = (acc[e.id] ?? 0) + e.count
+    return acc
+  }, {})
+}
+
+/** Copies per card id -> deck entries. */
+function toEntries(counts: Record<string, number>): { id: string; count: number }[] {
+  return Object.entries(counts).map(([id, count]) => ({ id, count }))
+}
+
 export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props) {
   const [name, setName] = useState(editEnemy?.name ?? "")
   const [kind, setKind] = useState<UnitKind>(editEnemy?.kind ?? UnitKind.Thug)
@@ -55,18 +66,12 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
   const [goldDrop, setGoldDrop] = useState(editEnemy?.goldDrop ?? 5)
   const [isMinion, setIsMinion] = useState(editEnemy?.isMinion ?? false)
   const [sprite, setSprite] = useState(editEnemy?.icon ?? "thug")
-  const [deck, setDeck] = useState<{ id: string; count: number }[]>(editEnemy?.deck ?? [])
+  const [deckCounts, setDeckCounts] = useState<Record<string, number>>(() =>
+    toCounts(editEnemy?.deck ?? []),
+  )
   const [aiProfile, setAiProfile] = useState<EnemyAiProfile | undefined>(editEnemy?.aiProfile)
   const [artworkFilter, setArtworkFilter] = useState("")
   const spriteNames = useSpriteNames()
-
-  const cardOptions = useMemo(
-    () =>
-      Object.values(CARD_LIBRARY)
-        .map((c) => ({ id: c.id, name: c.name }))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [],
-  )
 
   const filteredSprites = useMemo(() => {
     const q = artworkFilter.trim().toLowerCase()
@@ -86,7 +91,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
     goldDrop,
     isMinion,
     icon: sprite,
-    deck,
+    deck: toEntries(deckCounts),
     // a brawler with no tweaks is the engine default — don't write it down
     aiProfile: isDefaultAiProfile(aiProfile) ? undefined : aiProfile,
   }
@@ -101,18 +106,6 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
     } else {
       onSave(enemy)
     }
-  }
-
-  function addDeckEntry() {
-    setDeck([...deck, { id: "", count: 1 }])
-  }
-
-  function removeDeckEntry(idx: number) {
-    setDeck(deck.filter((_, i) => i !== idx))
-  }
-
-  function updateDeckEntry(idx: number, update: Partial<{ id: string; count: number }>) {
-    setDeck(deck.map((e, i) => (i === idx ? { ...e, ...update } : e)))
   }
 
   return (
@@ -177,106 +170,12 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                 </Field>
               </Panel>
 
-              <Panel title="Deck">
-                <div className="max-h-[420px] space-y-1.5 overflow-y-auto pr-1">
-                  {deck.map((entry, idx) => {
-                    const known = entry.id === "" || cardOptions.some((c) => c.id === entry.id)
-                    const card = entry.id ? CARD_LIBRARY[entry.id] : undefined
-                    const CardIcon = card ? getCardIcon(card.icon) : null
-                    return (
-                      <div
-                        key={idx}
-                        className="rounded-lg border border-white/10 bg-white/[0.04] p-1.5"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <select
-                            value={entry.id}
-                            aria-label={`Deck card ${idx + 1}`}
-                            onChange={(e) => updateDeckEntry(idx, { id: e.target.value })}
-                            className={cn(selectClass, "min-w-0 flex-1 py-1 sm:max-w-[240px]")}
-                          >
-                            <option value="">Choose a card…</option>
-                            {!known && <option value={entry.id}>{entry.id}</option>}
-                            {cardOptions.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="font-display text-xs uppercase tracking-wider text-muted-foreground">
-                            ×
-                          </span>
-                          <div className="flex items-center gap-0.5">
-                            <button
-                              type="button"
-                              aria-label="Fewer copies"
-                              onClick={() => updateDeckEntry(idx, { count: Math.max(1, entry.count - 1) })}
-                              className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-sm text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
-                            >
-                              −
-                            </button>
-                            <span className="flex h-7 w-8 items-center justify-center font-display text-sm font-bold text-gold">
-                              {entry.count}
-                            </span>
-                            <button
-                              type="button"
-                              aria-label="More copies"
-                              onClick={() => updateDeckEntry(idx, { count: Math.min(9, entry.count + 1) })}
-                              className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-sm text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
-                            >
-                              +
-                            </button>
-                          </div>
-                          <button
-                            type="button"
-                            aria-label="Remove deck entry"
-                            onClick={() => removeDeckEntry(idx)}
-                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:text-red-400"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-
-                        {/* card detail — so the designer doesn't have to remember
-                            what a card does just to build a deck around it */}
-                        {card && CardIcon && (
-                          <div className="mt-2 flex items-start gap-2 border-t border-white/10 pt-2">
-                            <CardIcon size={15} className="mt-0.5 shrink-0 text-muted-foreground" />
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span
-                                  className={cn(
-                                    "rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
-                                    TYPE_STYLES[card.type],
-                                  )}
-                                >
-                                  {card.type}
-                                </span>
-                                <span className="font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                  {card.cost} mana · {TARGET_LABELS[card.target]}
-                                </span>
-                              </div>
-                              <p className="mt-1 text-sm leading-snug text-muted-foreground">{card.desc}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                  <button
-                    type="button"
-                    onClick={addDeckEntry}
-                    className={cn(
-                      "flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-white/10 px-2.5 py-1.5",
-                      "font-display text-xs font-bold uppercase tracking-wider text-muted-foreground",
-                      "transition-colors hover:border-gold/40 hover:text-gold",
-                    )}
-                  >
-                    <Plus size={14} />
-                    Add Card to Deck
-                  </button>
-                </div>
-              </Panel>
+              <DeckSelectionPanel
+                title="Deck"
+                counts={deckCounts}
+                onChange={setDeckCounts}
+                maxCopies={9}
+              />
 
               <Panel title="Artwork">
                 {spriteNames.length > ARTWORK_SEARCH_THRESHOLD && (

@@ -1,14 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Check, Footprints, Heart, Layers, Search, Sparkles, Sword, Swords, User } from "lucide-react"
-import { CARD_LIBRARY, CardType, type CardDef } from "@/lib/game/cards"
+import { Check, Footprints, Heart, Swords, User } from "lucide-react"
+import { CARD_LIBRARY, type CardDef } from "@/lib/game/cards"
 import type { CharacterDef } from "@/lib/game/characters"
-import { getCardIcon } from "./card-icons"
 import { CharacterFace } from "./character-face"
+import { DeckSelectionPanel } from "./deck-selection-panel"
 import { spriteUrl, useSpriteNames } from "./sprites"
 import {
-  Chip,
   DesignHeader,
   EditingBadge,
   Field,
@@ -64,19 +63,9 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
   const [counts, setCounts] = useState<Record<string, number>>(() =>
     toCounts(editCharacter?.starterDeck ?? []),
   )
-  const [deckFilter, setDeckFilter] = useState("")
-  const [typeFilter, setTypeFilter] = useState<CardType | null>(null)
   const spriteNames = useSpriteNames()
 
   const cards = useMemo(() => Object.values(CARD_LIBRARY), [])
-
-  // cards already in the deck float to the top so edits stay in one place
-  const deckCards = useMemo(() => {
-    const q = deckFilter.trim().toLowerCase()
-    let matches = q ? cards.filter((c) => c.name.toLowerCase().includes(q)) : cards
-    if (typeFilter) matches = matches.filter((c) => c.type === typeFilter)
-    return [...matches].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0))
-  }, [cards, counts, deckFilter, typeFilter])
 
   const starterDeck = toDeck(counts, cards)
 
@@ -229,88 +218,12 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
               </Panel>
             </div>
 
-            <Panel title="Starter Deck">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-wider text-gold">
-                  <Layers size={13} />
-                  {starterDeck.length} card{starterDeck.length === 1 ? "" : "s"}
-                </span>
-                <div className="relative ml-auto w-full max-w-[240px]">
-                  <Search
-                    size={14}
-                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <input
-                    value={deckFilter}
-                    onChange={(e) => setDeckFilter(e.target.value)}
-                    placeholder="Search cards…"
-                    aria-label="Search cards"
-                    className={cn(inputClass, "py-1.5 pl-8 text-sm")}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip active={typeFilter === null} onClick={() => setTypeFilter(null)}>
-                    All
-                  </Chip>
-                  {[CardType.Attack, CardType.Skill, CardType.Summon].map((t) => (
-                    <Chip key={t} active={typeFilter === t} onClick={() => setTypeFilter(t)}>
-                      {t}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-
-              {deckCards.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
-                  No cards match “{deckFilter}”.
-                </p>
-              ) : (
-                <ul className="grid max-h-[420px] grid-cols-1 gap-1.5 overflow-y-auto pr-1 lg:grid-cols-2">
-                  {deckCards.map((card) => {
-                    const count = counts[card.id] ?? 0
-                    const Icon = getCardIcon(card.icon)
-                    const TypeIcon = card.type === CardType.Attack ? Sword : Sparkles
-                    return (
-                      <li
-                        key={card.id}
-                        className={cn(
-                          "flex items-start gap-2 rounded-lg border p-2 transition-colors",
-                          count > 0 ? "border-gold/40 bg-gold/[0.06]" : "border-white/10",
-                        )}
-                      >
-                        <Icon
-                          size={16}
-                          className={cn("mt-1 shrink-0", count > 0 ? "text-gold" : "text-muted-foreground")}
-                          aria-hidden
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="truncate font-display text-xs font-bold uppercase tracking-wider text-foreground">
-                              {card.name}
-                            </span>
-                            <span className="inline-flex shrink-0 items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 font-display text-[10px] font-bold uppercase leading-none tracking-wider text-muted-foreground">
-                              <TypeIcon size={10} aria-hidden />
-                              {card.type}
-                            </span>
-                          </div>
-                          <p className="truncate text-xs text-muted-foreground/70">{card.desc}</p>
-                        </div>
-                        <span className="shrink-0 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {card.cost}c
-                        </span>
-                        <Stepper
-                          value={count}
-                          min={0}
-                          max={MAX_COPIES}
-                          onChange={(v) => setCount(card.id, v)}
-                          label={`${card.name} copies`}
-                        />
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-            </Panel>
+            <DeckSelectionPanel
+              title="Starter Deck"
+              counts={counts}
+              onChange={setCounts}
+              maxCopies={MAX_COPIES}
+            />
           </div>
 
           <PreviewRail

@@ -33,8 +33,14 @@ function typeName(value: string) {
   act(() => fireEvent.change(screen.getByLabelText(/^name$/i), { target: { value } }))
 }
 
-/** Add one copy of a card to the starter deck via its stepper. */
+/** Open the deck popup from the collapsed summary button. */
+function openDeckEditor() {
+  act(() => fireEvent.click(screen.getByRole("button", { name: /edit deck/i })))
+}
+
+/** Add one copy of a card to the starter deck via its stepper in the deck popup. */
 function addCopy(cardName: string) {
+  openDeckEditor()
   act(() =>
     fireEvent.click(screen.getByRole("button", { name: `Increase ${cardName} copies` })),
   )
@@ -48,9 +54,12 @@ describe("CharacterCreateScreen", () => {
     typeName("Bruno")
     // a named character with an empty starter deck cannot start a run
     expect(saveButton().disabled).toBe(true)
+    // collapsed summary reports the deck size only
+    expect(screen.getByRole("button", { name: /edit deck/i })).toHaveTextContent("0 cards")
 
     addCopy(FIRST_CARD.name)
     expect(saveButton().disabled).toBe(false)
+    expect(screen.getByRole("button", { name: /edit deck/i })).toHaveTextContent("1 card")
   })
 
   it("saves the authored stats and starter deck", () => {

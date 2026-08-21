@@ -6,7 +6,7 @@ import { Team, UnitKind, type Unit } from "../../units"
 import { dealDamage } from "../../units"
 import { resolveSummon } from "../../summons"
 import { drawCards } from "../../deck"
-import { cellLabel, heroUnit, log, nid } from "../../shared"
+import { cellLabel, emitFx, heroUnit, log, nid } from "../../shared"
 
 /* ------------------------------------------------------------------ */
 /* Custom-effect registry (D11 escape hatch)                           */
@@ -68,7 +68,7 @@ export function resolveCardEffects(
 
   // enemy-target cards fire their card fx once, before effects (D6)
   if (card.target === CardTarget.Enemy && targetUnit) {
-    fx.push({ id: state.logCounter, kind: card.fx, from, to: { ...targetUnit.pos } })
+    fx.push(emitFx(state, { kind: card.fx, from, to: { ...targetUnit.pos } }))
   }
 
   for (const effect of card.effects) {
@@ -97,22 +97,23 @@ function applyEffect(
       const healed = effect.target === "caster" ? heroUnit(state) : targetUnit
       if (!healed) break
       healed.hp = Math.min(healed.maxHp, healed.hp + effect.amount)
-      fx.push({
-        id: state.logCounter,
-        kind: FxKind.Heal,
-        to: { ...healed.pos },
-        amount: effect.amount,
-      })
+      fx.push(
+        emitFx(state, {
+          kind: FxKind.Heal,
+          to: { ...healed.pos },
+          amount: effect.amount,
+        }),
+      )
       break
     }
     case "drawCards": {
-      if (from) fx.push({ id: state.logCounter, kind: FxKind.Draw, to: from })
+      if (from) fx.push(emitFx(state, { kind: FxKind.Draw, to: from }))
       drawCards(state, effect.amount, fx)
       break
     }
     case "gainCoin": {
       state.coin += effect.amount
-      if (from) fx.push({ id: state.logCounter, kind: FxKind.Coin, to: from, amount: effect.amount })
+      if (from) fx.push(emitFx(state, { kind: FxKind.Coin, to: from, amount: effect.amount }))
       break
     }
     case "buffAtk": {
@@ -141,7 +142,7 @@ function applyEffect(
         buffAtk: 0,
       }
       state.units = [...state.units, summoned]
-      fx.push({ id: state.logCounter, kind: FxKind.Summon, to: { ...tile } })
+      fx.push(emitFx(state, { kind: FxKind.Summon, to: { ...tile } }))
       break
     }
     case "custom": {
