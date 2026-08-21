@@ -68,6 +68,18 @@ describe("card schema: malformed payloads throw", () => {
     expect(() => CardDefSchema.parse(noCost)).toThrow()
   })
 
+  it("rejects a card missing range or with range 0 (range cannot be 0)", () => {
+    const { range: _range, ...noRange } = CARD_LIBRARY.demand_letter
+    expect(() => CardDefSchema.parse(noRange)).toThrow()
+    expect(() => CardDefSchema.parse({ ...CARD_LIBRARY.demand_letter, range: 0 })).toThrow()
+  })
+
+  it("every card in the database carries a range of at least 1", () => {
+    for (const card of Object.values(CARD_LIBRARY)) {
+      expect(card.range).toBeGreaterThanOrEqual(1)
+    }
+  })
+
   it("rejects a pack containing an invalid effect kind via CardPackSchema", () => {
     expect(() =>
       CardPackSchema.parse({

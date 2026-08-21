@@ -54,6 +54,7 @@ function syntheticCard(def: TrinketDef, trigger: TrinketTrigger, effects: CardDe
     cost: 0,
     value: 0,
     target: CardTarget.Self,
+    range: 1,
     desc: def.description,
     icon: def.icon,
     fx: FxKind.Coin,

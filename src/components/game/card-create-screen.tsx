@@ -45,6 +45,7 @@ interface CardDraft {
   name: string
   type: CardType
   target: CardTarget
+  range: number
   cost: number
   value: number
   desc: string
@@ -125,6 +126,7 @@ export function CardCreateScreen({
   const [target, setTarget] = useState<CardTarget>(
     stashed?.target ?? editCard?.target ?? CardTarget.Enemy,
   )
+  const [range, setRange] = useState(stashed?.range ?? editCard?.range ?? 4)
   const [cost, setCost] = useState(stashed?.cost ?? editCard?.cost ?? 1)
   const [value, setValue] = useState(stashed?.value ?? editCard?.value ?? 1)
   const [desc, setDesc] = useState(stashed?.desc ?? editCard?.desc ?? "")
@@ -136,9 +138,9 @@ export function CardCreateScreen({
   const [summonRow, setSummonRow] = useState<number | null>(null)
 
   useEffect(() => {
-    const stash: CardDraft = { forId: draftKey, name, type, target, cost, value, desc, icon, effects }
+    const stash: CardDraft = { forId: draftKey, name, type, target, range, cost, value, desc, icon, effects }
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stash))
-  }, [draftKey, name, type, target, cost, value, desc, icon, effects])
+  }, [draftKey, name, type, target, range, cost, value, desc, icon, effects])
 
   // only a genuine unmount (leaving the editor) discards it; a reload does not
   useEffect(() => () => sessionStorage.removeItem(DRAFT_KEY), [])
@@ -158,6 +160,7 @@ export function CardCreateScreen({
     cost,
     value,
     target,
+    range,
     desc,
     icon,
     fx: FxKind.Shock,
@@ -229,6 +232,11 @@ export function CardCreateScreen({
               <Field label="Value" hint="sell price">
                 <Stepper value={value} min={0} max={10} onChange={setValue} label="value" />
               </Field>
+              {target !== CardTarget.Self && (
+                <Field label="Range" hint="steps from your fish">
+                  <Stepper value={range} min={1} max={9} onChange={setRange} label="range" />
+                </Field>
+              )}
               <Field label="Target" className="basis-full">
                 <div className="flex flex-wrap gap-1.5">
                   {TARGETS.map((t) => (

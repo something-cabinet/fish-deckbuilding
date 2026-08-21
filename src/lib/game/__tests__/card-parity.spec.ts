@@ -33,6 +33,15 @@ function cast(
 ) {
   const card = state.hand.find((c) => c.def.id === libId)
   if (!card) throw new Error(`no hand card for ${libId}`)
+  // the hero spawns at (1,2) and every enemy starts beyond card range, so a
+  // successful cast first "moves" the hero next to the chosen target
+  const hero = state.units.find((u) => u.id === "hero")!
+  const tgt = target?.unitId ? state.units.find((u) => u.id === target.unitId) : undefined
+  if (tgt && tgt.id !== "hero") {
+    hero.pos = { x: Math.max(0, tgt.pos.x - 1), y: tgt.pos.y }
+  } else if (target?.tile) {
+    hero.pos = { x: Math.max(0, target.tile.x - 1), y: Math.min(state.rows - 1, target.tile.y + 1) }
+  }
   return castCard(state, card.uid, target ?? {})
 }
 
@@ -343,6 +352,51 @@ describe("card parity: insufficient coin rejected", () => {
   })
 })
 
+describe("card parity: card range", () => {
+  it("enemy beyond the card's range is not a valid target (unchanged state)", () => {
+    const s = withHand(fresh(), ["demand_letter"]) // range 4
+    const enemy = unitByTeam(s, Team.Enemy) // spawns at x >= 6, hero at (1,2)
+    expect(Math.abs(enemy.pos.x - 1) + Math.abs(enemy.pos.y - 2)).toBeGreaterThan(4)
+    const coinBefore = s.coin
+    const handBefore = s.hand.length
+    const logBefore = s.log.length
+
+    // castCard directly — the cast() helper would walk the hero into range
+    const card = s.hand.find((c) => c.def.id === "demand_letter")!
+    const { state, fx } = castCard(s, card.uid, { unitId: enemy.id })
+
+    expect(state).toBe(s)
+    expect(state.coin).toBe(coinBefore)
+    expect(state.hand.length).toBe(handBefore)
+    expect(state.log.length).toBe(logBefore)
+    expect(fx).toEqual([])
+  })
+
+  it("cardTargets lists only enemies within Manhattan range of the hero", () => {
+    const s = withHand(fresh(), ["demand_letter"])
+    const card = s.hand[0]
+    const hero = s.units.find((u) => u.id === "hero")!
+    const t = cardTargets(s, card)
+    const inRange = s.units.filter(
+      (u) => u.team === Team.Enemy && u.hp > 0 &&
+        Math.abs(u.pos.x - hero.pos.x) + Math.abs(u.pos.y - hero.pos.y) <= card.def.range,
+    )
+    expect(t.unitIds.sort()).toEqual(inRange.map((u) => u.id).sort())
+  })
+
+  it("range 1 reaches only the 4 orthogonal tiles (no diagonal)", () => {
+    const s = withHand(fresh(), ["muscle"])
+    const card = s.hand[0]
+    card.def = { ...card.def, range: 1 }
+    const hero = s.units.find((u) => u.id === "hero")!
+    const t = cardTargets(s, card)
+    for (const p of t.tiles) {
+      expect(Math.abs(p.x - hero.pos.x) + Math.abs(p.y - hero.pos.y)).toBe(1)
+    }
+    expect(t.tiles.length).toBe(4)
+  })
+})
+
 describe("card parity: canCast phase + cost", () => {
   it("canCast requires player phase and enough coin", () => {
     const s = withHand(fresh(), ["demand_letter"])
@@ -360,6 +414,9 @@ describe("card parity: cardTargets by target kind", () => {
   it("enemy target lists living enemy unit ids", () => {
     const s = withHand(fresh(), ["demand_letter"])
     const card = s.hand[0]
+    // walk the hero next to the first enemy so one sits within cast range
+    const nearest = s.units.find((u) => u.team === Team.Enemy && u.hp > 0)!
+    s.units.find((u) => u.id === "hero")!.pos = { x: nearest.pos.x - 1, y: nearest.pos.y }
     const t = cardTargets(s, card)
     expect(t.unitIds.length).toBeGreaterThan(0)
     for (const id of t.unitIds) {

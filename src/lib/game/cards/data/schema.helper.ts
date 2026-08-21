@@ -54,6 +54,7 @@ export const CardDefSchema = z.object({
   cost: z.number(),
   value: z.number(),
   target: CardTargetSchema,
+  range: z.number().int().min(1),
   desc: z.string(),
   icon: z.string(),
   fx: CardFxSchema,

@@ -10,6 +10,12 @@ export interface CardDef {
   cost: number // mana
   value: number // gold return when sold
   target: CardTarget
+  /**
+   * Cast range in orthogonal steps (Manhattan distance) from the caster
+   * (hero). 1 = melee: the 4 orthogonally adjacent tiles. Never 0 — a card
+   * must always be able to reach something other than its own tile.
+   */
+  range: number
   desc: string
   /** lucide icon name used in the card art */
   icon: string
