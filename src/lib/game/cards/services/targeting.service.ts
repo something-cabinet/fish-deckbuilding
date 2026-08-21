@@ -27,6 +27,17 @@ function emptyTiles(state: GameState): Pos[] {
   return out
 }
 
+/** Every board tile within cast range — the yellow range indicator diamond. */
+function rangeTiles(state: GameState, inRange: (p: Pos) => boolean): Pos[] {
+  const out: Pos[] = []
+  for (let y = 0; y < state.rows; y++)
+    for (let x = 0; x < state.cols; x++) {
+      const p = { x, y }
+      if (inRange(p)) out.push(p)
+    }
+  return out
+}
+
 /**
  * Cast range: Manhattan distance in orthogonal steps from the caster (hero),
  * so range 1 is melee — the 4 orthogonally adjacent tiles — and each extra
@@ -52,19 +63,19 @@ export function cardTargets(state: GameState, card: CardInstance): {
         unitIds: state.units
           .filter((u) => u.team === Team.Enemy && u.hp > 0 && inRange(u.pos))
           .map((u) => u.id),
-        tiles: [],
+        tiles: rangeTiles(state, inRange),
       }
     case CardTarget.Ally:
       return {
         unitIds: state.units
           .filter((u) => u.team === Team.Player && u.hp > 0 && inRange(u.pos))
           .map((u) => u.id),
-        tiles: [],
+        tiles: rangeTiles(state, inRange),
       }
     case CardTarget.Unit:
       return {
         unitIds: state.units.filter((u) => u.hp > 0 && inRange(u.pos)).map((u) => u.id),
-        tiles: [],
+        tiles: rangeTiles(state, inRange),
       }
     case CardTarget.EmptyTile:
       return { unitIds: [], tiles: emptyTiles(state).filter(inRange) }

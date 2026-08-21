@@ -416,7 +416,8 @@ describe("card parity: cardTargets by target kind", () => {
     const card = s.hand[0]
     // walk the hero next to the first enemy so one sits within cast range
     const nearest = s.units.find((u) => u.team === Team.Enemy && u.hp > 0)!
-    s.units.find((u) => u.id === "hero")!.pos = { x: nearest.pos.x - 1, y: nearest.pos.y }
+    const hero = s.units.find((u) => u.id === "hero")!
+    hero.pos = { x: nearest.pos.x - 1, y: nearest.pos.y }
     const t = cardTargets(s, card)
     expect(t.unitIds.length).toBeGreaterThan(0)
     for (const id of t.unitIds) {
@@ -424,7 +425,12 @@ describe("card parity: cardTargets by target kind", () => {
       expect(u.team).toBe(Team.Enemy)
       expect(u.hp).toBeGreaterThan(0)
     }
-    expect(t.tiles).toEqual([])
+    // unit-targeted cards still surface the yellow range indicator tiles
+    for (const p of t.tiles) {
+      expect(Math.abs(p.x - hero.pos.x) + Math.abs(p.y - hero.pos.y)).toBeLessThanOrEqual(
+        card.def.range,
+      )
+    }
   })
 
   it("self target has no units or tiles", () => {

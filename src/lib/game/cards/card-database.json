@@ -254,6 +254,26 @@
       ],
       "log": "",
       "logTone": "neutral"
+    },
+    {
+      "id": "custom_raze_the_ground_mt2t095q",
+      "name": "Raze the ground",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "empty-tile",
+      "range": 4,
+      "desc": "Deal 5 damage to enemy on a tile",
+      "icon": "Snowflake",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 5
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
     }
   ]
 }
