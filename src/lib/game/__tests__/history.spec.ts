@@ -30,6 +30,7 @@ describe("history: snapshot round-trip per action (D2)", () => {
   it("playCard → undo restores the exact pre-action state", () => {
     const b = bundle(fresh())
     const enemy = enemyOf(b.state)
+    heroUnit(b.state)!.pos = { x: enemy.pos.x - 1, y: enemy.pos.y } // within cast range
     const target = { unitId: enemy.id }
 
     const after = historyReducer(b, { kind: "playCard", cardUid: "c_h", target })

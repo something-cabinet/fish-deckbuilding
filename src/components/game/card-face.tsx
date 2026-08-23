@@ -1,7 +1,7 @@
 "use client"
 
-import { Coins } from "lucide-react"
-import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import { Coins, Crosshair, Radius } from "lucide-react"
+import { AOE_SINGLE_TILE, CardTarget, CardType, aoeTileCount, type CardDef } from "@/lib/game/cards"
 import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
@@ -107,9 +107,26 @@ export function CardFace({ def, size = "md", className }: Props) {
         </p>
       </div>
 
-      {/* footer: target + sell value */}
+      {/* footer: target (+ range) + sell value */}
       <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-xs font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
-        <span>{TARGET_LABELS[def.target] ?? def.target}</span>
+        <span className="flex items-center gap-1.5">
+          <span>{TARGET_LABELS[def.target] ?? def.target}</span>
+          {def.target !== CardTarget.Self && (
+            <span className="flex items-center gap-0.5" title={`Cast range ${def.range}`}>
+              <Crosshair size={10} aria-hidden />
+              {def.range}
+            </span>
+          )}
+          {def.aoe > AOE_SINGLE_TILE && (
+            <span
+              className="flex items-center gap-0.5 text-[oklch(0.45_0.16_25)]"
+              title={`Blast covers ${aoeTileCount(def.aoe)} tiles`}
+            >
+              <Radius size={10} aria-hidden />
+              {aoeTileCount(def.aoe)}
+            </span>
+          )}
+        </span>
         <span className="flex items-center gap-1">
           <Coins size={11} />
           {def.value}

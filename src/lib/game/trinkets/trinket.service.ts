@@ -1,4 +1,5 @@
 import { CardTarget, CardType } from "../cards/enums"
+import { AOE_SINGLE_TILE } from "../cards/constants"
 import type { CardDef } from "../cards/models"
 import { resolveCardEffects } from "../cards/services/effects.service"
 import { FxKind } from "../battle/enums"
@@ -42,7 +43,7 @@ export function resolveTrigger(
     // hypothetical `damage` effect would hit the hero — skip both kinds.
     const safe = effects.filter((e) => e.kind !== "damage" && e.kind !== "summon")
     if (!safe.length) continue
-    resolveCardEffects(state, syntheticCard(def, trigger, safe), { targetUnit: hero, from: hero?.pos }, fx)
+    resolveCardEffects(state, syntheticCard(def, trigger, safe), { targetUnits: hero ? [hero] : [], from: hero?.pos }, fx)
   }
 }
 
@@ -54,6 +55,8 @@ function syntheticCard(def: TrinketDef, trigger: TrinketTrigger, effects: CardDe
     cost: 0,
     value: 0,
     target: CardTarget.Self,
+    range: 1,
+    aoe: AOE_SINGLE_TILE,
     desc: def.description,
     icon: def.icon,
     fx: FxKind.Coin,

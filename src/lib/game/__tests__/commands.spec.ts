@@ -23,6 +23,7 @@ describe("reducer: reduce dispatches to the pure action functions (D1)", () => {
   it("playCard routes through the same engine function (parity)", () => {
     const s = castableState("demand_letter")
     const enemy = s.units.find((u) => u.team === Team.Enemy && u.hp > 0)!
+    heroUnit(s)!.pos = { x: enemy.pos.x - 1, y: enemy.pos.y } // within cast range
     const hpBefore = enemy.hp
     const coinBefore = s.coin
 
@@ -125,6 +126,7 @@ describe("reducer: deterministic ordered execution (AC-6)", () => {
     // kneecap emits two Shock fx (card fx + dealDamage) in one action
     const s = castableState("kneecap")
     const enemy = s.units.find((u) => u.team === Team.Enemy && u.hp > 0)!
+    heroUnit(s)!.pos = { x: enemy.pos.x - 1, y: enemy.pos.y } // within cast range
     const r = reduce(s, { kind: "playCard", cardUid: "c_cmd", target: { unitId: enemy.id } })
     expect(r.fx.length).toBeGreaterThan(1)
     const ids = r.fx.map((e) => e.id)

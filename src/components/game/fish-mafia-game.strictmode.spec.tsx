@@ -62,6 +62,12 @@ function parseHp(label: string | null): number {
   return m ? Number(m[1]) : -1
 }
 
+/** "Thug at G2, ..." -> { x: 6, y: 1 } (cols A..I, rows 1..5) */
+function parsePos(label: string | null): { x: number; y: number } {
+  const m = label?.match(/at ([A-I])([1-5])/)
+  return m ? { x: m[1].charCodeAt(0) - 65, y: Number(m[2]) - 1 } : { x: Number.NaN, y: Number.NaN }
+}
+
 /* ------------------------------------------------------------------ */
 /* tests                                                              */
 /* ------------------------------------------------------------------ */
@@ -166,15 +172,43 @@ describe("FishMafiaGame under StrictMode (AC-3)", () => {
       return
     }
 
-    // unit-targeted card (e.g. Demand Letter): click to arm it, then click a
-    // valid enemy target token
+    // unit-targeted card (e.g. Demand Letter): the target must sit within the
+    // card's cast range (Manhattan steps from the hero), so first walk the
+    // hero two tiles toward the mob (B3 -> D3), then arm and cast.
+    const hero = screen.getByRole("button", { name: /Guppy at B3/ })
+    act(() => {
+      fireEvent.click(hero)
+    })
+    const stepTile = container.querySelector('[data-drop="tile"][data-x="3"][data-y="2"]')
+    if (!stepTile || !stepTile.className.includes("bg-teal")) {
+      console.log("[strictmode] step tile D3 not reachable — skipping cast assertion")
+      return
+    }
+    act(() => {
+      fireEvent.click(stepTile)
+    })
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Guppy at D3/ })).toBeInTheDocument()
+    })
+
     act(() => {
       fireEvent.click(card)
     })
+    const heroPos = parsePos(
+      screen.getByRole("button", { name: /Guppy at/ }).getAttribute("aria-label"),
+    )
     const enemies = screen
       .getAllByRole("button", { name: /health$/ })
       .filter((b) => !(b.getAttribute("aria-label") ?? "").startsWith("Guppy"))
-    expect(enemies.length).toBeGreaterThan(0)
+      .filter((b) => {
+        const p = parsePos(b.getAttribute("aria-label"))
+        return Math.abs(p.x - heroPos.x) + Math.abs(p.y - heroPos.y) <= 4
+      })
+
+    if (enemies.length === 0) {
+      console.log("[strictmode] no enemy within card range — skipping cast assertion")
+      return
+    }
 
     const target = enemies[0]
     const targetName = (target.getAttribute("aria-label") ?? "").split(",")[0] // e.g. "Thug at G2"

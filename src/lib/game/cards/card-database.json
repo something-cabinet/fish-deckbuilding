@@ -7,11 +7,16 @@
       "cost": 1,
       "value": 1,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 2 damage to a target enemy.",
       "icon": "Mail",
       "fx": "letter",
       "effects": [
-        { "kind": "damage", "amount": 2 }
+        {
+          "kind": "damage",
+          "amount": 2
+        }
       ],
       "log": "Demand Letter hits {target} for 2.",
       "logTone": "good"
@@ -23,11 +28,16 @@
       "cost": 2,
       "value": 2,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 3 damage to a target enemy.",
       "icon": "PhoneCall",
       "fx": "phone",
       "effects": [
-        { "kind": "damage", "amount": 3 }
+        {
+          "kind": "damage",
+          "amount": 3
+        }
       ],
       "log": "Collection Call rattles {target} for 3.",
       "logTone": "good"
@@ -39,11 +49,16 @@
       "cost": 4,
       "value": 4,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 6 damage to a target enemy.",
       "icon": "FileX2",
       "fx": "gavel",
       "effects": [
-        { "kind": "damage", "amount": 6 }
+        {
+          "kind": "damage",
+          "amount": 6
+        }
       ],
       "log": "Foreclose slams {target} for 6!",
       "logTone": "good"
@@ -55,12 +70,20 @@
       "cost": 2,
       "value": 2,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 2 damage and weaken the target's attack by 1.",
       "icon": "Hammer",
       "fx": "shock",
       "effects": [
-        { "kind": "damage", "amount": 2 },
-        { "kind": "buffAtk", "amount": -1 }
+        {
+          "kind": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "buffAtk",
+          "amount": -1
+        }
       ],
       "log": "Kneecap hits {target} for 2 and weakens it.",
       "logTone": "good"
@@ -72,11 +95,16 @@
       "cost": 1,
       "value": 1,
       "target": "self",
+      "range": 4,
+      "aoe": 0,
       "desc": "Launder 3 coin into your pocket.",
       "icon": "Coins",
       "fx": "coin",
       "effects": [
-        { "kind": "gainCoin", "amount": 3 }
+        {
+          "kind": "gainCoin",
+          "amount": 3
+        }
       ],
       "log": "Cash Flow launders 3 coin.",
       "logTone": "gold"
@@ -88,11 +116,16 @@
       "cost": 1,
       "value": 1,
       "target": "self",
+      "range": 4,
+      "aoe": 0,
       "desc": "Draw 2 cards.",
       "icon": "TrendingUp",
       "fx": "draw",
       "effects": [
-        { "kind": "drawCards", "amount": 2 }
+        {
+          "kind": "drawCards",
+          "amount": 2
+        }
       ],
       "log": "Market Rate draws 2 cards.",
       "logTone": "neutral"
@@ -104,12 +137,21 @@
       "cost": 3,
       "value": 3,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 4 damage and heal your boss 2 HP.",
       "icon": "Skull",
       "fx": "shock",
       "effects": [
-        { "kind": "damage", "amount": 4 },
-        { "kind": "heal", "amount": 2, "target": "caster" }
+        {
+          "kind": "damage",
+          "amount": 4
+        },
+        {
+          "kind": "heal",
+          "amount": 2,
+          "target": "caster"
+        }
       ],
       "log": "Loan Shark drains {target} for 4, heals Guppy 2.",
       "logTone": "good"
@@ -121,11 +163,17 @@
       "cost": 2,
       "value": 2,
       "target": "ally",
+      "range": 4,
+      "aoe": 0,
       "desc": "Restore 5 HP to a friendly fish.",
       "icon": "HeartPulse",
       "fx": "heal",
       "effects": [
-        { "kind": "heal", "amount": 5, "target": "cast-target" }
+        {
+          "kind": "heal",
+          "amount": 5,
+          "target": "cast-target"
+        }
       ],
       "log": "Hush Money patches up {target} for 5.",
       "logTone": "good"
@@ -137,11 +185,16 @@
       "cost": 3,
       "value": 3,
       "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
       "desc": "Summon a Goon (5 HP / 2 ATK) on an empty tile.",
       "icon": "Fish",
       "fx": "summon",
       "effects": [
-        { "kind": "summon", "unit": "goon" }
+        {
+          "kind": "summon",
+          "unit": "goon"
+        }
       ],
       "log": "Hired Muscle joins at {tile}.",
       "logTone": "good"
@@ -153,11 +206,16 @@
       "cost": 0,
       "value": 1,
       "target": "self",
+      "range": 4,
+      "aoe": 0,
       "desc": "Shake down the locals for 2 coin.",
       "icon": "Banknote",
       "fx": "coin",
       "effects": [
-        { "kind": "gainCoin", "amount": 2 }
+        {
+          "kind": "gainCoin",
+          "amount": 2
+        }
       ],
       "log": "Shakedown nets 2 coin.",
       "logTone": "gold"
@@ -169,11 +227,16 @@
       "cost": 3,
       "value": 3,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 10 damage to an enemy.",
       "icon": "Skull",
       "fx": "shock",
       "effects": [
-        { "kind": "damage", "amount": 10 }
+        {
+          "kind": "damage",
+          "amount": 10
+        }
       ],
       "log": "",
       "logTone": "neutral"
@@ -185,15 +248,66 @@
       "cost": 2,
       "value": 1,
       "target": "enemy",
+      "range": 4,
+      "aoe": 0,
       "desc": "Deal 1 damage and heal 1 health.",
       "icon": "Droplet",
       "fx": "shock",
       "effects": [
-        { "kind": "damage", "amount": 1 },
-        { "kind": "heal", "amount": 1, "target": "caster" }
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "heal",
+          "amount": 1,
+          "target": "caster"
+        }
       ],
       "log": "",
       "logTone": "neutral"
+    },
+    {
+      "id": "custom_raze_the_ground_mt2t095q",
+      "name": "Raze the ground",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Deal 5 damage to enemy on a tile",
+      "icon": "Snowflake",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 5
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    },
+    {
+      "id": "pipe_bomb",
+      "name": "Pipe Bomb",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 1,
+      "desc": "Deal 2 damage to every enemy on the target tile and the four beside it.",
+      "icon": "Bomb",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 2
+        }
+      ],
+      "log": "Pipe Bomb goes off, catching {target}.",
+      "logTone": "good"
     }
   ]
 }

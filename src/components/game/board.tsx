@@ -17,6 +17,12 @@ interface Props {
   showEffects?: boolean
   highlightTiles: Pos[]
   highlightUnitIds: string[]
+  /** the blast the armed card would cover if cast at the tile under the cursor */
+  blastTiles: Pos[]
+  blastUnitIds: string[]
+  blastDamage: number
+  /** true while a tile-aimed card is armed, so tokens stop swallowing pointers */
+  aimingAtTile: boolean
   onCellPointerUp: (pos: Pos) => void
   onCellClick: (pos: Pos) => void
   onUnitClick: (unit: Unit) => void
@@ -30,6 +36,10 @@ export function Board({
   showEffects = true,
   highlightTiles,
   highlightUnitIds,
+  blastTiles,
+  blastUnitIds,
+  blastDamage,
+  aimingAtTile,
   onCellPointerUp,
   onCellClick,
   onUnitClick,
@@ -78,6 +88,8 @@ export function Board({
   const reachSet = useMemo(() => new Set(reachable.map((p) => `${p.x},${p.y}`)), [reachable])
   const tileSet = useMemo(() => new Set(highlightTiles.map((p) => `${p.x},${p.y}`)), [highlightTiles])
   const unitTargets = useMemo(() => new Set(highlightUnitIds), [highlightUnitIds])
+  const blastSet = useMemo(() => new Set(blastTiles.map((p) => `${p.x},${p.y}`)), [blastTiles])
+  const blastUnits = useMemo(() => new Set(blastUnitIds), [blastUnitIds])
 
   const hitIds = useMemo(() => {
     const s = new Set<string>()
@@ -145,6 +157,7 @@ export function Board({
                   const key = `${x},${y}`
                   const isReach = reachSet.has(key)
                   const isTile = tileSet.has(key)
+                  const isBlast = blastSet.has(key)
                   return (
                     <div
                       key={key}
@@ -158,6 +171,7 @@ export function Board({
                         (x + y) % 2 === 0 ? "bg-white/[0.015]" : "bg-white/[0.04]",
                         isReach && "cursor-pointer bg-teal/15 hover:bg-teal/30",
                         isTile && "cursor-pointer bg-gold/20 ring-1 ring-inset ring-gold/60 hover:bg-gold/35",
+                        isBlast && "bg-enemy/35 ring-2 ring-inset ring-enemy/80",
                       )}
                     >
                       {isReach && (
@@ -181,6 +195,9 @@ export function Board({
                   selected={state.selectedUnitId === u.id}
                   isValidTarget={unitTargets.has(u.id)}
                   hit={hitIds.has(u.id)}
+                  previewHit={blastUnits.has(u.id)}
+                  previewDamage={blastDamage}
+                  interactive={!aimingAtTile}
                   onClick={onUnitClick}
                   onPointerDown={onUnitPointerDown}
                 />

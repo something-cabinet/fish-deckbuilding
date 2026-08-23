@@ -43,6 +43,22 @@ export default {
     await actor().click(locate(REACHABLE_TILE).first())
   },
 
+  /**
+   * With the hero selected, step to the reachable tile closest to the mob
+   * (largest column). Attack cards cast from the hero's position, so a
+   * targeted cast needs the hero within card range first.
+   */
+  async stepTowardEnemies() {
+    const xs = await actor().grabAttributeFromAll(REACHABLE_TILE, "data-x")
+    const ys = await actor().grabAttributeFromAll(REACHABLE_TILE, "data-y")
+    if (!xs.length) return
+    let best = 0
+    for (let i = 1; i < xs.length; i++) {
+      if (Number(xs[i]) > Number(xs[best])) best = i
+    }
+    await actor().click(`[data-drop=tile][data-x="${xs[best]}"][data-y="${ys[best]}"]`)
+  },
+
   /** Current aria-label of the hero token (e.g. "Guppy at B1, 14 of 14 health"). */
   async heroLabel(): Promise<string> {
     return actor().grabAttributeFrom(HERO_ANY, "aria-label")
@@ -132,6 +148,10 @@ export default {
     const deal = pick("Deal")
     if (deal != null) {
       actor().say(`Casting targeted card: ${texts[deal].slice(0, 60)}`)
+      // Targeted cards cast from the hero's tile with limited range, so walk
+      // the hero toward the enemies before arming the card.
+      await this.selectHero()
+      await this.stepTowardEnemies()
       // Click to arm, then click an enemy target.
       await actor().click(locate(HAND_CARD).at(deal + 1))
       try {

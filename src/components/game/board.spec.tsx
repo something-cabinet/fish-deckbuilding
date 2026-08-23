@@ -27,6 +27,10 @@ describe("Board", () => {
         reachable={[]}
         highlightTiles={[]}
         highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile={false}
         onCellPointerUp={() => {}}
         onCellClick={() => {}}
         onUnitClick={() => {}}
@@ -46,6 +50,10 @@ describe("Board", () => {
         reachable={[{ x: 2, y: 2 }]}
         highlightTiles={[{ x: 3, y: 2 }]}
         highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile={false}
         onCellPointerUp={() => {}}
         onCellClick={() => {}}
         onUnitClick={() => {}}
@@ -70,6 +78,10 @@ describe("Board", () => {
         reachable={[]}
         highlightTiles={[]}
         highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile={false}
         onCellPointerUp={() => {}}
         onCellClick={() => {}}
         onUnitClick={() => {}}
@@ -91,6 +103,10 @@ describe("Board", () => {
         reachable={[]}
         highlightTiles={[]}
         highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile={false}
         onCellPointerUp={() => {}}
         onCellClick={() => {}}
         onUnitClick={() => {}}
@@ -98,5 +114,97 @@ describe("Board", () => {
       />,
     )
     expect(container.querySelector(".animate-fm-shake")).not.toBeNull()
+  })
+
+  it("outlines the blast tiles the armed card would cover", () => {
+    const state = createInitialState()
+    const { container } = render(
+      <Board
+        state={state}
+        fx={[]}
+        reachable={[]}
+        highlightTiles={[]}
+        highlightUnitIds={[]}
+        blastTiles={[
+          { x: 3, y: 2 },
+          { x: 4, y: 2 },
+        ]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile
+        onCellPointerUp={() => {}}
+        onCellClick={() => {}}
+        onUnitClick={() => {}}
+        onUnitPointerDown={() => {}}
+      />,
+    )
+    expect(container.querySelectorAll('[data-drop="tile"][class*="ring-enemy"]').length).toBe(2)
+  })
+
+  it("lets pointers fall through unit tokens while aiming at a tile", () => {
+    const state = createInitialState()
+    render(
+      <Board
+        state={state}
+        fx={[]}
+        reachable={[]}
+        highlightTiles={[]}
+        highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile
+        onCellPointerUp={() => {}}
+        onCellClick={() => {}}
+        onUnitClick={() => {}}
+        onUnitPointerDown={() => {}}
+      />,
+    )
+    expect(screen.getByRole("button", { name: /guppy at/i })).toHaveClass("pointer-events-none")
+  })
+
+  it("keeps unit tokens clickable when no tile-aimed card is armed", () => {
+    const state = createInitialState()
+    render(
+      <Board
+        state={state}
+        fx={[]}
+        reachable={[]}
+        highlightTiles={[]}
+        highlightUnitIds={[]}
+        blastTiles={[]}
+        blastUnitIds={[]}
+        blastDamage={0}
+        aimingAtTile={false}
+        onCellPointerUp={() => {}}
+        onCellClick={() => {}}
+        onUnitClick={() => {}}
+        onUnitPointerDown={() => {}}
+      />,
+    )
+    expect(screen.getByRole("button", { name: /guppy at/i })).not.toHaveClass("pointer-events-none")
+  })
+
+  it("shows the preview damage on each unit inside the blast", () => {
+    const state = createInitialState()
+    const enemy = state.units.find((u) => u.id === "enemy_0")!
+    const { container } = render(
+      <Board
+        state={state}
+        fx={[]}
+        reachable={[]}
+        highlightTiles={[]}
+        highlightUnitIds={[]}
+        blastTiles={[enemy.pos]}
+        blastUnitIds={[enemy.id]}
+        blastDamage={3}
+        aimingAtTile
+        onCellPointerUp={() => {}}
+        onCellClick={() => {}}
+        onUnitClick={() => {}}
+        onUnitPointerDown={() => {}}
+      />,
+    )
+    expect(container.textContent).toContain("-3")
   })
 })

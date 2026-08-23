@@ -19,7 +19,7 @@ import { cellLabel, emitFx, heroUnit, log, nid } from "../../shared"
 export interface CustomEffectContext {
   state: GameState
   card: CardDef
-  targetUnit?: Unit
+  targetUnits: Unit[]
   tile?: Pos
   fx: FxEvent[]
 }
@@ -51,9 +51,9 @@ export function hasCustomEffectHandler(handlerId: string): boolean {
 /* cards merge the visual into the effect's own fx emission.           */
 /* ------------------------------------------------------------------ */
 
-function interpolate(template: string, targetName?: string, tile?: Pos): string {
+function interpolate(template: string, targetNames: string[], tile?: Pos): string {
   let out = template
-  if (targetName) out = out.replaceAll("{target}", targetName)
+  if (targetNames.length) out = out.replaceAll("{target}", targetNames.join(", "))
   if (tile) out = out.replaceAll("{tile}", cellLabel(tile))
   return out
 }
@@ -61,49 +61,57 @@ function interpolate(template: string, targetName?: string, tile?: Pos): string 
 export function resolveCardEffects(
   state: GameState,
   card: CardDef,
-  ctx: { targetUnit?: Unit; tile?: Pos; from?: Pos },
+  ctx: { targetUnits?: Unit[]; tile?: Pos; from?: Pos },
   fx: FxEvent[],
 ): void {
-  const { targetUnit, tile, from } = ctx
+  const { tile, from } = ctx
+  const targetUnits = ctx.targetUnits ?? []
 
-  // enemy-target cards fire their card fx once, before effects (D6)
-  if (card.target === CardTarget.Enemy && targetUnit) {
-    fx.push(emitFx(state, { kind: card.fx, from, to: { ...targetUnit.pos } }))
+  // enemy-target cards fire their card fx once, before effects (D6); a blast
+  // lands on its aimed tile, a single-target card on the unit it picked
+  const impact = tile ?? targetUnits[0]?.pos
+  if (card.target === CardTarget.Enemy && impact) {
+    fx.push(emitFx(state, { kind: card.fx, from, to: { ...impact } }))
   }
 
   for (const effect of card.effects) {
-    applyEffect(state, card, effect, { targetUnit, tile, from }, fx)
+    applyEffect(state, card, effect, { targetUnits, tile, from }, fx)
   }
 
-  log(state, interpolate(card.log, targetUnit?.name, tile), card.logTone)
+  log(state, interpolate(card.log, targetUnits.map((u) => u.name), tile), card.logTone)
+}
+
+function casterOrEmpty(state: GameState): Unit[] {
+  const hero = heroUnit(state)
+  return hero ? [hero] : []
 }
 
 function applyEffect(
   state: GameState,
   card: CardDef,
   effect: CardEffect,
-  ctx: { targetUnit?: Unit; tile?: Pos; from?: Pos },
+  ctx: { targetUnits: Unit[]; tile?: Pos; from?: Pos },
   fx: FxEvent[],
 ): void {
-  const { targetUnit, tile, from } = ctx
+  const { targetUnits, tile, from } = ctx
 
   switch (effect.kind) {
     case "damage": {
-      if (!targetUnit) return
-      dealDamage(state, targetUnit, effect.amount, fx)
+      for (const target of targetUnits) dealDamage(state, target, effect.amount, fx)
       break
     }
     case "heal": {
-      const healed = effect.target === "caster" ? heroUnit(state) : targetUnit
-      if (!healed) break
-      healed.hp = Math.min(healed.maxHp, healed.hp + effect.amount)
-      fx.push(
-        emitFx(state, {
-          kind: FxKind.Heal,
-          to: { ...healed.pos },
-          amount: effect.amount,
-        }),
-      )
+      const healed = effect.target === "caster" ? casterOrEmpty(state) : targetUnits
+      for (const unit of healed) {
+        unit.hp = Math.min(unit.maxHp, unit.hp + effect.amount)
+        fx.push(
+          emitFx(state, {
+            kind: FxKind.Heal,
+            to: { ...unit.pos },
+            amount: effect.amount,
+          }),
+        )
+      }
       break
     }
     case "drawCards": {
@@ -117,7 +125,7 @@ function applyEffect(
       break
     }
     case "buffAtk": {
-      if (targetUnit) targetUnit.buffAtk += effect.amount
+      for (const target of targetUnits) target.buffAtk += effect.amount
       break
     }
     case "summon": {
@@ -152,7 +160,7 @@ function applyEffect(
           `Unknown custom effect handler "${effect.handlerId}" on card "${card.id}" (FR-14)`,
         )
       }
-      handler({ state, card, targetUnit, tile, fx })
+      handler({ state, card, targetUnits, tile, fx })
       break
     }
   }
