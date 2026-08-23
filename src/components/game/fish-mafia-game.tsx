@@ -11,7 +11,15 @@ import { SidePanel } from "./side-panel"
 import { TargetingArrow, type ArrowState } from "./targeting-arrow"
 import { TopBar } from "./top-bar"
 import { useFishMafia } from "@/hooks/use-fish-mafia"
-import { CardTarget, type CardInstance } from "@/lib/game/cards"
+import {
+  AOE_SINGLE_TILE,
+  AimMode,
+  aimMode,
+  aoeTiles,
+  unitsInAoe,
+  type CardDef,
+  type CardInstance,
+} from "@/lib/game/cards"
 import { Phase, type Pos, type GameState } from "@/lib/game/battle"
 import { Team, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
@@ -45,6 +53,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [arrow, setArrow] = useState<ArrowState | null>(null)
+  const [aimTile, setAimTile] = useState<Pos | null>(null)
   const [hoveredUid, setHoveredUid] = useState<string | null>(null)
 
   // measured width of the hand track + viewport height, so both the card size and
@@ -99,6 +108,19 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
     return { highlightTiles: t.tiles, highlightUnitIds: t.unitIds }
   }, [activeCard, targetsFor])
 
+  /* ---------- blast preview ---------- */
+  // A card with a blast radius aims at a tile, so the preview has to answer
+  // "what does this cover from here" before the player commits to a centre.
+  const aimingAtTile = !!activeCard && isBlastCard(activeCard.def)
+  const blast = useMemo(() => {
+    if (!activeCard || !aimTile || !isBlastCard(activeCard.def)) return EMPTY_BLAST
+    return {
+      tiles: aoeTiles(state, aimTile, activeCard.def.aoe),
+      unitIds: unitsInAoe(state, activeCard.def, aimTile).map((u) => u.id),
+      damage: damageTotal(activeCard.def),
+    }
+  }, [activeCard, aimTile, state])
+
   /* ---------- targeting arrow ---------- */
   // keep latest values readable inside imperative pointer listeners
   const highlightUnitIdsRef = useRef<string[]>([])
@@ -137,9 +159,11 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           valid = reachableRef.current.some((p) => p.x === tx && p.y === ty)
         }
       } else {
-        // arming / dragging a unit-targeted card
+        // arming / dragging a card: tile-aimed ones drive the blast preview,
+        // unit-aimed ones drive the arrow
         const card = (d?.kind === DragKind.Card ? d.card : undefined) ?? pendingCardRef.current
-        if (!card || card.def.target === CardTarget.EmptyTile || card.def.target === CardTarget.Self) {
+        if (!card || aimMode(card.def) !== AimMode.Unit) {
+          setAimTile(tileFromDrop(drop, dropType))
           setArrow(null)
           return
         }
@@ -148,6 +172,8 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           valid = highlightUnitIdsRef.current.includes(drop.dataset.unitId)
         }
       }
+
+      setAimTile(null)
 
       if (!from) {
         setArrow(null)
@@ -166,8 +192,9 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
 
   // track the cursor while a card is armed via click (no active drag)
   useEffect(() => {
-    if (!pendingCard || pendingCard.def.target === CardTarget.EmptyTile || pendingCard.def.target === CardTarget.Self) {
+    if (!pendingCard || aimMode(pendingCard.def) === AimMode.None) {
       setArrow(null)
+      setAimTile(null)
       return
     }
     const onMove = (e: PointerEvent) => computeArrow(e.clientX, e.clientY)
@@ -191,10 +218,10 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           if (targetId) attack(d.unit.id, targetId)
         }
       } else if (d.kind === DragKind.Card && d.card) {
-        const def = d.card.def
-        if (def.target === CardTarget.Self) {
+        const mode = aimMode(d.card.def)
+        if (mode === AimMode.None) {
           cast(d.card.uid, {})
-        } else if (def.target === CardTarget.EmptyTile) {
+        } else if (mode === AimMode.Tile) {
           if (type === "tile") cast(d.card.uid, { tile: { x: Number(drop.dataset.x), y: Number(drop.dataset.y) } })
         } else if (type === "unit" && drop.dataset.unitId) {
           cast(d.card.uid, { unitId: drop.dataset.unitId })
@@ -223,6 +250,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
       dragRef.current = null
       setDrag(null)
       setArrow(null)
+      setAimTile(null)
       if (!d) return
       if (d.moved) {
         suppressClick.current = true
@@ -264,7 +292,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
     (card: CardInstance) => {
       // called via onClick fallback when not dragged
       if (suppressClick.current || !playerTurn || card.def.cost > state.coin) return
-      if (card.def.target === CardTarget.Self) {
+      if (aimMode(card.def) === AimMode.None) {
         cast(card.uid, {})
         setPendingCard(null)
         return
@@ -290,7 +318,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
     (unit: Unit) => {
       if (suppressClick.current || !playerTurn) return
       // casting a pending card onto a unit
-      if (pendingCard && pendingCard.def.target !== CardTarget.EmptyTile && pendingCard.def.target !== CardTarget.Self) {
+      if (pendingCard && aimMode(pendingCard.def) === AimMode.Unit) {
         cast(pendingCard.uid, { unitId: unit.id })
         setPendingCard(null)
         return
@@ -313,9 +341,10 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   const onCellClick = useCallback(
     (pos: Pos) => {
       if (suppressClick.current || !playerTurn) return
-      if (pendingCard?.def.target === CardTarget.EmptyTile) {
+      if (pendingCard && aimMode(pendingCard.def) === AimMode.Tile) {
         cast(pendingCard.uid, { tile: pos })
         setPendingCard(null)
+        setAimTile(null)
         return
       }
       if (state.selectedUnitId) {
@@ -329,6 +358,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   const cancelPending = useCallback(() => {
     setPendingCard(null)
     setArrow(null)
+    setAimTile(null)
     select(null)
   }, [select])
 
@@ -363,6 +393,10 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
             showEffects={settings.visualEffects}
             highlightTiles={highlightTiles}
             highlightUnitIds={highlightUnitIds}
+            blastTiles={blast.tiles}
+            blastUnitIds={blast.unitIds}
+            blastDamage={blast.damage}
+            aimingAtTile={aimingAtTile}
             onCellPointerUp={onCellPointerUp}
             onCellClick={onCellClick}
             onUnitClick={onUnitClick}
@@ -411,8 +445,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           )}
           {state.hand.map((card, i) => {
             const isDragged = drag?.kind === DragKind.Card && drag.card?.uid === card.uid
-            const isUnitTargetDrag =
-              isDragged && card.def.target !== CardTarget.EmptyTile && card.def.target !== CardTarget.Self
+            const isUnitTargetDrag = isDragged && aimMode(card.def) === AimMode.Unit
             const isArmed = pendingCard?.uid === card.uid || isUnitTargetDrag
             const isHovered = hoveredUid === card.uid
             const fan = fanTransform(i, state.hand.length, handWidth / cardScale)
@@ -496,7 +529,10 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
       {/* click-to-cast hint */}
       {pendingCard && (
         <div className="pointer-events-none fixed bottom-28 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-gold/40 bg-ocean-deep/90 px-4 py-1.5 font-display text-xs uppercase tracking-widest text-gold">
-          <span>Pick a target for {pendingCard.def.name}</span>
+          <span>
+            {isBlastCard(pendingCard.def) ? "Pick a blast centre for" : "Pick a target for"}{" "}
+            {pendingCard.def.name}
+          </span>
           <span className="flex items-center gap-1 text-muted-foreground">
             <span aria-hidden>·</span>
             <MousePointer2 size={12} className="-scale-x-100" aria-hidden />
@@ -511,7 +547,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
       {/* drag ghost — only for tile-placed / self cards, which the arrow does not cover */}
       {drag?.kind === DragKind.Card &&
         drag.card &&
-        (drag.card.def.target === CardTarget.EmptyTile || drag.card.def.target === CardTarget.Self) && (
+        aimMode(drag.card.def) !== AimMode.Unit && (
           <div
             className="pointer-events-none fixed z-[60] -translate-x-1/2 -translate-y-1/2"
             style={{ left: drag.x, top: drag.y }}
@@ -530,6 +566,23 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
         )}
     </main>
   )
+}
+
+const EMPTY_BLAST = { tiles: [] as Pos[], unitIds: [] as string[], damage: 0 }
+
+/** A card that covers more than the tile it lands on, and so aims at tiles. */
+function isBlastCard(def: CardDef): boolean {
+  return aimMode(def) === AimMode.Tile && def.aoe > AOE_SINGLE_TILE
+}
+
+/** Damage the card would deal to each unit inside its blast, for the preview. */
+function damageTotal(def: CardDef): number {
+  return def.effects.reduce((sum, e) => (e.kind === "damage" ? sum + e.amount : sum), 0)
+}
+
+function tileFromDrop(drop: HTMLElement | null, dropType: string | null | undefined): Pos | null {
+  if (!drop || dropType !== "tile") return null
+  return { x: Number(drop.dataset.x), y: Number(drop.dataset.y) }
 }
 
 const CARD_W = 124 // compact GameCard width, at scale 1

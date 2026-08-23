@@ -16,6 +16,12 @@ export interface CardDef {
    * must always be able to reach something other than its own tile.
    */
   range: number
+  /**
+   * Blast radius in orthogonal steps (Manhattan distance) around the aimed
+   * tile. 0 = a single tile, 1 = 5 tiles, 2 = 13 tiles. Any radius above 0
+   * makes the card aim at tiles instead of units.
+   */
+  aoe: number
   desc: string
   /** lucide icon name used in the card art */
   icon: string

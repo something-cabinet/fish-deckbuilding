@@ -2,9 +2,9 @@ import { FxKind, Phase } from "../battle/enums"
 import type { FxEvent, GameState, Pos } from "../battle/models"
 import { clone, emitFx, heroUnit, log } from "../shared"
 import { checkEnd, manhattan, reachableTiles } from "../battle/services"
-import { cleanupDead, dealDamage, effAtk } from "../units"
+import { cleanupDead, dealDamage, effAtk, type Unit } from "../units"
 import { Team } from "../units"
-import { CardTarget, cardTargets, resolveCardEffects, type CardInstance } from "../cards"
+import { AimMode, aimMode, cardTargets, resolveCardEffects, unitsInAoe, type CardInstance } from "../cards"
 import { resolveTrigger } from "../trinkets"
 
 export function moveUnit(
@@ -61,17 +61,9 @@ export function castCard(
 
   const hero = heroUnit(s)
   const from = hero ? { ...hero.pos } : undefined
-  const tgtUnit = target.unitId ? s.units.find((u) => u.id === target.unitId) : undefined
 
-  const valid = cardTargets(s, card)
-  if (card.def.target !== CardTarget.Self) {
-    if (card.def.target === CardTarget.EmptyTile) {
-      if (!target.tile || !valid.tiles.some((p) => p.x === target.tile!.x && p.y === target.tile!.y))
-        return { state, fx }
-    } else if (!tgtUnit || !valid.unitIds.includes(tgtUnit.id)) {
-      return { state, fx }
-    }
-  }
+  const aimed = resolveAim(s, card, target)
+  if (!aimed) return { state, fx }
 
   // pay + move card to discard
   s.coin -= card.def.cost
@@ -81,12 +73,39 @@ export function castCard(
 
   // delegate effect application to the data-driven resolver (FR-3) — no
   // switch on card id; effects come from the trusted JSON source.
-  resolveCardEffects(s, card.def, { targetUnit: tgtUnit, tile: target.tile, from }, fx)
+  resolveCardEffects(s, card.def, { targetUnits: aimed.targetUnits, tile: aimed.tile, from }, fx)
 
   // fire onEnemyKilled trinket triggers here (units layer can't import trinkets)
   if (cleanupDead(s) > 0) resolveTrigger(s, s.activeTrinkets, "onEnemyKilled", fx)
   checkEnd(s)
   return { state: s, fx }
+}
+
+/**
+ * Turn the player's aim into the units and tile the resolver works on, or
+ * `null` when the aim is not a legal target for this card. Tile-aimed cards
+ * gather every affected unit from their blast diamond, so a blast centred on
+ * an empty square still hits what surrounds it.
+ */
+function resolveAim(
+  state: GameState,
+  card: CardInstance,
+  target: { unitId?: string; tile?: Pos },
+): { targetUnits: Unit[]; tile?: Pos } | null {
+  const mode = aimMode(card.def)
+  if (mode === AimMode.None) return { targetUnits: [] }
+
+  const valid = cardTargets(state, card)
+
+  if (mode === AimMode.Tile) {
+    const tile = target.tile
+    if (!tile || !valid.tiles.some((p) => p.x === tile.x && p.y === tile.y)) return null
+    return { targetUnits: unitsInAoe(state, card.def, tile), tile }
+  }
+
+  const unit = target.unitId ? state.units.find((u) => u.id === target.unitId) : undefined
+  if (!unit || !valid.unitIds.includes(unit.id)) return null
+  return { targetUnits: [unit] }
 }
 
 /**

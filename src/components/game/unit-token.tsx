@@ -26,11 +26,31 @@ interface Props {
   selected: boolean
   isValidTarget: boolean
   hit: boolean
+  /** inside the blast the armed card would land — outlined, with its damage */
+  previewHit: boolean
+  previewDamage: number
+  /**
+   * False while a tile-aimed card is armed, so pointer events fall through to
+   * the tile underneath and a blast can be centred on an occupied square.
+   */
+  interactive: boolean
   onPointerDown: (e: React.PointerEvent, unit: Unit) => void
   onClick: (unit: Unit) => void
 }
 
-export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPointerDown, onClick }: Props) {
+export function UnitToken({
+  unit,
+  cols,
+  rows,
+  selected,
+  isValidTarget,
+  hit,
+  previewHit,
+  previewDamage,
+  interactive,
+  onPointerDown,
+  onClick,
+}: Props) {
   const left = ((unit.pos.x + 0.5) / cols) * 100
   const top = ((unit.pos.y + 0.5) / rows) * 100
   const isPlayer = unit.team === Team.Player
@@ -47,6 +67,7 @@ export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPo
         "transition-[left,top] duration-300 ease-out",
         canMove ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isValidTarget && "cursor-pointer",
+        !interactive && "pointer-events-none",
       )}
       style={{ left: `${left}%`, top: `${top}%`, width: `${100 / cols}%` }}
       onPointerDown={(e) => canMove && onPointerDown(e, unit)}
@@ -61,8 +82,15 @@ export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPo
           selected && "bg-gold/10 ring-2 ring-gold animate-fm-pulse-ring",
           isValidTarget &&
             "bg-gold/15 ring-2 ring-gold animate-fm-pulse-ring group-hover:scale-105 group-hover:bg-gold/35 group-hover:ring-[3px]",
+          previewHit && "bg-enemy/25 ring-2 ring-enemy animate-fm-pulse-ring",
         )}
       />
+
+      {previewHit && previewDamage > 0 && (
+        <span className="pointer-events-none absolute -top-1 left-1/2 z-30 -translate-x-1/2 rounded-full border border-enemy/70 bg-ocean-deep/95 px-1.5 py-0.5 font-display text-[clamp(6px,1.4cqi,13px)] font-bold leading-none text-enemy shadow">
+          -{previewDamage}
+        </span>
+      )}
 
       {/* sprite disc */}
       <div
@@ -79,6 +107,7 @@ export function UnitToken({ unit, cols, rows, selected, isValidTarget, hit, onPo
             isPlayer ? "ring-gold/70" : "ring-enemy/70",
             selected && "ring-gold",
             isValidTarget && "ring-gold/80 group-hover:ring-gold group-hover:shadow-[0_0_16px_2px_var(--gold)]",
+            previewHit && "ring-enemy shadow-[0_0_16px_2px_var(--enemy)]",
           )}
           style={{ filter: unit.hp <= 0 ? "grayscale(1)" : undefined }}
         >

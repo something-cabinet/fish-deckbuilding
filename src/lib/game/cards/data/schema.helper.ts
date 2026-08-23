@@ -3,6 +3,7 @@ import type { CardDef } from "../models"
 import type { CardEffect } from "../models"
 import { CardTarget } from "../enums"
 import { CardType } from "../enums"
+import { AOE_SINGLE_TILE } from "../constants"
 import { FxKind } from "../../battle/enums"
 
 /* ------------------------------------------------------------------ */
@@ -55,6 +56,7 @@ export const CardDefSchema = z.object({
   value: z.number(),
   target: CardTargetSchema,
   range: z.number().int().min(1),
+  aoe: z.number().int().min(AOE_SINGLE_TILE),
   desc: z.string(),
   icon: z.string(),
   fx: CardFxSchema,

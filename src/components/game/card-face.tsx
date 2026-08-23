@@ -1,7 +1,7 @@
 "use client"
 
-import { Coins, Crosshair } from "lucide-react"
-import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import { Coins, Crosshair, Radius } from "lucide-react"
+import { AOE_SINGLE_TILE, CardTarget, CardType, aoeTileCount, type CardDef } from "@/lib/game/cards"
 import { getCardIcon } from "./card-icons"
 import { cn } from "@/lib/utils"
 
@@ -115,6 +115,15 @@ export function CardFace({ def, size = "md", className }: Props) {
             <span className="flex items-center gap-0.5" title={`Cast range ${def.range}`}>
               <Crosshair size={10} aria-hidden />
               {def.range}
+            </span>
+          )}
+          {def.aoe > AOE_SINGLE_TILE && (
+            <span
+              className="flex items-center gap-0.5 text-[oklch(0.45_0.16_25)]"
+              title={`Blast covers ${aoeTileCount(def.aoe)} tiles`}
+            >
+              <Radius size={10} aria-hidden />
+              {aoeTileCount(def.aoe)}
             </span>
           )}
         </span>

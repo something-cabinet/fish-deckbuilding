@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { Check, PlusCircle } from "lucide-react"
-import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
+import {
+  AOE_MAX,
+  AOE_SINGLE_TILE,
+  CardTarget,
+  CardType,
+  aoeTileCount,
+  type CardDef,
+} from "@/lib/game/cards"
 import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
 import { DEFAULT_SUMMON, SUMMON_DEFS, type SummonDef } from "@/lib/game/summons"
@@ -46,6 +53,7 @@ interface CardDraft {
   type: CardType
   target: CardTarget
   range: number
+  aoe: number
   cost: number
   value: number
   desc: string
@@ -79,6 +87,42 @@ const TARGETS: { id: CardTarget; label: string }[] = [
   { id: CardTarget.Self, label: "Self" },
   { id: CardTarget.EmptyTile, label: "Empty tile" },
 ]
+/** Reads the blast back to the designer in tiles, which is what they picture. */
+function aoeHint(def: CardDef): string {
+  if (def.aoe === AOE_SINGLE_TILE) return "single tile"
+  return `${aoeTileCount(def.aoe)} tiles · aims at a tile`
+}
+
+const BLAST_GRID = AOE_MAX * 2 + 1
+
+/** Mini board showing the diamond the current radius covers. */
+function BlastPreview({ radius }: { radius: number }) {
+  const centre = AOE_MAX
+  return (
+    <div
+      className="grid gap-px"
+      style={{ gridTemplateColumns: `repeat(${BLAST_GRID}, 8px)` }}
+      aria-hidden
+    >
+      {Array.from({ length: BLAST_GRID * BLAST_GRID }, (_, i) => {
+        const x = i % BLAST_GRID
+        const y = Math.floor(i / BLAST_GRID)
+        const inBlast = Math.abs(x - centre) + Math.abs(y - centre) <= radius
+        return (
+          <span
+            key={i}
+            className={cn(
+              "h-2 w-2 rounded-[1px]",
+              inBlast ? "bg-enemy/80" : "bg-white/10",
+              x === centre && y === centre && "ring-1 ring-gold",
+            )}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
 function slugify(name: string) {
   const base = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
   return `custom_${base || "card"}_${Date.now().toString(36)}`
@@ -127,6 +171,7 @@ export function CardCreateScreen({
     stashed?.target ?? editCard?.target ?? CardTarget.Enemy,
   )
   const [range, setRange] = useState(stashed?.range ?? editCard?.range ?? 4)
+  const [aoe, setAoe] = useState(stashed?.aoe ?? editCard?.aoe ?? AOE_SINGLE_TILE)
   const [cost, setCost] = useState(stashed?.cost ?? editCard?.cost ?? 1)
   const [value, setValue] = useState(stashed?.value ?? editCard?.value ?? 1)
   const [desc, setDesc] = useState(stashed?.desc ?? editCard?.desc ?? "")
@@ -138,9 +183,9 @@ export function CardCreateScreen({
   const [summonRow, setSummonRow] = useState<number | null>(null)
 
   useEffect(() => {
-    const stash: CardDraft = { forId: draftKey, name, type, target, range, cost, value, desc, icon, effects }
+    const stash: CardDraft = { forId: draftKey, name, type, target, range, aoe, cost, value, desc, icon, effects }
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stash))
-  }, [draftKey, name, type, target, range, cost, value, desc, icon, effects])
+  }, [draftKey, name, type, target, range, aoe, cost, value, desc, icon, effects])
 
   // only a genuine unmount (leaving the editor) discards it; a reload does not
   useEffect(() => () => sessionStorage.removeItem(DRAFT_KEY), [])
@@ -161,6 +206,7 @@ export function CardCreateScreen({
     value,
     target,
     range,
+    aoe,
     desc,
     icon,
     fx: FxKind.Shock,
@@ -235,6 +281,14 @@ export function CardCreateScreen({
               {target !== CardTarget.Self && (
                 <Field label="Range" hint="steps from your fish">
                   <Stepper value={range} min={1} max={9} onChange={setRange} label="range" />
+                </Field>
+              )}
+              {target !== CardTarget.Self && (
+                <Field label="Blast" hint={aoeHint(draft)}>
+                  <div className="flex items-center gap-3">
+                    <Stepper value={aoe} min={AOE_SINGLE_TILE} max={AOE_MAX} onChange={setAoe} label="blast" />
+                    <BlastPreview radius={aoe} />
+                  </div>
                 </Field>
               )}
               <Field label="Target" className="basis-full">

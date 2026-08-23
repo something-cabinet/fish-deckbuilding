@@ -24,7 +24,7 @@ describe("resolver: exhaustive effect application", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.demand_letter
 
-    resolveCardEffects(s, card, { targetUnit: target, from: heroUnit(s)?.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [target], from: heroUnit(s)?.pos }, fx)
 
     const after = s.units.find((u) => u.id === target.id)!
     expect(after.hp).toBe(hpBefore - 2)
@@ -40,7 +40,7 @@ describe("resolver: exhaustive effect application", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.kneecap
 
-    resolveCardEffects(s, card, { targetUnit: target, from: heroUnit(s)?.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [target], from: heroUnit(s)?.pos }, fx)
 
     const after = s.units.find((u) => u.id === target.id)!
     expect(after.hp).toBe(hpBefore - 2)
@@ -57,7 +57,7 @@ describe("resolver: exhaustive effect application", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.loan_shark
 
-    resolveCardEffects(s, card, { targetUnit: target, from: h.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [target], from: h.pos }, fx)
 
     const heroAfter = heroUnit(s)!
     expect(heroAfter.hp).toBe(h.maxHp) // 13 + 2 capped at 14
@@ -72,7 +72,7 @@ describe("resolver: exhaustive effect application", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.hush_money
 
-    resolveCardEffects(s, card, { targetUnit: h, from: h.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [h], from: h.pos }, fx)
 
     const heroAfter = heroUnit(s)!
     expect(heroAfter.hp).toBe(hpBefore + 5)
@@ -127,7 +127,7 @@ describe("resolver: exhaustive effect application", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.demand_letter
 
-    resolveCardEffects(s, card, { targetUnit: target, from: heroUnit(s)?.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [target], from: heroUnit(s)?.pos }, fx)
 
     const last = s.log[s.log.length - 1]
     expect(last.text).toBe(`Demand Letter hits ${target.name} for 2.`)
@@ -142,7 +142,7 @@ describe("resolver: fx ids are unique per emission (D3)", () => {
     const fx: FxEvent[] = []
     const card = CARD_LIBRARY.kneecap
 
-    resolveCardEffects(s, card, { targetUnit: target, from: heroUnit(s)?.pos }, fx)
+    resolveCardEffects(s, card, { targetUnits: [target], from: heroUnit(s)?.pos }, fx)
 
     expect(fx.length).toBeGreaterThan(1)
     const ids = fx.map((e) => e.id)
