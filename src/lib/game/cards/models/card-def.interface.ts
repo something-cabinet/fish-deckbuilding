@@ -23,8 +23,13 @@ export interface CardDef {
    */
   aoe: number
   desc: string
-  /** lucide icon name used in the card art */
+  /** lucide icon name, drawn only when the card's artwork is missing */
   icon: string
+  /**
+   * Base name of a PNG in `public/card-art/` (640x400, 16:10). Omitted cards
+   * fall back to the generic art for their type.
+   */
+  art?: string
   /** visual effect id fired on resolve */
   fx: FxKind
   /** data-driven effects applied in order by the resolver (FR-1) */

@@ -1,37 +1,9 @@
 "use client"
 
-import {
-  Coins,
-  FileX2,
-  Fish,
-  Hammer,
-  HeartPulse,
-  Mail,
-  PhoneCall,
-  Skull,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react"
-import { CardType, type CardInstance } from "@/lib/game/cards"
+import { Coins } from "lucide-react"
+import { type CardInstance } from "@/lib/game/cards"
+import { CardArtPanel } from "./card-face"
 import { cn } from "@/lib/utils"
-
-const ICONS: Record<string, LucideIcon> = {
-  Mail,
-  PhoneCall,
-  FileX2,
-  Hammer,
-  Coins,
-  TrendingUp,
-  Skull,
-  HeartPulse,
-  Fish,
-}
-
-const TYPE_STYLES: Record<CardType, string> = {
-  [CardType.Attack]: "bg-enemy text-white",
-  [CardType.Skill]: "bg-teal text-ocean-deep",
-  [CardType.Summon]: "bg-gold text-ocean-deep",
-}
 
 interface Props {
   card: CardInstance
@@ -46,7 +18,6 @@ interface Props {
 
 export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap, onSell, compact }: Props) {
   const { def } = card
-  const Icon = ICONS[def.icon] ?? Fish
 
   return (
     <div
@@ -68,32 +39,7 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
         armed && "ring-2 ring-gold shadow-2xl",
       )}
     >
-      {/* cost */}
-      <span className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-black/50 bg-ocean-deep font-display text-sm font-bold text-gold shadow">
-        {def.cost}
-      </span>
-
-      {/* type + art */}
-      <div className="relative flex h-[92px] flex-col bg-[oklch(0.82_0.02_85)]">
-        <span
-          className={cn(
-            "absolute right-1.5 top-1.5 rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
-            TYPE_STYLES[def.type],
-          )}
-        >
-          {def.type}
-        </span>
-        <div className="flex flex-1 items-center justify-center">
-          <Icon
-            className={cn(
-              "opacity-80",
-              def.type === CardType.Attack ? "text-enemy" : def.type === CardType.Skill ? "text-teal" : "text-gold-dim",
-            )}
-            size={compact ? 34 : 40}
-            strokeWidth={1.75}
-          />
-        </div>
-      </div>
+      <CardArtPanel def={def} />
 
       {/* body */}
       <div className="flex flex-1 flex-col gap-1 border-t border-black/20 px-2 pt-1.5">

@@ -30,6 +30,14 @@ This repo uses a pure JS/TS architecture — the retired Godot 4 + godot-rust st
 - shadcn/ui base components, `lucide-react` icons, `tw-animate-css` for animations.
 - Placeholder portraits from DiceBear (SVG avatar API) — no custom art during prototyping.
 
+## Card Artwork
+
+- Drop a PNG in `public/card-art/`; it shows up in the card editor's art picker with no code change.
+- **Ratio 16:10 landscape**, authored at **640x400**, under ~60 KB.
+- Point a card at it with `art: "<file base name>"` on its `CardDef` (e.g. `art: "generic-attack"`).
+- Cards with no `art` use the generic art for their type (`generic-attack` / `generic-skill` / `generic-summon`); if the file is missing entirely they fall back to their `lucide-react` icon.
+- Art is full-bleed (`object-cover`) in the card's art panel. Keep the focal subject centred and clear of the **top 25%** - the cost pill and type badge overlay both top corners.
+
 ## Quick Start
 
 ```bash

@@ -59,6 +59,7 @@ export const CardDefSchema = z.object({
   aoe: z.number().int().min(AOE_SINGLE_TILE),
   desc: z.string(),
   icon: z.string(),
+  art: z.string().optional(),
   fx: CardFxSchema,
   effects: z.array(CardEffectSchema),
   log: z.string(),

@@ -13,6 +13,7 @@ import {
 import type { CardEffect } from "@/lib/game/cards/models"
 import { FxKind } from "@/lib/game/battle"
 import { DEFAULT_SUMMON, SUMMON_DEFS, type SummonDef } from "@/lib/game/summons"
+import { GENERIC_CARD_ART, cardArtUrl, useCardArtNames } from "./card-art"
 import { CARD_ICON_NAMES, getCardIcon } from "./card-icons"
 import { CardFace } from "./card-face"
 import { EffectEditor, type EffectRow } from "./effect-editor"
@@ -58,6 +59,7 @@ interface CardDraft {
   value: number
   desc: string
   icon: string
+  art: string
   effects: EffectRow[]
 }
 
@@ -176,6 +178,9 @@ export function CardCreateScreen({
   const [value, setValue] = useState(stashed?.value ?? editCard?.value ?? 1)
   const [desc, setDesc] = useState(stashed?.desc ?? editCard?.desc ?? "")
   const [icon, setIcon] = useState(stashed?.icon ?? editCard?.icon ?? "Swords")
+  /** "" means "use the generic art for this card type" */
+  const [art, setArt] = useState(stashed?.art ?? editCard?.art ?? "")
+  const artNames = useCardArtNames()
   const [effects, setEffects] = useState<EffectRow[]>(
     stashed?.effects ?? (editCard ? fromCardEffects(editCard.effects) : []),
   )
@@ -183,9 +188,9 @@ export function CardCreateScreen({
   const [summonRow, setSummonRow] = useState<number | null>(null)
 
   useEffect(() => {
-    const stash: CardDraft = { forId: draftKey, name, type, target, range, aoe, cost, value, desc, icon, effects }
+    const stash: CardDraft = { forId: draftKey, name, type, target, range, aoe, cost, value, desc, icon, art, effects }
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stash))
-  }, [draftKey, name, type, target, range, aoe, cost, value, desc, icon, effects])
+  }, [draftKey, name, type, target, range, aoe, cost, value, desc, icon, art, effects])
 
   // only a genuine unmount (leaving the editor) discards it; a reload does not
   useEffect(() => () => sessionStorage.removeItem(DRAFT_KEY), [])
@@ -209,6 +214,7 @@ export function CardCreateScreen({
     aoe,
     desc,
     icon,
+    ...(art ? { art } : {}),
     fx: FxKind.Shock,
     effects: cardEffects,
     log: "",
@@ -314,6 +320,47 @@ export function CardCreateScreen({
             </Panel>
 
             <Panel title="Artwork">
+              <Field
+                label="Art"
+                hint={`Drop a 640x400 PNG in public/card-art/ to add more. Default: ${GENERIC_CARD_ART[type]}.`}
+              >
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setArt("")}
+                    aria-pressed={art === ""}
+                    className={cn(
+                      "flex aspect-[16/10] items-center justify-center rounded-md border text-[11px] uppercase tracking-wider transition-colors",
+                      art === ""
+                        ? "border-gold bg-gold/15 text-gold"
+                        : "border-white/10 text-muted-foreground hover:border-gold/40 hover:text-foreground",
+                    )}
+                  >
+                    Default
+                  </button>
+                  {artNames.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setArt(n)}
+                      aria-label={n}
+                      aria-pressed={art === n}
+                      className={cn(
+                        "overflow-hidden rounded-md border transition-colors",
+                        art === n ? "border-gold" : "border-white/10 hover:border-gold/40",
+                      )}
+                    >
+                      <img
+                        src={cardArtUrl(n)}
+                        alt=""
+                        className="aspect-[16/10] w-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <Field label="Fallback icon" hint="Drawn only if the art file is missing.">
               <div className="grid grid-cols-[repeat(auto-fill,minmax(32px,1fr))] gap-1.5">
                 {CARD_ICON_NAMES.map((n) => {
                   const Ico = getCardIcon(n)
@@ -336,6 +383,7 @@ export function CardCreateScreen({
                   )
                 })}
               </div>
+              </Field>
             </Panel>
           </div>
         </div>
