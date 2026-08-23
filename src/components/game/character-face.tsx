@@ -14,7 +14,7 @@ export function CharacterFace({ def, className }: { def: CharacterDef; className
   return (
     <div
       className={cn(
-        "flex w-[150px] flex-col items-center gap-2 rounded-xl border-2 border-gold/40 bg-ocean-deep/60 p-3 text-center",
+        "flex w-[180px] flex-col items-center gap-2 rounded-xl border-2 border-gold/40 bg-ocean-deep/60 p-3 text-center",
         className,
       )}
     >

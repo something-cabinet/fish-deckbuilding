@@ -216,7 +216,7 @@ export function CardLibraryScreen({
           ) : (
             <div className={libraryGridClass}>
               {visible.map((def) => (
-                <div key={def.id} className="relative w-[150px]">
+                <div key={def.id} className="relative w-[180px]">
                   {custom.has(def.id) && (
                     <span className="absolute -right-1.5 -top-1.5 z-20 flex items-center gap-1 rounded-full border border-gold/40 bg-ocean-deep px-2 py-0.5 font-display text-xs font-bold uppercase tracking-wider text-gold shadow">
                       <Sparkles size={9} />

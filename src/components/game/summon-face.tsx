@@ -12,19 +12,19 @@ interface Props {
 
 /**
  * Static rendering of a summon definition. Deliberately shares CardFace's/
- * EnemyFace's footprint (150x196) so the library grid stays uniform across tabs.
+ * EnemyFace's footprint (180x235) so the library grid stays uniform across tabs.
  */
 export function SummonFace({ def, className }: Props) {
   return (
     <div
       className={cn(
-        "relative flex h-[196px] w-[150px] select-none flex-col overflow-hidden rounded-lg border shadow-lg",
+        "relative flex h-[235px] w-[180px] select-none flex-col overflow-hidden rounded-lg border shadow-lg",
         "border-black/40 bg-[oklch(0.9_0.03_85)] text-[oklch(0.2_0.03_260)]",
         className,
       )}
     >
       {/* art */}
-      <div className="relative flex h-[92px] flex-col bg-[oklch(0.82_0.02_85)]">
+      <div className="relative flex h-[110px] flex-col bg-[oklch(0.82_0.02_85)]">
         <span className="absolute right-1.5 top-1.5 rounded bg-teal px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider text-ocean-deep">
           Summon
         </span>

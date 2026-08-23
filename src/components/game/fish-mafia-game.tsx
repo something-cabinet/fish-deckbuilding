@@ -585,14 +585,14 @@ function tileFromDrop(drop: HTMLElement | null, dropType: string | null | undefi
   return { x: Number(drop.dataset.x), y: Number(drop.dataset.y) }
 }
 
-const CARD_W = 124 // compact GameCard width, at scale 1
-const CARD_H = 168 // compact GameCard height, at scale 1
+const CARD_W = 149 // compact GameCard width, at scale 1
+const CARD_H = 202 // compact GameCard height, at scale 1
 const CARD_GAP = 8 // spacing used while the hand is still small
-const TARGET_STEP = 46 // spacing we try to keep between cards — cost pip + art stay visible
-const MIN_STEP = 28 // hard floor once even the target spacing cannot fit
+const TARGET_STEP = 55 // spacing we try to keep between cards — cost pip + art stay visible
+const MIN_STEP = 34 // hard floor once even the target spacing cannot fit
 const MIN_SCALE = 0.66
 const MAX_SCALE = 1.3
-const HAND_VH = 0.24 // the hand may claim at most this share of the window height
+const HAND_VH = 0.29 // the hand may claim at most this share of the window height
 const HAND_REF = 7 // card size is sized for a hand this big, so playing a card never resizes the bar
 
 /**

@@ -23,7 +23,7 @@ export function EnemyLibraryScreen({ enemies, onEdit, onDelete }: Props) {
       ) : (
         <div className={libraryGridClass}>
           {enemies.map((enemy) => (
-            <div key={enemy.id} className="w-[150px]">
+            <div key={enemy.id} className="w-[180px]">
               <EnemyFace def={enemy} />
               <div className="mt-1.5 flex gap-1">
                 <TileAction onClick={() => onEdit(enemy)} label={`Edit ${enemy.name}`} className="flex-1">

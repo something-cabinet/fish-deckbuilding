@@ -31,9 +31,10 @@ const ICON_TINTS: Record<CardType, string> = {
 
 /**
  * The top slab every card surface shares: full-bleed artwork with the cost pill
- * and type badge riding over it. Art is 16:10 and `object-cover`, so the panel
- * holds that ratio at every card size and one image serves all of them. A card
- * whose art file is missing falls back to its lucide icon.
+ * (top-left), type badge (top-right) and the card name banded across the bottom
+ * riding over it. Art is 16:10 and `object-cover`, so the panel holds that ratio
+ * at every card size and one image serves all of them. A card whose art file is
+ * missing falls back to its lucide icon.
  */
 export function CardArtPanel({ def, large = false }: { def: CardDef; large?: boolean }) {
   const [artFailed, setArtFailed] = useState(false)
@@ -62,8 +63,8 @@ export function CardArtPanel({ def, large = false }: { def: CardDef; large?: boo
       {/* cost */}
       <span
         className={cn(
-          "absolute left-1.5 top-1.5 z-10 flex items-center justify-center rounded-full border border-black/50 bg-ocean-deep font-display font-bold text-gold shadow",
-          large ? "h-9 w-9 text-lg" : "h-7 w-7 text-sm",
+          "absolute left-0.5 top-0.5 z-10 flex items-center justify-center rounded-full border border-black/50 bg-ocean-deep font-display font-bold text-gold shadow",
+          large ? "h-6 w-6 text-xs" : "h-5 w-5 text-[10px]",
         )}
       >
         {def.cost}
@@ -72,12 +73,26 @@ export function CardArtPanel({ def, large = false }: { def: CardDef; large?: boo
       {/* type */}
       <span
         className={cn(
-          "absolute right-1.5 top-1.5 z-10 rounded px-1.5 py-0.5 font-display text-xs font-bold uppercase tracking-wider",
+          "absolute right-0.5 top-0.5 z-10 rounded px-1 py-px font-display font-bold uppercase leading-tight tracking-wide",
+          large ? "text-[9px]" : "text-[8px]",
           TYPE_STYLES[def.type],
         )}
       >
         {def.type}
       </span>
+
+      {/* name: banded across the foot of the artwork, over a scrim so it stays
+          legible whatever the image behind it looks like */}
+      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/55 to-transparent px-1.5 pb-1 pt-3">
+        <h3
+          className={cn(
+            "text-center font-display font-bold uppercase leading-tight tracking-wide text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.9)]",
+            large ? "text-[13px]" : "text-[11px]",
+          )}
+        >
+          {def.name || "Untitled"}
+        </h3>
+      </div>
     </div>
   )
 }
@@ -89,9 +104,9 @@ interface Props {
 }
 
 const SIZES = {
-  sm: "h-[168px] w-[124px]",
-  md: "h-[196px] w-[150px]",
-  lg: "h-[248px] w-[188px]",
+  sm: "h-[202px] w-[149px]",
+  md: "h-[235px] w-[180px]",
+  lg: "h-[298px] w-[226px]",
 }
 
 /** Static, non-interactive rendering of a card definition. */
@@ -110,19 +125,11 @@ export function CardFace({ def, size = "md", className }: Props) {
       <CardArtPanel def={def} large={large} />
 
       {/* body */}
-      <div className="flex flex-1 flex-col gap-1 border-t border-black/20 px-2 pt-1.5">
-        <h3
-          className={cn(
-            "font-display font-bold uppercase leading-tight tracking-wide",
-            large ? "text-[15px]" : "text-[13px]",
-          )}
-        >
-          {def.name || "Untitled"}
-        </h3>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-black/20 px-1.5 py-1">
         <p
           className={cn(
-            "leading-snug text-[oklch(0.35_0.02_260)]",
-            large ? "text-xs" : "text-xs",
+            "min-h-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_bottom,black_calc(100%-10px),transparent)] leading-snug text-[oklch(0.35_0.02_260)]",
+            large ? "text-[11px]" : "text-[10px]",
           )}
         >
           {def.desc || "No description."}
@@ -130,7 +137,7 @@ export function CardFace({ def, size = "md", className }: Props) {
       </div>
 
       {/* footer: target (+ range) + sell value */}
-      <div className="mt-auto flex items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-2 py-1 font-display text-xs font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
+      <div className="mt-auto flex shrink-0 items-center justify-between border-t border-black/30 bg-[oklch(0.78_0.02_85)] px-1.5 py-0.5 font-display text-[10px] font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
         <span className="flex items-center gap-1.5">
           <span>{TARGET_LABELS[def.target] ?? def.target}</span>
           {def.target !== CardTarget.Self && (

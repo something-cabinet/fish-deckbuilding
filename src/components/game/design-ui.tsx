@@ -241,11 +241,11 @@ export function PreviewRail({
 }
 
 /**
- * Grid used by both library tabs. Fixed 150px tracks (not 1fr) keep the gutters
+ * Grid used by both library tabs. Fixed 180px tracks (not 1fr) keep the gutters
  * identical at every width instead of stretching them on wide screens.
  */
 export const libraryGridClass =
-  "grid grid-cols-[repeat(auto-fill,150px)] justify-center gap-x-3 gap-y-4"
+  "grid grid-cols-[repeat(auto-fill,180px)] justify-center gap-x-3 gap-y-4"
 
 /** Header chip naming the record an editor is currently changing. */
 export function EditingBadge({ name }: { name: string }) {

@@ -19,7 +19,7 @@ export function SummonLibraryScreen({ summons, onEdit, onDelete }: Props) {
       ) : (
         <div className={libraryGridClass}>
           {summons.map((def) => (
-            <div key={def.id} className="relative w-[150px]">
+            <div key={def.id} className="relative w-[180px]">
               <SummonFace def={def} />
               <div className="mt-1.5 flex gap-1">
                 <TileAction onClick={() => onEdit(def)} label={`Edit ${def.name}`} className="flex-1">

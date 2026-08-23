@@ -47,7 +47,7 @@ export function TrinketLibraryScreen({ trinkets, onEdit, onDelete }: Props) {
             ) : (
               <div className={libraryGridClass}>
                 {tierTrinkets.map((def) => (
-                  <div key={def.id} className="w-[150px]">
+                  <div key={def.id} className="w-[180px]">
                     <TrinketFace def={def} />
                     <div className="mt-1.5 flex gap-1">
                       <TileAction onClick={() => onEdit(def)} label={`Edit ${def.name}`} className="flex-1">
