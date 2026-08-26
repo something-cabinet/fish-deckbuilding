@@ -1,5 +1,22 @@
 {
   "summons": [
-    { "id": "goon", "name": "Goon", "hp": 5, "atk": 2, "move": 2, "range": 1, "icon": "goon" }
+    {
+      "id": "goon",
+      "name": "Goon",
+      "hp": 5,
+      "atk": 2,
+      "move": 2,
+      "range": 1,
+      "icon": "goon"
+    },
+    {
+      "id": "summon_vu_mtacskfm",
+      "name": "Vu",
+      "hp": 10,
+      "atk": 10,
+      "move": 5,
+      "range": 1,
+      "icon": "goon"
+    }
   ]
 }

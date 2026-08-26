@@ -308,6 +308,76 @@
       ],
       "log": "Pipe Bomb goes off, catching {target}.",
       "logTone": "good"
+    },
+    {
+      "id": "custom_dmcs_mtacrdsc",
+      "name": "Kamehameha",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "enemy",
+      "range": 8,
+      "aoe": 3,
+      "desc": "Deal 20 damage AoE. Gain 5 coin.",
+      "icon": "Swords",
+      "art": "generic-attack",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 20
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 5
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    },
+    {
+      "id": "custom_call_vu_mtacts90",
+      "name": "Call Vu",
+      "type": "summon",
+      "cost": 2,
+      "value": 2,
+      "target": "empty-tile",
+      "range": 9,
+      "aoe": 0,
+      "desc": "",
+      "icon": "Swords",
+      "art": "generic-summon",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "summon_vu_mtacskfm"
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
+    },
+    {
+      "id": "custom_call_vu_mtacu2sp",
+      "name": "Call Vu",
+      "type": "summon",
+      "cost": 2,
+      "value": 2,
+      "target": "empty-tile",
+      "range": 9,
+      "aoe": 0,
+      "desc": "Summon Vu minion (10 HP, 10 ATK)",
+      "icon": "Swords",
+      "art": "generic-summon",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "summon_vu_mtacskfm"
+        }
+      ],
+      "log": "",
+      "logTone": "neutral"
     }
   ]
 }
