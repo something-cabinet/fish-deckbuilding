@@ -159,6 +159,9 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
             value={`${state.hp}/${state.maxHp}`}
             icon={<HeartPulse size={13} className="text-enemy" />}
           />
+          {state.fin > 0 && (
+            <Stat label="Fin" value={state.fin} icon={<Fish size={13} className="text-teal" />} />
+          )}
           {state.trinkets.length > 0 && (
             <div className="flex items-center gap-1">
               {state.trinkets.map((id) => {

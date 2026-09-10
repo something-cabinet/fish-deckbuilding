@@ -1,11 +1,12 @@
 "use client"
 
-import { RotateCcw } from "lucide-react"
+import { Fish, RotateCcw } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface Props {
   outcome: "won" | "lost"
   gold: number
+  fin: number
   deckSize: number
   /** the character this run was played as, named in the flavor text */
   heroName: string
@@ -17,6 +18,7 @@ interface Props {
 export function RunSummary({
   outcome,
   gold,
+  fin,
   deckSize,
   heroName,
   lostReason = "defeat",
@@ -49,6 +51,13 @@ export function RunSummary({
           <div className="flex flex-col items-center">
             <span className="text-xs text-muted-foreground">Gold banked</span>
             <span className="text-lg font-bold text-gold">{gold}</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Fish size={11} className="text-teal" />
+              Fin
+            </span>
+            <span className="text-lg font-bold text-teal">{fin}</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-xs text-muted-foreground">Deck size</span>

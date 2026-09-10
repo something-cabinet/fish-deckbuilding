@@ -787,6 +787,7 @@ export function FishMafiaApp() {
           <RunSummary
             outcome={runResult}
             gold={s.gold}
+            fin={s.fin}
             deckSize={s.deck.length}
             heroName={resolveCharacter(s.characterId).name}
             lostReason={lostReason}
