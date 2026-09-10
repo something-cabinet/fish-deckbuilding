@@ -52,7 +52,10 @@ export function createInitialState(overrides?: {
   for (const id of trinkets) {
     const def = getTrinketDef(id)
     if (!def?.stats) continue
-    if (def.stats.maxHp) hero.maxHp += def.stats.maxHp
+    if (def.stats.maxHp) {
+      hero.maxHp += def.stats.maxHp
+      hero.hp += def.stats.maxHp
+    }
     if (def.stats.atk) hero.atk += def.stats.atk
     if (def.stats.move) hero.move += def.stats.move
   }
