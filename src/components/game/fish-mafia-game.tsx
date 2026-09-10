@@ -91,6 +91,21 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
 
   const playerTurn = state.phase === Phase.Player && !busy
 
+  // A card is only truly playable when its player can both afford it AND aim it
+  // at something. A cost-affordable attack with every enemy out of range would
+  // otherwise glow gold but silently fizzle on cast (Bug A) — that reads as a
+  // broken button, so gray it out like any other unplayable card.
+  const canPlay = useCallback(
+    (card: CardInstance) => {
+      if (!playerTurn || card.def.cost > state.coin) return false
+      const mode = aimMode(card.def)
+      if (mode === AimMode.None) return true
+      const t = targetsFor(card)
+      return mode === AimMode.Tile ? t.tiles.length > 0 : t.unitIds.length > 0
+    },
+    [playerTurn, state.coin, targetsFor],
+  )
+
   // Overworld mode: report the outcome upward instead of showing the local
   // restart overlay. The parent decides win -> reward, boss unlock, etc.
   const heroHp = state.units.find((u) => u.id === "hero")?.hp ?? 0
@@ -282,16 +297,16 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   /* ---------- card interactions ---------- */
   const onCardPointerDown = useCallback(
     (e: React.PointerEvent, card: CardInstance) => {
-      if (!playerTurn || card.def.cost > state.coin) return
+      if (!canPlay(card)) return
       beginDrag(DragKind.Card, e, { card })
     },
-    [beginDrag, playerTurn, state.coin],
+    [beginDrag, canPlay],
   )
 
   const onCardTap = useCallback(
     (card: CardInstance) => {
       // called via onClick fallback when not dragged
-      if (suppressClick.current || !playerTurn || card.def.cost > state.coin) return
+      if (suppressClick.current || !canPlay(card)) return
       if (aimMode(card.def) === AimMode.None) {
         cast(card.uid, {})
         setPendingCard(null)
@@ -300,7 +315,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
       setPendingCard((p) => (p?.uid === card.uid ? null : card))
       select(null)
     },
-    [cast, playerTurn, select, state.coin],
+    [cast, canPlay, select],
   )
 
   /* ---------- unit interactions ---------- */
@@ -484,7 +499,7 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
                 >
                   <GameCard
                     card={card}
-                    playable={playerTurn && card.def.cost <= state.coin}
+                    playable={canPlay(card)}
                     // unit-targeted cards stay lifted in hand while the arrow tracks the cursor
                     dragging={isDragged && !isUnitTargetDrag}
                     armed={isArmed}
