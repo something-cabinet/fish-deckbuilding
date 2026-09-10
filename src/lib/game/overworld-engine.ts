@@ -17,6 +17,7 @@ import {
   SHOP_REMOVE_PRICE,
   START_DEBT,
   ZONES,
+  UPGRADE_PRICE,
   shopCardPrice,
   type EventDef,
 } from "./overworld-data"
@@ -319,6 +320,42 @@ export function buyCard(state: OverworldState, cardId: string, price: number): O
   return { ...state, gold: state.gold - price, deck: [...state.deck, cardId] }
 }
 
+/* ------------------------------------------------------------------ */
+/* upgrade shop — spend Fin to improve cards deck-wide (spec D11)      */
+/* ------------------------------------------------------------------ */
+
+/** Upgrade a card in the deck: spend Fin, raise its upgrade level. */
+export function upgradeCard(
+  state: OverworldState,
+  cardId: string,
+): OverworldState {
+  const current = state.upgrades[cardId] ?? 0
+  const finCost = UPGRADE_PRICE + current * UPGRADE_PRICE
+  if (state.fin < finCost) return state
+  return {
+    ...state,
+    fin: state.fin - finCost,
+    upgrades: { ...state.upgrades, [cardId]: current + 1 },
+  }
+}
+
+/** All cards in the deck that can still be upgraded (not past max level). */
+export function upgradeableCards(state: OverworldState, maxLevel = 5): string[] {
+  const seen = new Set<string>()
+  for (const id of state.deck) {
+    if (!seen.has(id) && (state.upgrades[id] ?? 0) < maxLevel) seen.add(id)
+  }
+  return Array.from(seen)
+}
+
+/** Upgrade cost for a card at the current upgrade level. */
+export function upgradeCost(state: OverworldState, cardId: string): number {
+  const current = state.upgrades[cardId] ?? 0
+  return UPGRADE_PRICE + current * UPGRADE_PRICE
+}
+
+export { UPGRADE_PRICE }
+
 /** Strike one copy of a card from the deck for a flat fee. */
 export function removeCardFromDeck(
   state: OverworldState,
@@ -589,6 +626,7 @@ export function createNewRun(seed?: number, characterId?: string): OverworldStat
     unlockedZones: 1,
     seed: s,
     trinkets: [],
+    upgrades: {},
   }
 }
 
@@ -604,6 +642,7 @@ export function loadSave(): OverworldState | null {
       ...parsed,
       fin: typeof parsed.fin === "number" ? parsed.fin : 0,
       trinkets: Array.isArray(parsed.trinkets) ? parsed.trinkets : [],
+      upgrades: parsed.upgrades ?? {},
       characterId: resolveCharacter(parsed.characterId).id,
     }
   } catch {

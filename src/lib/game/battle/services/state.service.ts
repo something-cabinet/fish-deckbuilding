@@ -1,7 +1,7 @@
 import { Phase } from "../enums"
 import type { FxEvent, GameState, Pos } from "../models"
 import { DEFAULT_COLS, DEFAULT_ROWS } from "../constants"
-import { COIN_TURN_BASE, makeCard, type CardInstance } from "../../cards"
+import { COIN_TURN_BASE, applyCardUpgrade, makeCard, type CardInstance } from "../../cards"
 import { resolveCharacter } from "../../characters"
 import { ENEMY_SPAWNS, heroDefFromCharacter, Team, type EnemySpawn, type Unit } from "../../units"
 import { DEFAULT_HAND_SIZE, DEFAULT_HAND_MAX, shuffle } from "../../deck"
@@ -22,6 +22,11 @@ export function createInitialState(overrides?: {
   heroStart?: Pos
   /** trinket def ids active in this battle */
   trinkets?: string[]
+  /**
+   * card library id -> upgrade level, bought with Fin at shop nodes (D11).
+   * Applied deck-wide when the battle's deck is built below.
+   */
+  upgrades?: Record<string, number>
   /** the character being played; supplies hero stats and the fallback deck */
   characterId?: string
 }): GameState {
@@ -29,7 +34,11 @@ export function createInitialState(overrides?: {
   // an unknown/stale id resolves to the default character rather than throwing,
   // so a save that names a character deleted in the designer still plays
   const character = resolveCharacter(overrides?.characterId)
-  const deck = (overrides?.deck ?? character.starterDeck).map(makeCard)
+  const upgrades = overrides?.upgrades ?? {}
+  const deck = (overrides?.deck ?? character.starterDeck).map((id) => {
+    const instance = makeCard(id)
+    return { ...instance, def: applyCardUpgrade(instance.def, upgrades[id] ?? 0) }
+  })
   const hand: CardInstance[] = []
 
   const cols = overrides?.cols ?? DEFAULT_COLS

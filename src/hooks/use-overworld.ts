@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   REMOVE_PRICE,
+  UPGRADE_PRICE,
   applyEventChoice,
   buyCard as buyCardEngine,
   buyTrinket as buyTrinketEngine,
@@ -28,6 +29,9 @@ import {
   shopInventory,
   travelToNode,
   unlockNextZone,
+  upgradeCard as upgradeCardEngine,
+  upgradeableCards,
+  upgradeCost,
   zoneName,
 } from "@/lib/game/overworld-engine"
 import { createInitialState } from "@/lib/game/battle"
@@ -236,6 +240,12 @@ export function useOverworld() {
     setState((s) => (s ? clearCurrentNode(s) : s))
   }, [])
 
+  /* --- upgrade actions --- */
+
+  const upgradeCard = useCallback((cardId: string) => {
+    setState((s) => (s ? upgradeCardEngine(s, cardId) : s))
+  }, [])
+
   /* --- event actions --- */
 
   const resolveEvent = useCallback(
@@ -259,6 +269,14 @@ export function useOverworld() {
   const event = useMemo(
     () => (state ? eventForNode(state.seed, state.zoneIndex, state.nodeId) : null),
     [state?.seed, state?.zoneIndex, state?.nodeId],
+  )
+  const upgradeCandidates = useMemo(
+    () => (state ? upgradeableCards(state) : []),
+    [state],
+  )
+  const upgradeFinCost = useCallback(
+    (cardId: string) => (state ? upgradeCost(state, cardId) : 0),
+    [state],
   )
 
   /** Build the battle GameState for the hero's current node. */
@@ -285,6 +303,7 @@ export function useOverworld() {
         heroStart: setup.heroStart,
         fin: eff.fin,
         trinkets: eff.trinkets,
+        upgrades: eff.upgrades,
         characterId: eff.characterId,
       })
     },
@@ -302,6 +321,9 @@ export function useOverworld() {
     shop,
     event,
     removePrice: REMOVE_PRICE,
+    upgradePrice: UPGRADE_PRICE,
+    upgradeCandidates,
+    upgradeFinCost,
     foreclosed: state ? isForeclosed(state) : false,
     isBossNode: state ? isBossNode(state) : false,
     isRestNode: state ? isRestNode(state) : false,
@@ -324,6 +346,7 @@ export function useOverworld() {
     removeCard,
     payDebt,
     leaveShop,
+    upgradeCard,
     resolveEvent,
     onLoss,
     debugUpdate,

@@ -96,4 +96,10 @@ export interface OverworldState {
   seed: number
   /** trinket def ids owned by this run */
   trinkets: string[]
+  /**
+   * card library id -> upgrade level, bought with Fin at shop nodes (D11).
+   * Applies deck-wide: every copy of the card gets the boosted effects when a
+   * battle is built from this run.
+   */
+  upgrades: Record<string, number>
 }

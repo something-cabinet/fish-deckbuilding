@@ -719,14 +719,19 @@ export function FishMafiaApp() {
         {s && nodeAction === "shop" && !runResult && (
           <ShopScreen
             gold={s.gold}
+            fin={s.fin}
             debt={s.debt}
             deck={s.deck}
             offers={overworld.shop}
             removePrice={overworld.removePrice}
+            upgrades={s.upgrades}
+            upgradeCandidates={overworld.upgradeCandidates}
+            upgradeFinCost={overworld.upgradeFinCost}
             onBuy={overworld.buyCard}
             onBuyTrinket={overworld.buyTrinket}
             onRemove={overworld.removeCard}
             onPayDebt={overworld.payDebt}
+            onUpgrade={overworld.upgradeCard}
             onLeave={() => {
               overworld.leaveShop()
               setNodeAction(null)

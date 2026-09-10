@@ -8,7 +8,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { CARD_LIBRARY } from "@/lib/game"
-import type { CardDef } from "@/lib/game/cards"
+import { CardType, type CardDef } from "@/lib/game/cards"
 import { CardLibraryScreen } from "@/components/game/card-library-screen"
 
 afterEach(cleanup)
@@ -62,7 +62,7 @@ describe("CardLibraryScreen", () => {
     expect(screen.getByText(`${baseCards.length} cards`)).toBeInTheDocument()
   })
 
-  it("filters by type via the chips", () => {
+it("filters by type via the chips", () => {
     renderScreen()
     const byType = (type: CardDef["type"]) => baseCards.filter((c) => c.type === type).length
     act(() => fireEvent.click(screen.getByRole("button", { name: /skill/i })))
@@ -70,11 +70,11 @@ describe("CardLibraryScreen", () => {
     expect(screen.getByText("Hush Money")).toBeInTheDocument()
     expect(screen.getByText("Shakedown")).toBeInTheDocument()
     expect(screen.queryByText("Demand Letter")).not.toBeInTheDocument()
-    expect(screen.getByText(`${byType("skill")} cards`)).toBeInTheDocument()
+    expect(screen.getByText(`${byType(CardType.Skill)} cards`)).toBeInTheDocument()
 
     act(() => fireEvent.click(screen.getByRole("button", { name: /^summon$/i })))
     expect(screen.getByText("Hired Muscle")).toBeInTheDocument()
-    expect(screen.getByText(`${byType("summon")} cards`)).toBeInTheDocument()
+    expect(screen.getByText(`${byType(CardType.Summon)} cards`)).toBeInTheDocument()
   })
 
   it("shows a Custom badge for authored cards and includes them in the grid", () => {

@@ -5,6 +5,7 @@ import {
   FORECLOSURE_CAP,
   INTEREST_RATE,
   SHOP_REMOVE_PRICE,
+  UPGRADE_PRICE,
 } from "@/lib/game/overworld-data"
 import {
   generateZoneMap,
@@ -35,9 +36,11 @@ import {
   addRewardToState,
   createNewRun,
   REMOVE_PRICE,
+  upgradeCard,
+  upgradeableCards,
+  upgradeCost,
 } from "@/lib/game/overworld-engine"
-import { CARD_LIBRARY } from "@/lib/game"
-import { TRINKET_LIBRARY } from "@/lib/game"
+import { CARD_LIBRARY, TRINKET_LIBRARY } from "@/lib/game"
 import { UnitKind } from "@/lib/game/units"
 import type { MapNode, OverworldState } from "@/lib/game/overworld-types"
 
@@ -514,5 +517,64 @@ describe("createNewRun", () => {
 
   it("uses the provided seed so runs are reproducible", () => {
     expect(createNewRun(SEED).seed).toBe(SEED)
+  })
+})
+
+/* ------------------------------------------------------------------ */
+/* upgrade shop                                                         */
+/* ------------------------------------------------------------------ */
+
+describe("upgradeCard", () => {
+  it("upgrades a card by spending Fin, bumping its level", () => {
+    const s = stateAt({ fin: 100, deck: ["demand_letter", "collection_call"] })
+    const u = upgradeCard(s, "demand_letter")
+    expect(u.fin).toBe(100 - UPGRADE_PRICE)
+    expect(u.upgrades.demand_letter).toBe(1)
+    expect(u.upgrades.collection_call).toBeUndefined()
+  })
+
+  it("second upgrade costs more (+UPGRADE_PRICE per level)", () => {
+    const s = stateAt({ fin: 100, upgrades: { demand_letter: 1 } })
+    const u = upgradeCard(s, "demand_letter")
+    expect(u.fin).toBe(100 - UPGRADE_PRICE * 2)
+    expect(u.upgrades.demand_letter).toBe(2)
+  })
+
+  it("is a no-op when Fin is insufficient", () => {
+    const s = stateAt({ fin: 0, deck: ["demand_letter"] })
+    expect(upgradeCard(s, "demand_letter")).toBe(s)
+  })
+
+  it("is pure — does not mutate the input state", () => {
+    const s = stateAt({ fin: 100, deck: ["demand_letter"] })
+    const u = upgradeCard(s, "demand_letter")
+    expect(s.fin).toBe(100)
+    expect(s.upgrades).toEqual({})
+    expect(u.fin).toBeLessThan(s.fin)
+  })
+})
+
+describe("upgradeableCards", () => {
+  it("returns unique card ids from the deck not at max level", () => {
+    const s = stateAt({ deck: ["a", "b", "a", "c"] })
+    const list = upgradeableCards(s)
+    expect(list.sort()).toEqual(["a", "b", "c"])
+  })
+
+  it("excludes cards already at max level", () => {
+    const s = stateAt({ deck: ["a", "b"], upgrades: { a: 5 } })
+    expect(upgradeableCards(s, 5)).toEqual(["b"])
+  })
+})
+
+describe("upgradeCost", () => {
+  it("returns base price for an unupgraded card", () => {
+    const s = stateAt()
+    expect(upgradeCost(s, "demand_letter")).toBe(UPGRADE_PRICE)
+  })
+
+  it("scales with current level", () => {
+    const s = stateAt({ upgrades: { demand_letter: 2 } })
+    expect(upgradeCost(s, "demand_letter")).toBe(UPGRADE_PRICE * 3)
   })
 })

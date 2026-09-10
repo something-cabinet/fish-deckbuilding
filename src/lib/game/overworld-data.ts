@@ -97,6 +97,8 @@ export const SHOP_REMOVE_PRICE = 30
 export function shopCardPrice(cost: number): number {
   return 18 + cost * 14
 }
+/** Base Fin cost for a single card upgrade (scales per level: 15, 30, 45...). */
+export const UPGRADE_PRICE = 15
 
 /* ------------------------------------------------------------------ */
 /* events                                                              */
