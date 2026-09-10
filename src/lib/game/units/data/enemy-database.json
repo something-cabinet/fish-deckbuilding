@@ -145,6 +145,59 @@
           "count": 2
         }
       ]
+    },
+    {
+      "id": "fixer",
+      "name": "The Fixer",
+      "kind": 3,
+      "hp": 7,
+      "atk": 3,
+      "move": 2,
+      "range": 2,
+      "goldDrop": 10,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "collection_call",
+          "count": 2
+        },
+        {
+          "id": "kneecap",
+          "count": 1
+        }
+      ],
+      "aiProfile": {
+        "archetype": "artillery",
+        "weights": {
+          "distanceToTarget": -1.5
+        }
+      }
+    },
+    {
+      "id": "loan_officer",
+      "name": "Loan Officer",
+      "kind": 3,
+      "hp": 9,
+      "atk": 2,
+      "move": 1,
+      "range": 1,
+      "goldDrop": 12,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "hush_money",
+          "count": 2
+        },
+        {
+          "id": "cash_flow",
+          "count": 1
+        }
+      ],
+      "aiProfile": {
+        "archetype": "guardian"
+      }
     }
   ]
 }

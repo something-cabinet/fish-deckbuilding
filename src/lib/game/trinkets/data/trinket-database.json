@@ -148,6 +148,42 @@
       "triggers": {
         "onTurnStart": [{ "kind": "gainCoin", "amount": 3 }]
       }
+    },
+    {
+      "id": "oyster_ledger",
+      "name": "Oyster Ledger",
+      "description": "Start each battle with 2 extra cards drawn.",
+      "icon": "Scroll",
+      "rarity": "uncommon",
+      "triggers": {
+        "onCombatStart": [{ "kind": "drawCards", "amount": 2 }]
+      }
+    },
+    {
+      "id": "razor_gill",
+      "name": "Razor Gill",
+      "description": "Your attack is increased by 2.",
+      "icon": "Sword",
+      "rarity": "rare",
+      "stats": { "atk": 2 }
+    },
+    {
+      "id": "mob_loyalty",
+      "name": "Mob Loyalty Card",
+      "description": "Gain 5 coin whenever you defeat an enemy.",
+      "icon": "Coins",
+      "rarity": "rare",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "gainCoin", "amount": 5 }]
+      }
+    },
+    {
+      "id": "swift_fins",
+      "name": "Swimming Fins",
+      "description": "Your move range is increased by 1.",
+      "icon": "Waves",
+      "rarity": "common",
+      "stats": { "move": 1 }
     }
   ]
 }

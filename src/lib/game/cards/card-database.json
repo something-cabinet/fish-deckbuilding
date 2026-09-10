@@ -221,6 +221,187 @@
       "logTone": "gold"
     },
     {
+      "id": "rub_out",
+      "name": "Rub-Out",
+      "type": "attack",
+      "cost": 0,
+      "value": 0,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A cheap, clean hit for 1 damage.",
+      "icon": "Target",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        }
+      ],
+      "log": "Rub-Out nicks {target} for 1.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "bury_evidence",
+      "name": "Bury the Evidence",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Scrub a witness for 1 damage and cycle your deck.",
+      "icon": "Lock",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "drawCards",
+          "amount": 1
+        }
+      ],
+      "log": "Bury the Evidence silences {target} for 1 and cycles the deck.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "protection_money",
+      "name": "Protection Money",
+      "type": "attack",
+      "cost": 2,
+      "value": 2,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Collect 2 damage and 2 coin from a target enemy.",
+      "icon": "Banknote",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 2
+        }
+      ],
+      "log": "Protection Money collects from {target} — 2 damage, 2 coin.",
+      "logTone": "gold"
+    },
+    {
+      "id": "tax_audit",
+      "name": "Tax Audit",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Fine a target enemy for 4 damage and skim 1 coin.",
+      "icon": "Scroll",
+      "fx": "gavel",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 4
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 1
+        }
+      ],
+      "log": "Tax Audit finds {target} owes 4 and a coin.",
+      "logTone": "good"
+    },
+    {
+      "id": "shell_game",
+      "name": "Shell Game",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Quick shuffle — draw 1 card for free.",
+      "icon": "Sparkles",
+      "fx": "draw",
+      "effects": [
+        {
+          "kind": "drawCards",
+          "amount": 1
+        }
+      ],
+      "log": "Shell Game — nothing up the sleeve, one card drawn.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "the_treatment",
+      "name": "The Treatment",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Patch up a friendly fish for 3 HP.",
+      "icon": "Syringe",
+      "fx": "heal",
+      "effects": [
+        {
+          "kind": "heal",
+          "amount": 3,
+          "target": "cast-target"
+        }
+      ],
+      "log": "The Treatment patches up {target} for 3.",
+      "logTone": "good"
+    },
+    {
+      "id": "protection_racket",
+      "name": "Protection Racket",
+      "type": "skill",
+      "cost": 2,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Enforcer training — a friendly fish gains +2 ATK.",
+      "icon": "Sword",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "buffAtk",
+          "amount": 2
+        }
+      ],
+      "log": "{target} flexes — +2 ATK from Protection Racket.",
+      "logTone": "good"
+    },
+    {
+      "id": "mermaids_call",
+      "name": "Mermaid's Call",
+      "type": "summon",
+      "cost": 4,
+      "value": 3,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Summon a Siren (7 HP / 3 ATK) on an empty tile.",
+      "icon": "Ghost",
+      "fx": "summon",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "siren"
+        }
+      ],
+      "log": "A Siren rises at {tile}.",
+      "logTone": "good"
+    },
+    {
       "id": "custom_disposal_msg8wdvf",
       "name": "Disposal",
       "type": "attack",

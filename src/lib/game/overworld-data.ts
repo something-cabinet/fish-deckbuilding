@@ -36,6 +36,7 @@ export const ZONES: ZoneDef[] = [
     enemyPool: [
       { name: "Enforcer", kind: UnitKind.Enforcer, hp: 6, atk: 3, move: 2 },
       { name: "Thug", kind: UnitKind.Thug, hp: 7, atk: 3, move: 2 },
+      { name: "Fixer", kind: UnitKind.Enforcer, hp: 7, atk: 3, move: 2 },
     ],
     theme: "mid",
   },
@@ -52,6 +53,7 @@ export const ZONES: ZoneDef[] = [
     enemyPool: [
       { name: "Enforcer", kind: UnitKind.Enforcer, hp: 9, atk: 4, move: 2 },
       { name: "Thug", kind: UnitKind.Thug, hp: 10, atk: 4, move: 2 },
+      { name: "Loan Officer", kind: UnitKind.Enforcer, hp: 9, atk: 2, move: 1 },
     ],
     theme: "deep",
   },
@@ -162,6 +164,39 @@ export const EVENTS: EventDef[] = [
       { label: "Pay the toll", result: "They wave you through.", gold: -25 },
       { label: "Refuse them", result: "You take a beating but keep your coin.", hp: -6 },
       { label: "Forge papers", result: "A little debt buys safe passage.", debt: 20 },
+    ],
+  },
+  {
+    id: "slippery_pawn",
+    title: "The Slippery Pawn",
+    prompt:
+      "An old grouper runs a floating pawn shop. Everything is \u201Chot\u201D and half the stock is watching you back.",
+    choices: [
+      { label: "Buy the ledger", result: "A tidy card joins your deck.", card: "protection_money" },
+      { label: "Sell the tip", result: "A banker's confidence is worth gold.", gold: 25 },
+      { label: "Window shop", result: "Nothing catches your eye today.", },
+    ],
+  },
+  {
+    id: "lost_purse",
+    title: "The Lost Purse",
+    prompt:
+      "A velvet purse sways in the current, bloated with coins. The nameplate says it belongs to a collector you owe.",
+    choices: [
+      { label: "Return it whole", result: "The ledger smiles on you.", debt: -30 },
+      { label: "Keep the coin", result: "Easy gold, guilty fins.", gold: 30 },
+      { label: "Pocket a few", result: "A taste, not a feast.", gold: 12, debt: -12 },
+    ],
+  },
+  {
+    id: "fence_market",
+    title: "The Fence's Market",
+    prompt:
+      "In a flooded sunken hull, a lantern-jawed moray runs the black-market bazaar — the best odds for a shoddy trinket in the zone.",
+    choices: [
+      { label: "Inspect the lucky charm", result: "It feels warm in your fin.", trinket: "lucky_fin", debt: 15 },
+      { label: "Check the anchor ring", result: "Pawn-shop gold, still good as new.", trinket: "gold_pinky_ring", gold: -15 },
+      { label: "Walk away", result: "Too much risk today.", },
     ],
   },
 ]

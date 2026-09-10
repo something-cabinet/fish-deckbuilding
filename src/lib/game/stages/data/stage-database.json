@@ -125,6 +125,142 @@
           "y": 4
         }
       ]
+    },
+    {
+      "id": "stage_fixers_msi8y2c1",
+      "name": "Witness Protection",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "fixer",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "thug",
+          "x": 5,
+          "y": 0
+        },
+        {
+          "enemyId": "thug",
+          "x": 5,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_midwaters_gauntlet_msi8y2c2",
+      "name": "The Twilight Gauntlet",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 2
+        }
+      ]
+    },
+    {
+      "id": "stage_loan_officers_msi8y2c3",
+      "name": "The Ledger Desk",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "loan_officer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "loan_officer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "fixer",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 7,
+          "y": 0
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 7,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_depths_press_msi8y2c4",
+      "name": "The Bottom Line",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "depths_thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 2
+        }
+      ]
     }
   ]
 }
