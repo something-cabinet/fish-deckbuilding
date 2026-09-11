@@ -559,6 +559,94 @@
       ],
       "log": "",
       "logTone": "neutral"
+    },
+    {
+      "id": "debt_collector",
+      "name": "Debt Collector",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Collect what's owed — 1 damage and 1 coin.",
+      "icon": "HandCoins",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 1
+        }
+      ],
+      "log": "Debt Collector squeezes {target} for 1 damage and 1 coin.",
+      "logTone": "gold"
+    },
+    {
+      "id": "backup",
+      "name": "Backup",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Send backup — an ally gains +1 ATK.",
+      "icon": "Users",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "buffAtk",
+          "amount": 1
+        }
+      ],
+      "log": "{target} gets Backup — +1 ATK.",
+      "logTone": "good"
+    },
+    {
+      "id": "hard_stop",
+      "name": "Hard Stop",
+      "type": "attack",
+      "cost": 2,
+      "value": 2,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Put a hard stop on a target for 3 damage.",
+      "icon": "ShieldBan",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 3
+        }
+      ],
+      "log": "Hard Stop slams {target} for 3.",
+      "logTone": "good"
+    },
+    {
+      "id": "inside_job",
+      "name": "Inside Job",
+      "type": "skill",
+      "cost": 3,
+      "value": 2,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A tip from the inside — gain 5 coin.",
+      "icon": "Briefcase",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "gainCoin",
+          "amount": 5
+        }
+      ],
+      "log": "Inside Job pays out 5 coin.",
+      "logTone": "gold"
     }
   ]
 }

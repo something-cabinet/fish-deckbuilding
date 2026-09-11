@@ -54,6 +54,40 @@
         "custom_call_vu_mtacu2sp",
         "custom_call_vu_mtacu2sp"
       ]
+    },
+    {
+      "id": "puffer_enforcer",
+      "name": "Puffer",
+      "title": "The Enforcer",
+      "description": "Built tough, hits harder the longer a fight drags. The syndicate's favorite cleanup crew.",
+      "icon": "hero",
+      "stats": {
+        "maxHp": 18,
+        "atk": 2,
+        "move": 2
+      },
+      "starterDeck": [
+        "demand_letter",
+        "demand_letter",
+        "debt_collector",
+        "debt_collector",
+        "backup",
+        "backup",
+        "hard_stop",
+        "hard_stop",
+        "inside_job",
+        "cash_flow",
+        "market_rate",
+        "hush_money",
+        "hush_money",
+        "the_treatment",
+        "the_treatment",
+        "protection_racket",
+        "shakedown",
+        "shakedown",
+        "kneecap",
+        "kneecap"
+      ]
     }
   ]
 }
