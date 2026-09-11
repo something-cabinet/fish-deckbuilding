@@ -133,6 +133,50 @@ export interface EventDef {
 /** Seeded pool of `?` encounters — each offers a risk/reward decision. */
 export const EVENTS: EventDef[] = [
   {
+    id: "floating_black_market",
+    title: "The Floating Black Market",
+    prompt:
+      "A lantern-lit barge drifts through the current, crowded with vendor fish. One stall-owner flashes a card you've been looking for. \u201CI take coin, or a pound of flesh. Your pick.\u201D",
+    choices: [
+      { label: "Pay the asking price", result: "A fair deal on the black market.", gold: -25, card: "pipe_bomb" },
+      { label: "Trade your time", result: "You wince but pay in blood.", hp: -6, card: "pipe_bomb" },
+      { label: "Swim past", result: "Nothing ventured, nothing lost.", },
+    ],
+  },
+  {
+    id: "debt_trap",
+    title: "The Debt Collector's Trap",
+    prompt:
+      "A narrow channel opens ahead — but the silt on the floor is stamped with the syndicate's seal. \u201CYou owe us, remember?\u201D echoes from nowhere. Swim through or find another way?",
+    choices: [
+      { label: "Swim the tunnel", result: "Fast but expensive.", debt: 25, gold: 15 },
+      { label: "Bribe the lookouts", result: "Coin opens the side gate.", gold: -30 },
+      { label: "Fight through", result: "Bloody but free.", hp: -8 },
+    ],
+  },
+  {
+    id: "sap_sipper",
+    title: "The Sap-Sipper's Bounty",
+    prompt:
+      "A bloated lamprey lies across the reef path, too slow to fight but flanked by shimmering coin. A passing crab says it's guarding a smuggler's stash.",
+    choices: [
+      { label: "Fight it head-on", result: "You earn every coin.", hp: -6, gold: 35 },
+      { label: "Sneak the stash while it sleeps", result: "Quick fingers, light risk.", gold: 20, debt: 10 },
+      { label: "Leave it be", result: "Not worth the scales.", },
+    ],
+  },
+  {
+    id: "forgotten_cache",
+    title: "The Forgotten Cache",
+    prompt:
+      "A rusted strongbox wedged in a coral crevice. The lock is crusted with barnacles — but so is the syndicate's sigil on the lid. This belongs to someone.",
+    choices: [
+      { label: "Crack it open", result: "A trinket for your trouble.", trinket: "pawn_ticket", debt: 20 },
+      { label: "Report its location", result: "The syndicate rewards loyalty.", gold: 20, debt: -10 },
+      { label: "Leave sealed", result: "Clean hands, empty pockets.", },
+    ],
+  },
+  {
     id: "loan_shark",
     title: "The Loan Shark",
     prompt:
