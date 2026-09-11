@@ -61,7 +61,7 @@
       },
       "placements": [
         {
-          "enemyId": "collection_shark",
+          "enemyId": "boss_thug",
           "x": 7,
           "y": 2
         },
