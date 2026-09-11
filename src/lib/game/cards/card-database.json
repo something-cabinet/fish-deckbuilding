@@ -778,6 +778,81 @@
       ],
       "log": "Payout — 6 coin, no questions asked.",
       "logTone": "gold"
+    },
+    {
+      "id": "poison_pill",
+      "name": "Poison Pill",
+      "type": "attack",
+      "cost": 0,
+      "value": 0,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A cheap jab — deal 1 damage and weaken the target's attack by 1.",
+      "icon": "Syringe",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "buffAtk",
+          "amount": -1
+        }
+      ],
+      "log": "Poison Pill stings {target} for 1 and weakens them.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "break_in",
+      "name": "Break In",
+      "type": "attack",
+      "cost": 1,
+      "value": 1,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Break in — deal 1 damage and skim 2 coin.",
+      "icon": "Lock",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 1
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 2
+        }
+      ],
+      "log": "Break In cracks {target} for 1 damage and 2 coin.",
+      "logTone": "gold"
+    },
+    {
+      "id": "slush_fund",
+      "name": "Slush Fund",
+      "type": "skill",
+      "cost": 2,
+      "value": 2,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Dip into the slush fund — gain 3 coin and draw 1 card.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "gainCoin",
+          "amount": 3
+        },
+        {
+          "kind": "drawCards",
+          "amount": 1
+        }
+      ],
+      "log": "Slush Fund — 3 coin pocketed, 1 card drawn.",
+      "logTone": "gold"
     }
   ]
 }
