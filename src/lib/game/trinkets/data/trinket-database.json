@@ -217,6 +217,26 @@
       "triggers": {
         "onCardSold": [{ "kind": "gainCoin", "amount": 3 }]
       }
+    },
+    {
+      "id": "seaweed_wrap",
+      "name": "Seaweed Wrap",
+      "description": "Heal 2 HP at the start of each battle.",
+      "icon": "Heart",
+      "rarity": "common",
+      "triggers": {
+        "onCombatStart": [{ "kind": "heal", "amount": 2, "target": "caster" }]
+      }
+    },
+    {
+      "id": "smugglers_ledger",
+      "name": "Smuggler's Ledger",
+      "description": "You get 3 extra coin when you sell a card.",
+      "icon": "Scroll",
+      "rarity": "uncommon",
+      "triggers": {
+        "onCardSold": [{ "kind": "gainCoin", "amount": 3 }]
+      }
     }
   ]
 }

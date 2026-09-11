@@ -485,6 +485,64 @@
           "y": 4
         }
       ]
+    },
+    {
+      "id": "stage_reef_gate",
+      "name": "The Reef Gate",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 2
+        }
+      ]
+    },
+    {
+      "id": "stage_debtors_row",
+      "name": "The Debtor's Row",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "loan_officer",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 2
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
     }
   ]
 }
