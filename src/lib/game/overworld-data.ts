@@ -93,6 +93,9 @@ export const FORECLOSURE_WARN = 0.6
 
 /** Flat cost to strike a card from your deck at a shop. */
 export const SHOP_REMOVE_PRICE = 30
+
+/** Fin earned after winning any non-practice battle (combat-exit reward). */
+export const FIN_PER_BATTLE = 5
 /** Price of a card = base + per-mana premium (higher cost = pricier). */
 export function shopCardPrice(cost: number): number {
   return 18 + cost * 14

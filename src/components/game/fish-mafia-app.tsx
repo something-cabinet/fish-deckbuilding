@@ -8,6 +8,7 @@ import type { EnemyDef } from "@/lib/game/units"
 import { TRINKET_DEFS, type TrinketDef } from "@/lib/game/trinkets"
 import { CHARACTER_DEFS, resolveCharacter, type CharacterDef } from "@/lib/game/characters"
 import { SUMMON_DEFS, type SummonDef } from "@/lib/game/summons"
+import { FIN_PER_BATTLE } from "@/lib/game/overworld-data"
 import type { ZoneId } from "@/lib/game/overworld-types"
 import type { MapNode } from "@/lib/game/overworld-types"
 import type { EventChoice } from "@/lib/game/overworld-data"
@@ -325,8 +326,8 @@ export function FishMafiaApp() {
     }
   }
 
-  const handleWin = (heroHp: number, fin: number) => {
-    overworld.updateHp(heroHp, fin)
+  const handleWin = (heroHp: number, _fin: number) => {
+    overworld.updateHp(heroHp, FIN_PER_BATTLE)
     if (battleIsBoss) {
       // final zone boss -> run over, show the victory summary
       if (overworld.state?.zoneIndex === 2) {

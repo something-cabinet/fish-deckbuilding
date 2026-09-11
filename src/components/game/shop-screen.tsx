@@ -299,7 +299,7 @@ export function ShopScreen({
         </section>
 
         {/* upgrade cards with fin */}
-        {fin > 0 && upgradeCandidates.length > 0 && (
+        {upgradeCandidates.length > 0 && (
           <section>
             <h3 className="mb-3 flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.3em] text-teal">
               <Sparkles size={13} />
@@ -317,7 +317,7 @@ export function ShopScreen({
                 const canAfford = fin >= cost
                 const upgraded = applyCardUpgrade(def, 1)
                 return (
-                  <div key={id} className="flex flex-col items-center gap-1.5 rounded-xl border border-teal/20 bg-white/[0.03] p-3">
+                  <div key={id} className={cn("flex flex-col items-center gap-1.5 rounded-xl border p-3", fin === 0 ? "border-white/10 opacity-60" : "border-teal/20 bg-white/[0.03]")}>
                     <p className="font-display text-xs font-bold uppercase text-foreground">{def.name}</p>
                     <p className="text-[10px] text-muted-foreground">
                       Lv.{lvl}

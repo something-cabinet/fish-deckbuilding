@@ -197,7 +197,7 @@ export function useOverworld() {
         ? {
             ...s,
             hp: Math.max(1, Math.min(s.maxHp, hp)),
-            ...(typeof fin === "number" ? { fin } : {}),
+            ...(typeof fin === "number" ? { fin: s.fin + fin } : {}),
           }
         : s,
     )
