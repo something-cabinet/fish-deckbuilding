@@ -427,6 +427,7 @@ export function battleEnemiesForZone(zoneIndex: number, elite = false): EnemySpa
       hp: Math.round(t.hp * scale),
       atk: Math.round(t.atk * scale),
       move: t.move,
+      range: t.range,
     }
   })
 }

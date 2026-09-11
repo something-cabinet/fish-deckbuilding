@@ -388,6 +388,103 @@
           "y": 2
         }
       ]
+    },
+    {
+      "id": "stage_midwaters_agent_msi9x2a1",
+      "name": "The Collector's Due",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "collection_agent",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 0
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "id": "stage_depths_heavies_msi9x2a2",
+      "name": "The Strongroom",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "heavy",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "id": "stage_depths_nurse_msi9x2a3",
+      "name": "The Sick Room",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "mob_nurse",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "heavy",
+          "x": 6,
+          "y": 2
+        },
+        {
+          "enemyId": "fixer",
+          "x": 7,
+          "y": 3
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 5,
+          "y": 0
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 5,
+          "y": 4
+        }
+      ]
     }
   ]
 }

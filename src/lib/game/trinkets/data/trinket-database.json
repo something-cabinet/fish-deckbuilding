@@ -184,6 +184,39 @@
       "icon": "Waves",
       "rarity": "common",
       "stats": { "move": 1 }
+    },
+    {
+      "id": "blood_in_the_water",
+      "name": "Blood in the Water",
+      "description": "Gain 1 attack whenever you defeat an enemy for the rest of combat.",
+      "icon": "Sword",
+      "rarity": "uncommon",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "buffAtk", "amount": 1 }]
+      }
+    },
+    {
+      "id": "hot_tip",
+      "name": "Hot Tip",
+      "description": "Start each battle with 1 extra coin and draw 1 card.",
+      "icon": "Scroll",
+      "rarity": "common",
+      "triggers": {
+        "onCombatStart": [
+          { "kind": "gainCoin", "amount": 1 },
+          { "kind": "drawCards", "amount": 1 }
+        ]
+      }
+    },
+    {
+      "id": "black_ledger",
+      "name": "Black Ledger",
+      "description": "You get 3 extra coin when you sell a card.",
+      "icon": "Scroll",
+      "rarity": "rare",
+      "triggers": {
+        "onCardSold": [{ "kind": "gainCoin", "amount": 3 }]
+      }
     }
   ]
 }

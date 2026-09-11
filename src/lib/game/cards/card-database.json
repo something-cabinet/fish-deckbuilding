@@ -647,6 +647,137 @@
       ],
       "log": "Inside Job pays out 5 coin.",
       "logTone": "gold"
+    },
+    {
+      "id": "enforce",
+      "name": "Enforce",
+      "type": "attack",
+      "cost": 5,
+      "value": 5,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A collector's finale — deal 9 damage to a target.",
+      "icon": "Swords",
+      "fx": "gavel",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 9
+        }
+      ],
+      "log": "Enforce pounds {target} for 9!",
+      "logTone": "good"
+    },
+    {
+      "id": "cut",
+      "name": "Cut",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A quick bandage — heal yourself for 2 HP.",
+      "icon": "HeartPulse",
+      "fx": "heal",
+      "effects": [
+        {
+          "kind": "heal",
+          "amount": 2,
+          "target": "caster"
+        }
+      ],
+      "log": "Cut — patched up for 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "stiff",
+      "name": "Stiff",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Skip town — draw 1 card and gain 1 coin.",
+      "icon": "Footprints",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "drawCards",
+          "amount": 1
+        },
+        {
+          "kind": "gainCoin",
+          "amount": 1
+        }
+      ],
+      "log": "Stiff — 1 card drawn, 1 coin pocketed.",
+      "logTone": "gold"
+    },
+    {
+      "id": "torch",
+      "name": "Torch",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 1,
+      "desc": "Burn the whole block — deal 3 damage to target and adjacent enemies.",
+      "icon": "Flame",
+      "fx": "shock",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 3
+        }
+      ],
+      "log": "Torch engulfs {target} in flames for 3!",
+      "logTone": "good"
+    },
+    {
+      "id": "ringer",
+      "name": "Ringer",
+      "type": "summon",
+      "cost": 2,
+      "value": 2,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Call in a ringer — summon a Goon (5 HP / 2 ATK).",
+      "icon": "Fish",
+      "fx": "summon",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "goon"
+        }
+      ],
+      "log": "Ringer enters at {tile}.",
+      "logTone": "good"
+    },
+    {
+      "id": "payout",
+      "name": "Payout",
+      "type": "skill",
+      "cost": 3,
+      "value": 2,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "The boss's cut — gain 6 coin.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "gainCoin",
+          "amount": 6
+        }
+      ],
+      "log": "Payout — 6 coin, no questions asked.",
+      "logTone": "gold"
     }
   ]
 }

@@ -198,6 +198,73 @@
       "aiProfile": {
         "archetype": "guardian"
       }
+    },
+    {
+      "id": "collection_agent",
+      "name": "Collection Agent",
+      "kind": 2,
+      "hp": 3,
+      "atk": 1,
+      "move": 3,
+      "range": 2,
+      "goldDrop": 4,
+      "isMinion": false,
+      "icon": "thug",
+      "deck": [
+        {
+          "id": "demand_letter",
+          "count": 1
+        }
+      ],
+      "aiProfile": {
+        "archetype": "artillery",
+        "weights": {
+          "distanceToTarget": -2
+        }
+      }
+    },
+    {
+      "id": "heavy",
+      "name": "Heavy",
+      "kind": 3,
+      "hp": 12,
+      "atk": 3,
+      "move": 1,
+      "range": 1,
+      "goldDrop": 14,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "collection_call",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "mob_nurse",
+      "name": "Mob Nurse",
+      "kind": 3,
+      "hp": 5,
+      "atk": 1,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 10,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "hush_money",
+          "count": 2
+        },
+        {
+          "id": "the_treatment",
+          "count": 1
+        }
+      ],
+      "aiProfile": {
+        "archetype": "guardian"
+      }
     }
   ]
 }

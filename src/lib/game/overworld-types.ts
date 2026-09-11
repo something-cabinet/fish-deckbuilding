@@ -24,6 +24,8 @@ export interface EnemySpawnTemplate {
   hp: number
   atk: number
   move: number
+  /** default 1 (melee). Author as 2+ for ranged enemies. */
+  range?: number
 }
 
 export interface ZoneDef {
