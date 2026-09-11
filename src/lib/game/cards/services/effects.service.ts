@@ -58,14 +58,18 @@ function interpolate(template: string, targetNames: string[], tile?: Pos): strin
   return out
 }
 
+/** Resolve card effects against state, mutating the (already-cloned) state,
+ * pushing FxEvent[]s and log entries. Accepts an optional `casterTeam` for
+ * enemy-cast cards (defaults to Player). */
 export function resolveCardEffects(
   state: GameState,
   card: CardDef,
-  ctx: { targetUnits?: Unit[]; tile?: Pos; from?: Pos },
+  ctx: { targetUnits?: Unit[]; tile?: Pos; from?: Pos; casterTeam?: Team },
   fx: FxEvent[],
 ): void {
   const { tile, from } = ctx
   const targetUnits = ctx.targetUnits ?? []
+  const casterTeam = ctx.casterTeam ?? Team.Player
 
   // enemy-target cards fire their card fx once, before effects (D6); a blast
   // lands on its aimed tile, a single-target card on the unit it picked
@@ -75,7 +79,7 @@ export function resolveCardEffects(
   }
 
   for (const effect of card.effects) {
-    applyEffect(state, card, effect, { targetUnits, tile, from }, fx)
+    applyEffect(state, card, effect, { targetUnits, tile, from, casterTeam }, fx)
   }
 
   log(state, interpolate(card.log, targetUnits.map((u) => u.name), tile), card.logTone)
@@ -90,10 +94,10 @@ function applyEffect(
   state: GameState,
   card: CardDef,
   effect: CardEffect,
-  ctx: { targetUnits: Unit[]; tile?: Pos; from?: Pos },
+  ctx: { targetUnits: Unit[]; tile?: Pos; from?: Pos; casterTeam?: Team },
   fx: FxEvent[],
 ): void {
-  const { targetUnits, tile, from } = ctx
+  const { targetUnits, tile, from, casterTeam = Team.Player } = ctx
 
   switch (effect.kind) {
     case "damage": {
@@ -131,13 +135,11 @@ function applyEffect(
     case "summon": {
       if (!tile) break
       const summonDef = resolveSummon(effect.unit)
-      // castCard is player-only today, so team is always Player; a future
-      // enemy-cast path would set this from the caster instead
       const summoned: Unit = {
         id: nid(summonDef.id),
         name: summonDef.name,
         kind: UnitKind.Goon,
-        team: Team.Player,
+        team: casterTeam,
         pos: { ...tile },
         hp: summonDef.hp,
         maxHp: summonDef.hp,

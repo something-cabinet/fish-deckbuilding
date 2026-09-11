@@ -60,6 +60,8 @@ export function stageToSpawns(
       move: def.move,
       range: def.range,
       aiProfile: def.aiProfile,
+      deck: def.deck?.length ? def.deck.map((d) => ({ ...d })) : undefined,
+      templateId: def.id,
     })
   }
   return out

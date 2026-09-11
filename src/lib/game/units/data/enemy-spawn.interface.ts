@@ -13,4 +13,8 @@ export interface EnemySpawn {
   range?: number
   /** AI tuning from the enemy template; defaults to DEFAULT_AI_PROFILE */
   aiProfile?: EnemyAiProfile
+  /** authored deck from the enemy template: card id -> count */
+  deck?: { id: string; count: number }[]
+  /** enemy library id for looking up card pool at battle start */
+  templateId?: string
 }

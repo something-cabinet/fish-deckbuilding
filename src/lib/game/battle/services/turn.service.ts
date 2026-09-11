@@ -1,11 +1,13 @@
 import { EnemyStepKind, FxKind, Phase } from "../enums"
-import type { EnemyStep, FxEvent, GameState } from "../models"
+import type { EnemyStep, FxEvent, GameState, Pos } from "../models"
 import { clone, emitFx, heroUnit, log } from "../../shared"
-import { Team } from "../../units"
+import { Team, type Unit } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
-import { COIN_TURN_BASE } from "../../cards"
+import { COIN_TURN_BASE, CARD_LIBRARY, resolveCardEffects } from "../../cards"
 import { resolveTrigger } from "../../trinkets"
+import { CardTarget } from "../../cards/enums"
+import { manhattan } from "./board.service"
 
 export function checkEnd(state: GameState) {
   const hero = heroUnit(state)
@@ -25,6 +27,15 @@ export function checkEnd(state: GameState) {
 export function startEnemyPhase(state: GameState): GameState {
   const s = clone(state)
   s.phase = Phase.Enemy
+  // reset enemy hands then draw one card per living enemy from their pool
+  s.enemyHands = {}
+  for (const u of s.units) {
+    if (u.team !== Team.Enemy || u.hp <= 0) continue
+    const pool = s.enemyCardPools[u.id]
+    if (!pool || pool.length === 0) continue
+    const drawn = pool.splice(0, 1)[0]
+    if (drawn) s.enemyHands[u.id] = [drawn]
+  }
   return s
 }
 
@@ -56,6 +67,27 @@ export function applyEnemyStep(
       }
       break
     }
+    case EnemyStepKind.CastCard: {
+      if (step.cardId) {
+        const def = CARD_LIBRARY[step.cardId]
+        if (def) {
+          const enemies = s.units.filter((x) => x.team === Team.Player && x.hp > 0)
+          const allies = s.units.filter((x) => x.team === Team.Enemy && x.hp > 0 && x.id !== u.id)
+          const self = [u]
+          let targetUnits: typeof s.units = []
+          if (def.target === CardTarget.Enemy) {
+            targetUnits = sortByDist(enemies, u.pos).slice(0, 1)
+          } else if (def.target === CardTarget.Ally || def.target === CardTarget.Unit) {
+            targetUnits = sortByDist(allies, u.pos).slice(0, 1)
+          } else if (def.target === CardTarget.Self) {
+            targetUnits = self
+          }
+          resolveCardEffects(s, def, { targetUnits, from: u.pos, casterTeam: Team.Enemy }, fx)
+          log(s, `${u.name} casts ${def.name}.`, "bad")
+        }
+      }
+      break
+    }
     default: {
       const _exhaustive: never = step.kind
     }
@@ -64,6 +96,10 @@ export function applyEnemyStep(
   if (cleanupDead(s) > 0) resolveTrigger(s, s.activeTrinkets, "onEnemyKilled", fx)
   checkEnd(s)
   return { state: s, fx }
+}
+
+function sortByDist(units: Unit[], from: Pos): Unit[] {
+  return [...units].sort((a, b) => manhattan(a.pos, from) - manhattan(b.pos, from))
 }
 
 /**

@@ -36,4 +36,8 @@ export interface GameState {
   activeTrinkets: string[]
   /** the character being played, so battle UI can name and portrait the hero */
   characterId: string
+  /** card pools per enemy unit id — cards drawn from their authored decks */
+  enemyCardPools: Record<string, string[]>
+  /** cards drawn this turn but not yet played, per enemy unit id */
+  enemyHands: Record<string, string[]>
 }

@@ -33,5 +33,13 @@ export function clone(state: GameState): GameState {
     hand: [...state.hand],
     discard: [...state.discard],
     log: [...state.log],
+    enemyCardPools: mapValues(state.enemyCardPools, (v) => [...v]),
+    enemyHands: mapValues(state.enemyHands, (v) => [...v]),
   }
+}
+
+function mapValues<V>(obj: Record<string, V[]>, fn: (v: V[]) => V[]): Record<string, V[]> {
+  const out: Record<string, V[]> = {}
+  for (const k of Object.keys(obj)) out[k] = fn(obj[k])
+  return out
 }

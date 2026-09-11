@@ -9,4 +9,6 @@ export interface EnemyStep {
   to?: Pos
   targetId?: string
   amount?: number
+  /** card id when kind === CastCard */
+  cardId?: string
 }

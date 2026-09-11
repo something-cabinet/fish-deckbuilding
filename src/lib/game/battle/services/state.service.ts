@@ -86,6 +86,19 @@ export function createInitialState(overrides?: {
     aiProfile: e.aiProfile,
   }))
 
+  // build per-enemy card pools from authored decks
+  const enemyCardPools: Record<string, string[]> = {}
+  spawns.forEach((e, i) => {
+    const uid = `enemy_${i}`
+    const pool: string[] = []
+    if (e.deck) {
+      for (const entry of e.deck) {
+        for (let n = 0; n < entry.count; n++) pool.push(entry.id)
+      }
+    }
+    if (pool.length > 0) enemyCardPools[uid] = pool
+  })
+
   return {
     turn: 1,
     phase: Phase.Player,
@@ -109,6 +122,8 @@ export function createInitialState(overrides?: {
     handMax: DEFAULT_HAND_MAX,
     activeTrinkets: overrides?.trinkets ?? [],
     characterId: character.id,
+    enemyCardPools,
+    enemyHands: {},
   }
 }
 
