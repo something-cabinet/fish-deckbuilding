@@ -1,8 +1,14 @@
 # AI agent notes (persists across sessions on ai-new-feature)
 
+## Request from dev
+
+- Currently enemy with card-casting ability can use card without player know in advance, which is bad game design. Let player know which card the enemy will cast on its turn.
+- Show the card's range on the card UI itself, currently not supported.
+
 ## Session: 2026-09-11 (continued — fin economy, content batch, upgrade badge)
 
 ### Done
+
 - **Fin economy closed (fix):** Fin now earns 5 per battle win via `FIN_PER_BATTLE` constant. `updateHp` in `use-overworld.ts` changed from overwrite to additive (`s.fin + fin`) so accumulated Fin persists across battles.
 - **Always show Fin:** Map HUD and shop upgrade section now always visible even at 0 Fin, so players learn the mechanic exists.
 - **Content batch (6 cards, 3 enemies, 3 trinkets, 3 stages):**
@@ -16,6 +22,7 @@
 - All 349 tests pass (44 files), TypeScript compiles clean.
 
 ### Files changed
+
 - `src/lib/game/overworld-data.ts` — added `FIN_PER_BATTLE = 5`, zone pool updates
 - `src/hooks/use-overworld.ts` — `updateHp` fin additive
 - `src/lib/game/overworld-types.ts` — `EnemySpawnTemplate.range`
@@ -30,6 +37,7 @@
 - `CHANGELOG.md` — wrote full session entry
 
 ### Ideas / TODOs for next session
+
 - Enemy card pools currently only draw 1 card per turn per enemy and discard unused hands after the turn. Consider tuning: drawing 2 cards for ranged/guardian enemies, or allowing enemies to hold cards between turns for more interesting play patterns.
 - Consider adding a few more enemy templates with card-focused decks (e.g. a caster enemy with high-damage spells, or a debuffer).
 - Tooling suggestion: if AI-generated card art is desired, a stable-diffusion pipeline or similar image gen tool could populate `public/card-art/` with fish character portraits matching the crime-noir aesthetic.
