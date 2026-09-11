@@ -52,6 +52,7 @@ export function ShopScreen({
 }: Props) {
   const [bought, setBought] = useState<Set<string>>(new Set())
   const [removeMode, setRemoveMode] = useState(false)
+  const [upgradeMsg, setUpgradeMsg] = useState<string | null>(null)
 
   const buy = (cardId: string, price: number) => {
     if (gold < price || bought.has(cardId)) return
@@ -63,6 +64,12 @@ export function ShopScreen({
     if (gold < price || bought.has(`trinket-${trinketId}`)) return
     onBuyTrinket(trinketId, price)
     setBought((prev) => new Set(prev).add(`trinket-${trinketId}`))
+  }
+
+  const upgrade = (cardId: string, name: string) => {
+    onUpgrade(cardId)
+    setUpgradeMsg(`${name} upgraded!`)
+    setTimeout(() => setUpgradeMsg(null), 2000)
   }
 
   const cardOffers = offers.filter((o) => o.cardId)
@@ -332,7 +339,7 @@ export function ShopScreen({
                     <button
                       type="button"
                       disabled={!canAfford}
-                      onClick={() => onUpgrade(id)}
+                      onClick={() => upgrade(id, def.name)}
                       className={cn(
                         "flex items-center gap-1.5 rounded-md border px-3 py-1 font-display text-xs font-bold uppercase tracking-wider transition-colors",
                         canAfford
@@ -350,6 +357,13 @@ export function ShopScreen({
           </section>
         )}
       </div>
+      {/* upgrade toast */}
+      {upgradeMsg && (
+        <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 animate-fm-fade-in rounded-xl border border-teal/30 bg-ocean-deep/90 px-5 py-3 font-display text-sm font-bold uppercase tracking-wider text-teal shadow-xl backdrop-blur-sm">
+          <Sparkles size={14} className="mr-2 inline-block" />
+          {upgradeMsg}
+        </div>
+      )}
     </div>
   )
 }
