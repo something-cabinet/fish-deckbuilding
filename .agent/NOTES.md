@@ -1,35 +1,37 @@
 # AI agent notes (persists across sessions on ai-new-feature)
 
-## Session: 2026-09-11 (content + enemy-cast cards)
+## Session: 2026-09-11 (continued — fin economy, content batch, upgrade badge)
 
 ### Done
-- **Enemy-cast cards (big feature):** Enemies now play cards from their authored decks. Each living enemy draws one card per turn at enemy phase start, and the AI evaluates card casts alongside move+attack using the same utility scorer weights. Cards resolve through the shared effect system. Fixes the dormant `deck` field in enemy-database.json. See `ai.service.ts:planEnemyTurn` for card-candidate generation, `turn.service.ts:applyEnemyStep` for CastCard handling, `state.service.ts:createInitialState` for pool building.
-- **Stage completion (3 stages):** Added midwaters boss (The Collection Deck), depths elite (The Write-Off), depths boss (The Final Ledger). Every zone now has a full normal/elite/boss stage suite.
-- **New character + cards:** Puffer (The Enforcer) — 18 HP bruiser with support/defense deck. 4 new cards: Debt Collector, Backup, Hard Stop, Inside Job.
-- **Upgrade toast feedback:** Shop shows a 2-second "CardName upgraded!" toast when Fin is spent.
-- **Bug fixes:** Summon effect no longer hardcodes Team.Player (uses casterTeam); clone() now deep-copies enemyCardPools/enemyHands.
+- **Fin economy closed (fix):** Fin now earns 5 per battle win via `FIN_PER_BATTLE` constant. `updateHp` in `use-overworld.ts` changed from overwrite to additive (`s.fin + fin`) so accumulated Fin persists across battles.
+- **Always show Fin:** Map HUD and shop upgrade section now always visible even at 0 Fin, so players learn the mechanic exists.
+- **Content batch (6 cards, 3 enemies, 3 trinkets, 3 stages):**
+  - Cards: Enforce (5-cost 9dmg), Cut (0-cost self-heal 2), Stiff (1-cost draw 1 + coin 1), Torch (3-cost 3dmg AoE cross), Ringer (2-cost summon Goon), Payout (3-cost gain 6 coin).
+  - Enemies: Collection Agent (shallows ranged normal), Heavy (tank elite), Mob Nurse (healer elite with heal cards).
+  - Trinkets: Blood in the Water (onEnemyKilled: +1 ATK), Hot Tip (onCombatStart: +1 coin + draw 1), Black Ledger (onCardSold: +3 coin).
+  - Stages: The Collector's Due (midwaters normal), The Strongroom (depths normal), The Sick Room (depths elite).
+  - Zone pool diversity: Added all new enemies to appropriate zone pools.
+- **EnemySpawnTemplate range:** Added optional `range` field to `EnemySpawnTemplate` and pass-through in `battleEnemiesForZone` so ranged enemies from zone pools use authored range.
+- **Upgrade badge:** Overworld map deck modal now shows teal `+N` badge for upgraded cards.
 - All 349 tests pass (44 files), TypeScript compiles clean.
 
 ### Files changed
-- `src/lib/game/battle/enums/enemy-step-kind.enum.ts` — added `CastCard`
-- `src/lib/game/battle/models/enemy-step.interface.ts` — added `cardId`
-- `src/lib/game/battle/models/game-state.interface.ts` — added `enemyCardPools`, `enemyHands`
-- `src/lib/game/battle/models/ai-candidate.interface.ts` — added `kind`, `cardId`
-- `src/lib/game/battle/services/state.service.ts` — build enemy card pools in `createInitialState`
-- `src/lib/game/battle/services/turn.service.ts` — `startEnemyPhase` draws cards; `applyEnemyStep` handles CastCard
-- `src/lib/game/battle/services/ai.service.ts` — `planEnemyTurn` evaluates card-cast candidates
-- `src/lib/game/cards/services/effects.service.ts` — summon uses `casterTeam` instead of hardcoded Player
-- `src/lib/game/shared/helpers/engine.helper.ts` — clone deep-copies new fields
-- `src/lib/game/units/data/enemy-spawn.interface.ts` — added `deck`, `templateId`
-- `src/lib/game/stages/services/stage.service.ts` — pass deck + templateId through stageToSpawns
-- `src/lib/game/stages/data/stage-database.json` — 3 new stages (midwaters boss, depths elite/boss)
-- `src/lib/game/cards/card-database.json` — 4 new cards
-- `src/lib/game/characters/data/character-database.json` — Puffer character
-- `src/components/game/shop-screen.tsx` — upgrade toast feedback
+- `src/lib/game/overworld-data.ts` — added `FIN_PER_BATTLE = 5`, zone pool updates
+- `src/hooks/use-overworld.ts` — `updateHp` fin additive
+- `src/lib/game/overworld-types.ts` — `EnemySpawnTemplate.range`
+- `src/lib/game/overworld-engine.ts` — `battleEnemiesForZone` range pass-through
+- `src/lib/game/cards/card-database.json` — 6 new cards
+- `src/lib/game/units/data/enemy-database.json` — 3 new enemies
+- `src/lib/game/trinkets/data/trinket-database.json` — 3 new trinkets
+- `src/lib/game/stages/data/stage-database.json` — 3 new stages
+- `src/components/game/overworld-map.tsx` — always show Fin, +N badge in deck modal
+- `src/components/game/shop-screen.tsx` — show upgrade section even at 0 Fin
+- `src/components/game/fish-mafia-app.tsx` — `handleWin` passes `FIN_PER_BATTLE`
+- `CHANGELOG.md` — wrote full session entry
 
 ### Ideas / TODOs for next session
 - Enemy card pools currently only draw 1 card per turn per enemy and discard unused hands after the turn. Consider tuning: drawing 2 cards for ranged/guardian enemies, or allowing enemies to hold cards between turns for more interesting play patterns.
-- The `fin` display always shows (even at 0) in both top-bar and overworld-map — this was already done in a prior session.
-- Consider adding a few more enemy templates with card-focused decks (e.g. a healer enemy that mainly casts heal/support cards, or a caster enemy with high-damage spells).
+- Consider adding a few more enemy templates with card-focused decks (e.g. a caster enemy with high-damage spells, or a debuffer).
 - Tooling suggestion: if AI-generated card art is desired, a stable-diffusion pipeline or similar image gen tool could populate `public/card-art/` with fish character portraits matching the crime-noir aesthetic.
-- The Fin upgrade shop could show a small "Upgraded!" badge on cards in the deck modal that have been boosted (card-face list in the map screen).
+- The Fin economy is now closed at 5 per battle with UPGRADE_PRICE=15. Keep an eye on whether Fin feels too stingy or too generous — `FIN_PER_BATTLE` and `UPGRADE_PRICE` are the two tuning knobs.
+- The `game-state.interface.ts` has `fin` but it's just a pass-through from overworld. Consider removing `fin` from GameState if it's never used during battle logic, or use it for in-battle Fin rewards (e.g. killing a tough enemy drops fin mid-fight).

@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+- **Fin economy closed:** Fin now earns 5 per battle win (`FIN_PER_BATTLE` constant) and accumulates additively. The map HUD and shop upgrade section always display Fin (even at 0) so players learn the mechanic exists.
+- **6 new cards:** Enforce (5-cost 9dmg finisher), Cut (0-cost self-heal 2), Stiff (1-cost draw 1 + gain 1 coin), Torch (3-cost 3dmg AoE cross), Ringer (2-cost summon Goon), Payout (3-cost gain 6 coin).
+- **3 new enemies:** Collection Agent (shallows ranged normal), Heavy (midwaters/depths tank), Mob Nurse (midwaters/depths healer with heal cards).
+- **3 new trinkets:** Blood in the Water (onEnemyKilled: +1 ATK, uncommon), Hot Tip (onCombatStart: +1 coin + draw 1, common), Black Ledger (onCardSold: +3 coin, rare).
+- **3 new stages:** The Collector's Due (midwaters normal w/ Collection Agent), The Strongroom (depths normal w/ Heavy), The Sick Room (depths elite w/ Mob Nurse + Heavy).
+- **Zone pool diversity:** Collection Agent added to shallows pool; Heavy and Mob Nurse added to midwaters and depths pools, with difficulty-scaled stats.
+- **EnemySpawnTemplate range field:** `EnemySpawnTemplate` now supports an optional `range` field, passed through to `battleEnemiesForZone` so ranged enemies from zone pools correctly use their authored range instead of defaulting to melee.
+- **Upgrade badge in deck modal:** Cards in the overworld deck modal now show a teal `+N` badge when they have been upgraded with Fin.
 - **Enemy-cast cards:** Enemies now play cards from their authored decks each turn instead of only using basic attacks. Each living enemy draws one card per turn from their pool at phase start. The AI evaluates card casts alongside move+attack using the same utility scorer weights, picking the best option. Cards resolve through the shared effect system, with proper `casterTeam` support for enemy-cast summons. Covers all authored enemy decks (Thugs, Enforcers, Fixers, Loan Officers, bosses).
 - Fin upgrade shop (SPEC D11): Fin can now be spent at shop nodes to upgrade cards deck-wide. Each upgrade level bumps damage/heal effect amounts by 1, adds a "+N" name marker, and raises sell value. Cost scales per level (15 + 15 × level), capped at level 5. Accessible from any shop node when `fin > 0`.
 - 9 new crime-noir themed cards: Rub-Out (0-cost 1dmg), Bury the Evidence (1-cost 1dmg+cycle), Protection Money (2-cost 2dmg+2coin), Tax Audit (3-cost 4dmg+1coin), Shell Game (0-cost draw 1), The Treatment (1-cost heal 3 ally), Protection Racket (2-cost ally +2 ATK), Mermaid's Call (summon Siren 4-cost).
