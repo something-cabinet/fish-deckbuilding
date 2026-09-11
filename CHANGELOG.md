@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Shallows boss stage uses wrong boss:** `stage_boss_alpha` placed `collection_shark` (The Collection Shark, the midwaters boss) instead of `boss_thug` (Barnacle Brute, the shallows boss). This made the first zone's boss harder than intended and showed the wrong boss fish. `battleSetupForNode` uses authored stages with priority, so this affected every shallows boss fight.
+
+### Added
+- **4 new overworld events:** Floating Black Market (buy Pipe Bomb with gold or HP), The Debt Collector's Trap (debt/HP risk-reward), The Sap-Sipper's Bounty (fight or sneak past a guardian), The Forgotten Cache (crack a strongbox for Pawn Ticket). Event pool grows from 4 to 8, significantly more run variety in overworld encounters.
+- **3 new cards:** Poison Pill (0-cost attack: 1 damage + -1 ATK debuff), Break In (1-cost attack: 1 damage + 2 coin), Slush Fund (2-cost skill: 3 coin + draw 1). Fills gaps in 0-cost debuff, efficient economy attack, and mid-cost economy+cycle.
+- **2 new enemies:** The Informant (shallows/midwaters — fast ranged debuffer with Kneecap cards, artillery AI), The Caster (midwaters/depths — slow ranged glass cannon with Foreclose, artillery AI). Both added to appropriate zone battle pools.
+- **2 new trinkets:** Seaweed Wrap (common — heal 2 HP at combat start), Smuggler's Ledger (uncommon — +3 coin on card sell).
+- **2 new stages:** The Reef Gate (shallows normal — 2 thugs + enforcer), The Debtor's Row (midwaters normal — Loan Officer + 2 mid-thugs).
+
 ### Added
 - **Fin economy closed:** Fin now earns 5 per battle win (`FIN_PER_BATTLE` constant) and accumulates additively. The map HUD and shop upgrade section always display Fin (even at 0) so players learn the mechanic exists.
 - **6 new cards:** Enforce (5-cost 9dmg finisher), Cut (0-cost self-heal 2), Stiff (1-cost draw 1 + gain 1 coin), Torch (3-cost 3dmg AoE cross), Ringer (2-cost summon Goon), Payout (3-cost gain 6 coin).
