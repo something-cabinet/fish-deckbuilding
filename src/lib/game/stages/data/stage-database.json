@@ -261,6 +261,133 @@
           "y": 2
         }
       ]
+    },
+    {
+      "id": "stage_midwaters_boss_msi9x1a1",
+      "name": "The Collection Deck",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "boss",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "collection_shark",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "fixer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "fixer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 7,
+          "y": 0
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 7,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_depths_elite_msi9x1a2",
+      "name": "The Write-Off",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "loan_officer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "loan_officer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "fixer",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 5,
+          "y": 0
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 5,
+          "y": 4
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "stage_depths_boss_msi9x1a3",
+      "name": "The Final Ledger",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "boss",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "forecloser",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "fixer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "loan_officer",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 7,
+          "y": 0
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 7,
+          "y": 4
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 5,
+          "y": 2
+        }
+      ]
     }
   ]
 }
