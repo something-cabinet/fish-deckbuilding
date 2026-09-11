@@ -321,7 +321,7 @@ export function OverworldMap({ state, map, reachable, onNodeClick, onExit }: Pro
         </p>
       </div>
 
-      {showDeck && <DeckModal deck={state.deck} onClose={() => setShowDeck(false)} />}
+      {showDeck && <DeckModal deck={state.deck} upgrades={state.upgrades} onClose={() => setShowDeck(false)} />}
     </main>
   )
 }
@@ -485,7 +485,7 @@ function ZoneBackdrop({ index }: { index: number }) {
 
 const ZONE_NAMES = ["Shallows", "Midwaters", "Depths"]
 
-function DeckModal({ deck, onClose }: { deck: string[]; onClose: () => void }) {
+function DeckModal({ deck, upgrades, onClose }: { deck: string[]; upgrades: Record<string, number>; onClose: () => void }) {
   const counts = useMemo(() => {
     const m: Record<string, number> = {}
     for (const id of deck) m[id] = (m[id] ?? 0) + 1
@@ -521,6 +521,11 @@ function DeckModal({ deck, onClose }: { deck: string[]; onClose: () => void }) {
                 <span className="flex items-center gap-2 text-sm text-foreground">
                   <Shield size={13} className="text-gold/70" />
                   {def.name}
+                  {upgrades[id] > 0 && (
+                    <span className="rounded bg-teal/20 px-1 py-0.5 font-display text-[10px] font-bold text-teal">
+                      +{upgrades[id]}
+                    </span>
+                  )}
                 </span>
                 <span className="font-display text-xs font-bold text-muted-foreground">×{count}</span>
               </div>
