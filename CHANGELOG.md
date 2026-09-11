@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- **Enemy-cast cards:** Enemies now play cards from their authored decks each turn instead of only using basic attacks. Each living enemy draws one card per turn from their pool at phase start. The AI evaluates card casts alongside move+attack using the same utility scorer weights, picking the best option. Cards resolve through the shared effect system, with proper `casterTeam` support for enemy-cast summons. Covers all authored enemy decks (Thugs, Enforcers, Fixers, Loan Officers, bosses).
 - Fin upgrade shop (SPEC D11): Fin can now be spent at shop nodes to upgrade cards deck-wide. Each upgrade level bumps damage/heal effect amounts by 1, adds a "+N" name marker, and raises sell value. Cost scales per level (15 + 15 × level), capped at level 5. Accessible from any shop node when `fin > 0`.
 - 9 new crime-noir themed cards: Rub-Out (0-cost 1dmg), Bury the Evidence (1-cost 1dmg+cycle), Protection Money (2-cost 2dmg+2coin), Tax Audit (3-cost 4dmg+1coin), Shell Game (0-cost draw 1), The Treatment (1-cost heal 3 ally), Protection Racket (2-cost ally +2 ATK), Mermaid's Call (summon Siren 4-cost).
 - Siren summon template (7 HP / 3 ATK), used by Mermaid's Call.
@@ -11,9 +12,15 @@
 - 5 new stages: Witness Protection (shallows elite w/ Fixer), The Twilight Gauntlet (midwaters normal), The Ledger Desk (midwaters elite w/ Loan Officers), The Bottom Line (depths normal).
 - 4 new events: The Slippery Pawn (card reward option), The Lost Purse (debt/gold choice), The Fence's Market (trinket reward options).
 - Fill/balance: Fixer and Loan Officer added to midwaters/depths zone battle pools so generated (non-stage) battles also feature them.
+- **3 new stages:** The Collection Deck (midwaters boss — Collection Shark + 2 Fixers), The Write-Off (depths elite — 2 Loan Officers + Fixer + guards), The Final Ledger (depths boss — The Forecloser + Fixer + Loan Officer + guards). Every zone now has a complete normal/elite/boss stage suite.
+- **Puffer (The Enforcer)** — third playable character with 18 HP and a support/defense-oriented starter deck. Built tough for longer fights.
+- **4 new cards:** Debt Collector (1-cost 1dmg+1coin), Backup (1-cost ally +1 ATK), Hard Stop (2-cost 3dmg), Inside Job (3-cost gain 5 coin).
+- **Upgrade toast feedback:** Shop now shows a temporary "CardName upgraded!" toast with sparkle icon when a Fin upgrade is applied, auto-dismissing after 2 seconds.
 
 ### Fixed
 - Trinket maxHp bonus (e.g. Shark Tooth +5, Coral Crown +8) now also raises the hero's current HP at battle start, so the extra pool is immediately usable instead of requiring a heal source.
 - Cards with no legal target in range (e.g. an attack card when all enemies are dead or out of range) no longer glow gold as playable — they render dim like any unaffordable card.
 - Stale hardcoded card-count assertions in card-library-screen test were replaced with data-driven lookups so the test doesn't break when the card pool grows.
 - TypeScript compile errors cleaned up in card-library-screen test (CardType enum usage) and duplicate import in overworld-engine spec.
+- Summon effect in `resolveCardEffects` now uses the caster's team instead of hardcoding `Team.Player`, enabling enemy-cast summon cards.
+- `clone()` in engine helper now deep-copies `enemyCardPools` and `enemyHands` to prevent mutation leaks during enemy phase simulation.
