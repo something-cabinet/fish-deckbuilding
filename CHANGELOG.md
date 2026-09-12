@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Added
+- **Enemy card preview:** before each enemy CastCard step, a card preview overlay appears for 700ms showing the card face so the player knows what's coming. Addresses the game design concern that enemies were casting cards without player visibility.
+- **Range/target/AOE on hand card UI:** the interactive GameCard component now shows target label, cast range (crosshair icon), and blast radius (radius icon) in its description footer. Previously only the static CardFace displayed this info.
+- **Ranged/guardian draw 2 cards:** enemies with range > 1 or guardian archetype now draw 2 cards per turn from their deck instead of 1, making ranged casters and healers more tactically interesting.
+- **3 new cards:** Dip (0-cost skill, gain 1 coin), Hardball (4-cost attack, deal 7 damage), Guinea Pig (1-cost summon, brings Decoy 2 HP/1 ATK).
+- **2 new enemies:** The Bruiser (midwaters/depths elite tank, 15/20 HP, Kneecap deck), The Spotter (depths ranged glass cannon, range 4, Demand Letter deck).
+- **2 new stages:** The Pumphouse (shallows elite — Heavy + Capo + Soldiers), The Crosshairs (depths normal — Spotter + Soldiers).
+- **1 new trinket:** Barnacle Armor (common, +2 max HP).
+- **2 new events:** The Underworld Auction (coin or debt for Hardball card), The Anonymous Tip (risk/reward gold find). Event pool grows to 12.
+- **1 new summon:** Decoy (2 HP / 1 ATK / 1 move) for the Guinea Pig card.
+- **Card art (9):** dip, hardball, guinea_pig, foreclose_card, collection_call, pipe_bomb_card, muscle_card, loan_shark_card, cash_flow_card.
+- **Enemy sprites (7):** bruiser, spotter, caster_sprite, collection_agent, informant, heavy, mob_nurse — replacing shared generic placeholders with unique portraits.
+- **Summon sprite (1):** decoy — small bait fish with tin badge.
+
+### Changed
+- **Enemy card draw:** `startEnemyPhase` now draws 2 cards for enemies with range > 1 or guardian archetype, 1 for melee enemies. Gives ranged/guardian enemies more tactical options.
+- **Zone pool diversity:** Bruiser added to midwaters and depths pools; Spotter added to depths pool.
+
 ### Changed
 - **Enemy ranks follow the mafia hierarchy:** the Thug and Enforcer unit kinds are now **Soldier** and **Capo** (Soldier → Capo → Boss). Renamed in `UnitKind`, the enemy card badge, the enemy designer's Kind picker, and the generic enemies' display names (Thug → Soldier, Enforcer → Capo, stage "Double Enforcer" → "Double Capo"). Enum order is unchanged, so saved `kind` values stay valid; enemy ids and sprite file names (`thug`, `enforcer`) are kept so existing stages still resolve.
 - **Placeholder sprites as fallbacks:** units without a sprite of their own now fall back to placeholder art instead of real character art — `placeholder-enemy` for Soldier/Capo/Boss, `placeholder-player` for the hero, `placeholder-summon` for goons. The stage editor grid (hero start and enemies without an icon) and new enemies/characters/summons in the designers also start on the placeholders. Names live in `PLACEHOLDER_SPRITE` (`sprites.ts`).
