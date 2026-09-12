@@ -1,7 +1,7 @@
 import { EnemyStepKind, FxKind, Phase } from "../enums"
 import type { EnemyStep, FxEvent, GameState, Pos } from "../models"
 import { clone, emitFx, heroUnit, log } from "../../shared"
-import { Team, type Unit } from "../../units"
+import { AiArchetype, Team, type Unit } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
 import { COIN_TURN_BASE, CARD_LIBRARY, resolveCardEffects } from "../../cards"
@@ -27,14 +27,22 @@ export function checkEnd(state: GameState) {
 export function startEnemyPhase(state: GameState): GameState {
   const s = clone(state)
   s.phase = Phase.Enemy
-  // reset enemy hands then draw one card per living enemy from their pool
+  // reset enemy hands then draw cards per living enemy from their pool:
+  // melee enemies draw 1 card, ranged (range > 1) and guardian enemies draw 2
+  // so they have more interesting tactical options
   s.enemyHands = {}
   for (const u of s.units) {
     if (u.team !== Team.Enemy || u.hp <= 0) continue
     const pool = s.enemyCardPools[u.id]
     if (!pool || pool.length === 0) continue
-    const drawn = pool.splice(0, 1)[0]
-    if (drawn) s.enemyHands[u.id] = [drawn]
+    const isRangedOrGuardian = u.range > 1 || u.aiProfile?.archetype === AiArchetype.Guardian
+    const drawCount = isRangedOrGuardian ? 2 : 1
+    const drawn: string[] = []
+    for (let i = 0; i < drawCount && pool.length > 0; i++) {
+      const card = pool.splice(0, 1)[0]
+      if (card) drawn.push(card)
+    }
+    if (drawn.length > 0) s.enemyHands[u.id] = drawn
   }
   return s
 }
