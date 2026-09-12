@@ -209,7 +209,7 @@
       "range": 2,
       "goldDrop": 4,
       "isMinion": false,
-      "icon": "thug",
+      "icon": "collection_agent",
       "deck": [
         {
           "id": "demand_letter",
@@ -233,7 +233,7 @@
       "range": 1,
       "goldDrop": 14,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "heavy",
       "deck": [
         {
           "id": "collection_call",
@@ -251,7 +251,7 @@
       "range": 1,
       "goldDrop": 10,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "mob_nurse",
       "deck": [
         {
           "id": "hush_money",
@@ -276,7 +276,7 @@
       "range": 2,
       "goldDrop": 4,
       "isMinion": false,
-      "icon": "thug",
+      "icon": "informant",
       "deck": [
         {
           "id": "kneecap",
@@ -304,7 +304,7 @@
       "range": 3,
       "goldDrop": 12,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "caster_sprite",
       "deck": [
         {
           "id": "foreclose",
@@ -332,7 +332,7 @@
       "range": 1,
       "goldDrop": 14,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "bruiser",
       "deck": [
         {
           "id": "kneecap",
@@ -357,7 +357,7 @@
       "range": 4,
       "goldDrop": 4,
       "isMinion": false,
-      "icon": "thug",
+      "icon": "spotter",
       "deck": [
         {
           "id": "demand_letter",
