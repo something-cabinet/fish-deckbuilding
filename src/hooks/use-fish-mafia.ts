@@ -22,7 +22,7 @@ import {
   type HistoryBundle,
   type PlayerAction,
 } from "@/lib/game/actions"
-import { cardTargets, type CardInstance } from "@/lib/game/cards"
+import { cardTargets, CARD_LIBRARY, type CardInstance } from "@/lib/game/cards"
 import { clone } from "@/lib/game/shared"
 import { drawCards } from "@/lib/game/deck"
 import { Team } from "@/lib/game/units"
@@ -49,7 +49,8 @@ export function useFishMafia(initial?: GameState) {
     future: [],
     fx: [],
   }))
-  const [busy, setBusy] = useState(false) // enemy turn running / animating
+  const [busy, setBusy] = useState(false)
+  const [previewCard, setPreviewCard] = useState<CardInstance | null>(null) // enemy card preview
   const started = useRef(false)
   const fxTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -146,18 +147,28 @@ export function useFishMafia(initial?: GameState) {
 
     // apply enemy steps sequentially with animation delays — enemy steps run
     // through the same pure shape but never enter the undo stack (D6)
+    // Before a CastCard step, preview the card so the player knows what's coming
     let current = next
     const steps = planEnemyTurn(current)
     for (const step of steps) {
       if (current.phase === Phase.Won || current.phase === Phase.Lost) break
+
+      // show card preview before enemy casts
+      if (step.kind === EnemyStepKind.CastCard && step.cardId) {
+        const def = CARD_LIBRARY[step.cardId]
+        if (def) {
+          setPreviewCard({ uid: `${step.unitId}_preview`, def })
+          await wait(700)
+        }
+      }
+
       const { state: ns, fx: e } = applyEnemyStep(current, step)
       current = ns
-      // B1: commit state + fx together per step so tokens animate in place and
-      // hit-markers resolve against live state (FR-7/Scenario 3)
       setHistory((b) => ({ ...b, state: ns, fx: [...b.fx, ...e] }))
       scheduleFxClear()
       await wait(step.kind === EnemyStepKind.Attack ? 480 : 300)
     }
+    setPreviewCard(null)
 
     await wait(250)
     const { state: refreshed, fx: turnFx } = beginPlayerTurn(current)
@@ -200,6 +211,7 @@ export function useFishMafia(initial?: GameState) {
     state,
     fx,
     busy,
+    previewCard,
     select,
     move,
     attack,

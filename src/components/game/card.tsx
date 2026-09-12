@@ -1,9 +1,17 @@
 "use client"
 
-import { Coins } from "lucide-react"
-import { type CardInstance } from "@/lib/game/cards"
+import { Coins, Crosshair, Radius } from "lucide-react"
+import { AOE_SINGLE_TILE, CardTarget, aoeTileCount, type CardInstance } from "@/lib/game/cards"
 import { CardArtPanel } from "./card-face"
 import { cn } from "@/lib/utils"
+
+const TARGET_LABELS: Record<CardTarget, string> = {
+  [CardTarget.Enemy]: "Enemy",
+  [CardTarget.Ally]: "Ally",
+  [CardTarget.Unit]: "Any unit",
+  [CardTarget.Self]: "Self",
+  [CardTarget.EmptyTile]: "Empty tile",
+}
 
 interface Props {
   card: CardInstance
@@ -41,9 +49,24 @@ export function GameCard({ card, playable, dragging, armed, onPointerDown, onTap
     >
       <CardArtPanel def={def} />
 
-      {/* body: the name rides on the artwork, so this is description only */}
+      {/* body: description + range/target info */}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-black/20 px-1.5 py-1">
         <p className="min-h-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_bottom,black_calc(100%-10px),transparent)] text-[10px] leading-snug text-[oklch(0.35_0.02_260)]">{def.desc}</p>
+        {def.target !== CardTarget.Self && (
+          <div className="mt-auto flex items-center gap-1.5 pt-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-[oklch(0.3_0.04_260)]">
+            <span className="opacity-60">{TARGET_LABELS[def.target] ?? def.target}</span>
+            <span className="flex items-center gap-0.5 opacity-60" title={`Cast range ${def.range}`}>
+              <Crosshair size={9} aria-hidden />
+              {def.range}
+            </span>
+            {def.aoe > AOE_SINGLE_TILE && (
+              <span className="flex items-center gap-0.5 text-[oklch(0.45_0.16_25)]" title={`Blast covers ${aoeTileCount(def.aoe)} tiles`}>
+                <Radius size={9} aria-hidden />
+                {aoeTileCount(def.aoe)}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* sell footer */}

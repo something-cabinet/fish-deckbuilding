@@ -5,6 +5,7 @@ import { Home, Layers, MousePointer2, Play, Trash2 } from "lucide-react"
 import type { GameSettings } from "./fish-mafia-app"
 import { Board } from "./board"
 import { GameCard } from "./card"
+import { CardFace } from "./card-face"
 import { CoinRegister } from "./coin-register"
 import { ResultOverlay } from "./result-overlay"
 import { SidePanel } from "./side-panel"
@@ -48,7 +49,7 @@ interface GameProps {
 
 export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebugReady }: GameProps) {
   const game = useFishMafia(initial)
-  const { state, fx, busy, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor, debugUpdate, debugDrawCards } = game
+  const { state, fx, busy, previewCard, select, move, attack, cast, sell, endTurn, restart, reachable, targetsFor, debugUpdate, debugDrawCards } = game
 
   const [pendingCard, setPendingCard] = useState<CardInstance | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
@@ -425,6 +426,20 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           {busy && (
             <div className="pointer-events-none absolute left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-enemy/40 bg-ocean-deep/90 px-4 py-1.5 font-display text-xs uppercase tracking-widest text-enemy">
               The mob is moving...
+            </div>
+          )}
+
+          {/* enemy card preview overlay */}
+          {previewCard && (
+            <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="animate-fm-fade-in">
+                <div className="rounded-lg border border-enemy/60 bg-ocean-deep p-2 shadow-2xl">
+                  <p className="mb-1 text-center font-display text-xs uppercase tracking-widest text-enemy">
+                    Enemy casts…
+                  </p>
+                  <CardFace def={previewCard.def} size="sm" />
+                </div>
+              </div>
             </div>
           )}
         </div>
