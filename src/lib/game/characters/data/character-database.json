@@ -5,7 +5,7 @@
       "name": "Guppy",
       "title": "The Debtor",
       "description": "Small fish, big ledger. Starts owing the syndicate and collects the hard way.",
-      "icon": "hero",
+      "icon": "guppy_debtor",
       "stats": {
         "maxHp": 14,
         "atk": 2,
@@ -39,7 +39,7 @@
       "name": "Mị đô xô",
       "title": "The Streamer",
       "description": "funny streamer",
-      "icon": "domixi",
+      "icon": "character_m_x_mswwixoj",
       "stats": {
         "maxHp": 14,
         "atk": 2,
@@ -60,7 +60,7 @@
       "name": "Puffer",
       "title": "The Enforcer",
       "description": "Built tough, hits harder the longer a fight drags. The syndicate's favorite cleanup crew.",
-      "icon": "hero",
+      "icon": "puffer_enforcer",
       "stats": {
         "maxHp": 18,
         "atk": 2,

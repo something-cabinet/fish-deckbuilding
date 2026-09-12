@@ -8,7 +8,8 @@
 
 ### Added
 - **Placeholder sprites:** `public/sprites/placeholder-enemy.png`, `placeholder-player.png`, `placeholder-summon.png` (currently copies of thug/hero/goon, to be replaced with dedicated placeholder art).
-- **Demand Letter card art (test):** `public/card-art/demand_letter.png`, generated with the new `gen_asset.py` art tool as a pipeline test. Not yet assigned to the card (no `"art"` field set).
+- **Demand Letter card art:** `public/card-art/demand_letter.png`, generated with the new `gen_asset.py` art tool and assigned to the card (`"art": "demand_letter"`).
+- **Playable character sprites:** each playable character now has its own generated sprite instead of sharing `hero`/`domixi` — `guppy_debtor.png` (Guppy), `puffer_enforcer.png` (Puffer), `character_m_x_mswwixoj.png` (Mị đô xô), set as their `"icon"` in `character-database.json`.
 
 ### Fixed
 - **Shallows boss stage uses wrong boss:** `stage_boss_alpha` placed `collection_shark` (The Collection Shark, the midwaters boss) instead of `boss_thug` (Barnacle Brute, the shallows boss). This made the first zone's boss harder than intended and showed the wrong boss fish. `battleSetupForNode` uses authored stages with priority, so this affected every shallows boss fight.

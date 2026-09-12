@@ -11,15 +11,16 @@
       "aoe": 0,
       "desc": "Deal 2 damage to a target enemy.",
       "icon": "Mail",
-      "fx": "letter",
+      "art": "demand_letter",
+      "fx": "shock",
       "effects": [
         {
           "kind": "damage",
           "amount": 2
         }
       ],
-      "log": "Demand Letter hits {target} for 2.",
-      "logTone": "good"
+      "log": "",
+      "logTone": "neutral"
     },
     {
       "id": "collection_call",
