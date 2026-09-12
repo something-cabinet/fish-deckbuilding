@@ -215,10 +215,11 @@ export function CardCreateScreen({
     desc,
     icon,
     ...(art ? { art } : {}),
-    fx: FxKind.Shock,
+    // the form has no controls for these, so an edited card keeps its own
+    fx: editCard?.fx ?? FxKind.Shock,
     effects: cardEffects,
-    log: "",
-    logTone: "neutral",
+    log: editCard?.log ?? "",
+    logTone: editCard?.logTone ?? "neutral",
   }
   const canSave = name.trim().length > 0
 

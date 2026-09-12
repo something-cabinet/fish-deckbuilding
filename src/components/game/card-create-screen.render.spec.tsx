@@ -8,6 +8,8 @@ import { act, cleanup, fireEvent, render, screen, within } from "@testing-librar
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { CardCreateScreen } from "@/components/game/card-create-screen"
+import { FxKind } from "@/lib/game/battle"
+import { CardTarget, CardType, type CardDef } from "@/lib/game/cards"
 import type { SummonDef } from "@/lib/game/summons"
 
 afterEach(() => {
@@ -44,6 +46,48 @@ describe("CardCreateScreen", () => {
     const def = onSave.mock.calls[0][0]
     expect(def.name).toBe("Bribe Collector")
     expect(def.id).toMatch(/^custom_bribe_collector_/)
+  })
+
+  describe("fields the form has no controls for", () => {
+    const EXISTING: CardDef = {
+      id: "demand_letter",
+      name: "Demand Letter",
+      type: CardType.Attack,
+      cost: 1,
+      value: 1,
+      target: CardTarget.Enemy,
+      range: 4,
+      aoe: 0,
+      desc: "Deal 2 damage to a target enemy.",
+      icon: "Mail",
+      fx: FxKind.Letter,
+      effects: [{ kind: "damage", amount: 2 }],
+      log: "Demand Letter hits {target} for 2.",
+      logTone: "good",
+    }
+
+    it("saving an edited card keeps its fx, log line and log tone", () => {
+      const onUpdate = vi.fn()
+      render(<CardCreateScreen onBack={() => {}} onSave={() => {}} editCard={EXISTING} onUpdate={onUpdate} />)
+      act(() => fireEvent.click(screen.getByRole("button", { name: /^update$/i })))
+
+      expect(onUpdate).toHaveBeenCalledTimes(1)
+      expect(onUpdate.mock.calls[0][0]).toMatchObject({
+        id: "demand_letter",
+        fx: FxKind.Letter,
+        log: "Demand Letter hits {target} for 2.",
+        logTone: "good",
+      })
+    })
+
+    it("a new card gets the default fx and a blank neutral log", () => {
+      const onSave = vi.fn()
+      render(<CardCreateScreen onBack={() => {}} onSave={onSave} />)
+      act(() => fireEvent.change(screen.getByPlaceholderText(/racketeering/i), { target: { value: "Bribe" } }))
+      act(() => fireEvent.click(getSaveButton()))
+
+      expect(onSave.mock.calls[0][0]).toMatchObject({ fx: FxKind.Shock, log: "", logTone: "neutral" })
+    })
   })
 
   describe("summon effects", () => {
