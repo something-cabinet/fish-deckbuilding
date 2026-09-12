@@ -854,6 +854,69 @@
       ],
       "log": "Slush Fund — 3 coin pocketed, 1 card drawn.",
       "logTone": "gold"
+    },
+    {
+      "id": "dip",
+      "name": "Dip",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Quick dip into petty cash — gain 1 coin.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        {
+          "kind": "gainCoin",
+          "amount": 1
+        }
+      ],
+      "log": "Dip — 1 coin skimmed.",
+      "logTone": "gold"
+    },
+    {
+      "id": "hardball",
+      "name": "Hardball",
+      "type": "attack",
+      "cost": 4,
+      "value": 4,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Play hardball — deal 7 damage to a target enemy.",
+      "icon": "Swords",
+      "fx": "gavel",
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 7
+        }
+      ],
+      "log": "Hardball smashes {target} for 7!",
+      "logTone": "good"
+    },
+    {
+      "id": "guinea_pig",
+      "name": "Guinea Pig",
+      "type": "summon",
+      "cost": 1,
+      "value": 1,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Summon a Decoy (2 HP / 1 ATK) on an empty tile.",
+      "icon": "Fish",
+      "fx": "summon",
+      "effects": [
+        {
+          "kind": "summon",
+          "unit": "decoy"
+        }
+      ],
+      "log": "A Decoy scurries to {tile}.",
+      "logTone": "neutral"
     }
   ]
 }

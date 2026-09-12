@@ -321,6 +321,55 @@
           "distanceToTarget": -3
         }
       }
+    },
+    {
+      "id": "bruiser",
+      "name": "The Bruiser",
+      "kind": 3,
+      "hp": 15,
+      "atk": 3,
+      "move": 1,
+      "range": 1,
+      "goldDrop": 14,
+      "isMinion": false,
+      "icon": "enforcer",
+      "deck": [
+        {
+          "id": "kneecap",
+          "count": 2
+        },
+        {
+          "id": "hard_stop",
+          "count": 1
+        }
+      ],
+      "aiProfile": {
+        "archetype": "brawler"
+      }
+    },
+    {
+      "id": "spotter",
+      "name": "The Spotter",
+      "kind": 2,
+      "hp": 3,
+      "atk": 1,
+      "move": 2,
+      "range": 4,
+      "goldDrop": 4,
+      "isMinion": false,
+      "icon": "thug",
+      "deck": [
+        {
+          "id": "demand_letter",
+          "count": 2
+        }
+      ],
+      "aiProfile": {
+        "archetype": "artillery",
+        "weights": {
+          "distanceToTarget": -3
+        }
+      }
     }
   ]
 }

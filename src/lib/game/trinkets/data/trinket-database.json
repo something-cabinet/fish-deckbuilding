@@ -237,6 +237,14 @@
       "triggers": {
         "onCardSold": [{ "kind": "gainCoin", "amount": 3 }]
       }
+    },
+    {
+      "id": "barnacle_armor",
+      "name": "Barnacle Armor",
+      "description": "Your maximum HP is increased by 2.",
+      "icon": "Shield",
+      "rarity": "common",
+      "stats": { "maxHp": 2 }
     }
   ]
 }

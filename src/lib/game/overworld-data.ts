@@ -43,6 +43,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Mob Nurse", kind: UnitKind.Capo, hp: 5, atk: 1, move: 2 },
       { name: "Informant", kind: UnitKind.Soldier, hp: 5, atk: 3, move: 3, range: 2 },
       { name: "Caster", kind: UnitKind.Capo, hp: 5, atk: 1, move: 1, range: 3 },
+      { name: "Bruiser", kind: UnitKind.Capo, hp: 15, atk: 3, move: 1 },
     ],
     theme: "mid",
   },
@@ -63,6 +64,8 @@ export const ZONES: ZoneDef[] = [
       { name: "Heavy", kind: UnitKind.Capo, hp: 16, atk: 4, move: 1 },
       { name: "Mob Nurse", kind: UnitKind.Capo, hp: 7, atk: 2, move: 2 },
       { name: "Caster", kind: UnitKind.Capo, hp: 7, atk: 2, move: 1, range: 3 },
+      { name: "Bruiser", kind: UnitKind.Capo, hp: 20, atk: 4, move: 1 },
+      { name: "Spotter", kind: UnitKind.Soldier, hp: 3, atk: 1, move: 2, range: 4 },
     ],
     theme: "deep",
   },
@@ -255,6 +258,28 @@ export const EVENTS: EventDef[] = [
       { label: "Inspect the lucky charm", result: "It feels warm in your fin.", trinket: "lucky_fin", debt: 15 },
       { label: "Check the anchor ring", result: "Pawn-shop gold, still good as new.", trinket: "gold_pinky_ring", gold: -15 },
       { label: "Walk away", result: "Too much risk today.", },
+    ],
+  },
+  {
+    id: "underworld_auction",
+    title: "The Underworld Auction",
+    prompt:
+      "A hagfish in a cheap suit runs a clandestine auction from the hull of a sunken trawler. \"Lots go to the highest bidder, in coin or credit.\" A card you've been eyeing goes under the hammer.",
+    choices: [
+      { label: "Bid coin", result: "The hammer falls in your favour.", gold: -20, card: "hardball" },
+      { label: "Bid on credit", result: "A win today, a debt tomorrow.", debt: 25, card: "hardball" },
+      { label: "Leave the auction", result: "Not your kind of game.", },
+    ],
+  },
+  {
+    id: "anonymous_tip",
+    title: "The Anonymous Tip",
+    prompt:
+      "A scrap of parchment pinned to a reef reveals the location of a stash. \"No names, no debts. You find it, you keep it.\" Could be a trap, could be a goldmine.",
+    choices: [
+      { label: "Follow the tip", result: "A modest find.", gold: 18 },
+      { label: "Set a trap for the tipster", result: "Turns out it was a rival — your win, their loss.", gold: 25, hp: -3 },
+      { label: "Burn the note", result: "Safe and sorry.", },
     ],
   },
 ]

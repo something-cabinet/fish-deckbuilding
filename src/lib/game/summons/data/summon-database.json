@@ -26,6 +26,15 @@
       "move": 2,
       "range": 1,
       "icon": "goon"
+    },
+    {
+      "id": "decoy",
+      "name": "Decoy",
+      "hp": 2,
+      "atk": 1,
+      "move": 1,
+      "range": 1,
+      "icon": "goon"
     }
   ]
 }

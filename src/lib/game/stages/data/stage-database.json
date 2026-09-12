@@ -543,6 +543,69 @@
           "y": 3
         }
       ]
+    },
+    {
+      "id": "stage_pumphouse",
+      "name": "The Pumphouse",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "heavy",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "enemyId": "thug",
+          "x": 5,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "stage_crosshairs",
+      "name": "The Crosshairs",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "spotter",
+          "x": 8,
+          "y": 2
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
     }
   ]
 }
