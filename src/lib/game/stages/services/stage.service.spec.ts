@@ -12,7 +12,7 @@ import type { StageDef } from "../models/stage-def.interface"
 const thug: EnemyDef = {
   id: "thug",
   name: "Thug",
-  kind: UnitKind.Thug,
+  kind: UnitKind.Soldier,
   hp: 10,
   atk: 2,
   move: 2,

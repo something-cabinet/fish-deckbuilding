@@ -1,16 +1,16 @@
 "use client"
 
 import { Team, UnitKind, type Unit } from "@/lib/game/units"
-import { spriteUrl } from "./sprites"
+import { PLACEHOLDER_SPRITE, spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
 
 /** Fallback art per kind, used by any unit that carries no sprite of its own. */
 const SPRITES: Record<Unit["kind"], string> = {
-  [UnitKind.Hero]: spriteUrl("hero"),
-  [UnitKind.Goon]: spriteUrl("goon"),
-  [UnitKind.Thug]: spriteUrl("thug"),
-  [UnitKind.Enforcer]: spriteUrl("enforcer"),
-  [UnitKind.Boss]: spriteUrl("boss"),
+  [UnitKind.Hero]: spriteUrl(PLACEHOLDER_SPRITE.player),
+  [UnitKind.Goon]: spriteUrl(PLACEHOLDER_SPRITE.summon),
+  [UnitKind.Soldier]: spriteUrl(PLACEHOLDER_SPRITE.enemy),
+  [UnitKind.Capo]: spriteUrl(PLACEHOLDER_SPRITE.enemy),
+  [UnitKind.Boss]: spriteUrl(PLACEHOLDER_SPRITE.enemy),
 }
 
 /** A unit's own sprite (the character picked in the designer) wins over its kind's. */

@@ -20,8 +20,8 @@ const REACHABLE_TILE = "[data-drop=tile][class*=bg-teal]"
 const HAND_CARD = "[data-card-uid]"
 /** Enemy tokens use data-unit-id="enemy_N" (unit-token.tsx). */
 const ENEMY_TOKEN = '[role=button][data-unit-id^="enemy"]'
-/** The turn-1 Thug at G2 (spawn (6,1)). */
-const THUG_G2 = '[role=button][aria-label*="Thug at G2"]'
+/** The turn-1 Soldier at G2 (spawn (6,1)). */
+const SOLDIER_G2 = '[role=button][aria-label*="Soldier at G2"]'
 
 export interface CastResult {
   /** Which kind of card was cast; "none" when no affordable card was found. */
@@ -155,7 +155,7 @@ export default {
       // Click to arm, then click an enemy target.
       await actor().click(locate(HAND_CARD).at(deal + 1))
       try {
-        await actor().click(locate(THUG_G2).first())
+        await actor().click(locate(SOLDIER_G2).first())
       } catch {
         // Enemy may have moved from G2 on the fallback turn — any enemy works.
         await actor().click(locate(ENEMY_TOKEN).first())

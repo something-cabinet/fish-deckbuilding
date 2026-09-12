@@ -14,6 +14,13 @@ export function spriteUrl(name: string): string {
   return `${SPRITE_PATH}${name}.png`
 }
 
+/** Stand-in sprites for units that have no art of their own yet. */
+export const PLACEHOLDER_SPRITE = {
+  enemy: "placeholder-enemy",
+  player: "placeholder-player",
+  summon: "placeholder-summon",
+} as const
+
 /**
  * Selectable sprite names, discovered from `public/sprites/` via `/api/sprites`.
  * Drop a PNG in that folder and it shows up here on next fetch — no code change.

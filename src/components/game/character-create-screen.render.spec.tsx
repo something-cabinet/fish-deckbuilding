@@ -13,8 +13,9 @@ import type { CharacterDef } from "@/lib/game/characters"
 import { CharacterCreateScreen } from "@/components/game/character-create-screen"
 
 vi.mock("./sprites", () => ({
+  PLACEHOLDER_SPRITE: { enemy: "placeholder-enemy", player: "placeholder-player", summon: "placeholder-summon" },
   spriteUrl: (name: string) => `/sprites/${name}.png`,
-  useSpriteNames: () => ["hero", "thug"],
+  useSpriteNames: () => ["hero", "placeholder-player", "thug"],
 }))
 
 afterEach(cleanup)
@@ -80,13 +81,13 @@ describe("CharacterCreateScreen", () => {
     expect(def.id).toMatch(/^character_bruno_/)
   })
 
-  it("defaults to the hero sprite and saves the picked one", () => {
+  it("defaults to the placeholder sprite and saves the picked one", () => {
     const onSave = vi.fn()
     renderScreen({ onSave })
 
     typeName("Bruno")
     addCopy(FIRST_CARD.name)
-    expect(screen.getByRole("button", { name: /use hero sprite/i })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /use placeholder-player sprite/i })).toHaveAttribute(
       "aria-pressed",
       "true",
     )

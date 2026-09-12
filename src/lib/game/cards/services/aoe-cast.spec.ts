@@ -13,10 +13,10 @@ function board(def: CardDef): GameState {
     rows: 6,
     heroStart: { x: 3, y: 2 },
     enemies: [
-      { name: "A", kind: UnitKind.Thug, x: 5, y: 2, hp: 9, atk: 1, move: 1 },
-      { name: "B", kind: UnitKind.Thug, x: 6, y: 2, hp: 9, atk: 1, move: 1 },
-      { name: "C", kind: UnitKind.Thug, x: 5, y: 3, hp: 9, atk: 1, move: 1 },
-      { name: "D", kind: UnitKind.Thug, x: 0, y: 5, hp: 9, atk: 1, move: 1 },
+      { name: "A", kind: UnitKind.Soldier, x: 5, y: 2, hp: 9, atk: 1, move: 1 },
+      { name: "B", kind: UnitKind.Soldier, x: 6, y: 2, hp: 9, atk: 1, move: 1 },
+      { name: "C", kind: UnitKind.Soldier, x: 5, y: 3, hp: 9, atk: 1, move: 1 },
+      { name: "D", kind: UnitKind.Soldier, x: 0, y: 5, hp: 9, atk: 1, move: 1 },
     ],
   })
   return { ...s, coin: 10, hand: [{ uid: "blast", def }] }

@@ -34,8 +34,8 @@ An underwater crime-noir. The player is a small fish drowning in debt; the enemi
 |------|------|----|-----|------|-------|
 | Guppy (hero) | Player | 14 | 2 | 3 | You lose if it dies |
 | Goon | Player | 5 | 2 | 2 | Summoned by *Hired Muscle* |
-| Thug | Enemy | 4 | 2 | 2 | Basic aggressor |
-| Enforcer | Enemy | 6 | 3 | 2 | Heavy hitter |
+| Soldier | Enemy | 4 | 2 | 2 | Basic aggressor |
+| Capo | Enemy | 6 | 3 | 2 | Heavy hitter |
 | The Boss | Enemy | 16 | 4 | 1 | Slow, deadly kingpin |
 
 ## Card Library

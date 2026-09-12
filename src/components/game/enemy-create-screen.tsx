@@ -6,7 +6,7 @@ import { isDefaultAiProfile, UnitKind, type EnemyAiProfile, type EnemyDef } from
 import { AiProfileEditor } from "./ai-profile-editor"
 import { DeckSelectionPanel } from "./deck-selection-panel"
 import { EnemyFace } from "./enemy-face"
-import { spriteUrl, useSpriteNames } from "./sprites"
+import { PLACEHOLDER_SPRITE, spriteUrl, useSpriteNames } from "./sprites"
 import {
   Chip,
   DesignHeader,
@@ -31,8 +31,8 @@ interface Props {
 }
 
 const KINDS: { id: UnitKind; label: string }[] = [
-  { id: UnitKind.Thug, label: "Thug" },
-  { id: UnitKind.Enforcer, label: "Enforcer" },
+  { id: UnitKind.Soldier, label: "Soldier" },
+  { id: UnitKind.Capo, label: "Capo" },
   { id: UnitKind.Boss, label: "Boss" },
   { id: UnitKind.Goon, label: "Goon" },
 ]
@@ -58,14 +58,14 @@ function toEntries(counts: Record<string, number>): { id: string; count: number 
 
 export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props) {
   const [name, setName] = useState(editEnemy?.name ?? "")
-  const [kind, setKind] = useState<UnitKind>(editEnemy?.kind ?? UnitKind.Thug)
+  const [kind, setKind] = useState<UnitKind>(editEnemy?.kind ?? UnitKind.Soldier)
   const [hp, setHp] = useState(editEnemy?.hp ?? 4)
   const [atk, setAtk] = useState(editEnemy?.atk ?? 2)
   const [move, setMove] = useState(editEnemy?.move ?? 2)
   const [range, setRange] = useState(editEnemy?.range ?? 1)
   const [goldDrop, setGoldDrop] = useState(editEnemy?.goldDrop ?? 5)
   const [isMinion, setIsMinion] = useState(editEnemy?.isMinion ?? false)
-  const [sprite, setSprite] = useState(editEnemy?.icon ?? "thug")
+  const [sprite, setSprite] = useState<string>(editEnemy?.icon ?? PLACEHOLDER_SPRITE.enemy)
   const [deckCounts, setDeckCounts] = useState<Record<string, number>>(() =>
     toCounts(editEnemy?.deck ?? []),
   )
@@ -128,7 +128,7 @@ export function EnemyCreateScreen({ onBack, onSave, editEnemy, onUpdate }: Props
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={22}
-                    placeholder="Shark Enforcer"
+                    placeholder="Shark Capo"
                     className={inputClass}
                   />
                 </Field>

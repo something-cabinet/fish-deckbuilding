@@ -12,9 +12,9 @@ function board(): GameState {
     rows: 6,
     heroStart: { x: 0, y: 0 },
     enemies: [
-      { name: "A", kind: UnitKind.Thug, x: 4, y: 2, hp: 5, atk: 1, move: 1 },
-      { name: "B", kind: UnitKind.Thug, x: 5, y: 2, hp: 5, atk: 1, move: 1 },
-      { name: "C", kind: UnitKind.Thug, x: 4, y: 3, hp: 5, atk: 1, move: 1 },
+      { name: "A", kind: UnitKind.Soldier, x: 4, y: 2, hp: 5, atk: 1, move: 1 },
+      { name: "B", kind: UnitKind.Soldier, x: 5, y: 2, hp: 5, atk: 1, move: 1 },
+      { name: "C", kind: UnitKind.Soldier, x: 4, y: 3, hp: 5, atk: 1, move: 1 },
     ],
   })
 }

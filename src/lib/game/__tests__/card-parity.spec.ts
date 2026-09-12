@@ -135,7 +135,7 @@ describe("card parity: foreclose", () => {
 
   it("kills a 4 HP Thug, removes it via cleanupDead, logs death", () => {
     const s = withHand(fresh(), ["foreclose"])
-    const thug = s.units.find((u) => u.kind === UnitKind.Thug)!
+    const thug = s.units.find((u) => u.kind === UnitKind.Soldier)!
     const { state, fx } = cast(s, "foreclose", { unitId: thug.id })
 
     expect(state.units.find((u) => u.id === thug.id)).toBeUndefined()
@@ -173,7 +173,7 @@ describe("card parity: loan_shark", () => {
   it("deals 4 damage and heals hero 2, fx order: shock, shock(4), heal", () => {
     const s = withHand(fresh(), ["loan_shark"])
     // target a survivor (Enforcer, 6 HP) — a Thug would die to 4 damage
-    const enemy = s.units.find((u) => u.kind === UnitKind.Enforcer)!
+    const enemy = s.units.find((u) => u.kind === UnitKind.Capo)!
     const h = hero(s)
     const hpHeroBefore = h.hp
     const coinBefore = s.coin

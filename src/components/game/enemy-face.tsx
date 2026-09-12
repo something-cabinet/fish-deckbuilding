@@ -8,16 +8,16 @@ import { cn } from "@/lib/utils"
 export const KIND_LABELS: Record<UnitKind, string> = {
   [UnitKind.Hero]: "Hero",
   [UnitKind.Goon]: "Goon",
-  [UnitKind.Thug]: "Thug",
-  [UnitKind.Enforcer]: "Enforcer",
+  [UnitKind.Soldier]: "Soldier",
+  [UnitKind.Capo]: "Capo",
   [UnitKind.Boss]: "Boss",
 }
 
 const KIND_STYLES: Record<UnitKind, string> = {
   [UnitKind.Hero]: "bg-teal text-ocean-deep",
   [UnitKind.Goon]: "bg-enemy text-white",
-  [UnitKind.Thug]: "bg-enemy text-white",
-  [UnitKind.Enforcer]: "bg-teal text-ocean-deep",
+  [UnitKind.Soldier]: "bg-enemy text-white",
+  [UnitKind.Capo]: "bg-teal text-ocean-deep",
   [UnitKind.Boss]: "bg-gold text-ocean-deep",
 }
 

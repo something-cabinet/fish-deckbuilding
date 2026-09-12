@@ -6,7 +6,7 @@ import { ENEMY_LIBRARY } from "./enemy-library"
 const base = {
   id: "test_thug",
   name: "Thug",
-  kind: UnitKind.Thug,
+  kind: UnitKind.Soldier,
   hp: 4,
   atk: 2,
   move: 2,

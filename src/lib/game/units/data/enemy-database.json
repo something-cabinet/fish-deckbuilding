@@ -2,7 +2,7 @@
   "enemies": [
     {
       "id": "thug",
-      "name": "Thug",
+      "name": "Soldier",
       "kind": 2,
       "hp": 4,
       "atk": 2,
@@ -20,7 +20,7 @@
     },
     {
       "id": "enforcer",
-      "name": "Enforcer",
+      "name": "Capo",
       "kind": 3,
       "hp": 6,
       "atk": 3,
@@ -64,7 +64,7 @@
     },
     {
       "id": "midwaters_thug",
-      "name": "Thug",
+      "name": "Soldier",
       "kind": 2,
       "hp": 7,
       "atk": 3,
@@ -82,7 +82,7 @@
     },
     {
       "id": "depths_thug",
-      "name": "Thug",
+      "name": "Soldier",
       "kind": 2,
       "hp": 10,
       "atk": 4,

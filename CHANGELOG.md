@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+- **Enemy ranks follow the mafia hierarchy:** the Thug and Enforcer unit kinds are now **Soldier** and **Capo** (Soldier → Capo → Boss). Renamed in `UnitKind`, the enemy card badge, the enemy designer's Kind picker, and the generic enemies' display names (Thug → Soldier, Enforcer → Capo, stage "Double Enforcer" → "Double Capo"). Enum order is unchanged, so saved `kind` values stay valid; enemy ids and sprite file names (`thug`, `enforcer`) are kept so existing stages still resolve.
+- **Placeholder sprites as fallbacks:** units without a sprite of their own now fall back to placeholder art instead of real character art — `placeholder-enemy` for Soldier/Capo/Boss, `placeholder-player` for the hero, `placeholder-summon` for goons. The stage editor grid (hero start and enemies without an icon) and new enemies/characters/summons in the designers also start on the placeholders. Names live in `PLACEHOLDER_SPRITE` (`sprites.ts`).
+
+### Added
+- **Placeholder sprites:** `public/sprites/placeholder-enemy.png`, `placeholder-player.png`, `placeholder-summon.png` (currently copies of thug/hero/goon, to be replaced with dedicated placeholder art).
+- **Demand Letter card art (test):** `public/card-art/demand_letter.png`, generated with the new `gen_asset.py` art tool as a pipeline test. Not yet assigned to the card (no `"art"` field set).
+
 ### Fixed
 - **Shallows boss stage uses wrong boss:** `stage_boss_alpha` placed `collection_shark` (The Collection Shark, the midwaters boss) instead of `boss_thug` (Barnacle Brute, the shallows boss). This made the first zone's boss harder than intended and showed the wrong boss fish. `battleSetupForNode` uses authored stages with priority, so this affected every shallows boss fight.
 

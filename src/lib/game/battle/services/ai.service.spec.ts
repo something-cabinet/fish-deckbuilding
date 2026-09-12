@@ -17,7 +17,7 @@ import {
 function enemy(over: Partial<Unit> & { id: string }): Unit {
   return {
     name: "Thug",
-    kind: UnitKind.Thug,
+    kind: UnitKind.Soldier,
     team: Team.Enemy,
     pos: { x: 5, y: 2 },
     hp: 4,

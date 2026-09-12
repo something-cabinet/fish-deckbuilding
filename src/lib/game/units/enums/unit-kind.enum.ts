@@ -1,7 +1,7 @@
 export enum UnitKind {
   Hero,
   Goon,
-  Thug,
-  Enforcer,
+  Soldier,
+  Capo,
   Boss,
 }

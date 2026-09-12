@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Check, Search, Sparkles } from "lucide-react"
 import type { SummonDef } from "@/lib/game/summons"
 import { SummonFace } from "./summon-face"
-import { spriteUrl, useSpriteNames } from "./sprites"
+import { PLACEHOLDER_SPRITE, spriteUrl, useSpriteNames } from "./sprites"
 import {
   Chip,
   DesignHeader,
@@ -39,7 +39,7 @@ export function SummonCreateScreen({ onBack, onSave, editSummon, onUpdate }: Pro
   const [atk, setAtk] = useState(editSummon?.atk ?? 2)
   const [move, setMove] = useState(editSummon?.move ?? 2)
   const [range, setRange] = useState(editSummon?.range ?? 1)
-  const [sprite, setSprite] = useState(editSummon?.icon ?? "goon")
+  const [sprite, setSprite] = useState<string>(editSummon?.icon ?? PLACEHOLDER_SPRITE.summon)
   const [artworkFilter, setArtworkFilter] = useState("")
   const spriteNames = useSpriteNames()
 

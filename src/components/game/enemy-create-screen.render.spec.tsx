@@ -13,7 +13,7 @@ import { AiArchetype, UnitKind, type EnemyDef } from "@/lib/game/units"
 afterEach(cleanup)
 
 function nameIt(value: string) {
-  act(() => fireEvent.change(screen.getByPlaceholderText(/shark enforcer/i), { target: { value } }))
+  act(() => fireEvent.change(screen.getByPlaceholderText(/shark capo/i), { target: { value } }))
 }
 
 function save() {
@@ -24,7 +24,7 @@ describe("EnemyCreateScreen behaviour wiring", () => {
   it("omits aiProfile when the designer never touched the behaviour panel", () => {
     const onSave = vi.fn()
     render(<EnemyCreateScreen onBack={() => {}} onSave={onSave} />)
-    nameIt("Plain Thug")
+    nameIt("Plain Soldier")
     save()
 
     const def: EnemyDef = onSave.mock.calls[0][0]
@@ -46,7 +46,7 @@ describe("EnemyCreateScreen behaviour wiring", () => {
     const existing: EnemyDef = {
       id: "eel",
       name: "Sniper Eel",
-      kind: UnitKind.Thug,
+      kind: UnitKind.Soldier,
       hp: 6,
       atk: 3,
       move: 2,

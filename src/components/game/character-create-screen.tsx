@@ -6,7 +6,7 @@ import { CARD_LIBRARY, type CardDef } from "@/lib/game/cards"
 import type { CharacterDef } from "@/lib/game/characters"
 import { CharacterFace } from "./character-face"
 import { DeckSelectionPanel } from "./deck-selection-panel"
-import { spriteUrl, useSpriteNames } from "./sprites"
+import { PLACEHOLDER_SPRITE, spriteUrl, useSpriteNames } from "./sprites"
 import {
   DesignHeader,
   EditingBadge,
@@ -56,7 +56,7 @@ export function CharacterCreateScreen({ onBack, onSave, editCharacter, onUpdate 
   const [name, setName] = useState(editCharacter?.name ?? "")
   const [title, setTitle] = useState(editCharacter?.title ?? "")
   const [description, setDescription] = useState(editCharacter?.description ?? "")
-  const [icon, setIcon] = useState(editCharacter?.icon ?? "hero")
+  const [icon, setIcon] = useState<string>(editCharacter?.icon ?? PLACEHOLDER_SPRITE.player)
   const [maxHp, setMaxHp] = useState(editCharacter?.stats.maxHp ?? 14)
   const [atk, setAtk] = useState(editCharacter?.stats.atk ?? 2)
   const [move, setMove] = useState(editCharacter?.stats.move ?? 2)
