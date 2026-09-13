@@ -945,6 +945,7 @@
       "desc": "Shake down a mark \u2014 deal 1 damage and skim 1 coin.",
       "icon": "Banknote",
       "fx": "coin",
+      "art": "street_tax",
       "effects": [
         { "kind": "damage", "amount": 1 },
         { "kind": "gainCoin", "amount": 1 }
@@ -964,6 +965,7 @@
       "desc": "A friend gets the VIP treatment \u2014 heal 3 and +1 ATK.",
       "icon": "HeartPulse",
       "fx": "heal",
+      "art": "bottle_service",
       "effects": [
         { "kind": "heal", "amount": 3, "target": "cast-target" },
         { "kind": "buffAtk", "amount": 1 }
@@ -983,6 +985,7 @@
       "desc": "A quiet deal \u2014 gain 2 coin and draw 1 card.",
       "icon": "Coins",
       "fx": "coin",
+      "art": "under_the_table",
       "effects": [
         { "kind": "gainCoin", "amount": 2 },
         { "kind": "drawCards", "amount": 1 }
@@ -1002,6 +1005,7 @@
       "desc": "Summon a Transport (6 HP / 1 ATK) on an empty tile.",
       "icon": "Fish",
       "fx": "summon",
+      "art": "armored_transport",
       "effects": [
         { "kind": "summon", "unit": "transport" }
       ],

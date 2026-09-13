@@ -50,7 +50,7 @@
       "range": 1,
       "goldDrop": 20,
       "isMinion": false,
-      "icon": "boss",
+      "icon": "boss_thug_sprite",
       "deck": [
         {
           "id": "foreclose",
@@ -72,7 +72,7 @@
       "range": 1,
       "goldDrop": 6,
       "isMinion": false,
-      "icon": "thug",
+      "icon": "midwaters_thug",
       "deck": [
         {
           "id": "demand_letter",
@@ -90,7 +90,7 @@
       "range": 1,
       "goldDrop": 8,
       "isMinion": false,
-      "icon": "thug",
+      "icon": "depths_thug",
       "deck": [
         {
           "id": "demand_letter",
@@ -112,7 +112,7 @@
       "range": 1,
       "goldDrop": 30,
       "isMinion": false,
-      "icon": "boss",
+      "icon": "collection_shark_sprite",
       "deck": [
         {
           "id": "foreclose",
@@ -134,7 +134,7 @@
       "range": 1,
       "goldDrop": 40,
       "isMinion": false,
-      "icon": "boss",
+      "icon": "forecloser_sprite",
       "deck": [
         {
           "id": "foreclose",
@@ -156,7 +156,7 @@
       "range": 2,
       "goldDrop": 10,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "fixer_sprite",
       "deck": [
         {
           "id": "collection_call",
@@ -184,7 +184,7 @@
       "range": 1,
       "goldDrop": 12,
       "isMinion": false,
-      "icon": "enforcer",
+      "icon": "loan_officer_sprite",
       "deck": [
         {
           "id": "hush_money",
