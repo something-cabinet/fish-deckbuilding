@@ -2,21 +2,22 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Enemy card-cast AI target was ignored:** `applyEnemyStep` for `CastCard` was recalculating the target from scratch (nearest enemy/ally) instead of using `step.targetId` chosen by the AI planner. The AI's weighted scoring (LethalOnHero, KillSecured, etc.) is now respected during execution.
+- **Missing CardTarget.Self handling in AI scoring:** `scoreCardCast` did not handle `CardTarget.Self`, so self-target cards (Cash Flow, Market Rate, etc.) were never properly scored by the AI and effectively never chosen. Now self-target cards are scored with the caster as target.
+
 ### Added
-- **Enemy card preview:** before each enemy CastCard step, a card preview overlay appears for 700ms showing the card face so the player knows what's coming. Addresses the game design concern that enemies were casting cards without player visibility.
-- **Range/target/AOE on hand card UI:** the interactive GameCard component now shows target label, cast range (crosshair icon), and blast radius (radius icon) in its description footer. Previously only the static CardFace displayed this info.
-- **Ranged/guardian draw 2 cards:** enemies with range > 1 or guardian archetype now draw 2 cards per turn from their deck instead of 1, making ranged casters and healers more tactically interesting.
-- **3 new cards:** Dip (0-cost skill, gain 1 coin), Hardball (4-cost attack, deal 7 damage), Guinea Pig (1-cost summon, brings Decoy 2 HP/1 ATK).
-- **2 new enemies:** The Bruiser (midwaters/depths elite tank, 15/20 HP, Kneecap deck), The Spotter (depths ranged glass cannon, range 4, Demand Letter deck).
-- **2 new stages:** The Pumphouse (shallows elite — Heavy + Capo + Soldiers), The Crosshairs (depths normal — Spotter + Soldiers).
-- **1 new trinket:** Barnacle Armor (common, +2 max HP).
-- **2 new events:** The Underworld Auction (coin or debt for Hardball card), The Anonymous Tip (risk/reward gold find). Event pool grows to 12.
-- **1 new summon:** Decoy (2 HP / 1 ATK / 1 move) for the Guinea Pig card.
-- **Card art (9):** dip, hardball, guinea_pig, foreclose_card, collection_call, pipe_bomb_card, muscle_card, loan_shark_card, cash_flow_card.
-- **Enemy sprites (7):** bruiser, spotter, caster_sprite, collection_agent, informant, heavy, mob_nurse — replacing shared generic placeholders with unique portraits.
-- **Summon sprite (1):** decoy — small bait fish with tin badge.
-- **Card art backfill (30):** every card that was still on generic art now has its own generated art at `public/card-art/<card_id>.png`, set as its `"art"` — kneecap, market_rate, hush_money, shakedown, rub_out, bury_evidence, protection_money, tax_audit, shell_game, the_treatment, protection_racket, mermaids_call, debt_collector, backup, hard_stop, inside_job, enforce, cut, stiff, torch, ringer, payout, poison_pill, break_in, slush_fund, and the custom Disposal, Absorb, Raze the ground, Kamehameha and Call Vu cards.
-- **Card art regenerated with varied palettes:** Demand Letter, Torch, Poison Pill and Payout re-rendered with the updated art prompt (bold subject-matched colour instead of the default blue-teal cast, no signage text or letterbox bars).
+- **4 new cards:** Street Tax (0-cost attack: 1 damage + 1 coin), Bottle Service (1-cost skill: heal 3 + buff ATK 1 on ally), Under the Table (1-cost skill: 2 coin + draw 1), Armored Transport (2-cost summon: Transport 6 HP / 1 ATK).
+- **1 new summon:** Transport (6 HP / 1 ATK / 1 move / 1 range, slow durable blocker).
+- **2 new enemies:** The Dealer (midwaters medium, 6 HP / 2 ATK, economy deck with Market Rate + Cash Flow, skirmisher AI), Puffer Guard (shallows normal, 5 HP / 1 ATK, Pipe Bomb card, brawler AI).
+- **2 new stages:** The Card Room (midwaters normal — Dealer + 2 Soldiers), The Blowfish Gate (shallows normal — 2 Puffer Guards + Soldier).
+- **2 new trinkets:** Hot Lead (common, +1 ATK), Turtle Shell (uncommon, +4 max HP).
+- **Zone pool diversity:** Dealer added to midwaters pool; Puffer Guard added to shallows pool.
+- **Card art (4):** street_tax, bottle_service, under_the_table, armored_transport.
+- **Enemy sprites (9):** dealer, puffer_guard, midwaters_thug, depths_thug, fixer_sprite, loan_officer_sprite, forecloser_sprite, collection_shark_sprite, boss_thug_sprite — all previously sharing generic icons now have unique portraits.
+
+### Changed
+- **Zone pool diversity:** Dealer added to midwaters pool; Puffer Guard added to shallows pool.
 
 ### Removed
 - **Duplicate Call Vu card:** `custom_call_vu_mtacts90` (empty description, unused) removed; `custom_call_vu_mtacu2sp`, used by Mị đô xô's starter deck, is kept.
