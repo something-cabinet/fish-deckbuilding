@@ -35,6 +35,15 @@
       "move": 1,
       "range": 1,
       "icon": "decoy"
+    },
+    {
+      "id": "transport",
+      "name": "Transport",
+      "hp": 6,
+      "atk": 1,
+      "move": 1,
+      "range": 1,
+      "icon": "transport"
     }
   ]
 }

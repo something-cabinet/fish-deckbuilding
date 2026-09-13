@@ -932,6 +932,81 @@
       ],
       "log": "A Decoy scurries to {tile}.",
       "logTone": "neutral"
+    },
+    {
+      "id": "street_tax",
+      "name": "Street Tax",
+      "type": "attack",
+      "cost": 0,
+      "value": 0,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Shake down a mark \u2014 deal 1 damage and skim 1 coin.",
+      "icon": "Banknote",
+      "fx": "coin",
+      "effects": [
+        { "kind": "damage", "amount": 1 },
+        { "kind": "gainCoin", "amount": 1 }
+      ],
+      "log": "Street Tax hits {target} for 1, pockets 1 coin.",
+      "logTone": "gold"
+    },
+    {
+      "id": "bottle_service",
+      "name": "Bottle Service",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A friend gets the VIP treatment \u2014 heal 3 and +1 ATK.",
+      "icon": "HeartPulse",
+      "fx": "heal",
+      "effects": [
+        { "kind": "heal", "amount": 3, "target": "cast-target" },
+        { "kind": "buffAtk", "amount": 1 }
+      ],
+      "log": "Bottle Service patches up {target} for 3 and gives +1 ATK.",
+      "logTone": "good"
+    },
+    {
+      "id": "under_the_table",
+      "name": "Under the Table",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A quiet deal \u2014 gain 2 coin and draw 1 card.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        { "kind": "gainCoin", "amount": 2 },
+        { "kind": "drawCards", "amount": 1 }
+      ],
+      "log": "Under the Table \u2014 2 coin, 1 card, no witnesses.",
+      "logTone": "gold"
+    },
+    {
+      "id": "armored_transport",
+      "name": "Armored Transport",
+      "type": "summon",
+      "cost": 2,
+      "value": 2,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Summon a Transport (6 HP / 1 ATK) on an empty tile.",
+      "icon": "Fish",
+      "fx": "summon",
+      "effects": [
+        { "kind": "summon", "unit": "transport" }
+      ],
+      "log": "An Armored Transport arrives at {tile}.",
+      "logTone": "good"
     }
   ]
 }

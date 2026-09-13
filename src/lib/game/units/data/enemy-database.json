@@ -370,6 +370,43 @@
           "distanceToTarget": -3
         }
       }
+    },
+    {
+      "id": "dealer",
+      "name": "The Dealer",
+      "kind": 3,
+      "hp": 6,
+      "atk": 2,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 10,
+      "isMinion": false,
+      "icon": "dealer",
+      "deck": [
+        { "id": "market_rate", "count": 2 },
+        { "id": "cash_flow", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "skirmisher"
+      }
+    },
+    {
+      "id": "puffer_guard",
+      "name": "Puffer Guard",
+      "kind": 2,
+      "hp": 5,
+      "atk": 1,
+      "move": 1,
+      "range": 1,
+      "goldDrop": 5,
+      "isMinion": false,
+      "icon": "puffer_guard",
+      "deck": [
+        { "id": "pipe_bomb", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "brawler"
+      }
     }
   ]
 }

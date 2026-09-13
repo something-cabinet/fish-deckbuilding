@@ -606,6 +606,64 @@
           "y": 3
         }
       ]
+    },
+    {
+      "id": "stage_card_room",
+      "name": "The Card Room",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "dealer",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
+    },
+    {
+      "id": "stage_blowfish_gate",
+      "name": "The Blowfish Gate",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "puffer_guard",
+          "x": 7,
+          "y": 1
+        },
+        {
+          "enemyId": "puffer_guard",
+          "x": 7,
+          "y": 3
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 2
+        }
+      ]
     }
   ]
 }

@@ -245,6 +245,22 @@
       "icon": "Shield",
       "rarity": "common",
       "stats": { "maxHp": 2 }
+    },
+    {
+      "id": "hot_lead",
+      "name": "Hot Lead",
+      "description": "Your attack is increased by 1.",
+      "icon": "Sword",
+      "rarity": "common",
+      "stats": { "atk": 1 }
+    },
+    {
+      "id": "turtle_shell",
+      "name": "Turtle Shell",
+      "description": "Your maximum HP is increased by 4.",
+      "icon": "Shield",
+      "rarity": "uncommon",
+      "stats": { "maxHp": 4 }
     }
   ]
 }
