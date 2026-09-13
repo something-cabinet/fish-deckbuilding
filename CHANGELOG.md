@@ -15,6 +15,10 @@
 - **Card art (9):** dip, hardball, guinea_pig, foreclose_card, collection_call, pipe_bomb_card, muscle_card, loan_shark_card, cash_flow_card.
 - **Enemy sprites (7):** bruiser, spotter, caster_sprite, collection_agent, informant, heavy, mob_nurse — replacing shared generic placeholders with unique portraits.
 - **Summon sprite (1):** decoy — small bait fish with tin badge.
+- **Card art backfill (30):** every card that was still on generic art now has its own generated art at `public/card-art/<card_id>.png`, set as its `"art"` — kneecap, market_rate, hush_money, shakedown, rub_out, bury_evidence, protection_money, tax_audit, shell_game, the_treatment, protection_racket, mermaids_call, debt_collector, backup, hard_stop, inside_job, enforce, cut, stiff, torch, ringer, payout, poison_pill, break_in, slush_fund, and the custom Disposal, Absorb, Raze the ground, Kamehameha and Call Vu cards.
+
+### Removed
+- **Duplicate Call Vu card:** `custom_call_vu_mtacts90` (empty description, unused) removed; `custom_call_vu_mtacu2sp`, used by Mị đô xô's starter deck, is kept.
 
 ### Changed
 - **Enemy card draw:** `startEnemyPhase` now draws 2 cards for enemies with range > 1 or guardian archetype, 1 for melee enemies. Gives ranged/guardian enemies more tactical options.

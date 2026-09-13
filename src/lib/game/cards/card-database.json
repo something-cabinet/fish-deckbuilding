@@ -89,7 +89,8 @@
         }
       ],
       "log": "Kneecap hits {target} for 2 and weakens it.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "kneecap"
     },
     {
       "id": "cash_flow",
@@ -132,7 +133,8 @@
         }
       ],
       "log": "Market Rate draws 2 cards.",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "market_rate"
     },
     {
       "id": "loan_shark",
@@ -181,7 +183,8 @@
         }
       ],
       "log": "Hush Money patches up {target} for 5.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "hush_money"
     },
     {
       "id": "muscle",
@@ -224,7 +227,8 @@
         }
       ],
       "log": "Shakedown nets 2 coin.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "shakedown"
     },
     {
       "id": "rub_out",
@@ -245,7 +249,8 @@
         }
       ],
       "log": "Rub-Out nicks {target} for 1.",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "rub_out"
     },
     {
       "id": "bury_evidence",
@@ -270,7 +275,8 @@
         }
       ],
       "log": "Bury the Evidence silences {target} for 1 and cycles the deck.",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "bury_evidence"
     },
     {
       "id": "protection_money",
@@ -295,7 +301,8 @@
         }
       ],
       "log": "Protection Money collects from {target} \u2014 2 damage, 2 coin.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "protection_money"
     },
     {
       "id": "tax_audit",
@@ -320,7 +327,8 @@
         }
       ],
       "log": "Tax Audit finds {target} owes 4 and a coin.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "tax_audit"
     },
     {
       "id": "shell_game",
@@ -341,7 +349,8 @@
         }
       ],
       "log": "Shell Game \u2014 nothing up the sleeve, one card drawn.",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "shell_game"
     },
     {
       "id": "the_treatment",
@@ -363,7 +372,8 @@
         }
       ],
       "log": "The Treatment patches up {target} for 3.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "the_treatment"
     },
     {
       "id": "protection_racket",
@@ -384,7 +394,8 @@
         }
       ],
       "log": "{target} flexes \u2014 +2 ATK from Protection Racket.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "protection_racket"
     },
     {
       "id": "mermaids_call",
@@ -405,7 +416,8 @@
         }
       ],
       "log": "A Siren rises at {tile}.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "mermaids_call"
     },
     {
       "id": "custom_disposal_msg8wdvf",
@@ -426,7 +438,8 @@
         }
       ],
       "log": "",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "custom_disposal_msg8wdvf"
     },
     {
       "id": "custom_absorb_msg8xedc",
@@ -452,7 +465,8 @@
         }
       ],
       "log": "",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "custom_absorb_msg8xedc"
     },
     {
       "id": "custom_raze_the_ground_mt2t095q",
@@ -473,7 +487,8 @@
         }
       ],
       "log": "",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "custom_raze_the_ground_mt2t095q"
     },
     {
       "id": "pipe_bomb",
@@ -508,7 +523,7 @@
       "aoe": 3,
       "desc": "Deal 20 damage AoE. Gain 5 coin.",
       "icon": "Swords",
-      "art": "generic-attack",
+      "art": "custom_dmcs_mtacrdsc",
       "fx": "shock",
       "effects": [
         {
@@ -518,28 +533,6 @@
         {
           "kind": "gainCoin",
           "amount": 5
-        }
-      ],
-      "log": "",
-      "logTone": "neutral"
-    },
-    {
-      "id": "custom_call_vu_mtacts90",
-      "name": "Call Vu",
-      "type": "summon",
-      "cost": 2,
-      "value": 2,
-      "target": "empty-tile",
-      "range": 9,
-      "aoe": 0,
-      "desc": "",
-      "icon": "Swords",
-      "art": "generic-summon",
-      "fx": "shock",
-      "effects": [
-        {
-          "kind": "summon",
-          "unit": "summon_vu_mtacskfm"
         }
       ],
       "log": "",
@@ -556,7 +549,7 @@
       "aoe": 0,
       "desc": "Summon Vu minion (10 HP, 10 ATK)",
       "icon": "Swords",
-      "art": "generic-summon",
+      "art": "custom_call_vu_mtacu2sp",
       "fx": "shock",
       "effects": [
         {
@@ -590,7 +583,8 @@
         }
       ],
       "log": "Debt Collector squeezes {target} for 1 damage and 1 coin.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "debt_collector"
     },
     {
       "id": "backup",
@@ -611,7 +605,8 @@
         }
       ],
       "log": "{target} gets Backup \u2014 +1 ATK.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "backup"
     },
     {
       "id": "hard_stop",
@@ -632,7 +627,8 @@
         }
       ],
       "log": "Hard Stop slams {target} for 3.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "hard_stop"
     },
     {
       "id": "inside_job",
@@ -653,7 +649,8 @@
         }
       ],
       "log": "Inside Job pays out 5 coin.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "inside_job"
     },
     {
       "id": "enforce",
@@ -674,7 +671,8 @@
         }
       ],
       "log": "Enforce pounds {target} for 9!",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "enforce"
     },
     {
       "id": "cut",
@@ -696,7 +694,8 @@
         }
       ],
       "log": "Cut \u2014 patched up for 2.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "cut"
     },
     {
       "id": "stiff",
@@ -721,7 +720,8 @@
         }
       ],
       "log": "Stiff \u2014 1 card drawn, 1 coin pocketed.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "stiff"
     },
     {
       "id": "torch",
@@ -742,7 +742,8 @@
         }
       ],
       "log": "Torch engulfs {target} in flames for 3!",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "torch"
     },
     {
       "id": "ringer",
@@ -763,7 +764,8 @@
         }
       ],
       "log": "Ringer enters at {tile}.",
-      "logTone": "good"
+      "logTone": "good",
+      "art": "ringer"
     },
     {
       "id": "payout",
@@ -784,7 +786,8 @@
         }
       ],
       "log": "Payout \u2014 6 coin, no questions asked.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "payout"
     },
     {
       "id": "poison_pill",
@@ -809,7 +812,8 @@
         }
       ],
       "log": "Poison Pill stings {target} for 1 and weakens them.",
-      "logTone": "neutral"
+      "logTone": "neutral",
+      "art": "poison_pill"
     },
     {
       "id": "break_in",
@@ -834,7 +838,8 @@
         }
       ],
       "log": "Break In cracks {target} for 1 damage and 2 coin.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "break_in"
     },
     {
       "id": "slush_fund",
@@ -859,7 +864,8 @@
         }
       ],
       "log": "Slush Fund \u2014 3 coin pocketed, 1 card drawn.",
-      "logTone": "gold"
+      "logTone": "gold",
+      "art": "slush_fund"
     },
     {
       "id": "dip",
