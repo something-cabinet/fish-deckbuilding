@@ -288,6 +288,9 @@ function scoreCardCast(
     if (inRange.length === 0) return { total: -9999, damage: 0 }
     const worst = inRange.sort((a, b) => a.hp - b.hp)[0]
     targetId = worst?.id
+  } else if (def.target === CardTarget.Self) {
+    // self-target cards are always in range; no targetId needed
+    targetId = unit.id
   }
 
   const ctx: ScoreContext = { unit, dest, target: living.find((u) => u.id === targetId), damage, foes, allies }

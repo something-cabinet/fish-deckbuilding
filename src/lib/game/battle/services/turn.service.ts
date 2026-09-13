@@ -79,16 +79,22 @@ export function applyEnemyStep(
       if (step.cardId) {
         const def = CARD_LIBRARY[step.cardId]
         if (def) {
-          const enemies = s.units.filter((x) => x.team === Team.Player && x.hp > 0)
-          const allies = s.units.filter((x) => x.team === Team.Enemy && x.hp > 0 && x.id !== u.id)
-          const self = [u]
           let targetUnits: typeof s.units = []
-          if (def.target === CardTarget.Enemy) {
-            targetUnits = sortByDist(enemies, u.pos).slice(0, 1)
-          } else if (def.target === CardTarget.Ally || def.target === CardTarget.Unit) {
-            targetUnits = sortByDist(allies, u.pos).slice(0, 1)
-          } else if (def.target === CardTarget.Self) {
-            targetUnits = self
+          if (step.targetId) {
+            const t = s.units.find((x) => x.id === step.targetId)
+            if (t && t.hp > 0) targetUnits = [t]
+          }
+          if (targetUnits.length === 0) {
+            const enemies = s.units.filter((x) => x.team === Team.Player && x.hp > 0)
+            const allies = s.units.filter((x) => x.team === Team.Enemy && x.hp > 0 && x.id !== u.id)
+            const self = [u]
+            if (def.target === CardTarget.Enemy) {
+              targetUnits = sortByDist(enemies, u.pos).slice(0, 1)
+            } else if (def.target === CardTarget.Ally || def.target === CardTarget.Unit) {
+              targetUnits = sortByDist(allies, u.pos).slice(0, 1)
+            } else if (def.target === CardTarget.Self) {
+              targetUnits = self
+            }
           }
           resolveCardEffects(s, def, { targetUnits, from: u.pos, casterTeam: Team.Enemy }, fx)
           log(s, `${u.name} casts ${def.name}.`, "bad")
