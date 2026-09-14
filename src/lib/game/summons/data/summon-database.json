@@ -16,7 +16,8 @@
       "atk": 10,
       "move": 5,
       "range": 1,
-      "icon": "goon"
+      "icon": "goon",
+      "aiProfile": { "archetype": "berserker" }
     },
     {
       "id": "siren",
@@ -25,7 +26,8 @@
       "atk": 3,
       "move": 2,
       "range": 1,
-      "icon": "goon"
+      "icon": "goon",
+      "aiProfile": { "archetype": "berserker" }
     },
     {
       "id": "decoy",
@@ -34,7 +36,8 @@
       "atk": 1,
       "move": 1,
       "range": 1,
-      "icon": "decoy"
+      "icon": "decoy",
+      "aiProfile": { "archetype": "skirmisher" }
     },
     {
       "id": "transport",
@@ -43,7 +46,8 @@
       "atk": 1,
       "move": 1,
       "range": 1,
-      "icon": "transport"
+      "icon": "transport",
+      "aiProfile": { "archetype": "guardian" }
     }
   ]
 }

@@ -85,7 +85,11 @@ export function resolveCardEffects(
   log(state, interpolate(card.log, targetUnits.map((u) => u.name), tile), card.logTone)
 }
 
-function casterOrEmpty(state: GameState): Unit[] {
+function casterOrEmpty(state: GameState, at?: Pos): Unit[] {
+  if (at) {
+    const u = state.units.find((x) => x.pos.x === at.x && x.pos.y === at.y && x.hp > 0)
+    if (u) return [u]
+  }
   const hero = heroUnit(state)
   return hero ? [hero] : []
 }
@@ -105,7 +109,7 @@ function applyEffect(
       break
     }
     case "heal": {
-      const healed = effect.target === "caster" ? casterOrEmpty(state) : targetUnits
+      const healed = effect.target === "caster" ? casterOrEmpty(state, from) : targetUnits
       for (const unit of healed) {
         unit.hp = Math.min(unit.maxHp, unit.hp + effect.amount)
         fx.push(
@@ -129,7 +133,9 @@ function applyEffect(
       break
     }
     case "buffAtk": {
-      for (const target of targetUnits) target.buffAtk += effect.amount
+      for (const target of targetUnits) {
+        target.buffAtk = Math.max(-target.atk, target.buffAtk + effect.amount)
+      }
       break
     }
     case "summon": {
@@ -150,6 +156,7 @@ function applyEffect(
         hasMoved: true,
         hasActed: true,
         buffAtk: 0,
+        aiProfile: summonDef.aiProfile as Unit["aiProfile"],
       }
       state.units = [...state.units, summoned]
       fx.push(emitFx(state, { kind: FxKind.Summon, to: { ...tile } }))

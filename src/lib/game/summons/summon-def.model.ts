@@ -11,6 +11,6 @@ export interface SummonDef {
   atk: number
   move: number
   range: number
-  /** sprite base name under `public/sprites/`, e.g. "goon" -> goon.png */
   icon: string
+  aiProfile?: { archetype: string; weights?: Record<string, number> }
 }
