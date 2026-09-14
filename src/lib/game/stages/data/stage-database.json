@@ -664,6 +664,64 @@
           "y": 2
         }
       ]
+    },
+    {
+      "id": "stage_burning_ledger",
+      "name": "The Burning Ledger",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 0
+        },
+        {
+          "enemyId": "enforcer",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_script_room",
+      "name": "The Script Room",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "debt_scripter",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "thug",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "informant",
+          "x": 6,
+          "y": 3
+        }
+      ]
     }
   ]
 }

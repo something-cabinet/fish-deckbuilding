@@ -23,6 +23,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Collection Agent", kind: UnitKind.Soldier, hp: 3, atk: 1, move: 3, range: 2 },
       { name: "Informant", kind: UnitKind.Soldier, hp: 4, atk: 2, move: 3, range: 2 },
       { name: "Puffer Guard", kind: UnitKind.Soldier, hp: 5, atk: 1, move: 1 },
+      { name: "The Ridge Runner", kind: UnitKind.Soldier, hp: 3, atk: 3, move: 3 },
     ],
     theme: "shallow",
   },
@@ -46,6 +47,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Caster", kind: UnitKind.Capo, hp: 5, atk: 1, move: 1, range: 3 },
       { name: "Bruiser", kind: UnitKind.Capo, hp: 15, atk: 3, move: 1 },
       { name: "Dealer", kind: UnitKind.Capo, hp: 6, atk: 2, move: 2 },
+      { name: "The Debt Scripter", kind: UnitKind.Capo, hp: 7, atk: 2, move: 2, range: 2 },
     ],
     theme: "mid",
   },
@@ -282,6 +284,17 @@ export const EVENTS: EventDef[] = [
       { label: "Follow the tip", result: "A modest find.", gold: 18 },
       { label: "Set a trap for the tipster", result: "Turns out it was a rival — your win, their loss.", gold: 25, hp: -3 },
       { label: "Burn the note", result: "Safe and sorry.", },
+    ],
+  },
+  {
+    id: "ghost_ledger",
+    title: "The Ghost Ledger",
+    prompt:
+      "A translucent ledger floats in the dark water, names of the drowned flickering across its pages. Touching it sends a cold jolt through your fin — and the numbers start filling in with your name.",
+    choices: [
+      { label: "Study the entries", result: "Forbidden knowledge has a price — and a payout.", card: "the_ledger", debt: 15 },
+      { label: "Burn the page", result: "The ledger dissolves into a shower of coins.", gold: 20 },
+      { label: "Swim away", result: "You shake off the chill and move on.", },
     ],
   },
 ]

@@ -407,6 +407,43 @@
       "aiProfile": {
         "archetype": "brawler"
       }
+    },
+    {
+      "id": "debt_scripter",
+      "name": "The Debt Scripter",
+      "kind": 3,
+      "hp": 7,
+      "atk": 2,
+      "move": 2,
+      "range": 2,
+      "goldDrop": 10,
+      "isMinion": false,
+      "icon": "placeholder-enemy",
+      "deck": [
+        { "id": "cut", "count": 2 },
+        { "id": "kneecap", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "artillery"
+      }
+    },
+    {
+      "id": "ridge_runner",
+      "name": "The Ridge Runner",
+      "kind": 2,
+      "hp": 3,
+      "atk": 3,
+      "move": 3,
+      "range": 1,
+      "goldDrop": 4,
+      "isMinion": false,
+      "icon": "placeholder-enemy",
+      "deck": [
+        { "id": "rub_out", "count": 2 }
+      ],
+      "aiProfile": {
+        "archetype": "skirmisher"
+      }
     }
   ]
 }

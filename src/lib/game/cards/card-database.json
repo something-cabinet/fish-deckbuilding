@@ -1011,6 +1011,117 @@
       ],
       "log": "An Armored Transport arrives at {tile}.",
       "logTone": "good"
+    },
+    {
+      "id": "pump_up",
+      "name": "Pump Up",
+      "type": "skill",
+      "cost": 0,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Psych yourself up — +1 ATK this turn.",
+      "icon": "Sword",
+      "fx": "shock",
+      "effects": [
+        { "kind": "buffAtk", "amount": 1 }
+      ],
+      "log": "Pump Up — +1 ATK.",
+      "logTone": "good"
+    },
+    {
+      "id": "backhander",
+      "name": "Backhander",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "A discreet payment — heal an ally for 4 HP.",
+      "icon": "HeartPulse",
+      "fx": "heal",
+      "effects": [
+        { "kind": "heal", "amount": 4, "target": "cast-target" }
+      ],
+      "log": "Backhander patches up {target} for 4.",
+      "logTone": "good"
+    },
+    {
+      "id": "the_ledger",
+      "name": "The Ledger",
+      "type": "attack",
+      "cost": 4,
+      "value": 4,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Balance the books — deal 5 damage and heal yourself 3 HP.",
+      "icon": "BookOpen",
+      "fx": "gavel",
+      "effects": [
+        { "kind": "damage", "amount": 5 },
+        { "kind": "heal", "amount": 3, "target": "caster" }
+      ],
+      "log": "The Ledger settles with {target} for 5, heals for 3.",
+      "logTone": "good"
+    },
+    {
+      "id": "wire_transfer",
+      "name": "Wire Transfer",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Move money fast — gain 3 coin, lose 1 HP from the rush.",
+      "icon": "ArrowRightLeft",
+      "fx": "coin",
+      "effects": [
+        { "kind": "gainCoin", "amount": 3 },
+        { "kind": "heal", "amount": -1, "target": "caster" }
+      ],
+      "log": "Wire Transfer — 3 coin wired, 1 HP lost in transaction fees.",
+      "logTone": "gold"
+    },
+    {
+      "id": "tail_job",
+      "name": "Tail Job",
+      "type": "skill",
+      "cost": 2,
+      "value": 2,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Tail a mark — draw 2 cards but lose 2 HP from the strain.",
+      "icon": "Eye",
+      "fx": "draw",
+      "effects": [
+        { "kind": "drawCards", "amount": 2 },
+        { "kind": "heal", "amount": -2, "target": "caster" }
+      ],
+      "log": "Tail Job — 2 cards drawn, 2 HP lost.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "bodyguard",
+      "name": "Bodyguard",
+      "type": "summon",
+      "cost": 2,
+      "value": 2,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Call in a Guard (5 HP / 1 ATK) with defensive instincts.",
+      "icon": "Shield",
+      "fx": "summon",
+      "effects": [
+        { "kind": "summon", "unit": "guard" }
+      ],
+      "log": "A Bodyguard takes position at {tile}.",
+      "logTone": "good"
     }
   ]
 }

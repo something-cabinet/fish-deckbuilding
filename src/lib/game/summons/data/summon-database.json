@@ -48,6 +48,16 @@
       "range": 1,
       "icon": "transport",
       "aiProfile": { "archetype": "guardian" }
+    },
+    {
+      "id": "guard",
+      "name": "Guard",
+      "hp": 5,
+      "atk": 1,
+      "move": 1,
+      "range": 1,
+      "icon": "goon",
+      "aiProfile": { "archetype": "guardian" }
     }
   ]
 }

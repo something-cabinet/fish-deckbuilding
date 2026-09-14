@@ -261,6 +261,24 @@
       "icon": "Shield",
       "rarity": "uncommon",
       "stats": { "maxHp": 4 }
+    },
+    {
+      "id": "gilded_hook",
+      "name": "Gilded Hook",
+      "description": "Your maximum HP is increased by 2.",
+      "icon": "Anchor",
+      "rarity": "common",
+      "stats": { "maxHp": 2 }
+    },
+    {
+      "id": "blood_ink",
+      "name": "Blood Ink",
+      "description": "Draw 1 card whenever you defeat an enemy.",
+      "icon": "Skull",
+      "rarity": "rare",
+      "triggers": {
+        "onEnemyKilled": [{ "kind": "drawCards", "amount": 1 }]
+      }
     }
   ]
 }
