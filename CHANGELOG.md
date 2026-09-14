@@ -3,6 +3,26 @@
 ## [Unreleased]
 
 ### Fixed
+- **Self-heal caster target always resolved to hero (Latent Bug 2):** `casterOrEmpty()` in `effects.service.ts` always returned the hero unit regardless of who cast the card. Fixed to look up the unit at the `from` position first, so enemy-cast self-heal cards (cut, loan_shark rider) correctly heal the enemy caster instead of the hero.
+- **buffAtk lower-bound clamp (Bug 3):** `buffAtk` effect in `effects.service.ts` now clamps the result so `buffAtk` can never go below `-target.atk`, preventing negative effective attack values from propagating into the raw property.
+- **Summoned units lack aiProfile (Bug 4):** `SummonDef` interface, Zod schema, and summon database entries now support an optional `aiProfile` field, wired through to the summoned Unit in `effects.service.ts`. Applies sensible archetypes: Siren (berserker), Decoy (skirmisher), Transport (guardian), Guard (guardian), Vu (berserker). Goon keeps default brawler.
+
+### Added
+- **6 new cards:** Pump Up (0c skill self, +1 ATK), Backhander (1c skill ally, heal 4), The Ledger (4c attack enemy, 5 damage + heal caster 3), Wire Transfer (1c skill self, gain 3 coin, lose 1 HP), Tail Job (2c skill self, draw 2, lose 2 HP), Bodyguard (2c summon, Guard 5/1/1 guardian AI).
+- **1 new summon:** Guard (5 HP / 1 ATK / 1 move / 1 range, guardian AI). Used by Bodyguard card.
+- **2 new enemies:** The Debt Scripter (midwaters Capo, 7 HP / 2 ATK / range 2, artillery AI, Cut+Kneecap deck) — first enemy to use self-heal cards, validating Bug 2 fix. The Ridge Runner (shallows Soldier, 3 HP / 3 ATK / 3 move, skirmisher AI, fast glass cannon).
+- **2 new stages:** The Burning Ledger (shallows elite — 2 Soldiers + Capo), The Script Room (midwaters normal — Debt Scripter + Soldier + Informant).
+- **2 new trinkets:** Gilded Hook (common, +2 max HP), Blood Ink (rare, draw 1 card on enemy kill).
+- **1 new event:** The Ghost Ledger — study for a card at debt cost, burn for gold, or swim away.
+- **Zone pool diversity:** The Ridge Runner added to shallows pool; The Debt Scripter added to midwaters pool.
+- **Card art (6):** pump_up, backhander, the_ledger, wire_transfer, tail_job, bodyguard.
+- **Enemy sprites (2):** debt_scripter, ridge_runner.
+- **Summon sprites (2):** guard_sprite (new Guard summon), siren_sprite (backfill — Siren no longer shares Goon icon).
+
+### Changed
+- **Zone pool diversity:** The Ridge Runner added to shallows pool; The Debt Scripter added to midwaters pool.
+
+### Fixed
 - **Enemy card-cast AI target was ignored:** `applyEnemyStep` for `CastCard` was recalculating the target from scratch (nearest enemy/ally) instead of using `step.targetId` chosen by the AI planner. The AI's weighted scoring (LethalOnHero, KillSecured, etc.) is now respected during execution.
 - **Missing CardTarget.Self handling in AI scoring:** `scoreCardCast` did not handle `CardTarget.Self`, so self-target cards (Cash Flow, Market Rate, etc.) were never properly scored by the AI and effectively never chosen. Now self-target cards are scored with the caster as target.
 
