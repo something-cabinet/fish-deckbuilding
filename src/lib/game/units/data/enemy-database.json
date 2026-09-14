@@ -418,7 +418,7 @@
       "range": 2,
       "goldDrop": 10,
       "isMinion": false,
-      "icon": "placeholder-enemy",
+      "icon": "debt_scripter",
       "deck": [
         { "id": "cut", "count": 2 },
         { "id": "kneecap", "count": 1 }
@@ -437,7 +437,7 @@
       "range": 1,
       "goldDrop": 4,
       "isMinion": false,
-      "icon": "placeholder-enemy",
+      "icon": "ridge_runner",
       "deck": [
         { "id": "rub_out", "count": 2 }
       ],

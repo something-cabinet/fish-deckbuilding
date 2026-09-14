@@ -1024,6 +1024,7 @@
       "desc": "Psych yourself up — +1 ATK this turn.",
       "icon": "Sword",
       "fx": "shock",
+      "art": "pump_up",
       "effects": [
         { "kind": "buffAtk", "amount": 1 }
       ],
@@ -1042,6 +1043,7 @@
       "desc": "A discreet payment — heal an ally for 4 HP.",
       "icon": "HeartPulse",
       "fx": "heal",
+      "art": "backhander",
       "effects": [
         { "kind": "heal", "amount": 4, "target": "cast-target" }
       ],
@@ -1060,6 +1062,7 @@
       "desc": "Balance the books — deal 5 damage and heal yourself 3 HP.",
       "icon": "BookOpen",
       "fx": "gavel",
+      "art": "the_ledger",
       "effects": [
         { "kind": "damage", "amount": 5 },
         { "kind": "heal", "amount": 3, "target": "caster" }
@@ -1079,6 +1082,7 @@
       "desc": "Move money fast — gain 3 coin, lose 1 HP from the rush.",
       "icon": "ArrowRightLeft",
       "fx": "coin",
+      "art": "wire_transfer",
       "effects": [
         { "kind": "gainCoin", "amount": 3 },
         { "kind": "heal", "amount": -1, "target": "caster" }
@@ -1098,6 +1102,7 @@
       "desc": "Tail a mark — draw 2 cards but lose 2 HP from the strain.",
       "icon": "Eye",
       "fx": "draw",
+      "art": "tail_job",
       "effects": [
         { "kind": "drawCards", "amount": 2 },
         { "kind": "heal", "amount": -2, "target": "caster" }
@@ -1117,6 +1122,7 @@
       "desc": "Call in a Guard (5 HP / 1 ATK) with defensive instincts.",
       "icon": "Shield",
       "fx": "summon",
+      "art": "bodyguard",
       "effects": [
         { "kind": "summon", "unit": "guard" }
       ],
