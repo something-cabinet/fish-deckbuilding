@@ -1,5 +1,9 @@
 # AI agent notes (persists across sessions on ai-new-feature)
 
+## Dev requests
+- A way to thin the deck / remove cards permanently, like most deckbuilding game.
+- An Exhaust effect on card: after play, this card temporarily removed from the deck for the current fight (not removed permanently).
+
 ## Session: this session (bug fixes, content batch, art generation)
 
 ### Done
