@@ -444,6 +444,44 @@
       "aiProfile": {
         "archetype": "skirmisher"
       }
+    },
+    {
+      "id": "auditor",
+      "name": "The Auditor",
+      "kind": 3,
+      "hp": 8,
+      "atk": 2,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 12,
+      "isMinion": false,
+      "icon": "auditor",
+      "deck": [
+        { "id": "tax_audit", "count": 2 },
+        { "id": "kneecap", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "skirmisher"
+      }
+    },
+    {
+      "id": "cleaner_soldier",
+      "name": "The Cleaner",
+      "kind": 2,
+      "hp": 8,
+      "atk": 3,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 7,
+      "isMinion": false,
+      "icon": "cleaner",
+      "deck": [
+        { "id": "cut", "count": 1 },
+        { "id": "demand_letter", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "brawler"
+      }
     }
   ]
 }

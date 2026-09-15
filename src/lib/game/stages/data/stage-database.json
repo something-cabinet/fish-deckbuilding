@@ -722,6 +722,64 @@
           "y": 3
         }
       ]
+    },
+    {
+      "id": "stage_audit_floor",
+      "name": "The Audit Floor",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "auditor",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 0
+        },
+        {
+          "enemyId": "midwaters_thug",
+          "x": 6,
+          "y": 4
+        }
+      ]
+    },
+    {
+      "id": "stage_cleaning_closet",
+      "name": "The Cleaning Closet",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        {
+          "enemyId": "cleaner_soldier",
+          "x": 7,
+          "y": 2
+        },
+        {
+          "enemyId": "cleaner_soldier",
+          "x": 6,
+          "y": 1
+        },
+        {
+          "enemyId": "depths_thug",
+          "x": 6,
+          "y": 3
+        }
+      ]
     }
   ]
 }

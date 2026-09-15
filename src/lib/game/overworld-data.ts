@@ -48,6 +48,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Bruiser", kind: UnitKind.Capo, hp: 15, atk: 3, move: 1 },
       { name: "Dealer", kind: UnitKind.Capo, hp: 6, atk: 2, move: 2 },
       { name: "The Debt Scripter", kind: UnitKind.Capo, hp: 7, atk: 2, move: 2, range: 2 },
+      { name: "The Auditor", kind: UnitKind.Capo, hp: 8, atk: 2, move: 2 },
     ],
     theme: "mid",
   },
@@ -70,6 +71,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Caster", kind: UnitKind.Capo, hp: 7, atk: 2, move: 1, range: 3 },
       { name: "Bruiser", kind: UnitKind.Capo, hp: 20, atk: 4, move: 1 },
       { name: "Spotter", kind: UnitKind.Soldier, hp: 3, atk: 1, move: 2, range: 4 },
+      { name: "The Cleaner", kind: UnitKind.Soldier, hp: 8, atk: 3, move: 2 },
     ],
     theme: "deep",
   },
@@ -295,6 +297,28 @@ export const EVENTS: EventDef[] = [
       { label: "Study the entries", result: "Forbidden knowledge has a price — and a payout.", card: "the_ledger", debt: 15 },
       { label: "Burn the page", result: "The ledger dissolves into a shower of coins.", gold: 20 },
       { label: "Swim away", result: "You shake off the chill and move on.", },
+    ],
+  },
+  {
+    id: "abandoned_warehouse",
+    title: "The Abandoned Warehouse",
+    prompt:
+      "A derelict warehouse on the seafloor, its doors hanging open. Inside, crates stamped with the syndicate's crest — and something moving in the dark. Quick looting or a quiet retreat?",
+    choices: [
+      { label: "Raid the crates", result: "You grab a card and slip into the shadows.", card: "cleanup" },
+      { label: "Torch the place", result: "Insurance money, no questions asked.", gold: 20, debt: 15 },
+      { label: "Back away slowly", result: "Some doors stay shut for a reason.", },
+    ],
+  },
+  {
+    id: "numbers_game",
+    title: "The Numbers Game",
+    prompt:
+      "A seahorse in a cracked visor runs a floating gambling den. \u201CThree shells, one pearl. Double your coin — or halve it.\u201D The crowd smells like cheap kelp and desperation.",
+    choices: [
+      { label: "Play the game", result: "The pearl's under the middle shell. Easy money.", gold: 30 },
+      { label: "Watch from the rail", result: "You learn a new trick from the house.", card: "shell_game" },
+      { label: "Walk away", result: "The house always wins — and you're no house.", },
     ],
   },
 ]

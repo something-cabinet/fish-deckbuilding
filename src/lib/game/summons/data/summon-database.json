@@ -58,6 +58,26 @@
       "range": 1,
       "icon": "guard_sprite",
       "aiProfile": { "archetype": "guardian" }
+    },
+    {
+      "id": "night_fish",
+      "name": "Night Fish",
+      "hp": 10,
+      "atk": 5,
+      "move": 1,
+      "range": 1,
+      "icon": "night_fish",
+      "aiProfile": { "archetype": "berserker" }
+    },
+    {
+      "id": "killer",
+      "name": "Killer",
+      "hp": 3,
+      "atk": 3,
+      "move": 3,
+      "range": 2,
+      "icon": "killer",
+      "aiProfile": { "archetype": "artillery" }
     }
   ]
 }

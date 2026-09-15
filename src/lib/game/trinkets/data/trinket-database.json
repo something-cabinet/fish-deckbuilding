@@ -279,6 +279,26 @@
       "triggers": {
         "onEnemyKilled": [{ "kind": "drawCards", "amount": 1 }]
       }
+    },
+    {
+      "id": "snaggletooth",
+      "name": "Snaggletooth",
+      "description": "Gain 1 attack whenever you sell a card for the rest of combat.",
+      "icon": "Sword",
+      "rarity": "rare",
+      "triggers": {
+        "onCardSold": [{ "kind": "buffAtk", "amount": 1 }]
+      }
+    },
+    {
+      "id": "ledger_shredder",
+      "name": "Ledger Shredder",
+      "description": "Draw 1 card at the start of each turn.",
+      "icon": "Scroll",
+      "rarity": "rare",
+      "triggers": {
+        "onTurnStart": [{ "kind": "drawCards", "amount": 1 }]
+      }
     }
   ]
 }
