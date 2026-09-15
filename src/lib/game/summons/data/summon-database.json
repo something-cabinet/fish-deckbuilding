@@ -16,7 +16,7 @@
       "atk": 10,
       "move": 5,
       "range": 1,
-      "icon": "goon",
+      "icon": "vu_sprite",
       "aiProfile": { "archetype": "berserker" }
     },
     {

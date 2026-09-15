@@ -1141,6 +1141,7 @@
       "desc": "Call a deep-sea horror — summon a Night Fish (10 HP / 5 ATK) on an empty tile.",
       "icon": "Skull",
       "fx": "summon",
+      "art": "night_fish_card",
       "effects": [
         { "kind": "summon", "unit": "night_fish" }
       ],
@@ -1159,6 +1160,7 @@
       "desc": "Hire a Killer (3 HP / 3 ATK / range 2) on an empty tile.",
       "icon": "Fish",
       "fx": "summon",
+      "art": "contract_killer_card",
       "effects": [
         { "kind": "summon", "unit": "killer" }
       ],
@@ -1177,6 +1179,7 @@
       "desc": "Clean house — deal 3 damage to a target enemy and draw 1 card.",
       "icon": "Sparkles",
       "fx": "shock",
+      "art": "cleanup_card",
       "effects": [
         { "kind": "damage", "amount": 3 },
         { "kind": "drawCards", "amount": 1 }
@@ -1196,6 +1199,7 @@
       "desc": "Crunch the numbers — draw 3 cards.",
       "icon": "Calculator",
       "fx": "draw",
+      "art": "number_cruncher_card",
       "effects": [
         { "kind": "drawCards", "amount": 3 }
       ],
