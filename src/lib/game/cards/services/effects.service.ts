@@ -111,7 +111,7 @@ function applyEffect(
     case "heal": {
       const healed = effect.target === "caster" ? casterOrEmpty(state, from) : targetUnits
       for (const unit of healed) {
-        unit.hp = Math.min(unit.maxHp, unit.hp + effect.amount)
+        unit.hp = Math.max(0, Math.min(unit.maxHp, unit.hp + effect.amount))
         fx.push(
           emitFx(state, {
             kind: FxKind.Heal,
