@@ -24,6 +24,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Informant", kind: UnitKind.Soldier, hp: 4, atk: 2, move: 3, range: 2 },
       { name: "Puffer Guard", kind: UnitKind.Soldier, hp: 5, atk: 1, move: 1 },
       { name: "The Ridge Runner", kind: UnitKind.Soldier, hp: 3, atk: 3, move: 3 },
+      { name: "The Bomber", kind: UnitKind.Soldier, hp: 5, atk: 2, move: 2, range: 2 },
     ],
     theme: "shallow",
   },

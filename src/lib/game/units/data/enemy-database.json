@@ -482,6 +482,25 @@
       "aiProfile": {
         "archetype": "brawler"
       }
+    },
+    {
+      "id": "bomber",
+      "name": "The Bomber",
+      "kind": 2,
+      "hp": 5,
+      "atk": 2,
+      "move": 2,
+      "range": 2,
+      "goldDrop": 6,
+      "isMinion": false,
+      "icon": "bomber",
+      "deck": [
+        { "id": "pipe_bomb", "count": 2 }
+      ],
+      "aiProfile": {
+        "archetype": "artillery",
+        "weights": { "distanceToTarget": -2 }
+      }
     }
   ]
 }
