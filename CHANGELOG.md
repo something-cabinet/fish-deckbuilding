@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Added
+- **Exhaust mechanic:** Cards with `exhaust: true` are set aside in a new `exhaust` pile instead of the discard pile after play. They cannot be used again for the rest of the fight. This enables powerful single-use-per-combat card designs. Wired through CardDef model, castCard routing, Zod schema, and GameState.
+- **Remove (deck-thinning) mechanic:** New `removeRandomFromHand` card effect randomly removes a card from the player's hand (after the played card is already removed). Enables deck-thinning strategies during combat. Wired through CardEffect union, effects.service, Zod schema.
+- **6 new cards:**
+  - The Big One (3c attack, 6 damage, Exhaust) — powerful one-shot hit.
+  - Desperate Measures (0c skill, draw 3, Exhaust) — emergency cycle.
+  - Cut Losses (0c skill, remove a random card, gain 2 coin) — deck-thin + economy.
+  - Fence the Goods (1c skill, remove a random card, draw 2) — deck-thin + cycle.
+  - Torpedo (2c attack, AoE 1, 2 damage) — cheap cross-blast, fills AoE gap at lower cost.
+  - Clean Slate (1c skill, remove a random card, gain 1 coin, Exhaust) — thin + economy + one-shot.
+- **1 new enemy:** The Bomber (shallows soldier, 5 HP / 2 ATK / 2 move / range 2, artillery AI, Pipe Bomb ×2 deck). Added to shallows zone pool.
+- **3 new stages:** The Bomb Bay (shallows normal — Bomber + 2 thugs), The Torpedo Range (shallows normal — 2 Puffer Guards + Capo), The Bruiser Pit (midwaters elite — Bruiser + Spotter + guards).
+- **2 new events:** The Arms Dealer (offers The Big One or Torpedo for coin or debt), The Cleaner's Offer (offers Cut Losses or Clean Slate for coin).
+- **Card art (6):** the_big_one, desperate_measures, cut_losses, fence_the_goods, torpedo, clean_slate.
+- **Enemy sprite (1):** bomber.
+
 ### Fixed
 - **Negative heal can set HP below 0 (Bug 5):** The `heal` effect in `effects.service.ts` clamped only the upper bound (`Math.min(maxHp, ...)`) but not the lower bound. Cards using negative-amount heal (Wire Transfer, Tail Job) could drive a unit's HP below 0. Added `Math.max(0, ...)` guard so self-damage cards floor at 0, matching how `dealDamage` already safeguards the damage path.
 

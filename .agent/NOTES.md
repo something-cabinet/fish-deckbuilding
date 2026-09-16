@@ -1,39 +1,49 @@
 # AI agent notes (persists across sessions on ai-new-feature)
 
-## Dev requests
-- A way to thin the deck / remove cards permanently, like most deckbuilding game.
-- An Exhaust effect on card: after play, this card temporarily removed from the deck for the current fight (not removed permanently).
+## Dev requests (carried forward — still not implemented in card effects)
+- **(done) A way to thin the deck / remove cards permanently** — implemented as `removeRandomFromHand` effect; cards Cut Losses, Fence the Goods, Clean Slate use it.
+- **(done) An Exhaust effect on card** — implemented as `exhaust` property on CardDef; cards The Big One, Desperate Measures, Clean Slate use it.
 
-## Session: this session (bug fixes, content batch, art generation)
+## Session: this session (exhaust, deck-thin, 6 cards, bomber, stages, events, art)
 
 ### Done
 
-- **Bug fix — negative heal HP floor (Bug 5):** `heal` effect in `effects.service.ts` clamped only the upper bound (`Math.min(maxHp, ...)`) but not the lower bound. Negative-amount heal cards (Wire Transfer, Tail Job) could drive HP below 0. Added `Math.max(0, ...)` guard.
-- **Content batch:** 4 cards (Night Fish, Contract Killer, Cleanup, Number Cruncher), 2 summons (Night Fish, Killer), 2 enemies (The Auditor, The Cleaner), 2 stages (The Audit Floor, The Cleaning Closet), 2 events (The Abandoned Warehouse, The Numbers Game), 2 trinkets (Snaggletooth, Ledger Shredder).
-- **Zone pool entries:** Auditor to midwaters, Cleaner to depths.
-- **Art generation:** 4 card arts (night_fish_card, contract_killer_card, cleanup_card, number_cruncher_card), 2 enemy sprites (auditor, cleaner), 3 summon sprites (night_fish, killer, vu_sprite — backfill for Vu which previously shared goon icon). 9 total assets generated.
+- **Exhaust mechanic:** New `exhaust?: boolean` field on CardDef. After play, exhausted cards go to `state.exhaust` pile instead of discard. Single-use per fight. Wired through model, schema, actions.service, state.service, clone.
+- **Remove (deck-thin) mechanic:** New `removeRandomFromHand` effect in CardEffect union. Removes a random card from player's hand after the played card leaves hand. Wired through model, schema, effects.service.
+- **6 new cards:** The Big One (3c 6dmg exhaust), Desperate Measures (0c draw 3 exhaust), Cut Losses (0c remove+2coin), Fence the Goods (1c remove+draw2), Torpedo (2c AoE1 2dmg), Clean Slate (1c remove+1coin exhaust).
+- **1 new enemy:** The Bomber (shallows, range 2, Pipe Bomb x2, artillery). Added to shallows zone pool.
+- **3 new stages:** The Bomb Bay (shallows normal), The Torpedo Range (shallows normal), The Bruiser Pit (midwaters elite).
+- **2 new events:** The Arms Dealer (Big One / Torpedo), The Cleaner's Offer (Cut Losses / Clean Slate).
+- **Art generation:** 6 card arts + 1 enemy sprite (7 assets total). 3 of 10 budget remaining unused.
 - All 351 tests pass, TypeScript compiles clean.
 
 ### Files changed
 
-- `src/lib/game/cards/services/effects.service.ts` — heal lower-bound clamp
-- `src/lib/game/summons/data/summon-database.json` — 2 new summons, vu_sprite icon backfill
-- `src/lib/game/cards/card-database.json` — 4 new cards with art references
-- `src/lib/game/units/data/enemy-database.json` — 2 new enemies
-- `src/lib/game/stages/data/stage-database.json` — 2 new stages
-- `src/lib/game/trinkets/data/trinket-database.json` — 2 new trinkets
-- `src/lib/game/overworld-data.ts` — zone pool entries, 2 new events
-- `public/card-art/*.png` — 4 new card arts
-- `public/sprites/*.png` — 5 new sprites (auditor, cleaner, night_fish, killer, vu_sprite)
-- `CHANGELOG.md` — session entry
+- `src/lib/game/cards/models/card-def.interface.ts` — exhaust field added
+- `src/lib/game/cards/models/card-effect.model.ts` — removeRandomFromHand effect added
+- `src/lib/game/cards/data/schema.helper.ts` — schema updated for exhaust + remove
+- `src/lib/game/battle/models/game-state.interface.ts` — exhaust pile added
+- `src/lib/game/battle/services/state.service.ts` — exhaust array initialized
+- `src/lib/game/shared/helpers/engine.helper.ts` — exhaust deep-copied in clone
+- `src/lib/game/actions/actions.service.ts` — castCard routes exhaust to exhaust pile
+- `src/lib/game/cards/services/effects.service.ts` — removeRandomFromHand handler
+- `src/components/game/card-create-screen.tsx` — fromCardEffects handles new effect kind
+- `src/lib/game/cards/card-database.json` — 6 new cards
+- `src/lib/game/units/data/enemy-database.json` — The Bomber
+- `src/lib/game/stages/data/stage-database.json` — 3 new stages
+- `src/lib/game/overworld-data.ts` — Bomber in shallows pool, 2 new events
+- `public/card-art/*.png` — 6 new card arts
+- `public/sprites/bomber.png` — 1 new enemy sprite
+- `CHANGELOG.md` — updated
 - `.agent/NOTES.md` — this update
 
 ### Ideas / TODOs for next session
 
-- All summons now have unique icons (Vu backfilled this session). Consider if any enemies share generic icons — check puffer_guard, heavy, bruiser, spotter etc. for potential backfill.
-- Event pool is 16 now. Good diversity — revisit if >20.
-- Buff/debuff visual indicators on unit tokens (buffAtk value) — still invisible to players.
-- Consider showing move range indicator when selecting a unit (player QoL).
-- The shield icon on Bodyguard might be wrong — lucide icons may not have "Shield" as a valid icon name. Verify in game.
-- Consider adding a `buffMove` effect type so cards like the planned "Get Moving" can give move buffs — would need new effect kind in CardEffect union + handler in effects.service.ts.
-- Consider adding deck-thinning (remove cards permanently) and Exhaust mechanics (next session).
+- **BuffedATK visual indicator:** the ATK plate shows `unit.atk + unit.buffAtk` but there's no visual cue that some of that ATK is from a buff. Consider a gold "+N" badge next to the ATK number to differentiate buffed from base.
+- **Move range indicator:** showing reachable tiles when selecting a unit would be a nice QoL improvement (currently only shown when you click and drag).
+- **buffMove effect:** planned `buffMove` effect type for future "Get Moving" card — would need new CardEffect kind + handler + schema update.
+- **buffHp effect / temp HP:** not yet implemented but could open design space.
+- **Exhaust pile in UI:** The exhaust pile exists in state but has no visual representation on the board (no pile shown). Could add a small exhausted-pile stack next to Discard for player awareness.
+- **South shallows / north midwaters gap:** Fewer shallows stages with newer enemies would round out variety. Consider more puffer_guard / bomber / ridge_runner stages.
+- **Consider adding remove-from-deck (non-random) effect** — a card that lets you choose which card to remove. More powerful but requires a targeting modal in the UI.
+- **Check if bodyguard icon 'Shield' is valid in lucide:** Verified — `Shield` is imported from lucide-react in card-icons.ts. Not a bug.
