@@ -1205,6 +1205,126 @@
       ],
       "log": "Number Cruncher draws 3 cards.",
       "logTone": "neutral"
+    },
+    {
+      "id": "the_big_one",
+      "name": "The Big One",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Call in a favor with the big boss — deal 6 damage. Exhaust.",
+      "icon": "Skull",
+      "fx": "gavel",
+      "art": "the_big_one",
+      "exhaust": true,
+      "effects": [
+        { "kind": "damage", "amount": 6 }
+      ],
+      "log": "The Big One — {target} takes 6, one shot.",
+      "logTone": "good"
+    },
+    {
+      "id": "desperate_measures",
+      "name": "Desperate Measures",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "When your back's against the wall — draw 3 cards. Exhaust.",
+      "icon": "Zap",
+      "fx": "draw",
+      "art": "desperate_measures",
+      "exhaust": true,
+      "effects": [
+        { "kind": "drawCards", "amount": 3 }
+      ],
+      "log": "Desperate measures — 3 cards, no second chances.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "cut_losses",
+      "name": "Cut Losses",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Cut your losses — remove a random card from your hand and gain 2 coin.",
+      "icon": "Sword",
+      "fx": "coin",
+      "art": "cut_losses",
+      "effects": [
+        { "kind": "removeRandomFromHand" },
+        { "kind": "gainCoin", "amount": 2 }
+      ],
+      "log": "Cut losses — a card removed, 2 coin pocketed.",
+      "logTone": "gold"
+    },
+    {
+      "id": "fence_the_goods",
+      "name": "Fence the Goods",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Fence the evidence — remove a random card from hand and draw 2 cards.",
+      "icon": "Lock",
+      "fx": "draw",
+      "art": "fence_the_goods",
+      "effects": [
+        { "kind": "removeRandomFromHand" },
+        { "kind": "drawCards", "amount": 2 }
+      ],
+      "log": "Fence the goods — one card fenced, 2 drawn.",
+      "logTone": "neutral"
+    },
+    {
+      "id": "torpedo",
+      "name": "Torpedo",
+      "type": "attack",
+      "cost": 2,
+      "value": 2,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 1,
+      "desc": "Launch a torpedo — deal 2 damage to the target and adjacent enemies.",
+      "icon": "Bomb",
+      "fx": "shock",
+      "art": "torpedo",
+      "effects": [
+        { "kind": "damage", "amount": 2 }
+      ],
+      "log": "Torpedo blast catches {target} for 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "clean_slate",
+      "name": "Clean Slate",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Burn the records and disappear — remove a random card from hand, gain 1 coin. Exhaust.",
+      "icon": "Sparkles",
+      "fx": "coin",
+      "art": "clean_slate",
+      "exhaust": true,
+      "effects": [
+        { "kind": "removeRandomFromHand" },
+        { "kind": "gainCoin", "amount": 1 }
+      ],
+      "log": "Clean slate — evidence burned, 1 coin pocketed.",
+      "logTone": "gold"
     }
   ]
 }
