@@ -322,4 +322,27 @@ export const EVENTS: EventDef[] = [
       { label: "Walk away", result: "The house always wins — and you're no house.", },
     ],
   },
+  {
+    id: "arms_dealer",
+    title: "The Arms Dealer",
+    prompt:
+      "A scorpionfish in a soldier's coat runs a stall of confiscated weapons. \u201CI've got one-shot specials and crowd-control pieces. Name your poison \u2014 and your price.\u201D",
+    choices: [
+      { label: "Buy the one-shot", result: "A heavy hitter for tight spots.", gold: -20, card: "the_big_one" },
+      { label: "Buy the spread", result: "A torpedo for the crowd.", gold: -15, card: "torpedo" },
+      { label: "Buy both on credit", result: "The syndicate always collects.", debt: 30, card: "the_big_one" },
+      { label: "Walk on", result: "You keep your fins clean.", },
+    ],
+  },
+  {
+    id: "cleaners_offer",
+    title: "The Cleaner's Offer",
+    prompt:
+      "A sleek fish in rubber gloves approaches. \u201CYou've got clutter. I can make it disappear \u2014 no questions asked. But my services aren't cheap.\u201D",
+    choices: [
+      { label: "Hire the cleaner", result: "Evidence gone, coin pocketed.", gold: -18, card: "cut_losses" },
+      { label: "Hire the crew", result: "Full sanitization — no trace left.", gold: -28, card: "clean_slate" },
+      { label: "Decline", result: "The clutter stays.", },
+    ],
+  },
 ]
