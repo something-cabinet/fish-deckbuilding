@@ -25,6 +25,7 @@ export const CardEffectSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("gainCoin"), amount: z.number() }),
   z.object({ kind: z.literal("buffAtk"), amount: z.number() }),
 z.object({ kind: z.literal("summon"), unit: z.string() }),
+  z.object({ kind: z.literal("removeRandomFromHand") }),
   z.object({ kind: z.literal("custom"), handlerId: z.string() }),
 ])
 
@@ -62,6 +63,7 @@ export const CardDefSchema = z.object({
   art: z.string().optional(),
   fx: CardFxSchema,
   effects: z.array(CardEffectSchema),
+  exhaust: z.boolean().optional(),
   log: z.string(),
   logTone: z.enum(["neutral", "good", "bad", "gold"]),
 })

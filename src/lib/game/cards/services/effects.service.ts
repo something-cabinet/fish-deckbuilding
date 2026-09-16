@@ -162,6 +162,15 @@ function applyEffect(
       fx.push(emitFx(state, { kind: FxKind.Summon, to: { ...tile } }))
       break
     }
+    case "removeRandomFromHand": {
+      if (state.hand.length > 0) {
+        const idx = Math.floor(Math.random() * state.hand.length)
+        const removed = state.hand[idx]
+        state.hand = state.hand.filter((_, i) => i !== idx)
+        log(state, `${removed.def.name} removed from the ledger.`, "neutral")
+      }
+      break
+    }
     case "custom": {
       const handler = customHandlers.get(effect.handlerId)
       if (!handler) {

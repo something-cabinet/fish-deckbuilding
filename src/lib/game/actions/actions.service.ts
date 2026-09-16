@@ -65,11 +65,15 @@ export function castCard(
   const aimed = resolveAim(s, card, target)
   if (!aimed) return { state, fx }
 
-  // pay + move card to discard
+  // pay + move card to discard or exhaust pile
   s.coin -= card.def.cost
   s.spentCount += 1
   s.hand = s.hand.filter((c) => c.uid !== cardUid)
-  s.discard = [...s.discard, card]
+  if (card.def.exhaust) {
+    s.exhaust = [...s.exhaust, { ...card }]
+  } else {
+    s.discard = [...s.discard, card]
+  }
 
   // delegate effect application to the data-driven resolver (FR-3) — no
   // switch on card id; effects come from the trusted JSON source.

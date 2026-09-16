@@ -6,4 +6,5 @@ export type CardEffect =
   | { kind: "gainCoin"; amount: number }
   | { kind: "buffAtk"; amount: number } // signed
 | { kind: "summon"; unit: string }
+  | { kind: "removeRandomFromHand" }
   | { kind: "custom"; handlerId: string }

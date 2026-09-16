@@ -32,6 +32,7 @@ export function clone(state: GameState): GameState {
     deck: [...state.deck],
     hand: [...state.hand],
     discard: [...state.discard],
+    exhaust: state.exhaust.map((c) => ({ ...c, def: { ...c.def } })),
     log: [...state.log],
     enemyCardPools: mapValues(state.enemyCardPools, (v) => [...v]),
     enemyHands: mapValues(state.enemyHands, (v) => [...v]),

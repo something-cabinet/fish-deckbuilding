@@ -34,6 +34,11 @@ export interface CardDef {
   fx: FxKind
   /** data-driven effects applied in order by the resolver (FR-1) */
   effects: CardEffect[]
+  /**
+   * After play, this card is set aside in the exhaust pile instead of
+   * going to the discard pile. It cannot be used again this fight.
+   */
+  exhaust?: boolean
   /** resolution log template; {target} = target unit name, {tile} = cell label */
   log: string
   /** tone of the resolution log entry */

@@ -22,6 +22,8 @@ export interface GameState {
   deck: CardInstance[]
   hand: CardInstance[]
   discard: CardInstance[]
+  /** cards with the exhaust property, set aside for the fight after play */
+  exhaust: CardInstance[]
   spentCount: number
   log: LogEntry[]
   selectedUnitId: string | null

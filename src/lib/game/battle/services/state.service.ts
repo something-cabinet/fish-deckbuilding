@@ -113,6 +113,7 @@ export function createInitialState(overrides?: {
     deck,
     hand,
     discard: [],
+    exhaust: [],
     spentCount: 0,
     log: [{ id: 0, turn: 1, text: "The ledger opens. Collect what you're owed.", tone: "gold" }],
     selectedUnitId: "hero",
