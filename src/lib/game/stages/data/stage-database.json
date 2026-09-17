@@ -877,6 +877,59 @@
           "y": 2
         }
       ]
+    },
+    {
+      "id": "stage_arsonists_row",
+      "name": "The Arsonist's Row",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        { "enemyId": "arsonist", "x": 7, "y": 2 },
+        { "enemyId": "puffer_guard", "x": 6, "y": 0 },
+        { "enemyId": "puffer_guard", "x": 6, "y": 4 }
+      ]
+    },
+    {
+      "id": "stage_exchange",
+      "name": "The Exchange",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        { "enemyId": "fence", "x": 7, "y": 2 },
+        { "enemyId": "ridge_runner", "x": 6, "y": 0 },
+        { "enemyId": "midwaters_thug", "x": 6, "y": 4 }
+      ]
+    },
+    {
+      "id": "stage_interrogation_room",
+      "name": "The Interrogation Room",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": {
+        "x": 1,
+        "y": 2
+      },
+      "placements": [
+        { "enemyId": "interrogator", "x": 7, "y": 2 },
+        { "enemyId": "enforcer", "x": 6, "y": 1 },
+        { "enemyId": "mob_nurse", "x": 6, "y": 3 },
+        { "enemyId": "depths_thug", "x": 5, "y": 0 },
+        { "enemyId": "depths_thug", "x": 5, "y": 4 }
+      ]
     }
   ]
 }
