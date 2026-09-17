@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Home, Layers, MousePointer2, Play, Trash2 } from "lucide-react"
+import { Home, Layers, MousePointer2, Play, Trash2, Flame } from "lucide-react"
 import type { GameSettings } from "./fish-mafia-app"
 import { Board } from "./board"
 import { GameCard } from "./card"
@@ -463,6 +463,9 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           <div className="hidden flex-col gap-1 sm:flex">
             <Pile icon={<Layers size={13} />} label="Draw" value={state.deck.length} />
             <Pile icon={<Trash2 size={13} />} label="Spent" value={state.discard.length} />
+            {state.exhaust.length > 0 && (
+              <Pile icon={<Flame size={13} />} label="Exhaust" value={state.exhaust.length} />
+            )}
           </div>
         </div>
 

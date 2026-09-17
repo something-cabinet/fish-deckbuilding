@@ -130,7 +130,19 @@ export function UnitToken({
           isPlayer ? "border-gold/60 bg-ocean-deep/90" : "border-enemy/60 bg-ocean-deep/90",
         )}
       >
-        <span className="flex items-center gap-0.5 bg-enemy/85 px-1.5 py-1 text-white">{unit.atk + unit.buffAtk}</span>
+        <span className="flex items-center gap-0.5 bg-enemy/85 px-1.5 py-1 text-white">
+        {unit.atk + unit.buffAtk}
+        {unit.buffAtk > 0 && (
+          <span className="ml-0.5 rounded-sm bg-gold/85 px-0.5 text-[9px] font-bold leading-none text-ocean-deep">
+            +{unit.buffAtk}
+          </span>
+        )}
+        {unit.buffAtk < 0 && (
+          <span className="ml-0.5 rounded-sm bg-red-400/85 px-0.5 text-[9px] font-bold leading-none text-white">
+            {unit.buffAtk}
+          </span>
+        )}
+      </span>
         <span className="flex flex-col justify-center px-1.5 py-0.5 text-foreground">
           <span className="text-center">{unit.hp}</span>
           <span className="mt-0.5 block h-[3px] w-8 overflow-hidden rounded-full bg-white/15">
