@@ -4,7 +4,6 @@ import {
   START_DEBT,
   FORECLOSURE_CAP,
   INTEREST_RATE,
-  SHOP_REMOVE_PRICE,
   UPGRADE_PRICE,
 } from "@/lib/game/overworld-data"
 import {
@@ -24,6 +23,7 @@ import {
   payDebt,
   shopInventory,
   buyCard,
+  getRemovePrice,
   removeCardFromDeck,
   eventForNode,
   applyEventChoice,
@@ -35,7 +35,6 @@ import {
   rollTreasure,
   addRewardToState,
   createNewRun,
-  REMOVE_PRICE,
   upgradeCard,
   upgradeableCards,
   upgradeCost,
@@ -373,24 +372,31 @@ describe("shop", () => {
   })
 
   it("removeCardFromDeck strikes one copy and charges the fee", () => {
-    const s = stateAt({ gold: 100, deck: ["a", "b", "a"] })
-    const removed = removeCardFromDeck(s, "a", REMOVE_PRICE)
-    expect(removed.gold).toBe(100 - REMOVE_PRICE)
+    const s = stateAt({ gold: 100, deck: ["a", "b", "a"], cardsRemoved: 0 })
+    const removed = removeCardFromDeck(s, "a")
+    expect(removed.gold).toBe(100 - getRemovePrice(0))
     expect(removed.deck).toEqual(["b", "a"]) // only first copy struck
+    expect(removed.cardsRemoved).toBe(1)
   })
 
   it("removeCardFromDeck is a no-op if the card isn't in the deck", () => {
-    const s = stateAt({ gold: 100, deck: ["a"] })
-    expect(removeCardFromDeck(s, "zzz", REMOVE_PRICE)).toBe(s)
+    const s = stateAt({ gold: 100, deck: ["a"], cardsRemoved: 0 })
+    expect(removeCardFromDeck(s, "zzz")).toBe(s)
   })
 
   it("removeCardFromDeck is a no-op when unaffordable", () => {
-    const s = stateAt({ gold: 5, deck: ["a"] })
-    expect(removeCardFromDeck(s, "a", REMOVE_PRICE)).toBe(s)
+    const s = stateAt({ gold: 5, deck: ["a"], cardsRemoved: 0 })
+    expect(removeCardFromDeck(s, "a")).toBe(s)
   })
 
-  it("REMOVE_PRICE mirrors the data-layer constant", () => {
-    expect(REMOVE_PRICE).toBe(SHOP_REMOVE_PRICE)
+  it("removeCardFromDeck price scales with each removal", () => {
+    const s = stateAt({ gold: 999, deck: ["a", "b", "c", "d"], cardsRemoved: 2 })
+    const r1 = removeCardFromDeck(s, "a")
+    expect(r1.gold).toBe(999 - getRemovePrice(2))
+    expect(r1.cardsRemoved).toBe(3)
+    const r2 = removeCardFromDeck(r1, "b")
+    expect(r2.gold).toBe(999 - getRemovePrice(2) - getRemovePrice(3))
+    expect(r2.cardsRemoved).toBe(4)
   })
 })
 

@@ -110,8 +110,15 @@ export const FORECLOSURE_WARN = 0.6
 /* shop pricing                                                        */
 /* ------------------------------------------------------------------ */
 
-/** Flat cost to strike a card from your deck at a shop. */
-export const SHOP_REMOVE_PRICE = 30
+/** Flat cost to strike a card from your deck at a shop (before scaling). */
+export const SHOP_REMOVE_BASE = 30
+/** Extra gold charged per previous card removed this run (STS-style scaling). */
+export const SHOP_REMOVE_INCREMENT = 20
+
+/** Price to remove a card, scaling with each previous removal this run. */
+export function getRemovePrice(cardsRemoved: number): number {
+  return SHOP_REMOVE_BASE + cardsRemoved * SHOP_REMOVE_INCREMENT
+}
 
 /** Fin earned after winning any non-practice battle (combat-exit reward). */
 export const FIN_PER_BATTLE = 5

@@ -14,10 +14,10 @@ import {
   FORECLOSURE_CAP,
   INTEREST_RATE,
   NODE_KIND_WEIGHTS,
-  SHOP_REMOVE_PRICE,
   START_DEBT,
   ZONES,
   UPGRADE_PRICE,
+  getRemovePrice,
   shopCardPrice,
   type EventDef,
 } from "./overworld-data"
@@ -312,8 +312,6 @@ export function shopInventory(seed: number, zoneIndex: number, nodeId: string): 
   return [...cardOffers, ...trinketOffers.map((t) => ({ cardId: "", price: t.price, trinketId: t.trinketId }))]
 }
 
-export const REMOVE_PRICE = SHOP_REMOVE_PRICE
-
 /** Buy a card at a shop: deduct gold, add to deck. No-op if unaffordable. */
 export function buyCard(state: OverworldState, cardId: string, price: number): OverworldState {
   if (state.gold < price) return state
@@ -354,20 +352,20 @@ export function upgradeCost(state: OverworldState, cardId: string): number {
   return UPGRADE_PRICE + current * UPGRADE_PRICE
 }
 
-export { UPGRADE_PRICE }
+export { getRemovePrice, UPGRADE_PRICE }
 
-/** Strike one copy of a card from the deck for a flat fee. */
+/** Strike one copy of a card from the deck. Price scales with previous removals. */
 export function removeCardFromDeck(
   state: OverworldState,
   cardId: string,
-  price: number,
 ): OverworldState {
+  const price = getRemovePrice(state.cardsRemoved)
   if (state.gold < price) return state
   const i = state.deck.indexOf(cardId)
   if (i < 0) return state
   const deck = [...state.deck]
   deck.splice(i, 1)
-  return { ...state, gold: state.gold - price, deck }
+  return { ...state, gold: state.gold - price, deck, cardsRemoved: state.cardsRemoved + 1 }
 }
 
 /* ------------------------------------------------------------------ */
@@ -628,6 +626,7 @@ export function createNewRun(seed?: number, characterId?: string): OverworldStat
     seed: s,
     trinkets: [],
     upgrades: {},
+    cardsRemoved: 0,
   }
 }
 
@@ -644,6 +643,7 @@ export function loadSave(): OverworldState | null {
       fin: typeof parsed.fin === "number" ? parsed.fin : 0,
       trinkets: Array.isArray(parsed.trinkets) ? parsed.trinkets : [],
       upgrades: parsed.upgrades ?? {},
+      cardsRemoved: typeof parsed.cardsRemoved === "number" ? parsed.cardsRemoved : 0,
       characterId: resolveCharacter(parsed.characterId).id,
     }
   } catch {

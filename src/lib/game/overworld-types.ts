@@ -104,4 +104,6 @@ export interface OverworldState {
    * battle is built from this run.
    */
   upgrades: Record<string, number>
+  /** how many cards have been struck from the deck this run (prices scale) */
+  cardsRemoved: number
 }

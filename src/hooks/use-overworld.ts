@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  REMOVE_PRICE,
   UPGRADE_PRICE,
   applyEventChoice,
   buyCard as buyCardEngine,
@@ -13,6 +12,7 @@ import {
   createNewRun,
   eventForNode,
   generateAllZoneMaps,
+  getRemovePrice,
   healAtRest,
   isBossNode,
   isForeclosed,
@@ -228,7 +228,7 @@ export function useOverworld() {
   }, [])
 
   const removeCard = useCallback((cardId: string) => {
-    setState((s) => (s ? removeCardFromDeck(s, cardId, REMOVE_PRICE) : s))
+    setState((s) => (s ? removeCardFromDeck(s, cardId) : s))
   }, [])
 
   const payDebt = useCallback((amount: number) => {
@@ -320,7 +320,7 @@ export function useOverworld() {
     nodeType,
     shop,
     event,
-    removePrice: REMOVE_PRICE,
+    removePrice: state ? getRemovePrice(state.cardsRemoved) : 0,
     upgradePrice: UPGRADE_PRICE,
     upgradeCandidates,
     upgradeFinCost,
