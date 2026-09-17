@@ -1414,6 +1414,7 @@
       "desc": "Unleash a broadside — deal 2 damage to the target and adjacent enemies.",
       "icon": "Swords",
       "fx": "shock",
+      "art": "broadside",
       "effects": [
         { "kind": "damage", "amount": 2 }
       ],
@@ -1432,6 +1433,7 @@
       "desc": "Sweep the floor — deal 2 damage to the target and all enemies within 2 tiles.",
       "icon": "Swords",
       "fx": "shock",
+      "art": "sweep",
       "effects": [
         { "kind": "damage", "amount": 2 }
       ],
@@ -1450,6 +1452,7 @@
       "desc": "Put out a hit — deal 5 damage and reduce target's ATK by 1.",
       "icon": "Target",
       "fx": "shock",
+      "art": "hit",
       "effects": [
         { "kind": "damage", "amount": 5 },
         { "kind": "buffAtk", "amount": -1 }
