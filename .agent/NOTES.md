@@ -4,46 +4,48 @@
 - **(done) A way to thin the deck / remove cards permanently** — implemented as `removeRandomFromHand` effect; cards Cut Losses, Fence the Goods, Clean Slate use it.
 - **(done) An Exhaust effect on card** — implemented as `exhaust` property on CardDef; cards The Big One, Desperate Measures, Clean Slate use it.
 
-## Session: this session (exhaust, deck-thin, 6 cards, bomber, stages, events, art)
+## Session: 2 (8 cards, 1 summon, 3 enemies, 3 stages, 2 events, QoL, art)
 
 ### Done
 
-- **Exhaust mechanic:** New `exhaust?: boolean` field on CardDef. After play, exhausted cards go to `state.exhaust` pile instead of discard. Single-use per fight. Wired through model, schema, actions.service, state.service, clone.
-- **Remove (deck-thin) mechanic:** New `removeRandomFromHand` effect in CardEffect union. Removes a random card from player's hand after the played card leaves hand. Wired through model, schema, effects.service.
-- **6 new cards:** The Big One (3c 6dmg exhaust), Desperate Measures (0c draw 3 exhaust), Cut Losses (0c remove+2coin), Fence the Goods (1c remove+draw2), Torpedo (2c AoE1 2dmg), Clean Slate (1c remove+1coin exhaust).
-- **1 new enemy:** The Bomber (shallows, range 2, Pipe Bomb x2, artillery). Added to shallows zone pool.
-- **3 new stages:** The Bomb Bay (shallows normal), The Torpedo Range (shallows normal), The Bruiser Pit (midwaters elite).
-- **2 new events:** The Arms Dealer (Big One / Torpedo), The Cleaner's Offer (Cut Losses / Clean Slate).
-- **Art generation:** 6 card arts + 1 enemy sprite (7 assets total). 3 of 10 budget remaining unused.
-- All 351 tests pass, TypeScript compiles clean.
+- **8 new cards:** Vig (0c coin-hp trade), Juice (2c heal+buff), Shark Bait (0c dmg+cycle), Toll Booth (2c coin+cycle), Broadside (4c AoE1 2dmg), Sweep (5c AoE2 2dmg), Hit (3c 5dmg+debuff), The Sicario (6c summon).
+- **1 new summon:** Sicario (6/4/3 berserker), wired into summon-database.json.
+- **3 new enemies:** The Arsonist (shallows, range3, Torch x2, artillery), The Fence (midwaters, economy, guardian), The Interrogator (depths, debuff, brawler).
+- **3 new stages:** The Arsonist's Row (shallows normal), The Exchange (midwaters normal), The Interrogation Room (depths elite).
+- **2 new events:** The Vig Collector, The Hit Contract.
+- **Zone pool updates:** All 3 new enemies added to their zone pools.
+- **BuffedATK visual indicator:** Gold "+N" / red "-N" badge on unit token when buffAtk != 0.
+- **Exhaust pile in bottom bar:** Flame-icon pile visible when exhaust count > 0.
+- **Art generation:** 7 assets (sicario summon sprite, arsonist/fence/interrogator enemy sprites, broadside/sweep/hit card arts). Cap used today: 7/10.
+- All 351 tests pass.
 
 ### Files changed
 
-- `src/lib/game/cards/models/card-def.interface.ts` — exhaust field added
-- `src/lib/game/cards/models/card-effect.model.ts` — removeRandomFromHand effect added
-- `src/lib/game/cards/data/schema.helper.ts` — schema updated for exhaust + remove
-- `src/lib/game/battle/models/game-state.interface.ts` — exhaust pile added
-- `src/lib/game/battle/services/state.service.ts` — exhaust array initialized
-- `src/lib/game/shared/helpers/engine.helper.ts` — exhaust deep-copied in clone
-- `src/lib/game/actions/actions.service.ts` — castCard routes exhaust to exhaust pile
-- `src/lib/game/cards/services/effects.service.ts` — removeRandomFromHand handler
-- `src/components/game/card-create-screen.tsx` — fromCardEffects handles new effect kind
-- `src/lib/game/cards/card-database.json` — 6 new cards
-- `src/lib/game/units/data/enemy-database.json` — The Bomber
+- `src/lib/game/summons/data/summon-database.json` — Sicario summon added
+- `src/lib/game/units/data/enemy-database.json` — 3 new enemies
+- `src/lib/game/cards/card-database.json` — 8 new cards, art wired for broadside/sweep/hit
 - `src/lib/game/stages/data/stage-database.json` — 3 new stages
-- `src/lib/game/overworld-data.ts` — Bomber in shallows pool, 2 new events
-- `public/card-art/*.png` — 6 new card arts
-- `public/sprites/bomber.png` — 1 new enemy sprite
+- `src/lib/game/overworld-data.ts` — zone pool updates + 2 new events
+- `src/components/game/unit-token.tsx` — buffedATK visual indicator
+- `src/components/game/fish-mafia-game.tsx` — exhaust pile indicator
+- `public/sprites/sicario.png` — summon sprite
+- `public/sprites/arsonist.png` — enemy sprite
+- `public/sprites/fence.png` — enemy sprite
+- `public/sprites/interrogator.png` — enemy sprite
+- `public/card-art/broadside.png` — card art
+- `public/card-art/sweep.png` — card art
+- `public/card-art/hit.png` — card art
 - `CHANGELOG.md` — updated
 - `.agent/NOTES.md` — this update
 
 ### Ideas / TODOs for next session
 
-- **BuffedATK visual indicator:** the ATK plate shows `unit.atk + unit.buffAtk` but there's no visual cue that some of that ATK is from a buff. Consider a gold "+N" badge next to the ATK number to differentiate buffed from base.
-- **Move range indicator:** showing reachable tiles when selecting a unit would be a nice QoL improvement (currently only shown when you click and drag).
 - **buffMove effect:** planned `buffMove` effect type for future "Get Moving" card — would need new CardEffect kind + handler + schema update.
 - **buffHp effect / temp HP:** not yet implemented but could open design space.
-- **Exhaust pile in UI:** The exhaust pile exists in state but has no visual representation on the board (no pile shown). Could add a small exhausted-pile stack next to Discard for player awareness.
-- **South shallows / north midwaters gap:** Fewer shallows stages with newer enemies would round out variety. Consider more puffer_guard / bomber / ridge_runner stages.
+- **Move range indicator:** showing reachable tiles when selecting a unit would be a nice QoL improvement (currently only shown when you click and drag).
+- **South shallows / north midwaters gap:** Now partly filled (Arsonist in shallows, Fence in midwaters). Ridge Runner and Puffer Guard could use more stages built around them.
 - **Consider adding remove-from-deck (non-random) effect** — a card that lets you choose which card to remove. More powerful but requires a targeting modal in the UI.
-- **Check if bodyguard icon 'Shield' is valid in lucide:** Verified — `Shield` is imported from lucide-react in card-icons.ts. Not a bug.
+- **Content left on placeholder art:** The Sicario card art, Vig, Juice, Shark Bait, Toll Booth — these don't have `art` field and use generic fallbacks. Backfill next session.
+- **The Arsonist has Torch (3c AoE card) in its deck** — verify enemy-cast AoE works correctly in playtesting.
+- **Consider making Sweep cost 4 instead of 5** — 5 cost may be too expensive for 2dmg AoE2; playtest.
+- **The Sicario at 6 cost is the most expensive card in the game** — verify it's worth the investment in playtesting.

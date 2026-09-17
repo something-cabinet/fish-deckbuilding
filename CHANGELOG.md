@@ -3,20 +3,27 @@
 ## [Unreleased]
 
 ### Added
-- **Exhaust mechanic:** Cards with `exhaust: true` are set aside in a new `exhaust` pile instead of the discard pile after play. They cannot be used again for the rest of the fight. This enables powerful single-use-per-combat card designs. Wired through CardDef model, castCard routing, Zod schema, and GameState.
-- **Remove (deck-thinning) mechanic:** New `removeRandomFromHand` card effect randomly removes a card from the player's hand (after the played card is already removed). Enables deck-thinning strategies during combat. Wired through CardEffect union, effects.service, Zod schema.
-- **6 new cards:**
-  - The Big One (3c attack, 6 damage, Exhaust) — powerful one-shot hit.
-  - Desperate Measures (0c skill, draw 3, Exhaust) — emergency cycle.
-  - Cut Losses (0c skill, remove a random card, gain 2 coin) — deck-thin + economy.
-  - Fence the Goods (1c skill, remove a random card, draw 2) — deck-thin + cycle.
-  - Torpedo (2c attack, AoE 1, 2 damage) — cheap cross-blast, fills AoE gap at lower cost.
-  - Clean Slate (1c skill, remove a random card, gain 1 coin, Exhaust) — thin + economy + one-shot.
-- **1 new enemy:** The Bomber (shallows soldier, 5 HP / 2 ATK / 2 move / range 2, artillery AI, Pipe Bomb ×2 deck). Added to shallows zone pool.
-- **3 new stages:** The Bomb Bay (shallows normal — Bomber + 2 thugs), The Torpedo Range (shallows normal — 2 Puffer Guards + Capo), The Bruiser Pit (midwaters elite — Bruiser + Spotter + guards).
-- **2 new events:** The Arms Dealer (offers The Big One or Torpedo for coin or debt), The Cleaner's Offer (offers Cut Losses or Clean Slate for coin).
-- **Card art (6):** the_big_one, desperate_measures, cut_losses, fence_the_goods, torpedo, clean_slate.
-- **Enemy sprite (1):** bomber.
+- **8 new cards:**
+  - Vig (0c skill, gain 1 coin, lose 1 HP) — high-risk economy cantrip.
+  - Juice (2c skill ally, heal 4 HP, +1 ATK) — premium support.
+  - Shark Bait (0c attack, 1 damage, draw 1) — zero-cost cycle attack.
+  - Toll Booth (2c skill self, gain 3 coin, draw 1) — efficient economy engine.
+  - Broadside (4c attack, AoE 1, 2 damage) — premium player AoE.
+  - Sweep (5c attack, AoE 2, 2 damage) — wide-area crowd control.
+  - Hit (3c attack, 5 damage, -1 ATK debuff) — premium damage + debuff.
+  - The Sicario (6c summon, Sicario 6/4/3) — premium late-game summon.
+- **1 new summon:** The Sicario (6 HP / 4 ATK / 3 move / range 1, berserker). Used by The Sicario card.
+- **3 new enemies:** The Arsonist (shallows Capo, 6/2/2/range3 artillery, Torch ×2), The Fence (midwaters Capo, 8/1/2 guardian, Shakedown+ economy), The Interrogator (depths Capo, 10/3/2 brawler, Kneecap debuff).
+- **3 new stages:** The Arsonist's Row (shallows normal — Arsonist + 2 Puffer Guards), The Exchange (midwaters normal — Fence + Ridge Runner + Soldier), The Interrogation Room (depths elite — Interrogator + Capo + Mob Nurse + 2 Soldiers).
+- **2 new events:** The Vig Collector (offers Vig card or gold/HP trade-offs), The Hit Contract (offers Hit card for coin or debt).
+- **Zone pool diversity:** The Arsonist added to shallows; The Fence added to midwaters; The Interrogator added to depths.
+- **BuffedATK visual indicator:** Unit tokens now show a gold "+N" badge (or red "-N" for debuffs) next to the ATK number when `buffAtk` != 0, differentiating buffed from base ATK.
+- **Exhaust pile in bottom bar:** The exhaust count is now visible as a `Flame`-icon pile next to Draw/Spent when cards have been exhausted this fight.
+
+### Art
+- **Card art (3):** broadside, sweep, hit.
+- **Enemy sprites (3):** arsonist, fence, interrogator.
+- **Summon sprites (1):** sicario.
 
 ### Fixed
 - **Negative heal can set HP below 0 (Bug 5):** The `heal` effect in `effects.service.ts` clamped only the upper bound (`Math.min(maxHp, ...)`) but not the lower bound. Cards using negative-amount heal (Wire Transfer, Tail Job) could drive a unit's HP below 0. Added `Math.max(0, ...)` guard so self-damage cards floor at 0, matching how `dealDamage` already safeguards the damage path.
