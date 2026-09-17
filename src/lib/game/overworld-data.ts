@@ -25,6 +25,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Puffer Guard", kind: UnitKind.Soldier, hp: 5, atk: 1, move: 1 },
       { name: "The Ridge Runner", kind: UnitKind.Soldier, hp: 3, atk: 3, move: 3 },
       { name: "The Bomber", kind: UnitKind.Soldier, hp: 5, atk: 2, move: 2, range: 2 },
+      { name: "The Arsonist", kind: UnitKind.Capo, hp: 6, atk: 2, move: 2, range: 3 },
     ],
     theme: "shallow",
   },
@@ -50,6 +51,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Dealer", kind: UnitKind.Capo, hp: 6, atk: 2, move: 2 },
       { name: "The Debt Scripter", kind: UnitKind.Capo, hp: 7, atk: 2, move: 2, range: 2 },
       { name: "The Auditor", kind: UnitKind.Capo, hp: 8, atk: 2, move: 2 },
+      { name: "The Fence", kind: UnitKind.Capo, hp: 8, atk: 1, move: 2 },
     ],
     theme: "mid",
   },
@@ -73,6 +75,7 @@ export const ZONES: ZoneDef[] = [
       { name: "Bruiser", kind: UnitKind.Capo, hp: 20, atk: 4, move: 1 },
       { name: "Spotter", kind: UnitKind.Soldier, hp: 3, atk: 1, move: 2, range: 4 },
       { name: "The Cleaner", kind: UnitKind.Soldier, hp: 8, atk: 3, move: 2 },
+      { name: "The Interrogator", kind: UnitKind.Capo, hp: 10, atk: 3, move: 2 },
     ],
     theme: "deep",
   },
@@ -350,6 +353,28 @@ export const EVENTS: EventDef[] = [
       { label: "Hire the cleaner", result: "Evidence gone, coin pocketed.", gold: -18, card: "cut_losses" },
       { label: "Hire the crew", result: "Full sanitization — no trace left.", gold: -28, card: "clean_slate" },
       { label: "Decline", result: "The clutter stays.", },
+    ],
+  },
+  {
+    id: "vig_collector",
+    title: "The Vig Collector",
+    prompt:
+      "A wiry anglerfish with a pocket watch taps its fin. \u201CInterest is due, pal. Pay up, or I'll take it out of your hide.\u201D",
+    choices: [
+      { label: "Pay the vig", result: "The collector tips his hat and leaves.", gold: -15, hp: -2 },
+      { label: "Pocket the vig yourself", result: "You walk away richer — and sore.", card: "vig", hp: -4 },
+      { label: "Skip town", result: "You dodge the collector — this time.", debt: 15 },
+    ],
+  },
+  {
+    id: "hit_contract",
+    title: "The Hit Contract",
+    prompt:
+      "A folded note drifts past, sealed with crimson wax. Inside: a contract with a name crossed out and yours half-written in its place. \u201CTake this job. The price is right.\u201D",
+    choices: [
+      { label: "Take the contract", result: "A mark is hit, and a card joins your hand.", gold: -20, card: "hit" },
+      { label: "Take it on credit", result: "The payment can wait. The syndicate never forgets.", debt: 25, card: "hit" },
+      { label: "Shred the note", result: "Some contracts aren't worth signing.", },
     ],
   },
 ]
