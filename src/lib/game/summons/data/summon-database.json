@@ -78,6 +78,16 @@
       "range": 2,
       "icon": "killer",
       "aiProfile": { "archetype": "artillery" }
+    },
+    {
+      "id": "sicario",
+      "name": "Sicario",
+      "hp": 6,
+      "atk": 4,
+      "move": 3,
+      "range": 1,
+      "icon": "sicario",
+      "aiProfile": { "archetype": "berserker" }
     }
   ]
 }

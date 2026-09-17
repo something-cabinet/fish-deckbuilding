@@ -1325,6 +1325,155 @@
       ],
       "log": "Clean slate — evidence burned, 1 coin pocketed.",
       "logTone": "gold"
+    },
+    {
+      "id": "vig",
+      "name": "Vig",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Call in a vig — gain 1 coin but lose 1 HP to the interest.",
+      "icon": "Coins",
+      "fx": "coin",
+      "effects": [
+        { "kind": "gainCoin", "amount": 1 },
+        { "kind": "heal", "amount": -1, "target": "caster" }
+      ],
+      "log": "Vig — 1 coin gained, 1 HP lost to the street.",
+      "logTone": "gold"
+    },
+    {
+      "id": "juice",
+      "name": "Juice",
+      "type": "skill",
+      "cost": 2,
+      "value": 2,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Pump up an ally — heal 4 HP and give +1 ATK.",
+      "icon": "HeartPulse",
+      "fx": "heal",
+      "effects": [
+        { "kind": "heal", "amount": 4, "target": "cast-target" },
+        { "kind": "buffAtk", "amount": 1 }
+      ],
+      "log": "Juice patches up {target} for 4 and pumps them up.",
+      "logTone": "good"
+    },
+    {
+      "id": "shark_bait",
+      "name": "Shark Bait",
+      "type": "attack",
+      "cost": 0,
+      "value": 0,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Throw out some shark bait — deal 1 damage and draw 1 card.",
+      "icon": "Fish",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 1 },
+        { "kind": "drawCards", "amount": 1 }
+      ],
+      "log": "Shark Bait nicks {target} for 1 and cycles.",
+      "logTone": "good"
+    },
+    {
+      "id": "toll_booth",
+      "name": "Toll Booth",
+      "type": "skill",
+      "cost": 2,
+      "value": 2,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Set up a toll — gain 3 coin and draw 1 card.",
+      "icon": "Banknote",
+      "fx": "coin",
+      "effects": [
+        { "kind": "gainCoin", "amount": 3 },
+        { "kind": "drawCards", "amount": 1 }
+      ],
+      "log": "Toll Booth collects 3 coin and draws 1.",
+      "logTone": "gold"
+    },
+    {
+      "id": "broadside",
+      "name": "Broadside",
+      "type": "attack",
+      "cost": 4,
+      "value": 4,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 1,
+      "desc": "Unleash a broadside — deal 2 damage to the target and adjacent enemies.",
+      "icon": "Swords",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 2 }
+      ],
+      "log": "Broadside catches {target} for 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "sweep",
+      "name": "Sweep",
+      "type": "attack",
+      "cost": 5,
+      "value": 5,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 2,
+      "desc": "Sweep the floor — deal 2 damage to the target and all enemies within 2 tiles.",
+      "icon": "Swords",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 2 }
+      ],
+      "log": "Sweep hits {target} and surrounding enemies for 2.",
+      "logTone": "good"
+    },
+    {
+      "id": "hit",
+      "name": "Hit",
+      "type": "attack",
+      "cost": 3,
+      "value": 3,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Put out a hit — deal 5 damage and reduce target's ATK by 1.",
+      "icon": "Target",
+      "fx": "shock",
+      "effects": [
+        { "kind": "damage", "amount": 5 },
+        { "kind": "buffAtk", "amount": -1 }
+      ],
+      "log": "Hit lands on {target} for 5 and weakens them.",
+      "logTone": "good"
+    },
+    {
+      "id": "the_sicario",
+      "name": "The Sicario",
+      "type": "summon",
+      "cost": 6,
+      "value": 5,
+      "target": "empty-tile",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Call in the Sicario — summon a 6 HP / 4 ATK enforcer on an empty tile.",
+      "icon": "Skull",
+      "fx": "summon",
+      "effects": [
+        { "kind": "summon", "unit": "sicario" }
+      ],
+      "log": "The Sicario arrives at {tile}.",
+      "logTone": "good"
     }
   ]
 }

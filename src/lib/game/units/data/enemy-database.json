@@ -501,6 +501,63 @@
         "archetype": "artillery",
         "weights": { "distanceToTarget": -2 }
       }
+    },
+    {
+      "id": "arsonist",
+      "name": "The Arsonist",
+      "kind": 3,
+      "hp": 6,
+      "atk": 2,
+      "move": 2,
+      "range": 3,
+      "goldDrop": 7,
+      "isMinion": false,
+      "icon": "arsonist",
+      "deck": [
+        { "id": "torch", "count": 2 }
+      ],
+      "aiProfile": {
+        "archetype": "artillery",
+        "weights": { "distanceToTarget": -2 }
+      }
+    },
+    {
+      "id": "fence",
+      "name": "The Fence",
+      "kind": 3,
+      "hp": 8,
+      "atk": 1,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 10,
+      "isMinion": false,
+      "icon": "fence",
+      "deck": [
+        { "id": "shakedown", "count": 2 },
+        { "id": "cash_flow", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "guardian"
+      }
+    },
+    {
+      "id": "interrogator",
+      "name": "The Interrogator",
+      "kind": 3,
+      "hp": 10,
+      "atk": 3,
+      "move": 2,
+      "range": 1,
+      "goldDrop": 12,
+      "isMinion": false,
+      "icon": "interrogator",
+      "deck": [
+        { "id": "kneecap", "count": 2 },
+        { "id": "cut", "count": 1 }
+      ],
+      "aiProfile": {
+        "archetype": "brawler"
+      }
     }
   ]
 }
