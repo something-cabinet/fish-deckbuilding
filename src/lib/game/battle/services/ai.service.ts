@@ -36,8 +36,9 @@ function reachableWithPaths(
   const out: ReachableTile[] = [{ pos: { ...unit.pos }, path: [] }]
   const seen = new Set<string>([startKey])
   let frontier: ReachableTile[] = [{ pos: { ...unit.pos }, path: [] }]
+  const effMove = unit.move + unit.buffMove
 
-  for (let depth = 0; depth < unit.move; depth++) {
+  for (let depth = 0; depth < effMove; depth++) {
     const next: ReachableTile[] = []
     for (const cur of frontier) {
       for (const [dx, dy] of DIRECTIONS) {
@@ -64,7 +65,7 @@ function reachableWithPaths(
 function threatAt(dest: Pos, foes: Unit[]): number {
   let total = 0
   for (const f of foes) {
-    const reach = f.move + Math.max(1, f.range)
+    const reach = f.move + f.buffMove + Math.max(1, f.range)
     if (manhattan(dest, f.pos) <= reach) total += Math.max(0, f.atk + f.buffAtk)
   }
   return total

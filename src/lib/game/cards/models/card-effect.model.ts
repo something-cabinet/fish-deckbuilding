@@ -4,7 +4,8 @@ export type CardEffect =
   | { kind: "heal"; amount: number; target: "caster" | "cast-target" }
   | { kind: "drawCards"; amount: number }
   | { kind: "gainCoin"; amount: number }
-  | { kind: "buffAtk"; amount: number } // signed
-| { kind: "summon"; unit: string }
+  | { kind: "buffAtk"; amount: number }
+  | { kind: "buffMove"; amount: number }
+  | { kind: "summon"; unit: string }
   | { kind: "removeRandomFromHand" }
   | { kind: "custom"; handlerId: string }

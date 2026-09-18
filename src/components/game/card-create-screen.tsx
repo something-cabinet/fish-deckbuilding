@@ -138,6 +138,7 @@ function fromCardEffects(effects: CardEffect[]): EffectRow[] {
       case "drawCards": return { kind: "drawCards", amount: e.amount }
       case "gainCoin": return { kind: "gainCoin", amount: e.amount }
       case "buffAtk": return { kind: "buffAtk", amount: e.amount }
+      case "buffMove": return { kind: "buffMove", amount: e.amount }
       case "summon": return { kind: "summon", amount: 0, summonUnitId: e.unit }
       case "removeRandomFromHand": return { kind: "damage", amount: 0 }
       case "custom": return { kind: "damage", amount: 0 }
@@ -153,6 +154,7 @@ function toCardEffects(rows: EffectRow[]): CardEffect[] {
       case "drawCards": return { kind: "drawCards", amount: r.amount }
       case "gainCoin": return { kind: "gainCoin", amount: r.amount }
       case "buffAtk": return { kind: "buffAtk", amount: r.amount }
+      case "buffMove": return { kind: "buffMove", amount: r.amount }
       case "summon": return { kind: "summon", unit: r.summonUnitId ?? DEFAULT_SUMMON.id }
     }
   })

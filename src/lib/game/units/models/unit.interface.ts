@@ -13,12 +13,11 @@ export interface Unit {
   maxHp: number
   atk: number
   move: number
-  range: number // basic attack range (1 = melee)
+  range: number
   hasMoved: boolean
   hasActed: boolean
   buffAtk: number
-  /** sprite base name under `public/sprites/`; absent = the kind's default sprite */
+  buffMove: number
   icon?: string
-  /** enemy-only AI tuning, copied from the template at spawn; absent = brawler */
   aiProfile?: EnemyAiProfile
 }

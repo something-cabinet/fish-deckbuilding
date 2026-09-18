@@ -7,10 +7,9 @@ import { selectClass } from "./design-ui"
 import { cn } from "@/lib/utils"
 
 export interface EffectRow {
-  kind: "damage" | "heal" | "drawCards" | "gainCoin" | "buffAtk" | "summon"
+  kind: "damage" | "heal" | "drawCards" | "gainCoin" | "buffAtk" | "buffMove" | "summon"
   amount: number
   healTarget?: "caster" | "cast-target"
-  /** SummonDef id, for kind "summon" */
   summonUnitId?: string
 }
 
@@ -33,10 +32,11 @@ const EFFECT_KINDS: { id: EffectRow["kind"]; label: string }[] = [
   { id: "drawCards", label: "Draw" },
   { id: "gainCoin", label: "Coin" },
   { id: "buffAtk", label: "Buff Atk" },
+  { id: "buffMove", label: "Buff Move" },
   { id: "summon", label: "Summon" },
 ]
 
-const HAS_AMOUNT = new Set(["damage", "heal", "drawCards", "gainCoin", "buffAtk"])
+const HAS_AMOUNT = new Set(["damage", "heal", "drawCards", "gainCoin", "buffAtk", "buffMove"])
 const HAS_TARGET = new Set(["heal"])
 const HAS_SUMMON_UNIT = new Set(["summon"])
 

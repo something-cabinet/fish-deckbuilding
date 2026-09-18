@@ -17,6 +17,7 @@ export function heroDefFromCharacter(def: CharacterDef): Omit<Unit, "id" | "pos"
     hasMoved: false,
     hasActed: false,
     buffAtk: 0,
+    buffMove: 0,
   }
 }
 

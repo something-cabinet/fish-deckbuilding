@@ -28,6 +28,7 @@ function enemy(over: Partial<Unit> & { id: string }): Unit {
     hasMoved: false,
     hasActed: false,
     buffAtk: 0,
+    buffMove: 0,
     ...over,
   }
 }

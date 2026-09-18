@@ -138,6 +138,12 @@ function applyEffect(
       }
       break
     }
+    case "buffMove": {
+      for (const target of targetUnits) {
+        target.buffMove = Math.max(-target.move, target.buffMove + effect.amount)
+      }
+      break
+    }
     case "summon": {
       if (!tile) break
       const summonDef = resolveSummon(effect.unit)
@@ -156,6 +162,7 @@ function applyEffect(
         hasMoved: true,
         hasActed: true,
         buffAtk: 0,
+        buffMove: 0,
         aiProfile: summonDef.aiProfile as Unit["aiProfile"],
       }
       state.units = [...state.units, summoned]

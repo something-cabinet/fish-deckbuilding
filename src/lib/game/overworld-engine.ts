@@ -81,6 +81,7 @@ function fillerBag(): NodeType[] {
 
 /** Telegraphed threat tier for a node (0 = no combat). */
 function threatFor(type: NodeType, zoneIndex: number, nodeId: string): number {
+  if (type === "boss") return 4
   if (type === "elite") return 3
   if (type === "battle") {
     const base = 1 + (hashStr(nodeId) % 2) // 1..2

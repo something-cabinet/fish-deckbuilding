@@ -81,16 +81,18 @@ export function aoeTiles(state: GameState, centre: Pos, radius: number): Pos[] {
   return out
 }
 
-function affectsTeam(target: CardTarget): (u: Unit) => boolean {
-  if (target === CardTarget.Enemy) return (u) => u.team === Team.Enemy
-  if (target === CardTarget.Ally) return (u) => u.team === Team.Player
+function affectsTeam(target: CardTarget, casterTeam: Team = Team.Player): (u: Unit) => boolean {
+  const enemyTeam = casterTeam === Team.Player ? Team.Enemy : Team.Player
+  const allyTeam = casterTeam
+  if (target === CardTarget.Enemy) return (u) => u.team === enemyTeam
+  if (target === CardTarget.Ally) return (u) => u.team === allyTeam
   if (target === CardTarget.Unit) return () => true
   return () => false
 }
 
 /** Living units the card's effects apply to when its blast is centred on `centre`. */
-export function unitsInAoe(state: GameState, def: CardDef, centre: Pos): Unit[] {
-  const affects = affectsTeam(def.target)
+export function unitsInAoe(state: GameState, def: CardDef, centre: Pos, casterTeam?: Team): Unit[] {
+  const affects = affectsTeam(def.target, casterTeam)
   return state.units.filter(
     (u) => u.hp > 0 && affects(u) && manhattan(u.pos, centre) <= def.aoe,
   )

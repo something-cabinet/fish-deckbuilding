@@ -1477,6 +1477,81 @@
       ],
       "log": "The Sicario arrives at {tile}.",
       "logTone": "good"
+    },
+    {
+      "id": "get_moving",
+      "name": "Get Moving",
+      "type": "skill",
+      "cost": 0,
+      "value": 0,
+      "target": "self",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Gain +1 move this turn and draw a card.",
+      "icon": "Zap",
+      "fx": "draw",
+      "effects": [
+        { "kind": "buffMove", "amount": 1 },
+        { "kind": "drawCards", "amount": 1 }
+      ],
+      "log": "{target} gets a move on.",
+      "logTone": "good"
+    },
+    {
+      "id": "grease_wheels",
+      "name": "Grease the Wheels",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "An ally gains +1 move this turn.",
+      "icon": "Zap",
+      "fx": "draw",
+      "effects": [
+        { "kind": "buffMove", "amount": 1 }
+      ],
+      "log": "{target} gets greased wheels.",
+      "logTone": "good"
+    },
+    {
+      "id": "favor",
+      "name": "Favor",
+      "type": "skill",
+      "cost": 1,
+      "value": 1,
+      "target": "ally",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Heal an ally 3 and grant +1 move.",
+      "icon": "Heart",
+      "fx": "heal",
+      "effects": [
+        { "kind": "heal", "amount": 3, "target": "cast-target" },
+        { "kind": "buffMove", "amount": 1 }
+      ],
+      "log": "{target} is healed 3 and gains +1 move.",
+      "logTone": "good"
+    },
+    {
+      "id": "stakeout",
+      "name": "Stakeout",
+      "type": "attack",
+      "cost": 2,
+      "value": 2,
+      "target": "enemy",
+      "range": 4,
+      "aoe": 0,
+      "desc": "Deal 3 damage and draw a card.",
+      "icon": "Eye",
+      "fx": "letter",
+      "effects": [
+        { "kind": "damage", "amount": 3 },
+        { "kind": "drawCards", "amount": 1 }
+      ],
+      "log": "Stakeout hits {target} for 3. Intelligence gathered.",
+      "logTone": "good"
     }
   ]
 }

@@ -4,7 +4,13 @@ import { clone, emitFx, heroUnit, log } from "../../shared"
 import { AiArchetype, Team, type Unit } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
 import { drawCards } from "../../deck"
-import { COIN_TURN_BASE, CARD_LIBRARY, resolveCardEffects } from "../../cards"
+import {
+  COIN_TURN_BASE,
+  CARD_LIBRARY,
+  resolveCardEffects,
+  unitsInAoe,
+  AOE_SINGLE_TILE,
+} from "../../cards"
 import { resolveTrigger } from "../../trinkets"
 import { CardTarget } from "../../cards/enums"
 import { manhattan } from "./board.service"
@@ -80,23 +86,40 @@ export function applyEnemyStep(
         const def = CARD_LIBRARY[step.cardId]
         if (def) {
           let targetUnits: typeof s.units = []
+          let impactTile: Pos | undefined
           if (step.targetId) {
             const t = s.units.find((x) => x.id === step.targetId)
-            if (t && t.hp > 0) targetUnits = [t]
+            if (t && t.hp > 0) {
+              if (def.aoe > AOE_SINGLE_TILE) {
+                impactTile = { ...t.pos }
+                targetUnits = unitsInAoe(s, def, impactTile, Team.Enemy)
+              } else {
+                targetUnits = [t]
+              }
+            }
           }
           if (targetUnits.length === 0) {
             const enemies = s.units.filter((x) => x.team === Team.Player && x.hp > 0)
             const allies = s.units.filter((x) => x.team === Team.Enemy && x.hp > 0 && x.id !== u.id)
             const self = [u]
             if (def.target === CardTarget.Enemy) {
-              targetUnits = sortByDist(enemies, u.pos).slice(0, 1)
+              const nearest = sortByDist(enemies, u.pos).slice(0, 1)
+              if (nearest.length > 0) {
+                const target = nearest[0]
+                if (def.aoe > AOE_SINGLE_TILE) {
+                  impactTile = { ...target.pos }
+                  targetUnits = unitsInAoe(s, def, impactTile, Team.Enemy)
+                } else {
+                  targetUnits = [target]
+                }
+              }
             } else if (def.target === CardTarget.Ally || def.target === CardTarget.Unit) {
               targetUnits = sortByDist(allies, u.pos).slice(0, 1)
             } else if (def.target === CardTarget.Self) {
               targetUnits = self
             }
           }
-          resolveCardEffects(s, def, { targetUnits, from: u.pos, casterTeam: Team.Enemy }, fx)
+          resolveCardEffects(s, def, { targetUnits, tile: impactTile, from: u.pos, casterTeam: Team.Enemy }, fx)
           log(s, `${u.name} casts ${def.name}.`, "bad")
         }
       }
@@ -140,6 +163,7 @@ export function beginPlayerTurn(state: GameState): { state: GameState; fx: FxEve
   for (const u of s.units) {
     u.hasMoved = false
     u.hasActed = false
+    u.buffMove = 0
   }
 
   // fresh hand each turn: discard whatever wasn't played, then redeal to handSize

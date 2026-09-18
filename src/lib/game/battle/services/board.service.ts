@@ -25,10 +25,11 @@ export function reachableTiles(state: GameState, unitId: string): Pos[] {
   const seen = new Map<string, number>([[posKey(start), 0]])
   const queue: Pos[] = [start]
   const out: Pos[] = []
+  const effMove = u.move + u.buffMove
   while (queue.length) {
     const cur = queue.shift()!
     const dist = seen.get(posKey(cur))!
-    if (dist >= u.move) continue
+    if (dist >= effMove) continue
     for (const [dx, dy] of [
       [1, 0],
       [-1, 0],

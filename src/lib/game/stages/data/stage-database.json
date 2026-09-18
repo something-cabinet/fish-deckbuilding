@@ -930,6 +930,66 @@
         { "enemyId": "depths_thug", "x": 5, "y": 0 },
         { "enemyId": "depths_thug", "x": 5, "y": 4 }
       ]
+    },
+    {
+      "id": "stage_puffer_alley",
+      "name": "Puffer Alley",
+      "zone": "shallows",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": { "x": 1, "y": 2 },
+      "placements": [
+        { "enemyId": "ridge_runner", "x": 8, "y": 2 },
+        { "enemyId": "puffer_guard", "x": 6, "y": 0 },
+        { "enemyId": "puffer_guard", "x": 6, "y": 4 }
+      ]
+    },
+    {
+      "id": "stage_scriptorium",
+      "name": "The Scriptorium",
+      "zone": "midwaters",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": { "x": 1, "y": 2 },
+      "placements": [
+        { "enemyId": "caster", "x": 7, "y": 2 },
+        { "enemyId": "debt_scripter", "x": 6, "y": 1 },
+        { "enemyId": "midwaters_thug", "x": 6, "y": 3 },
+        { "enemyId": "midwaters_thug", "x": 5, "y": 0 },
+        { "enemyId": "midwaters_thug", "x": 5, "y": 4 }
+      ]
+    },
+    {
+      "id": "stage_clean_room",
+      "name": "The Clean Room",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "normal",
+      "heroStart": { "x": 1, "y": 2 },
+      "placements": [
+        { "enemyId": "cleaner_soldier", "x": 7, "y": 1 },
+        { "enemyId": "spotter", "x": 8, "y": 2 },
+        { "enemyId": "depths_thug", "x": 6, "y": 3 }
+      ]
+    },
+    {
+      "id": "stage_pillory",
+      "name": "The Pillory",
+      "zone": "depths",
+      "cols": 9,
+      "rows": 5,
+      "type": "elite",
+      "heroStart": { "x": 1, "y": 2 },
+      "placements": [
+        { "enemyId": "interrogator", "x": 7, "y": 2 },
+        { "enemyId": "caster", "x": 6, "y": 1 },
+        { "enemyId": "enforcer", "x": 6, "y": 3 },
+        { "enemyId": "depths_thug", "x": 5, "y": 0 },
+        { "enemyId": "depths_thug", "x": 5, "y": 4 }
+      ]
     }
   ]
 }
