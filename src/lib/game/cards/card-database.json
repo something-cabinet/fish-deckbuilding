@@ -1338,6 +1338,7 @@
       "desc": "Call in a vig — gain 1 coin but lose 1 HP to the interest.",
       "icon": "Coins",
       "fx": "coin",
+      "art": "vig",
       "effects": [
         { "kind": "gainCoin", "amount": 1 },
         { "kind": "heal", "amount": -1, "target": "caster" }
@@ -1357,6 +1358,7 @@
       "desc": "Pump up an ally — heal 4 HP and give +1 ATK.",
       "icon": "HeartPulse",
       "fx": "heal",
+      "art": "juice",
       "effects": [
         { "kind": "heal", "amount": 4, "target": "cast-target" },
         { "kind": "buffAtk", "amount": 1 }
@@ -1376,6 +1378,7 @@
       "desc": "Throw out some shark bait — deal 1 damage and draw 1 card.",
       "icon": "Fish",
       "fx": "shock",
+      "art": "shark_bait",
       "effects": [
         { "kind": "damage", "amount": 1 },
         { "kind": "drawCards", "amount": 1 }
@@ -1395,6 +1398,7 @@
       "desc": "Set up a toll — gain 3 coin and draw 1 card.",
       "icon": "Banknote",
       "fx": "coin",
+      "art": "toll_booth",
       "effects": [
         { "kind": "gainCoin", "amount": 3 },
         { "kind": "drawCards", "amount": 1 }
@@ -1472,6 +1476,7 @@
       "desc": "Call in the Sicario — summon a 6 HP / 4 ATK enforcer on an empty tile.",
       "icon": "Skull",
       "fx": "summon",
+      "art": "the_sicario",
       "effects": [
         { "kind": "summon", "unit": "sicario" }
       ],
@@ -1490,6 +1495,7 @@
       "desc": "Gain +1 move this turn and draw a card.",
       "icon": "Zap",
       "fx": "draw",
+      "art": "get_moving",
       "effects": [
         { "kind": "buffMove", "amount": 1 },
         { "kind": "drawCards", "amount": 1 }
@@ -1509,6 +1515,7 @@
       "desc": "An ally gains +1 move this turn.",
       "icon": "Zap",
       "fx": "draw",
+      "art": "grease_wheels",
       "effects": [
         { "kind": "buffMove", "amount": 1 }
       ],
@@ -1527,6 +1534,7 @@
       "desc": "Heal an ally 3 and grant +1 move.",
       "icon": "Heart",
       "fx": "heal",
+      "art": "favor",
       "effects": [
         { "kind": "heal", "amount": 3, "target": "cast-target" },
         { "kind": "buffMove", "amount": 1 }
@@ -1546,6 +1554,7 @@
       "desc": "Deal 3 damage and draw a card.",
       "icon": "Eye",
       "fx": "letter",
+      "art": "stakeout",
       "effects": [
         { "kind": "damage", "amount": 3 },
         { "kind": "drawCards", "amount": 1 }
