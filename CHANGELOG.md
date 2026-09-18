@@ -3,22 +3,28 @@
 ## [Unreleased]
 
 ### Added
-- **8 new cards:**
-  - Vig (0c skill, gain 1 coin, lose 1 HP) — high-risk economy cantrip.
-  - Juice (2c skill ally, heal 4 HP, +1 ATK) — premium support.
-  - Shark Bait (0c attack, 1 damage, draw 1) — zero-cost cycle attack.
-  - Toll Booth (2c skill self, gain 3 coin, draw 1) — efficient economy engine.
-  - Broadside (4c attack, AoE 1, 2 damage) — premium player AoE.
-  - Sweep (5c attack, AoE 2, 2 damage) — wide-area crowd control.
-  - Hit (3c attack, 5 damage, -1 ATK debuff) — premium damage + debuff.
-  - The Sicario (6c summon, Sicario 6/4/3) — premium late-game summon.
-- **1 new summon:** The Sicario (6 HP / 4 ATK / 3 move / range 1, berserker). Used by The Sicario card.
-- **3 new enemies:** The Arsonist (shallows Capo, 6/2/2/range3 artillery, Torch ×2), The Fence (midwaters Capo, 8/1/2 guardian, Shakedown+ economy), The Interrogator (depths Capo, 10/3/2 brawler, Kneecap debuff).
-- **3 new stages:** The Arsonist's Row (shallows normal — Arsonist + 2 Puffer Guards), The Exchange (midwaters normal — Fence + Ridge Runner + Soldier), The Interrogation Room (depths elite — Interrogator + Capo + Mob Nurse + 2 Soldiers).
-- **2 new events:** The Vig Collector (offers Vig card or gold/HP trade-offs), The Hit Contract (offers Hit card for coin or debt).
-- **Zone pool diversity:** The Arsonist added to shallows; The Fence added to midwaters; The Interrogator added to depths.
-- **BuffedATK visual indicator:** Unit tokens now show a gold "+N" badge (or red "-N" for debuffs) next to the ATK number when `buffAtk` != 0, differentiating buffed from base ATK.
-- **Exhaust pile in bottom bar:** The exhaust count is now visible as a `Flame`-icon pile next to Draw/Spent when cards have been exhausted this fight.
+- **New effect: buffMove** — `buffMove` CardEffect kind added to the typed union, effect handler, Zod schema, and `Unit.buffMove` field. Pathfinding (player reachable tiles, AI reachableWithPaths, threatAt) now respects `move + buffMove`. Move buffs reset each turn in `beginPlayerTurn`.
+- **4 new cards:**
+  - Get Moving (0c skill self, buffMove +1, draw 1) — zero-cost speed + cycle.
+  - Grease the Wheels (1c skill ally, buffMove +1) — cheap mobility support.
+  - Favor (1c skill ally, heal 3 + buffMove +1) — versatile heal + speed.
+  - Stakeout (2c attack enemy, 3 damage + draw 1) — efficient damage+cycle.
+- **4 new stages:**
+  - Puffer Alley (shallows normal — Ridge Runner + 2 Puffer Guards).
+  - The Scriptorium (midwaters elite — Caster + Debt Scripter + 3 Soldiers).
+  - The Clean Room (depths normal — 2 Cleaners + Spotter).
+  - The Pillory (depths elite — Interrogator + Caster + Capo + 2 Soldiers).
+
+### Fixed
+- **Enemy-cast AoE cards only damage the primary target (Bug 1):** `applyEnemyStep` now uses `unitsInAoe()` with `casterTeam: Team.Enemy` when the cast card has `aoe > 0`, so all units in the blast radius take damage/effects instead of just the nearest one.
+- **threatFor returns 0 for boss nodes (Bug 2):** Added `type === "boss"` case returning 4 so boss encounters show their correct danger level.
+- **affectsTeam hardcodes player perspective (Bug 3):** `affectsTeam` and `unitsInAoe` now accept an optional `casterTeam` parameter (defaults to `Team.Player`). Prophe-fixed alongside Bug 1 — enemy-cast AoE now correctly filters teams from the enemy caster's perspective.
+
+### Art
+- **Card art (9):** get_moving, grease_wheels, favor, stakeout (new cards); vig, juice, shark_bait, toll_booth, the_sicario (backfill). All cards now have their own art — no generic fallbacks remain.
+
+### Developer
+- **Card create screen** updated to support the `buffMove` effect kind in `EffectRow` and the `fromCardEffects`/`toCardEffects` converters.
 
 ### Art
 - **Card art (3):** broadside, sweep, hit.
