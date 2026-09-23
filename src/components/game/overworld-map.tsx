@@ -11,7 +11,7 @@ import {
   HelpCircle,
   Layers,
   Scale,
-  Shield,
+  Search,
   ShoppingBag,
   Skull,
   Swords,
@@ -20,12 +20,14 @@ import {
 import type { MapNode, NodeType, OverworldState } from "@/lib/game/overworld-types"
 import { FORECLOSURE_CAP, FORECLOSURE_WARN } from "@/lib/game/overworld-data"
 import { accrueInterest } from "@/lib/game/overworld-engine"
-import { CARD_LIBRARY } from "@/lib/game/cards"
+import { CARD_LIBRARY, CardType } from "@/lib/game/cards"
 import { resolveCharacter } from "@/lib/game/characters"
 import { TRINKET_LIBRARY } from "@/lib/game/trinkets"
 import { getCardIcon } from "./card-icons"
 import { spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
+import { CardFace } from "./card-face"
+import { Chip, libraryGridClass } from "./design-ui"
 
 interface Props {
   state: OverworldState
@@ -486,53 +488,159 @@ function ZoneBackdrop({ index }: { index: number }) {
 const ZONE_NAMES = ["Shallows", "Midwaters", "Depths"]
 
 function DeckModal({ deck, upgrades, onClose }: { deck: string[]; upgrades: Record<string, number>; onClose: () => void }) {
+  const [search, setSearch] = useState("")
+  const [typeFilter, setTypeFilter] = useState<CardType | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
+
   const counts = useMemo(() => {
     const m: Record<string, number> = {}
     for (const id of deck) m[id] = (m[id] ?? 0) + 1
     return m
   }, [deck])
 
+  const cards = useMemo(() => Object.values(CARD_LIBRARY), [])
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    let matches = q ? cards.filter((c) => c.name.toLowerCase().includes(q)) : cards
+    if (typeFilter) matches = matches.filter((c) => c.type === typeFilter)
+    return [...matches]
+      .filter((c) => counts[c.id] > 0)
+      .sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0) || a.name.localeCompare(b.name))
+  }, [cards, counts, search, typeFilter])
+
+  const selectedDef = selected ? CARD_LIBRARY[selected] : null
+
+  const uniqueCount = Object.keys(counts).length
+
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-ocean-deep/85 p-6 backdrop-blur-sm animate-fm-fade-in">
-      <div className="flex max-h-[80vh] w-full max-w-md flex-col rounded-2xl border border-gold/25 bg-ocean-deep/95 p-5 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 font-display text-xl font-bold uppercase tracking-widest text-gold">
-            <Layers size={20} />
-            Deck · {deck.length} cards
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close deck"
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-2 overflow-y-auto pr-1">
-          {Object.entries(counts).map(([id, count]) => {
-            const def = CARD_LIBRARY[id]
-            if (!def) return null
-            return (
-              <div
-                key={id}
-                className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2"
-              >
-                <span className="flex items-center gap-2 text-sm text-foreground">
-                  <Shield size={13} className="text-gold/70" />
-                  {def.name}
-                  {upgrades[id] > 0 && (
-                    <span className="rounded bg-teal/20 px-1 py-0.5 font-display text-[10px] font-bold text-teal">
-                      +{upgrades[id]}
-                    </span>
-                  )}
-                </span>
-                <span className="font-display text-xs font-bold text-muted-foreground">×{count}</span>
+    <>
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-ocean-deep/85 p-6 backdrop-blur-sm animate-fm-fade-in">
+        <div className="flex max-h-[80vh] w-full max-w-4xl flex-col rounded-2xl border border-gold/25 bg-ocean-deep/95 shadow-2xl">
+          {/* Header */}
+          <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4">
+            <h2 className="flex items-center gap-2 font-display text-xl font-bold uppercase tracking-widest text-gold">
+              <Layers size={20} />
+              Deck · {deck.length} cards
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close deck"
+              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Search + Type Filter */}
+          <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/10 px-5 py-3">
+            <div className="relative w-full max-w-[200px]">
+              <Search
+                size={14}
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Filter cards…"
+                aria-label="Filter cards"
+                className="w-full rounded-md border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-gold/40"
+              />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Chip active={typeFilter === null} onClick={() => setTypeFilter(null)}>
+                All
+              </Chip>
+              {[CardType.Attack, CardType.Skill, CardType.Summon].map((t) => (
+                <Chip key={t} active={typeFilter === t} onClick={() => setTypeFilter(t)}>
+                  {t}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          {/* Card Grid */}
+          <div className="flex-1 overflow-y-auto p-5">
+            {visible.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                No cards match your filter.
+              </p>
+            ) : (
+              <div className={libraryGridClass}>
+                {visible.map((card) => {
+                  const count = counts[card.id]
+                  const upgrade = upgrades[card.id] ?? 0
+                  return (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => setSelected(card.id)}
+                      className="relative flex flex-col items-center gap-2 text-left outline-none"
+                    >
+                      <div className="relative transition-transform hover:scale-[1.02]">
+                        <CardFace def={card} size="sm" className="ring-1 ring-gold/30" />
+                        {count > 0 && (
+                          <span className="absolute -right-2 top-6 flex h-6 min-w-6 items-center justify-center rounded-full border border-gold/50 bg-ocean-deep px-1 font-display text-xs font-bold text-gold shadow">
+                            ×{count}
+                          </span>
+                        )}
+                        {upgrade > 0 && (
+                          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-teal/20 px-2 py-0.5 font-display text-[10px] font-bold text-teal">
+                            +{upgrade}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-            )
-          })}
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex shrink-0 items-center justify-between border-t border-white/10 px-5 py-3">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {uniqueCount} unique · {deck.length} total
+            </span>
+            <span className="text-xs text-muted-foreground">Click a card to inspect</span>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Detail Popup */}
+      {selectedDef && (
+        <div
+          className="absolute inset-0 z-[60] flex items-center justify-center bg-ocean-deep/60 p-6 backdrop-blur-sm animate-fm-fade-in"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="flex flex-col items-center gap-4 rounded-2xl border border-gold/30 bg-ocean-deep/95 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardFace def={selectedDef} size="lg" />
+            <div className="flex items-center gap-3">
+              {counts[selected!] > 1 && (
+                <span className="rounded-full border border-gold/30 bg-gold/10 px-3 py-1 font-display text-xs font-bold text-gold">
+                  ×{counts[selected!]} in deck
+                </span>
+              )}
+              {(upgrades[selected!] ?? 0) > 0 && (
+                <span className="rounded bg-teal/20 px-3 py-1 font-display text-xs font-bold text-teal">
+                  +{upgrades[selected!]}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              className="mt-1 rounded-lg border border-white/10 px-6 py-2 font-display text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
