@@ -126,6 +126,7 @@ export function createInitialState(overrides?: {
     characterId: character.id,
     enemyCardPools,
     enemyHands: {},
+    enemyIntentions: {},
   }
 }
 

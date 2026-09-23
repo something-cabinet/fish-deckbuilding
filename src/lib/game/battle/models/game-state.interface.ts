@@ -1,5 +1,6 @@
 import type { CardInstance } from "../../cards"
 import type { Unit } from "../../units"
+import type { EnemyIntention } from "./enemy-intention.interface"
 import type { LogEntry } from "./log-entry.interface"
 import type { Phase } from "../enums/phase.enum"
 import type { Pos } from "./pos.interface"
@@ -42,4 +43,6 @@ export interface GameState {
   enemyCardPools: Record<string, string[]>
   /** cards drawn this turn but not yet played, per enemy unit id */
   enemyHands: Record<string, string[]>
+  /** per-unit intentions computed at the start of each player turn */
+  enemyIntentions: Record<string, EnemyIntention | null>
 }

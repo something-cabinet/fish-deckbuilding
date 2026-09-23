@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ParticleCanvas } from "./particle-canvas"
 import { UnitToken } from "./unit-token"
-import { FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
+import { type EnemyIntention, FxKind, type FxEvent, type GameState, type Pos } from "@/lib/game/battle"
 import type { Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +27,8 @@ interface Props {
   onCellClick: (pos: Pos) => void
   onUnitClick: (unit: Unit) => void
   onUnitPointerDown: (e: React.PointerEvent, unit: Unit) => void
+  onUnitPointerEnter: (unit: Unit) => void
+  onUnitPointerLeave: () => void
 }
 
 export function Board({
@@ -44,6 +46,8 @@ export function Board({
   onCellClick,
   onUnitClick,
   onUnitPointerDown,
+  onUnitPointerEnter,
+  onUnitPointerLeave,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [boardWidth, setBoardWidth] = useState<number | null>(null)
@@ -197,9 +201,12 @@ export function Board({
                   hit={hitIds.has(u.id)}
                   previewHit={blastUnits.has(u.id)}
                   previewDamage={blastDamage}
+                  enemyIntention={state.enemyIntentions[u.id] ?? null}
                   interactive={!aimingAtTile}
                   onClick={onUnitClick}
                   onPointerDown={onUnitPointerDown}
+                  onPointerEnter={onUnitPointerEnter}
+                  onPointerLeave={onUnitPointerLeave}
                 />
               ))}
 

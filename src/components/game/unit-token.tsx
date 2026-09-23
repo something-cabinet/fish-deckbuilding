@@ -1,6 +1,7 @@
 "use client"
 
 import { Team, UnitKind, type Unit } from "@/lib/game/units"
+import { EnemyStepKind, type EnemyIntention } from "@/lib/game/battle"
 import { PLACEHOLDER_SPRITE, spriteUrl } from "./sprites"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +19,31 @@ function unitSprite(unit: Unit): string {
   return unit.icon ? spriteUrl(unit.icon) : SPRITES[unit.kind]
 }
 
+function IntentionIcon({ kind }: { kind: EnemyStepKind }) {
+  if (kind === EnemyStepKind.Move) {
+    return (
+      <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" className="drop-shadow-sm">
+        <path d="M1 8h10M7 4l4 4-4 4" />
+      </svg>
+    )
+  }
+  if (kind === EnemyStepKind.Attack) {
+    return (
+      <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" className="drop-shadow-sm">
+        <circle cx="8" cy="8" r="2.5" />
+        <path d="M8 2v2M8 12v2M2 8h2M12 8h2" />
+      </svg>
+    )
+  }
+  // CastCard
+  return (
+    <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" className="drop-shadow-sm">
+      <rect x="2" y="1.5" width="12" height="13" rx="1.5" />
+      <path d="M5 4.5h6M5 7.5h6M5 10.5h4" />
+    </svg>
+  )
+}
+
 interface Props {
   unit: Unit
   /** board dimensions, so tokens position correctly on any stage size */
@@ -29,12 +55,15 @@ interface Props {
   /** inside the blast the armed card would land — outlined, with its damage */
   previewHit: boolean
   previewDamage: number
+  enemyIntention: EnemyIntention | null
   /**
    * False while a tile-aimed card is armed, so pointer events fall through to
    * the tile underneath and a blast can be centred on an occupied square.
    */
   interactive: boolean
   onPointerDown: (e: React.PointerEvent, unit: Unit) => void
+  onPointerEnter: (unit: Unit) => void
+  onPointerLeave: () => void
   onClick: (unit: Unit) => void
 }
 
@@ -47,8 +76,11 @@ export function UnitToken({
   hit,
   previewHit,
   previewDamage,
+  enemyIntention,
   interactive,
   onPointerDown,
+  onPointerEnter,
+  onPointerLeave,
   onClick,
 }: Props) {
   const left = ((unit.pos.x + 0.5) / cols) * 100
@@ -57,6 +89,7 @@ export function UnitToken({
   const canMove = isPlayer && !unit.hasMoved
   const hpPct = Math.max(0, (unit.hp / unit.maxHp) * 100)
   const isBoss = unit.kind === UnitKind.Boss
+  const isEnemy = unit.team === Team.Enemy
 
   return (
     <div
@@ -71,6 +104,8 @@ export function UnitToken({
       )}
       style={{ left: `${left}%`, top: `${top}%`, width: `${100 / cols}%` }}
       onPointerDown={(e) => canMove && onPointerDown(e, unit)}
+      onPointerEnter={() => onPointerEnter(unit)}
+      onPointerLeave={onPointerLeave}
       onClick={() => onClick(unit)}
       role="button"
       aria-label={`${unit.name} at ${String.fromCharCode(65 + unit.pos.x)}${unit.pos.y + 1}, ${unit.hp} of ${unit.maxHp} health`}
@@ -85,6 +120,24 @@ export function UnitToken({
           previewHit && "bg-enemy/25 ring-2 ring-enemy animate-fm-pulse-ring",
         )}
       />
+
+      {/* intention icon for enemy units */}
+      {isEnemy && enemyIntention && (
+        <div
+          className={cn(
+            "pointer-events-none absolute -top-1 z-30 flex items-center justify-center",
+            "rounded-full border px-1 py-0.5",
+            "font-display text-xs font-bold leading-none shadow-md",
+            enemyIntention.kind === EnemyStepKind.Move
+              ? "border-teal/60 bg-ocean-deep/95 text-teal"
+              : enemyIntention.kind === EnemyStepKind.Attack
+                ? "border-enemy/70 bg-ocean-deep/95 text-enemy"
+                : "border-gold/60 bg-ocean-deep/95 text-gold-dim",
+          )}
+        >
+          <IntentionIcon kind={enemyIntention.kind} />
+        </div>
+      )}
 
       {previewHit && previewDamage > 0 && (
         <span className="pointer-events-none absolute -top-1 left-1/2 z-30 -translate-x-1/2 rounded-full border border-enemy/70 bg-ocean-deep/95 px-1.5 py-0.5 font-display text-[clamp(6px,1.4cqi,13px)] font-bold leading-none text-enemy shadow">

@@ -17,11 +17,12 @@ import {
   AimMode,
   aimMode,
   aoeTiles,
+  CARD_LIBRARY,
   unitsInAoe,
   type CardDef,
   type CardInstance,
 } from "@/lib/game/cards"
-import { Phase, type Pos, type GameState } from "@/lib/game/battle"
+import { EnemyStepKind, Phase, type Pos, type GameState } from "@/lib/game/battle"
 import { Team, type Unit } from "@/lib/game/units"
 import { cn } from "@/lib/utils"
 import { DragKind } from "./drag-kind.enum"
@@ -56,6 +57,17 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
   const [arrow, setArrow] = useState<ArrowState | null>(null)
   const [aimTile, setAimTile] = useState<Pos | null>(null)
   const [hoveredUid, setHoveredUid] = useState<string | null>(null)
+  const [hoveredEnemyId, setHoveredEnemyId] = useState<string | null>(null)
+  const hoveredEnemy = useMemo(
+    () => state.units.find((u) => u.id === hoveredEnemyId && u.team === Team.Enemy),
+    [hoveredEnemyId, state.units],
+  )
+  const hoveredEnemyCard = useMemo(() => {
+    if (!hoveredEnemy) return null
+    const intention = state.enemyIntentions[hoveredEnemy.id]
+    if (!intention || intention.kind !== EnemyStepKind.CastCard || !intention.cardId) return null
+    return { uid: `${hoveredEnemy.id}_preview`, def: CARD_LIBRARY[intention.cardId] }
+  }, [hoveredEnemy, state.enemyIntentions])
 
   // measured width of the hand track + viewport height, so both the card size and
   // the fan spacing follow the window instead of assuming a fixed card footprint
@@ -92,17 +104,15 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
 
   const playerTurn = state.phase === Phase.Player && !busy
 
-  // A card is only truly playable when its player can both afford it AND aim it
-  // at something. A cost-affordable attack with every enemy out of range would
-  // otherwise glow gold but silently fizzle on cast (Bug A) — that reads as a
-  // broken button, so gray it out like any other unplayable card.
+  // A card is playable when the player can afford it and it's their turn.
+  // Attack cards with no valid targets remain playable — the player sees
+  // the empty range overlay and understands they're out of range.
   const canPlay = useCallback(
     (card: CardInstance) => {
       if (!playerTurn || card.def.cost > state.coin) return false
       const mode = aimMode(card.def)
       if (mode === AimMode.None) return true
-      const t = targetsFor(card)
-      return mode === AimMode.Tile ? t.tiles.length > 0 : t.unitIds.length > 0
+      return mode === AimMode.Tile ? targetsFor(card).tiles.length > 0 : true
     },
     [playerTurn, state.coin, targetsFor],
   )
@@ -350,6 +360,14 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
     [attack, cast, pendingCard, playerTurn, select, state.selectedUnitId, state.units],
   )
 
+  const onUnitPointerEnter = useCallback((unit: Unit) => {
+    if (unit.team === Team.Enemy) setHoveredEnemyId(unit.id)
+  }, [])
+
+  const onUnitPointerLeave = useCallback(() => {
+    setHoveredEnemyId(null)
+  }, [])
+
   const onCellPointerUp = useCallback(() => {
     /* handled globally by resolveDrop */
   }, [])
@@ -417,6 +435,8 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
             onCellClick={onCellClick}
             onUnitClick={onUnitClick}
             onUnitPointerDown={onUnitPointerDown}
+            onUnitPointerEnter={onUnitPointerEnter}
+            onUnitPointerLeave={onUnitPointerLeave}
           />
           <ResultOverlay
             state={state}
@@ -430,6 +450,19 @@ export function FishMafiaGame({ settings, initial, onWin, onLose, onExit, onDebu
           )}
 
           {/* enemy card preview overlay */}
+
+          {/* hovered enemy card tooltip */}
+          {hoveredEnemyCard && !busy && (
+            <div className="pointer-events-none absolute left-1/2 top-3 z-50 -translate-x-1/2 animate-fm-fade-in">
+              <div className="rounded-lg border border-gold/60 bg-ocean-deep p-1.5 shadow-2xl">
+                <p className="mb-1 text-center font-display text-[9px] uppercase tracking-widest text-gold">
+                  {hoveredEnemy?.name} intends to cast
+                </p>
+                <CardFace def={hoveredEnemyCard.def} size="sm" />
+              </div>
+            </div>
+          )}
+
           {previewCard && (
             <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-black/40">
               <div className="animate-fm-fade-in">

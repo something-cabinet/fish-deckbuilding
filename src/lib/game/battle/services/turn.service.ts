@@ -1,5 +1,5 @@
 import { EnemyStepKind, FxKind, Phase } from "../enums"
-import type { EnemyStep, FxEvent, GameState, Pos } from "../models"
+import type { EnemyIntention, EnemyStep, FxEvent, GameState, Pos } from "../models"
 import { clone, emitFx, heroUnit, log } from "../../shared"
 import { AiArchetype, Team, type Unit } from "../../units"
 import { cleanupDead, dealDamage } from "../../units"
@@ -14,6 +14,7 @@ import {
 import { resolveTrigger } from "../../trinkets"
 import { CardTarget } from "../../cards/enums"
 import { manhattan } from "./board.service"
+import { planEnemyTurn } from "./ai.service"
 
 export function checkEnd(state: GameState) {
   const hero = heroUnit(state)
@@ -140,6 +141,39 @@ function sortByDist(units: Unit[], from: Pos): Unit[] {
 }
 
 /**
+ * Simulate the upcoming enemy turn to extract per-unit intentions.
+ * Runs at the start of each player turn so the UI can show what each
+ * enemy plans to do.
+ */
+export function computeEnemyIntentions(state: GameState): Record<string, EnemyIntention | null> {
+  const s = clone(state)
+  const prepared = startEnemyPhase(s)
+  const steps = planEnemyTurn(prepared)
+  const intentions: Record<string, EnemyIntention | null> = {}
+
+  for (const u of s.units) {
+    if (u.team === Team.Enemy) {
+      intentions[u.id] = null
+    }
+  }
+
+  for (const step of steps) {
+    const existing = intentions[step.unitId]
+    if (step.kind === EnemyStepKind.Move) {
+      // only register move if no action follows for this unit
+      if (!existing || existing.kind === EnemyStepKind.Move) {
+        intentions[step.unitId] = { kind: EnemyStepKind.Move }
+      }
+    } else if (step.kind === EnemyStepKind.Attack) {
+      intentions[step.unitId] = { kind: EnemyStepKind.Attack, targetId: step.targetId }
+    } else if (step.kind === EnemyStepKind.CastCard) {
+      intentions[step.unitId] = { kind: EnemyStepKind.CastCard, targetId: step.targetId, cardId: step.cardId }
+    }
+  }
+  return intentions
+}
+
+/**
  * Finish enemy phase → refresh for the player's next turn.
  * Returns `{ state, fx }` so the caller can surface onTurnStart trinket
  * trigger fx (FR-5/AC-5 — no dropped fx).
@@ -181,5 +215,6 @@ export function beginPlayerTurn(state: GameState): { state: GameState; fx: FxEve
   }
 
   checkEnd(s)
+  s.enemyIntentions = computeEnemyIntentions(s)
   return { state: s, fx }
 }

@@ -35,6 +35,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(container.querySelectorAll('[data-drop="tile"]').length).toBe(9 * 5)
@@ -58,6 +60,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(container.querySelector('[data-x="2"][data-y="2"]')).toHaveClass("bg-teal/15")
@@ -86,6 +90,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(screen.getByText("-5")).toBeInTheDocument()
@@ -111,6 +117,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(container.querySelector(".animate-fm-shake")).not.toBeNull()
@@ -136,6 +144,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(container.querySelectorAll('[data-drop="tile"][class*="ring-enemy"]').length).toBe(2)
@@ -158,6 +168,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(screen.getByRole("button", { name: /guppy at/i })).toHaveClass("pointer-events-none")
@@ -180,6 +192,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(screen.getByRole("button", { name: /guppy at/i })).not.toHaveClass("pointer-events-none")
@@ -203,6 +217,8 @@ describe("Board", () => {
         onCellClick={() => {}}
         onUnitClick={() => {}}
         onUnitPointerDown={() => {}}
+        onUnitPointerEnter={() => {}}
+        onUnitPointerLeave={() => {}}
       />,
     )
     expect(container.textContent).toContain("-3")
